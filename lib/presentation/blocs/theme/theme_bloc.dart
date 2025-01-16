@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'theme_event.dart';
@@ -27,15 +28,16 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
         seedColor: Colors.blue,
         brightness: Brightness.light,
       ),
-      scaffoldBackgroundColor: Colors.white,
+      scaffoldBackgroundColor: Colors.grey[100],
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
       ),
+      textTheme: GoogleFonts.poppinsTextTheme().apply(bodyColor: Colors.black),
     );
   }
 
@@ -47,7 +49,7 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
         seedColor: Colors.blue,
         brightness: Brightness.dark,
       ),
-      // Customize dark theme properties
+      scaffoldBackgroundColor: Colors.black,
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
@@ -56,7 +58,7 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
-      // Add more dark theme customization
+      textTheme: GoogleFonts.poppinsTextTheme().apply(bodyColor: Colors.white),
     );
   }
 

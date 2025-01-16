@@ -1,4 +1,10 @@
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:home_clean/presentation/screens/activity/activity_screen.dart';
+import 'package:home_clean/presentation/screens/message/message_screen.dart';
+
+import '../screens/home/home_screen.dart';
+import '../screens/setting/settings_screen.dart';
 
 class BottomNavigation extends StatefulWidget {
   final Widget child;
@@ -12,7 +18,12 @@ class BottomNavigation extends StatefulWidget {
 class _BottomNavigationState extends State<BottomNavigation> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [];
+  final List<Widget> _pages = [
+    HomeScreen(),
+    ActivityScreen(),
+    MessageScreen(),
+    SettingsScreen(),
+  ];
 
   void _onTabTapped(int index) {
     setState(() {
@@ -27,30 +38,20 @@ class _BottomNavigationState extends State<BottomNavigation> {
         index: _currentIndex,
         children: _pages,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.black87,
-        unselectedItemColor: Colors.grey,
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped,
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: Colors.grey[200]!,
+        color: Colors.white,
+        buttonBackgroundColor: Colors.greenAccent,
+        height: 60,
+        index: _currentIndex,
+        animationDuration: const Duration(milliseconds: 300),
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.inventory_outlined),
-            label: 'Order',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Setting',
-          ),
+          Icon(Icons.home, size: 30, color: Colors.black),
+          Icon(Icons.local_activity, size: 30, color: Colors.black),
+          Icon(Icons.message_outlined, size: 30, color: Colors.black),
+          Icon(Icons.person_outline, size: 30, color: Colors.black),
         ],
+        onTap: _onTabTapped,
       ),
     );
   }

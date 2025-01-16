@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:home_clean/core/request.dart';
 
 import '../../domain/repositories/authentication_repository.dart';
 import '../datasource/authen_local_datasource.dart';
 import '../models/authen/authen_model.dart';
 import '../models/authen/create_authen_model.dart';
 import '../models/authen/login_model.dart';
-import '../utils/request.dart';
 
 class AuthenticationRepositoryImpl implements AuthenticationRepository {
   @override

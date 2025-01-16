@@ -21,8 +21,8 @@ class Body extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF2193b0),
-              Color(0xFF6dd5ed),
+              Color(0xFF1CAF7D),
+              Color.fromARGB(255, 250, 251, 251),
             ],
           ),
         ),

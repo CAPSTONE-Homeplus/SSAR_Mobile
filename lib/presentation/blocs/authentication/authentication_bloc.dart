@@ -18,8 +18,6 @@ class AuthenticationBloc
     on<StartAuthen>(_onStartAuthen);
     on<RegisterAccount>(_onRegisterAccount);
     on<LoginAccount>(_onLoginAccount);
-    // on<LoginGmail>(_onLoginGmail);
-    // on<LogoutAccount>(_onLogoutAccount);
   }
 
   final GoogleSignIn googleSignIn = GoogleSignIn(
