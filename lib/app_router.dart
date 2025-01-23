@@ -1,10 +1,13 @@
 import 'package:get/get.dart';
+import 'package:home_clean/domain/entities/service.dart';
 import 'package:home_clean/presentation/screens/home/home_screen.dart';
 import 'package:home_clean/presentation/screens/message/message_screen.dart';
+import 'package:home_clean/presentation/screens/service_detail/service_detail_screen.dart';
 import 'package:home_clean/presentation/screens/start/splash_screen.dart';
 
 import 'presentation/screens/activity/activity_screen.dart';
 import 'presentation/screens/login/login_screen.dart';
+import 'presentation/screens/service_list_screen/service_list_screen.dart';
 import 'presentation/widgets/bottom_navigation.dart';
 
 class AppRouter {
@@ -14,6 +17,8 @@ class AppRouter {
   static const String routeMessage = '/message';
   static const String routeSetting = '/setting';
   static const String routeSplash = '/splash';
+  static const String routeServiceDetails = '/service-details';
+  static const String routeServiceDetail = '/service-detail';
 
   static List<GetPage> get routes => [
         GetPage(
@@ -52,6 +57,21 @@ class AppRouter {
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
+        GetPage(
+          name: routeServiceDetails,
+          page: () => ServiceListScreen(),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+        GetPage(
+          name: routeServiceDetail,
+          page: () {
+            final Service service = Get.arguments;
+            return ServiceDetailScreen(service: service);
+          },
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
       ];
 
   static void navigateToHome() {
@@ -76,5 +96,13 @@ class AppRouter {
 
   static void navigateToSplash() {
     Get.offAllNamed(routeSplash);
+  }
+
+  static void navigateToServiceDetail(Service service) {
+    Get.toNamed(routeServiceDetail, arguments: service);
+  }
+
+  static void navigateToServiceDetails() {
+    Get.toNamed(routeServiceDetails);
   }
 }
