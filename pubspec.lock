@@ -201,6 +201,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  easy_date_timeline:
+    dependency: "direct main"
+    description:
+      name: easy_date_timeline
+      sha256: "4eecaf2df247f20e1d30899a979590ebbd3954c40cd5426afd3b72b83d9952ac"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.6"
   equatable:
     dependency: "direct main"
     description:
@@ -1002,6 +1010,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  wheel_picker:
+    dependency: "direct main"
+    description:
+      name: wheel_picker
+      sha256: c116ef7e801d50b090ecd033b41efecd82f90fb51dbfc3543408bba54e36ed83
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
   win32:
     dependency: transitive
     description:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:home_clean/core/colors.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -41,16 +42,16 @@ class _CustomAppBarState extends State<CustomAppBar> {
 
   Widget _buildAppbar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.primaryColor,
       elevation: 0.5,
       surfaceTintColor: Colors.transparent,
       automaticallyImplyLeading: false,
       title: Text(
         widget.title,
         style: TextStyle(
-          color: Colors.black87,
+          color: Colors.white,
           fontSize: 20,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
           letterSpacing: 0.5,
         ),
       ),
@@ -77,7 +78,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
         IconButton(
           icon: Icon(
             Icons.notifications_none_rounded,
-            color: Colors.black87,
+            color: Colors.white,
             size: 24,
           ),
           onPressed: widget.onNotificationPressed ??

@@ -9,4 +9,10 @@ class ApiConstant {
 
   // service activity
   static const String SERVICE_ACTIVITIES = "/service-activities";
+
+  // sub activity
+  static const String SUB_ACTIVITIES = "/sub-activities";
+
+  // time slot
+  static const String TIME_SLOTS = "/time-slots";
 }

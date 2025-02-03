@@ -1,12 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/domain/repositories/option_repository.dart';
+import 'package:home_clean/core/constant.dart';
+import 'package:home_clean/domain/usecases/option/get_options_usecase.dart';
 import 'package:home_clean/presentation/blocs/option/option_event.dart';
 import 'package:home_clean/presentation/blocs/option/option_state.dart';
 
 class OptionBloc extends Bloc<OptionEvent, OptionState> {
-  final OptionRepository optionRepository;
+  final GetOptionsUsecase getOptionsUsecase;
 
-  OptionBloc({required this.optionRepository}) : super(OptionInitialState()) {
+  OptionBloc({required this.getOptionsUsecase}) : super(OptionInitialState()) {
     on<GetOptionsEvent>(_onGetServicesEvent);
   }
 
@@ -16,8 +17,12 @@ class OptionBloc extends Bloc<OptionEvent, OptionState> {
   ) async {
     emit(OptionLoadingState());
     try {
-      final response = await optionRepository.getOptionsByServiceId(
-        serviceId: event.serviceId,
+      final response = await getOptionsUsecase.execute(
+        event.serviceId,
+        event.search ?? '',
+        event.orderBy ?? '',
+        event.page ?? Constant.defaultPage,
+        event.size ?? Constant.defaultSize,
       );
       emit(OptionSuccessState(options: response.items));
     } catch (e) {

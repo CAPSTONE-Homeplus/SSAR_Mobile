@@ -1,14 +1,30 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/domain/repositories/service_repository.dart';
-import 'package:home_clean/presentation/blocs/service/service_event.dart';
-import 'package:home_clean/presentation/blocs/service/service_state.dart';
+import 'package:home_clean/core/constant.dart';
+import 'package:home_clean/data/repositories/service/service_repository.dart';
+import 'package:home_clean/domain/entities/service/service.dart';
+import 'package:home_clean/domain/usecases/service/clear_selected_service_ids.dart';
+import 'package:home_clean/domain/usecases/service/get_selected_service_ids.dart';
+import 'package:home_clean/domain/usecases/service/save_selected_service_ids.dart';
+
+part 'service_event.dart';
+part 'service_state.dart';
 
 class ServiceBloc extends Bloc<ServiceEvent, ServiceState> {
   final ServiceRepository serviceRepository;
+  final SaveSelectedServiceIds saveSelectedServiceIds;
+  final GetSelectedServiceIds getSelectedServiceIds;
+  final ClearSelectedServiceIds clearSelectedServiceIds;
 
-  ServiceBloc({required this.serviceRepository})
-      : super(ServiceInitialState()) {
+  ServiceBloc({
+    required this.serviceRepository,
+    required this.saveSelectedServiceIds,
+    required this.getSelectedServiceIds,
+    required this.clearSelectedServiceIds,
+  }) : super(ServiceInitialState()) {
     on<GetServicesEvent>(_onGetServicesEvent);
+    on<SaveServiceIdsEvent>(_onSaveServiceIds);
+    on<GetServiceIdsEvent>(_onGetServiceIds);
+    on<ClearServiceIdsEvent>(_onClearServiceIds);
   }
 
   Future<void> _onGetServicesEvent(
@@ -18,14 +34,32 @@ class ServiceBloc extends Bloc<ServiceEvent, ServiceState> {
     emit(ServiceLoadingState());
     try {
       final response = await serviceRepository.getServices(
-        event.search,
-        event.orderBy,
-        event.page,
-        event.size,
+        event.search ?? '',
+        event.orderBy ?? '',
+        event.page ?? Constant.defaultPage,
+        event.size ?? Constant.defaultSize,
       );
       emit(ServiceSuccessState(services: response.items));
     } catch (e) {
       emit(ServiceErrorState(message: e.toString()));
     }
+  }
+
+  void _onSaveServiceIds(
+      SaveServiceIdsEvent event, Emitter<ServiceState> emit) async {
+    await saveSelectedServiceIds(event.ids);
+    emit(ServiceIdsSavedState());
+  }
+
+  void _onGetServiceIds(
+      GetServiceIdsEvent event, Emitter<ServiceState> emit) async {
+    final ids = await getSelectedServiceIds();
+    emit(ServiceIdsLoadedState(ids: ids ?? []));
+  }
+
+  void _onClearServiceIds(
+      ClearServiceIdsEvent event, Emitter<ServiceState> emit) async {
+    await clearSelectedServiceIds();
+    emit(ServiceIdsClearedState());
   }
 }

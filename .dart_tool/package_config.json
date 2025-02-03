@@ -152,6 +152,12 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "easy_date_timeline",
+      "rootUri": "file:///C:/Users/ADMIN-PC/AppData/Local/Pub/Cache/hosted/pub.dev/easy_date_timeline-2.0.6",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "equatable",
       "rootUri": "file:///C:/Users/ADMIN-PC/AppData/Local/Pub/Cache/hosted/pub.dev/equatable-2.0.7",
       "packageUri": "lib/",
@@ -764,6 +770,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "wheel_picker",
+      "rootUri": "file:///C:/Users/ADMIN-PC/AppData/Local/Pub/Cache/hosted/pub.dev/wheel_picker-0.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
       "name": "win32",
       "rootUri": "file:///C:/Users/ADMIN-PC/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.10.0",
       "packageUri": "lib/",
@@ -794,7 +806,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2025-01-22T17:36:56.648928Z",
+  "generated": "2025-01-24T11:06:29.249245Z",
   "generator": "pub",
   "generatorVersion": "3.6.0",
   "flutterRoot": "file:///D:/MyResources/FLUTTER/flutter-navigation-example/flutter",

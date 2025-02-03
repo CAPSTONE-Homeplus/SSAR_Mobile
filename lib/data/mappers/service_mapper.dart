@@ -1,5 +1,5 @@
 import 'package:home_clean/data/models/service/service_model.dart';
-import 'package:home_clean/domain/entities/service.dart';
+import 'package:home_clean/domain/entities/service/service.dart';
 
 class ServiceMapper {
   static ServiceModel toModel(Service service) {

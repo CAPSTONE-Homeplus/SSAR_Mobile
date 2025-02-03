@@ -1,4 +1,4 @@
-import '../../domain/entities/service_category.dart';
+import '../../domain/entities/service_category/service_category.dart';
 import '../models/service_category/service_category_model.dart';
 
 class ServiceCategoryMapper {

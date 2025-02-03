@@ -1,5 +1,5 @@
 import 'package:home_clean/data/models/service_activity/service_activity_model.dart';
-import 'package:home_clean/domain/entities/service_activity.dart';
+import 'package:home_clean/domain/entities/service_activity/service_activity.dart';
 
 class ServiceActivityMapper {
   static ServiceActivityModel toModel(ServiceActivity entity) {

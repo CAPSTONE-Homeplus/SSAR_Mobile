@@ -1,9 +1,10 @@
 import 'package:get/get.dart';
-import 'package:home_clean/domain/entities/service.dart';
+import 'package:home_clean/domain/entities/service/service.dart';
 import 'package:home_clean/presentation/screens/home/home_screen.dart';
 import 'package:home_clean/presentation/screens/message/message_screen.dart';
 import 'package:home_clean/presentation/screens/service_detail/service_detail_screen.dart';
 import 'package:home_clean/presentation/screens/start/splash_screen.dart';
+import 'package:home_clean/presentation/screens/time_selection/work_time_selection_screen.dart';
 
 import 'presentation/screens/activity/activity_screen.dart';
 import 'presentation/screens/login/login_screen.dart';
@@ -19,6 +20,7 @@ class AppRouter {
   static const String routeSplash = '/splash';
   static const String routeServiceDetails = '/service-details';
   static const String routeServiceDetail = '/service-detail';
+  static const String routeTimeCollection = '/time-collection';
 
   static List<GetPage> get routes => [
         GetPage(
@@ -72,6 +74,12 @@ class AppRouter {
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
+        GetPage(
+          name: routeTimeCollection,
+          page: () => WorkTimeSelectionScreen(),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
       ];
 
   static void navigateToHome() {
@@ -104,5 +112,9 @@ class AppRouter {
 
   static void navigateToServiceDetails() {
     Get.toNamed(routeServiceDetails);
+  }
+
+  static void navigateToTimeCollection() {
+    Get.toNamed(routeTimeCollection);
   }
 }

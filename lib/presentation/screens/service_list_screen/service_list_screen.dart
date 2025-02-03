@@ -10,7 +10,7 @@ import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/constant.dart';
-import '../../../domain/entities/service.dart';
+import '../../../domain/entities/service/service.dart';
 
 class ServiceListScreen extends StatefulWidget {
   const ServiceListScreen({Key? key}) : super(key: key);
@@ -266,7 +266,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   'Coming Soon',
-                  style: AppTextStyles.headingGrey,
+                  style: AppTextStyles.greyHeading,
                 ),
               )
             : Container(

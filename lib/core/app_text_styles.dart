@@ -35,7 +35,13 @@ class AppTextStyles {
     color: Colors.black,
   );
 
-  static const TextStyle headingGrey = TextStyle(
+  static const TextStyle whiteHeading = TextStyle(
+    fontFamily: 'NotoSans',
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+    color: Colors.white,
+  );
+  static const TextStyle greyHeading = TextStyle(
     fontFamily: 'NotoSans',
     fontSize: 16,
     fontWeight: FontWeight.w700,

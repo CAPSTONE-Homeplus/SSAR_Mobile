@@ -1,4 +1,4 @@
-import 'package:home_clean/domain/entities/option.dart';
+import 'package:home_clean/domain/entities/option/option.dart';
 
 abstract class OptionState {}
 

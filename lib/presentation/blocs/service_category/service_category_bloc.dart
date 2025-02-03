@@ -1,13 +1,18 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/domain/repositories/service_category_repository.dart';
+import 'package:home_clean/core/constant.dart';
+import 'package:home_clean/domain/usecases/service_category/get_service_by_service_category_usecase.dart';
+import 'package:home_clean/domain/usecases/service_category/get_service_categories_usecase.dart';
 import 'package:home_clean/presentation/blocs/service_category/service_category_event.dart';
 import 'package:home_clean/presentation/blocs/service_category/service_category_state.dart';
 
 class ServiceCategoryBloc
     extends Bloc<ServiceCategoryEvent, ServiceCategoryState> {
-  final ServiceCategoryRepository serviceCategoryRepository;
+  final GetServiceCategoriesUsecase getServiceCategories;
+  final GetServiceByServiceCategoryUsecase getServiceByServiceCategory;
 
-  ServiceCategoryBloc({required this.serviceCategoryRepository})
+  ServiceCategoryBloc(
+      {required this.getServiceCategories,
+      required this.getServiceByServiceCategory})
       : super(ServiceCategoryInitialState()) {
     on<GetServiceCategoriesEvent>(_onGetServiceCategoriesEvent);
     on<GetServiceByServiceCategoryEvent>(_onGetServiceByServiceCategoryEvent);
@@ -19,11 +24,11 @@ class ServiceCategoryBloc
   ) async {
     emit(ServiceCategoryLoadingState());
     try {
-      final response = await serviceCategoryRepository.getServiceCategories(
-        search: event.search,
-        orderBy: event.orderBy,
-        page: event.page,
-        size: event.size,
+      final response = await getServiceCategories.execute(
+        event.search ?? '',
+        event.orderBy ?? '',
+        event.page ?? Constant.defaultPage,
+        event.size ?? Constant.defaultSize,
       );
       emit(ServiceCategorySuccessState(serviceCategories: response.items));
     } catch (e) {
@@ -37,13 +42,12 @@ class ServiceCategoryBloc
   ) async {
     emit(ServiceCategoryLoadingState());
     try {
-      final response =
-          await serviceCategoryRepository.getServiceByServiceCategory(
-        serviceCategoryId: event.serviceCategoryId,
-        search: event.search,
-        orderBy: event.orderBy,
-        page: event.page,
-        size: event.size,
+      final response = await getServiceByServiceCategory.execute(
+        event.serviceCategoryId,
+        event.search,
+        event.orderBy,
+        event.page,
+        event.size,
       );
       emit(ServiceByCategorySuccessState(services: response.items));
     } catch (e) {

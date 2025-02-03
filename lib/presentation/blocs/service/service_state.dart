@@ -1,4 +1,4 @@
-import 'package:home_clean/domain/entities/service.dart';
+part of 'service_bloc.dart';
 
 abstract class ServiceState {}
 
@@ -17,3 +17,24 @@ class ServiceErrorState extends ServiceState {
 
   ServiceErrorState({required this.message});
 }
+
+// State cho luu tru danh sach id duoi local
+class ServiceIdsSavedState extends ServiceState {}
+
+class ServiceIdsLoadedState extends ServiceState {
+  final List<String> ids;
+
+  ServiceIdsLoadedState({required this.ids});
+}
+
+class ServiceIdsClearedState extends ServiceState {}
+
+
+// thao tac tren state
+
+class ServiceIdsState extends ServiceState {
+  final List<String> serviceIds;
+
+  ServiceIdsState({required this.serviceIds});
+}
+

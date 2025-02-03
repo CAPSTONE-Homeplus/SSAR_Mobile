@@ -1,5 +1,5 @@
-import '../../../domain/entities/service.dart';
-import '../../../domain/entities/service_category.dart';
+import '../../../domain/entities/service/service.dart';
+import '../../../domain/entities/service_category/service_category.dart';
 
 abstract class ServiceCategoryState {}
 

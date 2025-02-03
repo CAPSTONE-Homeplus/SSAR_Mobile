@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/app_router.dart';
 import 'package:home_clean/core/app_text_styles.dart';
-import 'package:home_clean/domain/entities/service.dart';
+import 'package:home_clean/domain/entities/service/service.dart';
 
 import '../../../../core/constant.dart';
 

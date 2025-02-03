@@ -1,5 +1,5 @@
 import 'package:home_clean/data/models/option/option_model.dart';
-import 'package:home_clean/domain/entities/option.dart';
+import 'package:home_clean/domain/entities/option/option.dart';
 
 class OptionMapper {
   static Option toEntity(OptionModel model) {

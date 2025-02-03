@@ -1,13 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/domain/repositories/service_activity_repository.dart';
+import 'package:home_clean/core/constant.dart';
+import 'package:home_clean/domain/usecases/service_activity/get_service_activities_by_service_usecase.dart';
 import 'package:home_clean/presentation/blocs/service_activity/service_activity_event.dart';
 import 'package:home_clean/presentation/blocs/service_activity/service_activity_state.dart';
 
 class ServiceActivityBloc
     extends Bloc<ServiceActivityEvent, ServiceActivityState> {
-  final ServiceActivityRepository serviceActivityRepository;
+  final GetServiceActivitiesByServiceUsecase getServiceActivitiesByService;
 
-  ServiceActivityBloc({required this.serviceActivityRepository})
+  ServiceActivityBloc({required this.getServiceActivitiesByService})
       : super(ServiceActivityInitialState()) {
     on<GetServiceActivitiesByServiceIdEvent>(_onGetServicesEvent);
   }
@@ -18,9 +19,12 @@ class ServiceActivityBloc
   ) async {
     emit(ServiceActivityLoadingState());
     try {
-      final response =
-          await serviceActivityRepository.getServiceActivitiesByServiceId(
-        serviceId: event.serviceId,
+      final response = await getServiceActivitiesByService.execute(
+        event.serviceId,
+        event.search ?? '',
+        event.orderBy ?? '',
+        event.page ?? Constant.defaultPage,
+        event.size ?? Constant.defaultSize,
       );
 
       emit(ServiceActivitySuccessState(serviceActivities: response.items));

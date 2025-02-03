@@ -1,4 +1,4 @@
-import 'package:home_clean/domain/entities/service_activity.dart';
+import 'package:home_clean/domain/entities/service_activity/service_activity.dart';
 
 abstract class ServiceActivityState {}
 

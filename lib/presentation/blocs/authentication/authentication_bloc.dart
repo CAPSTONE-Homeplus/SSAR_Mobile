@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:home_clean/data/repositories/auth/authentication_repository.dart';
 
 import '../../../data/models/authen/create_authen_model.dart';
 import '../../../data/models/authen/login_model.dart';
-import '../../../domain/repositories/authentication_repository.dart';
 
 part 'authentication_event.dart';
 part 'authentication_state.dart';
