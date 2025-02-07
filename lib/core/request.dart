@@ -51,6 +51,49 @@ class ExpiredException extends AppException {
   ExpiredException([String? message]) : super(message, "Token Expired: ");
 }
 
+// Cơ chế retry request
+class RetryInterceptor extends Interceptor {
+  final Dio dio;
+  final int maxRetries;
+
+  RetryInterceptor({required this.dio, this.maxRetries = 3});
+
+  @override
+  Future<void> onError(DioError err, ErrorInterceptorHandler handler) async {
+    if (_shouldRetry(err) && maxRetries > 0) {
+      int retryCount = 0;
+      while (retryCount < maxRetries) {
+        retryCount++;
+        try {
+          print('Retry attempt $retryCount');
+          final response = await dio.request(
+            err.requestOptions.path,
+            options: Options(
+              method: err.requestOptions.method,
+              headers: err.requestOptions.headers,
+            ),
+            data: err.requestOptions.data,
+            queryParameters: err.requestOptions.queryParameters,
+          );
+          return handler.resolve(response);
+        } catch (e) {
+          if (retryCount == maxRetries) {
+            return super.onError(err, handler);
+          }
+        }
+      }
+    }
+    return super.onError(err, handler);
+  }
+
+  bool _shouldRetry(DioError err) {
+    return err.type == DioErrorType.connectionTimeout ||
+        err.type == DioErrorType.sendTimeout ||
+        err.type == DioErrorType.receiveTimeout ||
+        err.type == DioErrorType.connectionError;
+  }
+}
+
 class CustomInterceptors extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
@@ -98,6 +141,7 @@ class MyRequest {
   MyRequest() {
     _inner = Dio(options);
     _inner.interceptors.add(CustomInterceptors());
+    _inner.interceptors.add(RetryInterceptor(dio: _inner));
     _inner.interceptors.add(InterceptorsWrapper(
       onResponse: (e, handler) {
         return handler.next(e); // continue

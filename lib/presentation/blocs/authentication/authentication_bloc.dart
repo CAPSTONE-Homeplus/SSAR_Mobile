@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:home_clean/data/repositories/auth/authentication_repository.dart';
 
 import '../../../data/models/authen/create_authen_model.dart';
@@ -20,12 +19,12 @@ class AuthenticationBloc
     on<LoginAccount>(_onLoginAccount);
   }
 
-  final GoogleSignIn googleSignIn = GoogleSignIn(
-    scopes: [
-      'email',
-      'https://www.googleapis.com/auth/userinfo.profile',
-    ],
-  );
+  // final GoogleSignIn googleSignIn = GoogleSignIn(
+  //   scopes: [
+  //     'email',
+  //     'https://www.googleapis.com/auth/userinfo.profile',
+  //   ],
+  // );
 
   Future<void> _onStartAuthen(
       StartAuthen event, Emitter<AuthenticationState> emit) async {

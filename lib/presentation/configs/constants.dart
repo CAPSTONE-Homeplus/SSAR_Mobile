@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
 
 const kPrimaryColor = Color(0xff2ecc71);
@@ -47,7 +46,7 @@ String changeFormateDate(String dateTime) {
 var formatter = NumberFormat.decimalPattern();
 
 //others
-final GoogleSignIn googleSignIn = GoogleSignIn();
+// final GoogleSignIn googleSignIn = GoogleSignIn();
 
 TimeOfDay parseTimeString(String timeString) {
   // Splitting the time string by ":" and converting the parts to integers

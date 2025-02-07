@@ -1,7 +1,10 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/app_router.dart';
+import 'package:home_clean/core/colors.dart';
+import 'package:home_clean/core/validation.dart';
 import 'package:home_clean/domain/entities/equipment_supply/equipment_supply.dart';
 import 'package:home_clean/domain/entities/extra_service/extra_service.dart';
 import 'package:home_clean/domain/entities/option/option.dart';
@@ -24,7 +27,14 @@ import 'package:home_clean/presentation/blocs/sub_activity/sub_activity_state.da
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../domain/entities/order/create_order.dart';
+import '../../../domain/entities/time_slot/time_slot.dart';
 import '../../blocs/option/option_bloc.dart';
+import '../../blocs/time_slot/time_slot_bloc.dart';
+import '../../blocs/time_slot/time_slot_event.dart';
+import '../../blocs/time_slot/time_slot_state.dart';
+import '../../widgets/step_indicator_widget.dart';
+import '../../widgets/time_drop_down.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   final Service service;
@@ -37,8 +47,8 @@ class ServiceDetailScreen extends StatefulWidget {
 }
 
 class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
-  final List<String> _selectedOptions = [];
-  final List<String> _selectedExtraServices = [];
+  final List<Option> _selectedOptions = [];
+  final List<ExtraService> _selectedExtraServices = [];
   List<Option> _options = [];
   List<ExtraService> _extraServices = [];
   List<EquipmentSupply> _supplies = [];
@@ -48,11 +58,24 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   late EquipmentSupplyBloc _equipmentSupplyBloc;
   bool isLoading = true;
   final Map<String, List<SubActivity>> _serviceActivities = {};
+  int _totalPrice = 0;
+  String _selectedPaymentMethod = 'Tiền mặt';
+  late TimeSlotBloc _timeSlotBloc;
+  List<TimeSlot> timeSlots = [];
+  late TimeSlot _selectedTimeSlot  = TimeSlot(id: '', startTime: '', endTime: '');
+  final TextEditingController _notesController = TextEditingController();
+
 
   @override
   void initState() {
     super.initState();
     _init();
+  }
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
   }
 
   void _init() {
@@ -67,6 +90,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         _optionBloc = context.read<OptionBloc>();
         _extraServiceBloc = context.read<ExtraServiceBloc>();
         _equipmentSupplyBloc = context.read<EquipmentSupplyBloc>();
+        _timeSlotBloc = context.read<TimeSlotBloc>();
 
         // Fetch service events
         _serviceActivityBloc.add(
@@ -80,12 +104,16 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         _equipmentSupplyBloc.add(
           GetEquipmentSupplies(serviceId: widget.service.id ?? ''),
         );
+        _timeSlotBloc.add(GetTimeSlotEvents());
+
 
         // Process events
         final serviceActivityComplete = _processServiceActivities();
         final extraServiceComplete = _processExtraServices();
         final optionComplete = _processOptions();
         final supplyComplete = _processSupplies();
+        final timeSlotComplete = _processTimeSlot();
+
 
         // Wait for all events to complete
         await Future.wait([
@@ -93,6 +121,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           extraServiceComplete,
           optionComplete,
           supplyComplete,
+          timeSlotComplete,
         ]);
 
         setState(() {
@@ -104,6 +133,18 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         });
       }
     });
+  }
+
+
+  Future<void> _processTimeSlot() async {
+    await for (final state in _timeSlotBloc.stream) {
+      if (state is TimeSlotLoaded && mounted) {
+        setState(() {
+          timeSlots = state.timeSlots;
+        });
+        break;
+      }
+    }
   }
 
   Future<void> _processServiceActivities() async {
@@ -170,6 +211,20 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     }
   }
 
+  void _handleCreateOrder(bool isEmergency) {
+    final createOrder = CreateOrder(
+      userId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+      service: widget.service,
+      option: _selectedOptions,
+      extraService: _selectedExtraServices,
+      timeSlot: _selectedTimeSlot,
+      notes : _notesController.text,
+      emergencyRequest: isEmergency, address: '123 ABC Street',
+    );
+    AppRouter.navigateToOrderDetailWithArguments(createOrder);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -182,20 +237,28 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       body: isLoading
           ? _loadingPlaceholder()
           : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildServiceSupply(),
-                    SizedBox(height: 8),
-                    _buildAdditionalOptionsSection(),
-                    SizedBox(height: 8),
-                    _buildExtraService(),
-                    SizedBox(height: 8),
-                    _buildJobDetailsSection(),
-                  ],
-                ),
+              child: Column(
+                children: [
+                  StepIndicatorWidget(currentStep: 2),
+                  SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildServiceSupply(),
+                        SizedBox(height: 10),
+                        _buildAdditionalOptionsSection(),
+                        SizedBox(height: 10),
+                        _buildExtraService(),
+                        SizedBox(height: 10),
+                        _buildJobDetailsSection(),
+                        SizedBox(height: 10),
+                        _buildNotesField(),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
       bottomNavigationBar: _buildBottomBar(),
@@ -245,24 +308,34 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     );
   }
 
-  Widget _buildServiceSupply() {
+  Widget _buildSection({
+    required String title,
+    required IconData icon,
+    required Widget child,
+  }) {
     return Container(
-      padding: EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8.0),
-        boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black12)],
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               children: [
+                Icon(icon, color: const Color(0xFF1CAF7D), size: 20),
+                const SizedBox(width: 8),
                 Text(
-                  'Các công cụ',
+                  title,
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -270,36 +343,47 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 12),
-            GestureDetector(
-              onTap: _showToolsList,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey, width: 1),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Danh sách dụng cụ',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: child,
+          ),
+        ],
       ),
     );
+  }
+
+  Widget _buildServiceSupply() {
+    return _buildSection(title: "Công cụ", icon: Icons.cleaning_services, child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: _showToolsList,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey, width: 1),
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Danh sách dụng cụ',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),);
   }
 
   void _showToolsList() {
@@ -412,41 +496,23 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildAdditionalOptionsSection() {
-    return Container(
-      padding: EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8.0),
-        boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black12)],
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Tùy chọn thêm',
+    return _buildSection(title: "Tùy chọn thêm", icon: Icons.add_reaction, child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_options.isEmpty)
+          Center(
+            child: Text(
+              'Không có tùy chọn thêm nào',
               style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+                fontStyle: FontStyle.italic,
               ),
             ),
-            SizedBox(height: 12),
-            if (_options.isEmpty)
-              Center(
-                child: Text(
-                  'Không có tùy chọn thêm nào',
-                  style: GoogleFonts.poppins(
-                    color: Colors.grey,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              )
-            else
-              _buildOption(),
-          ],
-        ),
-      ),
+          )
+        else
+          _buildOption(),
+      ],
+    ),
     );
   }
 
@@ -471,18 +537,23 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   ),
                 ),
                 subtitle: Text(
-                  option.price != null ? '+${option.price} VND' : '',
+                  option.price != null ? '+ ${Validation.formatCurrency(option.price!)}' : '',
                   style: GoogleFonts.poppins(
                     color: Colors.grey,
                   ),
                 ),
-                value: _selectedOptions.contains(option.id),
+                value: _selectedOptions.contains(option),
+                activeColor: AppColors.primaryColor,
+                checkColor: Colors.white,
+                tileColor: Colors.grey[100],
                 onChanged: (value) {
                   setState(() {
                     if (value!) {
-                      _selectedOptions.add(option.id ?? '');
+                      _selectedOptions.add(option);
+                      _totalPrice += option.price ?? 0;
                     } else {
-                      _selectedOptions.remove(option.id);
+                      _selectedOptions.remove(option);
+                      _totalPrice -= option.price ?? 0;
                     }
                   });
                 },
@@ -502,41 +573,23 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildExtraService() {
-    return Container(
-      padding: EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8.0),
-        boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black12)],
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Dịch vụ thêm',
+    return _buildSection(title: "Dịch vụ thêm", icon: Icons.add, child:   Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_extraServices.isEmpty)
+          Center(
+            child: Text(
+              'Không có dịch vụ thêm nào',
               style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+                fontStyle: FontStyle.italic,
               ),
             ),
-            SizedBox(height: 12),
-            if (_extraServices.isEmpty)
-              Center(
-                child: Text(
-                  'Không có dịch vụ thêm nào',
-                  style: GoogleFonts.poppins(
-                    color: Colors.grey,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              )
-            else
-              _buildExtra(),
-          ],
-        ),
-      ),
+          )
+        else
+          _buildExtra(),
+      ],
+    ),
     );
   }
 
@@ -562,18 +615,23 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   ),
                 ),
                 subtitle: Text(
-                  extra.price != null ? '+${extra.price} VND' : '',
+                  extra.price != null ? '+ ${Validation.formatCurrency(extra.price!)}' : '',
                   style: GoogleFonts.poppins(
                     color: Colors.grey,
                   ),
                 ),
-                value: _selectedExtraServices.contains(extra.id),
+                value: _selectedExtraServices.contains(extra),
+                activeColor: AppColors.primaryColor,
+                checkColor: Colors.white,
+                tileColor: Colors.grey[100],
                 onChanged: (value) {
                   setState(() {
                     if (value!) {
-                      _selectedExtraServices.add(extra.id ?? '');
+                      _selectedExtraServices.add(extra);
+                      _totalPrice += extra.price ?? 0;
                     } else {
-                      _selectedExtraServices.remove(extra.id);
+                      _selectedExtraServices.remove(extra);
+                      _totalPrice -= extra.price ?? 0;
                     }
                   });
                 },
@@ -593,180 +651,436 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildJobDetailsSection() {
-    return Container(
-      padding: EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8.0),
-        boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black12)],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: DefaultTabController(
-          length: _serviceActivities.length, // Số lượng tab
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Chi tiết công việc',
+    return _buildSection(title: "Chi tiết công việc", icon: Icons.work, child: DefaultTabController(
+      length: _serviceActivities.length, // Số lượng tab
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_serviceActivities.isEmpty)
+            Center(
+              child: Text(
+                'Không có hoạt động nào',
                 style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                  fontStyle: FontStyle.italic,
                 ),
               ),
-              const SizedBox(height: 12),
-              if (_serviceActivities.isEmpty)
-                Center(
-                  child: Text(
-                    'Không có hoạt động nào',
-                    style: GoogleFonts.poppins(
-                      color: Colors.grey,
-                      fontStyle: FontStyle.italic,
-                    ),
+            )
+          else
+            Column(
+              children: [
+                TabBar(
+                  isScrollable: true,
+                  indicatorColor: const Color(0xFF1CAF7D),
+                  labelColor: Colors.black87,
+                  unselectedLabelColor: Colors.grey,
+                  labelStyle: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
                   ),
-                )
-              else
-                Column(
-                  children: [
-                    TabBar(
-                      isScrollable: true,
-                      indicatorColor: const Color(0xFF1CAF7D),
-                      labelColor: Colors.black87,
-                      unselectedLabelColor: Colors.grey,
-                      labelStyle: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      tabs: _serviceActivities.keys
-                          .map((key) =>
-                              Tab(text: key.isNotEmpty ? key : 'Unnamed'))
-                          .toList(),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 200,
-                      child: TabBarView(
-                        children: _serviceActivities.entries.map((entry) {
-                          final key = entry.key;
-                          final subActivities = entry.value;
-
-                          return ListView(
-                            children: [
-                              Container(
-                                margin: const EdgeInsets.only(bottom: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[100],
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: ListTile(
-                                  leading: const Icon(
-                                    Icons.check_circle_outline,
-                                    color: Color(0xFF1CAF7D),
-                                  ),
-                                  title: Text(
-                                    key.isNotEmpty ? key : 'Unnamed Activity',
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              // Hiển thị luôn phần nội dung mở rộng
-                              Padding(
-                                padding: const EdgeInsets.only(left: 16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: subActivities
-                                      .map(
-                                        (subActivity) => Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 4.0),
-                                          child: Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.circle,
-                                                size: 8,
-                                                color: Colors.grey,
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                subActivity.name ??
-                                                    'Unnamed Sub-Activity',
-                                                style: GoogleFonts.poppins(
-                                                  color: Colors.black87,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                                ),
-                              ),
-                            ],
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ],
+                  tabs: _serviceActivities.keys
+                      .map((key) =>
+                      Tab(text: key.isNotEmpty ? key : 'Unnamed'))
+                      .toList(),
                 ),
-            ],
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 200,
+                  child: TabBarView(
+                    children: _serviceActivities.entries.map((entry) {
+                      final key = entry.key;
+                      final subActivities = entry.value;
+
+                      return ListView(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ListTile(
+                              leading: const Icon(
+                                Icons.check_circle_outline,
+                                color: Color(0xFF1CAF7D),
+                              ),
+                              title: Text(
+                                key.isNotEmpty ? key : 'Unnamed Activity',
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Hiển thị luôn phần nội dung mở rộng
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: subActivities
+                                  .map(
+                                    (subActivity) => Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 4.0),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.circle,
+                                        size: 8,
+                                        color: Colors.grey,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        subActivity.name ??
+                                            'Unnamed Sub-Activity',
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.black87,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                                  .toList(),
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    ),
+    );
+  }
+
+  Widget _buildNotesField() {
+    return _buildSection(title: "Ghi chú", icon: Icons.notes, child:   Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: _notesController,
+          decoration: InputDecoration(
+            hintText: 'Nhập ghi chú',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            filled: true,
+            fillColor: Colors.grey[100],
           ),
+          maxLines: 3,
+        ),
+      ],
+    ),
+    );
+  }
+
+  Widget _buildShimmerLoading() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.27,
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(28),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            offset: const Offset(0, -3),
+            blurRadius: 20,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 15,
+              width: 100,
+              color: Colors.grey[300],
+            ),
+            const SizedBox(height: 4),
+            Container(
+              height: 24,
+              width: 150,
+              color: Colors.grey[300],
+            ),
+            const SizedBox(height: 16),
+            Divider(color: Colors.grey[200], height: 1),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 40,
+                    color: Colors.grey[300],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(
+                    height: 40,
+                    color: Colors.grey[300],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 50,
+                    color: Colors.grey[300],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(
+                    height: 50,
+                    color: Colors.grey[300],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildBottomBar() {
-    return Container(
-      padding: EdgeInsets.all(16),
+    return isLoading ? _buildShimmerLoading() : Container(
+      height: MediaQuery.of(context).size.height * 0.27,
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
       decoration: BoxDecoration(
         color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(28),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            offset: Offset(0, -2),
-            blurRadius: 8,
+            color: Colors.black.withOpacity(0.06),
+            offset: const Offset(0, -3),
+            blurRadius: 20,
+            spreadRadius: 1,
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
-            onTap: () {
-              // Xử lý sự kiện onTap ở đây
-              print("Total tapped");
-            },
-            child: Text(
-              'Total: 200,000 VND',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+          // Price section with divider
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Tổng cộng',
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  color: Colors.grey[600],
+                  letterSpacing: 0.3,
+                ),
               ),
-            ),
+              const SizedBox(height: 4),
+              Text(
+                '${Validation.formatCurrency(_totalPrice)} VND',
+                style: GoogleFonts.poppins(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1CAF7D),
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              AppRouter.navigateToTimeCollection();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF1CAF7D),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          const SizedBox(height: 16),
+          Divider(color: Colors.grey[200], height: 1),
+          const SizedBox(height: 16),
+
+          // Dropdowns row
+          Row(
+            children: [
+              // Expanded(
+              //   child: _buildDropdown(
+              //     value: _selectedPaymentMethod,
+              //     items: ['Tiền mặt', 'Ví điện tử'],
+              //     getIcon: (value) => value == 'Tiền mặt'
+              //         ? Icons.payments_outlined
+              //         : Icons.account_balance_wallet_outlined,
+              //     onChanged: (newValue) {
+              //       setState(() => _selectedPaymentMethod = newValue!);
+              //     },
+              //   ),
+              // ),
+              // const SizedBox(width: 12),
+              Expanded(
+                child: TimeDropdown(
+                  value: _selectedTimeSlot,
+                  items: timeSlots,
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedTimeSlot = newValue!;
+                    });
+                  },
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Action buttons
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionButton(
+                  title: 'Đặt ngay',
+                  icon: Icons.flash_on,
+                  isEmergency: true,
+                  onPressed: () {
+                    _handleCreateOrder(true);
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildActionButton(
+                  title: 'Đặt theo giờ',
+                  icon: Icons.schedule,
+                  isEmergency: false,
+                  onPressed: () {
+                    if (_selectedTimeSlot.id == '') {
+                      _showErrorDialog(context, 'Vui lòng chọn khung giờ trước khi đặt.');
+                    } else {
+                      _handleCreateOrder(false);
+                    }
+                  },
+                ),
+              ),
+
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Thông báo'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
             ),
-            child: Text(
-              'Book Now',
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+          ],
+        );
+      },
+    );
+  }
+
+
+// Helper method for consistent dropdown styling
+  Widget _buildDropdown({
+    required String value,
+    required List<String> items,
+    required IconData Function(String) getIcon,
+    required Function(String?) onChanged,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+        color: Colors.grey.shade50,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey[600], size: 22),
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Colors.black87,
+            fontWeight: FontWeight.w500,
+          ),
+          items: items.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    getIcon(value),
+                    size: 18,
+                    color: Colors.grey[700],
+                  ),
+                  const SizedBox(width: 8),
+                  Text(value),
+                ],
               ),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+// Helper method for consistent button styling
+  Widget _buildActionButton({
+    required String title,
+    required IconData icon,
+    required bool isEmergency,
+    required VoidCallback onPressed,
+  }) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isEmergency ? Colors.grey[100] : const Color(0xFF1CAF7D),
+        foregroundColor: isEmergency ? Colors.black87 : Colors.white,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: isEmergency
+              ? BorderSide(color: Colors.grey.shade300)
+              : BorderSide.none,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 20),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.3,
             ),
           ),
         ],
       ),
     );
   }
+
 }

@@ -1,5 +1,7 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,6 +10,7 @@ import 'package:home_clean/data/datasource/service_local_data_source.dart';
 import 'package:home_clean/data/repositories/equipment_supply/equipment_supply_repository_impl.dart';
 import 'package:home_clean/data/repositories/extra_service/extra_service_repository_impl.dart';
 import 'package:home_clean/data/repositories/option/option_repository_impl.dart';
+import 'package:home_clean/data/repositories/order/order_repository.dart';
 import 'package:home_clean/data/repositories/service_activity/service_activity_repository_impl.dart';
 import 'package:home_clean/data/repositories/service_category/service_category_repository_impl.dart';
 import 'package:home_clean/data/repositories/sub_activity/sub_activity_repository_impl.dart';
@@ -15,12 +18,15 @@ import 'package:home_clean/data/repositories/time_slot/time_slot_repository_impl
 import 'package:home_clean/domain/usecases/equipment_supply/get_equipment_supplies_usecase.dart';
 import 'package:home_clean/domain/usecases/extra_service/get_extra_service_usecase.dart';
 import 'package:home_clean/domain/usecases/option/get_options_usecase.dart';
+import 'package:home_clean/domain/usecases/order/create_orders.dart';
 import 'package:home_clean/domain/usecases/service/clear_selected_service_ids.dart';
 import 'package:home_clean/domain/usecases/service/get_selected_service_ids.dart';
 import 'package:home_clean/domain/usecases/service/save_selected_service_ids.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_bloc.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_bloc.dart';
+import 'package:home_clean/presentation/blocs/notification/notification_bloc.dart';
 import 'package:home_clean/presentation/blocs/option/option_bloc.dart';
+import 'package:home_clean/presentation/blocs/order/order_bloc.dart';
 import 'package:home_clean/presentation/blocs/service/service_bloc.dart';
 import 'package:home_clean/presentation/blocs/service_activity/service_activity_bloc.dart';
 import 'package:home_clean/presentation/blocs/service_category/service_category_bloc.dart';
@@ -33,13 +39,20 @@ import 'data/repositories/auth/authentication_repository.dart';
 import 'data/repositories/auth/authentication_repository_impl.dart';
 import 'data/repositories/equipment_supply/equipment_supply_repository.dart';
 import 'data/repositories/extra_service/extra_service_repository.dart';
+import 'data/repositories/notification/notification_repository.dart';
+import 'data/repositories/notification/notification_repository_impl.dart';
 import 'data/repositories/option/option_repository.dart';
+import 'data/repositories/order/order_repository_impl.dart';
 import 'data/repositories/service/service_repository.dart';
 import 'data/repositories/service/service_repository_impl.dart';
 import 'data/repositories/service_activity/service_activity_repository.dart';
 import 'data/repositories/service_category/service_category_repository.dart';
 import 'data/repositories/sub_activity/sub_activity_repository.dart';
 import 'data/repositories/time_slot/time_slot_repository.dart';
+import 'domain/usecases/notification/initialize_notification_usecase.dart';
+import 'domain/usecases/notification/show_notification_usecase.dart';
+import 'domain/usecases/order/get_order_from_local.dart';
+import 'domain/usecases/order/save_order_to_local.dart';
 import 'domain/usecases/service_activity/get_service_activities_by_service_usecase.dart';
 import 'domain/usecases/service_category/get_service_by_service_category_usecase.dart';
 import 'domain/usecases/service_category/get_service_categories_usecase.dart';
@@ -51,19 +64,29 @@ import 'presentation/blocs/theme/theme_bloc.dart';
 
 final sl = GetIt.instance;
 final navigatorKey = GlobalKey<NavigatorState>();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
+late InitializeNotificationUseCase _initializeNotificationUseCase;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await setupServiceLocator();
+
+  _initializeNotificationUseCase = InitializeNotificationUseCase(sl());
+  await _initializeNotificationUseCase.call();
 
   await initializeDateFormatting('vi_VN', null);
-
-  // cho doi khoi tao DI
-  await setupServiceLocator();
 
   runApp(HomeClean(preferences: sl<SharedPreferences>()));
 }
 
+
+
 Future<void> setupServiceLocator() async {
+  // Service
+  sl.registerLazySingleton(() => FlutterLocalNotificationsPlugin());
+
   // External
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
@@ -88,9 +111,13 @@ Future<void> setupServiceLocator() async {
       () => SubActivityRepositoryImpl());
   sl.registerLazySingleton<ExtraServiceRepository>(
       () => ExtraServiceRepositoryImpl());
-  sl.registerCachedFactory<EquipmentSupplyRepository>(
+  sl.registerLazySingleton<EquipmentSupplyRepository>(
       () => EquipmentSupplyRepositoryImpl());
-  sl.registerCachedFactory<TimeSlotRepository>(() => TimeSlotRepositoryImpl());
+  sl.registerLazySingleton<TimeSlotRepository>(() => TimeSlotRepositoryImpl());
+  sl.registerLazySingleton<OrderRepository>(() => OrderRepositoryImpl());
+  sl.registerLazySingleton<NotificationRepository>(
+          () => NotificationRepositoryImpl(sl<FlutterLocalNotificationsPlugin>())
+  );
 
   // Use Cases
   sl.registerLazySingleton(() => SaveSelectedServiceIds(sl()));
@@ -104,6 +131,11 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => GetTimeSlotsUsecase(sl()));
   sl.registerLazySingleton(() => GetServiceByServiceCategoryUsecase(sl()));
   sl.registerLazySingleton(() => GetServiceCategoriesUsecase(sl()));
+  sl.registerLazySingleton(() => CreateOrders(sl()));
+  sl.registerLazySingleton(() => SaveOrderToLocal (sl()));
+  sl.registerLazySingleton(() => GetOrderFromLocal (sl()));
+  sl.registerLazySingleton(() => InitializeNotificationUseCase (sl()));
+  sl.registerLazySingleton(() => ShowNotificationUseCase (sl()));
 
   // Blocs (sử dụng Factory vì mỗi bloc sẽ cần một instance mới)
   sl.registerFactory(() => AuthenticationBloc(authenticationRepository: sl()));
@@ -127,6 +159,9 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(
       () => EquipmentSupplyBloc(getEquipmentSuppliesUsecase: sl()));
   sl.registerFactory(() => TimeSlotBloc(getTimeSlotsUsecase: sl()));
+  sl.registerFactory(() => OrderBloc(createOrder: sl(), saveOrderToLocal: sl(), getOrderFromLocal: sl(), deleteOrderFromLocal: sl()));
+  sl.registerFactory(() => NotificationBloc(
+      initializeNotificationUseCase: sl(), showNotificationUseCase: sl()));
 }
 
 class HomeClean extends StatelessWidget {
@@ -157,6 +192,9 @@ class HomeClean extends StatelessWidget {
             create: (_) => sl<EquipmentSupplyRepository>()),
         RepositoryProvider<TimeSlotRepository>(
             create: (_) => sl<TimeSlotRepository>()),
+        RepositoryProvider<OrderRepository>(
+            create: (_) => sl<OrderRepository>()),
+        RepositoryProvider(create: (_) => sl<NotificationRepository>()),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -192,6 +230,11 @@ class HomeClean extends StatelessWidget {
                   EquipmentSupplyBloc(getEquipmentSuppliesUsecase: sl())),
           BlocProvider(
               create: (context) => TimeSlotBloc(getTimeSlotsUsecase: sl())),
+          BlocProvider(create: (context) => OrderBloc(createOrder: sl(), saveOrderToLocal: sl(), getOrderFromLocal: sl(), deleteOrderFromLocal: sl())),
+          BlocProvider(
+              create: (context) => NotificationBloc(
+                  initializeNotificationUseCase: sl(),
+                  showNotificationUseCase: sl())),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {
@@ -209,7 +252,7 @@ class HomeClean extends StatelessWidget {
                 textTheme: GoogleFonts.notoSansTextTheme(themeData.textTheme),
               ),
               getPages: AppRouter.routes,
-              initialRoute: AppRouter.routeSplash,
+              initialRoute: AppRouter.routeHome,
             );
           },
         ),

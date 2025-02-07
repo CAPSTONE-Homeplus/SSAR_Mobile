@@ -1,10 +1,11 @@
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
 import 'package:home_clean/presentation/screens/home/home_screen.dart';
 import 'package:home_clean/presentation/screens/message/message_screen.dart';
+import 'package:home_clean/presentation/screens/order_confirmation/order_confirmation_screen.dart';
 import 'package:home_clean/presentation/screens/service_detail/service_detail_screen.dart';
 import 'package:home_clean/presentation/screens/start/splash_screen.dart';
-import 'package:home_clean/presentation/screens/time_selection/work_time_selection_screen.dart';
 
 import 'presentation/screens/activity/activity_screen.dart';
 import 'presentation/screens/login/login_screen.dart';
@@ -21,6 +22,7 @@ class AppRouter {
   static const String routeServiceDetails = '/service-details';
   static const String routeServiceDetail = '/service-detail';
   static const String routeTimeCollection = '/time-collection';
+  static const String routeOrderConfirmation = '/order-confirmation';
 
   static List<GetPage> get routes => [
         GetPage(
@@ -75,8 +77,10 @@ class AppRouter {
           transitionDuration: const Duration(milliseconds: 300),
         ),
         GetPage(
-          name: routeTimeCollection,
-          page: () => WorkTimeSelectionScreen(),
+          name: routeOrderConfirmation,
+          page: () => OrderConfirmationScreen(
+            orderDetails: Get.arguments,
+          ),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -117,4 +121,13 @@ class AppRouter {
   static void navigateToTimeCollection() {
     Get.toNamed(routeTimeCollection);
   }
+
+  static void navigateToOrderDetail() {
+    Get.toNamed(routeOrderConfirmation);
+  }
+
+  static void navigateToOrderDetailWithArguments(dynamic arguments) {
+    Get.toNamed(routeOrderConfirmation, arguments: arguments);
+  }
+
 }

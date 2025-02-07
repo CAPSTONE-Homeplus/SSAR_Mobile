@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "379685700483",
+    "project_id": "homeclean-f09fb",
+    "storage_bucket": "homeclean-f09fb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:379685700483:android:d13db2f80a0c03d3da2cb6",
+        "android_client_info": {
+          "package_name": "com.example.home_clean"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbcKioRg6s033C-8Z6_O1KZfmcSlT-lJ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

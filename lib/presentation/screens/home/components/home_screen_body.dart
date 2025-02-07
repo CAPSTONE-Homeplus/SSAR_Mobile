@@ -3,8 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/app_router.dart';
 import 'package:home_clean/core/app_text_styles.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../../../core/constant.dart';
+import '../../location_picker/location_picker_screen.dart';
 
 class HomeScreenBody extends StatefulWidget {
   List<Service> servicesToFetch;
@@ -16,10 +18,16 @@ class HomeScreenBody extends StatefulWidget {
 
 class _HomeScreenBodyState extends State<HomeScreenBody> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return _buildHomeScreen(widget.servicesToFetch);
   }
 }
+
 
 Widget _buildHomeScreen(List<Service> services) {
   return Scaffold(
@@ -30,24 +38,30 @@ Widget _buildHomeScreen(List<Service> services) {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Your Location',
+            'Ho Chi Minh City',
             style: GoogleFonts.poppins(
               color: Colors.grey,
               fontSize: 12,
             ),
           ),
-          Row(
-            children: [
-              Text(
-                'Ho Chi Minh City',
-                style: GoogleFonts.poppins(
-                  color: Colors.black,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+          GestureDetector(
+            onTap: () {
+            },
+
+
+            child: Row(
+              children: [
+                Text(
+                  'Ho Chi Minh City',
+                  style: GoogleFonts.poppins(
+                    color: Colors.black,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              Icon(Icons.keyboard_arrow_down, color: Colors.grey)
-            ],
+                Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+              ],
+            ),
           ),
         ],
       ),
@@ -168,34 +182,6 @@ Widget _buildHomeScreen(List<Service> services) {
               ],
             ),
           ),
-
-          // Padding(
-          //   padding: const EdgeInsets.all(16),
-          //   child: Column(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       Text(
-          //         'Promotions',
-          //         style: GoogleFonts.poppins(
-          //           fontSize: 18,
-          //           fontWeight: FontWeight.bold,
-          //         ),
-          //       ),
-          //       SizedBox(height: 12),
-          //       Container(
-          //         height: 160,
-          //         child: ListView(
-          //           scrollDirection: Axis.horizontal,
-          //           children: [
-          //             _buildPromotionCard(),
-          //             _buildPromotionCard(),
-          //             _buildPromotionCard(),
-          //           ],
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
 
           // Recent Bookings
           Padding(

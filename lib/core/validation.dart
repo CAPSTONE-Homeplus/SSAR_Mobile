@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 
 class Validation {
-  static String formatCurrency(double amount) {
+  static String formatCurrency(int amount) {
     final formatter = NumberFormat('#,###', 'vi_VN');
     return formatter.format(amount);
   }
