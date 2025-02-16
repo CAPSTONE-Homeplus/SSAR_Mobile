@@ -4,6 +4,7 @@ import 'package:home_clean/domain/entities/service/service.dart';
 import 'package:home_clean/presentation/screens/home/home_screen.dart';
 import 'package:home_clean/presentation/screens/message/message_screen.dart';
 import 'package:home_clean/presentation/screens/order_confirmation/order_confirmation_screen.dart';
+import 'package:home_clean/presentation/screens/register/register_screen.dart';
 import 'package:home_clean/presentation/screens/service_detail/service_detail_screen.dart';
 import 'package:home_clean/presentation/screens/start/splash_screen.dart';
 
@@ -14,6 +15,7 @@ import 'presentation/widgets/bottom_navigation.dart';
 
 class AppRouter {
   static const String routeLogin = '/login';
+  static const String routeRegister = '/register';
   static const String routeHome = '/home';
   static const String routeActivity = '/activity';
   static const String routeMessage = '/message';
@@ -28,6 +30,12 @@ class AppRouter {
         GetPage(
           name: routeLogin,
           page: () => const LoginScreen(),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+        GetPage(
+          name: routeRegister,
+          page: () => const RegisterScreen(),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -86,6 +94,10 @@ class AppRouter {
         ),
       ];
 
+  static void navigateToLogin() {
+    Get.toNamed(routeLogin);
+  }
+
   static void navigateToHome() {
     Get.toNamed(routeHome);
   }
@@ -128,6 +140,10 @@ class AppRouter {
 
   static void navigateToOrderDetailWithArguments(dynamic arguments) {
     Get.toNamed(routeOrderConfirmation, arguments: arguments);
+  }
+
+  static void navigateToRegister() {
+    Get.toNamed(routeRegister);
   }
 
 }

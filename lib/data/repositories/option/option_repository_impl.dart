@@ -17,7 +17,7 @@ class OptionRepositoryImpl implements OptionRepository {
     int? size,
   ) async {
     try {
-      final response = await request
+      final response = await homeCleanRequest
           .get('${ApiConstant.SERVICES}/$serviceId/options', queryParameters: {
         'id': serviceId,
         'search': search,

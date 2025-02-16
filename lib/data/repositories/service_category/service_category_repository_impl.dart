@@ -20,7 +20,7 @@ class ServiceCategoryRepositoryImpl implements ServiceCategoryRepository {
     int? size,
   ) async {
     try {
-      final response = await request
+      final response = await homeCleanRequest
           .get('${ApiConstant.SERVICE_CATEGORIES}', queryParameters: {
         'search': search,
         'orderBy': orderBy,
@@ -64,7 +64,7 @@ class ServiceCategoryRepositoryImpl implements ServiceCategoryRepository {
     int? size,
   ) async {
     try {
-      final response = await request.get(
+      final response = await homeCleanRequest.get(
           '${ApiConstant.SERVICE_CATEGORIES}/$serviceCategoryId/services',
           queryParameters: {
             'id': serviceCategoryId,

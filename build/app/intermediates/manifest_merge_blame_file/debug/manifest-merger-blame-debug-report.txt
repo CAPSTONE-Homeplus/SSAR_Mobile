@@ -46,8 +46,8 @@
 25-->D:\MyResources\FLUTTER\Home_Clean\home_clean\android\app\src\main\AndroidManifest.xml:12:5-77
 25-->D:\MyResources\FLUTTER\Home_Clean\home_clean\android\app\src\main\AndroidManifest.xml:12:22-74
 26    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-26-->D:\MyResources\FLUTTER\Home_Clean\home_clean\android\app\src\main\AndroidManifest.xml:13:9-89
-26-->D:\MyResources\FLUTTER\Home_Clean\home_clean\android\app\src\main\AndroidManifest.xml:13:26-86
+26-->D:\MyResources\FLUTTER\Home_Clean\home_clean\android\app\src\main\AndroidManifest.xml:13:5-85
+26-->D:\MyResources\FLUTTER\Home_Clean\home_clean\android\app\src\main\AndroidManifest.xml:13:22-82
 27    <!--
 28 Required to query activities that can process text, see:
 29         https://developer.android.com/training/package-visibility and

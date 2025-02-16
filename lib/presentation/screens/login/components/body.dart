@@ -1,31 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_clean/core/colors.dart';
 import 'package:home_clean/presentation/screens/login/components/form_login.dart';
+
+import '../../../../core/size_config.dart';
 
 class Body extends StatelessWidget {
   const Body({super.key});
 
   @override
   Widget build(BuildContext context) {
-    double baseWidth = 375;
-    double baseHeight = 812;
-    double fem = MediaQuery.of(context).size.width / baseWidth;
-    double hem = MediaQuery.of(context).size.height / baseHeight;
-    double ffem = fem * 0.97;
-
+    final fem = SizeConfig.fem;
+    final hem = SizeConfig.hem;
+    final ffem = SizeConfig.ffem;
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1CAF7D),
-              Color.fromARGB(255, 250, 251, 251),
-            ],
-          ),
+          color: AppColors.primaryColor,
         ),
+        child: Column(
+          children: [
+        Expanded(
+
         child: SingleChildScrollView(
           child: Stack(
             children: [
@@ -82,7 +79,7 @@ class Body extends StatelessWidget {
                               ],
                             ),
                             child: Icon(
-                              Icons.home_work_rounded,
+                              Icons.home,
                               size: 60 * fem,
                               color: Color(0xFF2193b0),
                             ),
@@ -104,7 +101,7 @@ class Body extends StatelessWidget {
                               return Opacity(
                                 opacity: value,
                                 child: Text(
-                                  'Welcome Back!',
+                                  'Home Clean',
                                   style: GoogleFonts.poppins(
                                     fontSize: 32 * ffem,
                                     fontWeight: FontWeight.bold,
@@ -117,7 +114,7 @@ class Body extends StatelessWidget {
                           ),
                           SizedBox(height: 8 * hem),
                           Text(
-                            'Managing your home services made easy',
+                            'Quản lý ngôi nhà của bạn một cách dễ dàng',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.poppins(
                               fontSize: 16 * ffem,
@@ -145,43 +142,14 @@ class Body extends StatelessWidget {
                       ),
                       child: FormLogin(fem: fem, hem: hem, ffem: ffem),
                     ),
-                    SizedBox(height: 24 * hem),
-                    // Sign up section
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 16 * hem),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'New to Home Clean? ',
-                            style: GoogleFonts.poppins(
-                              fontSize: 14 * ffem,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              // Navigation
-                            },
-                            child: Text(
-                              'Create Account',
-                              style: GoogleFonts.poppins(
-                                fontSize: 14 * ffem,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 20 * hem),
                   ],
                 ),
               ),
             ],
           ),
+        ),
+      ),
+          ],
         ),
       ),
     );

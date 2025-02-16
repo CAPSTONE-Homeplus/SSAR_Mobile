@@ -5,6 +5,8 @@ import 'package:home_clean/presentation/blocs/service/service_bloc.dart';
 import 'package:home_clean/presentation/screens/home/components/home_screen_body.dart';
 import 'package:home_clean/presentation/screens/home/components/home_screen_loading.dart';
 
+import '../../../core/size_config.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -23,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return BlocBuilder<ServiceBloc, ServiceState>(
       builder: (context, state) {
         if (state is ServiceLoadingState) {

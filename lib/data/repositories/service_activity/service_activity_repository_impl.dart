@@ -17,7 +17,7 @@ class ServiceActivityRepositoryImpl implements ServiceActivityRepository {
     int? size,
   ) async {
     try {
-      final response = await request.get(
+      final response = await homeCleanRequest.get(
           '${ApiConstant.SERVICES}/$serviceId/service-activities',
           queryParameters: {
             'id': serviceId,

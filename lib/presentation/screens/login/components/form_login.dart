@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_clean/app_router.dart';
+import 'package:home_clean/core/size_config.dart';
 
 import '../../../blocs/authentication/authentication_bloc.dart';
 import '../../../blocs/internet/internet_bloc.dart';
@@ -28,6 +30,8 @@ class _FormLoginState extends State<FormLogin> {
   final TextEditingController passwordController = TextEditingController();
   bool _obscureText = true;
 
+  final Color primaryColor = const Color(0xFF1CAF7D);
+
   @override
   Widget build(BuildContext context) {
     final authState = context.watch<AuthenticationBloc>().state;
@@ -35,31 +39,9 @@ class _FormLoginState extends State<FormLogin> {
       AuthenticationInitial() => _buildLoginForm(),
       AuthenticationFailed(error: final error) => _buildLoginForm(error: error),
       AuthenticationSuccess() => _buildLoginForm(),
-      AuthenticationInProcessByAccount() => _buildLoginForm(),
-      AuthenticationInProcess() => _buildLoginForm(),
-      AuthenticationInProcessByGmail() => _buildLoginForm(),
+      AuthenticationLoading() => _buildLoginForm(),
+      AuthenticationState() => throw UnimplementedError(),
     });
-
-    loginWidget = BlocListener<AuthenticationBloc, AuthenticationState>(
-      listener: (context, state) {
-        if (state is AuthenticationSuccess) {
-          NotificationApp.show(
-            context,
-            'Đăng nhập thành công!',
-            backgroundColor: Colors.green.shade400,
-            icon: Icons.check_circle,
-          );
-        } else if (state is AuthenticationFailed) {
-          NotificationApp.show(
-            context,
-            'Đăng nhập thất bại, vui lòng thử lại!',
-            backgroundColor: Colors.red.shade400,
-            icon: Icons.error,
-          );
-        }
-      },
-      child: loginWidget,
-    );
 
     return Form(
       key: _formKey,
@@ -68,11 +50,11 @@ class _FormLoginState extends State<FormLogin> {
         children: [
           loginWidget,
           SizedBox(height: 25 * widget.hem),
-          _buildLoginButton(),
+          _buildLoginButton(context),
           SizedBox(height: 16 * widget.hem),
           _buildDivider(),
-          SizedBox(height: 16 * widget.hem),
-          _buildGoogleButton(),
+          SizedBox(height: 8 * widget.hem),
+          _buildRegisterButton(),
         ],
       ),
     );
@@ -117,21 +99,11 @@ class _FormLoginState extends State<FormLogin> {
               'Forgot Password?',
               style: GoogleFonts.poppins(
                 fontSize: 14 * widget.ffem,
-                color: Color(0xFF2193b0),
+                color: primaryColor,
               ),
             ),
           ),
         ),
-        if (error != null) ...[
-          SizedBox(height: 8 * widget.hem),
-          Text(
-            error,
-            style: GoogleFonts.poppins(
-              fontSize: 12 * widget.ffem,
-              color: Colors.red,
-            ),
-          ),
-        ],
       ],
     );
   }
@@ -154,22 +126,22 @@ class _FormLoginState extends State<FormLogin> {
           fontSize: 15 * widget.ffem,
           color: Colors.grey.shade400,
         ),
-        prefixIcon: Icon(icon, color: Color(0xFF2193b0)),
+        prefixIcon: Icon(icon, color: primaryColor),
         suffixIcon: isPassword
             ? IconButton(
-                icon: Icon(
-                  _obscureText ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.grey,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-              )
+          icon: Icon(
+            _obscureText ? Icons.visibility_off : Icons.visibility,
+            color: Colors.grey,
+          ),
+          onPressed: () {
+            setState(() {
+              _obscureText = !_obscureText;
+            });
+          },
+        )
             : null,
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12 * widget.fem),
           borderSide: BorderSide.none,
@@ -180,80 +152,82 @@ class _FormLoginState extends State<FormLogin> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12 * widget.fem),
-          borderSide: BorderSide(color: Color(0xFF2193b0)),
+          borderSide: BorderSide(color: primaryColor),
         ),
       ),
     );
   }
 
-  Widget _buildLoginButton() {
-    return ElevatedButton(
-      onPressed: () {
-        if (context.read<InternetBloc>().state is Connected) {
-          if (_formKey.currentState!.validate()) {
-            context.read<AuthenticationBloc>().add(
-                  LoginAccount(
-                    emailOrUsername: userNameController.text.trim(),
-                    password: passwordController.text,
-                  ),
-                );
-          }
-        } else {
-          NotificationApp.show(
-            context,
-            'Không có kết nối Internet!',
-            backgroundColor: Colors.red.shade400,
-            icon: Icons.error,
+  Widget _buildLoginButton(BuildContext context) {
+    return BlocListener<AuthenticationBloc, AuthenticationState>(
+      listener: (context, state) {
+        if (state is AuthenticationSuccess) {
+          AppRouter.navigateToHome();
+        } else if (state is AuthenticationFailed) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.error)),
           );
         }
       },
+      child: ElevatedButton(
+        onPressed: () {
+          if (context.read<InternetBloc>().state is Connected) {
+            if (_formKey.currentState!.validate()) {
+              context.read<AuthenticationBloc>().add(
+                LoginAccount(
+                  username: userNameController.text.trim(),
+                  password: passwordController.text,
+                ),
+              );
+            }
+          } else {
+            NotificationApp.show(
+              context,
+              'Không có kết nối Internet!',
+              backgroundColor: Colors.red.shade400,
+              icon: Icons.error,
+            );
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primaryColor,
+          padding: EdgeInsets.symmetric(vertical: 16 * widget.hem),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12 * widget.fem),
+          ),
+        ),
+        child: Text(
+          'Đăng nhập',
+          style: GoogleFonts.poppins(
+            fontSize: 16 * widget.ffem,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildRegisterButton() {
+    return ElevatedButton(
+      onPressed: () {
+          AppRouter.navigateToRegister();
+        },
       style: ElevatedButton.styleFrom(
-        backgroundColor: Color(0xFF2193b0),
+        backgroundColor: Colors.grey.shade400,
         padding: EdgeInsets.symmetric(vertical: 16 * widget.hem),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12 * widget.fem),
         ),
       ),
       child: Text(
-        'Sign In',
+        'Tạo tài khoản mới',
         style: GoogleFonts.poppins(
           fontSize: 16 * widget.ffem,
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
-      ),
-    );
-  }
-
-  Widget _buildGoogleButton() {
-    return OutlinedButton(
-      onPressed: () {
-        context.read<AuthenticationBloc>().add(LoginGmail());
-      },
-      style: OutlinedButton.styleFrom(
-        padding: EdgeInsets.symmetric(vertical: 16 * widget.hem),
-        side: BorderSide(color: Colors.grey.shade300),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12 * widget.fem),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/google.png',
-            height: 24 * widget.fem,
-          ),
-          SizedBox(width: 12 * widget.fem),
-          Text(
-            'Continue with Google',
-            style: GoogleFonts.poppins(
-              fontSize: 16 * widget.ffem,
-              color: Colors.black87,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -265,7 +239,7 @@ class _FormLoginState extends State<FormLogin> {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16 * widget.fem),
           child: Text(
-            'OR',
+            'Hoặc',
             style: GoogleFonts.poppins(
               fontSize: 14 * widget.ffem,
               color: Colors.grey.shade600,

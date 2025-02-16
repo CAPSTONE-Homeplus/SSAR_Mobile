@@ -17,7 +17,7 @@ class EquipmentSupplyRepositoryImpl implements EquipmentSupplyRepository {
     int? size,
   ) async {
     try {
-      final response = await request.get(
+      final response = await homeCleanRequest.get(
           '${ApiConstant.SERVICES}/$serviceId/equipment-supplies',
           queryParameters: {
             'id': serviceId,

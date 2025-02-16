@@ -4,6 +4,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:home_clean/core/api_constant.dart';
 
+enum BaseUrlType {
+  homeClean,
+  vinWallet,
+}
+
 Map<String, dynamic> convertToQueryParams(
     [Map<String, dynamic> params = const {}]) {
   Map<String, dynamic> queryParams = Map.from(params);
@@ -127,55 +132,80 @@ class CustomInterceptors extends Interceptor {
 }
 
 class MyRequest {
-  static BaseOptions options = BaseOptions(
-      baseUrl: ApiConstant.BASE_URL,
+  static final Map<BaseUrlType, String> baseUrls = {
+    BaseUrlType.homeClean: ApiConstant.HOME_CLEAN_URL,
+    BaseUrlType.vinWallet: ApiConstant.VIN_WALLET_URL,
+  };
+
+  static BaseOptions getOptions(BaseUrlType urlType) => BaseOptions(
+      baseUrl: baseUrls[urlType]!,
       headers: {
         Headers.contentTypeHeader: "application/json",
         Headers.acceptHeader: "application/json",
       },
-      connectTimeout: const Duration(seconds: 20),
-      sendTimeout: const Duration(seconds: 20),
-      receiveTimeout: const Duration(seconds: 20));
+      connectTimeout: const Duration(seconds: 5),
+      sendTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 5));
 
-  late Dio _inner;
-  MyRequest() {
-    _inner = Dio(options);
-    _inner.interceptors.add(CustomInterceptors());
-    _inner.interceptors.add(RetryInterceptor(dio: _inner));
-    _inner.interceptors.add(InterceptorsWrapper(
-      onResponse: (e, handler) {
-        return handler.next(e); // continue
-      },
-      onError: (e, handler) async {
-        if (e.response?.statusCode == 400) {
-          print("Bad Request");
-        } else if (e.response?.statusCode == 500) {
-          print("Server Error");
-        } else if (e.response?.statusCode == 401) {
-          print("Unauthorized");
-        } else {
-          print(e);
-        }
-        handler.next(e);
-      },
-    ));
+  late Map<BaseUrlType, Dio> _dioInstances;
+  BaseUrlType _currentUrlType;
+
+  MyRequest({BaseUrlType initialUrlType = BaseUrlType.homeClean})
+      : _currentUrlType = initialUrlType {
+    _dioInstances = {};
+
+    // Khởi tạo các instance Dio cho từng BASE URL
+    for (var urlType in BaseUrlType.values) {
+      var dio = Dio(getOptions(urlType));
+      dio.interceptors.add(CustomInterceptors());
+      dio.interceptors.add(RetryInterceptor(dio: dio));
+      dio.interceptors.add(InterceptorsWrapper(
+        onResponse: (e, handler) {
+          return handler.next(e);
+        },
+        onError: (e, handler) async {
+          if (e.response?.statusCode == 400) {
+            print("Bad Request");
+          } else if (e.response?.statusCode == 500) {
+            print("Server Error");
+          } else if (e.response?.statusCode == 401) {
+            print("Unauthorized");
+          } else {
+            print(e);
+          }
+          handler.next(e);
+        },
+      ));
+      _dioInstances[urlType] = dio;
+    }
   }
 
-  Dio get request {
-    return _inner;
+  // Lấy instance Dio hiện tại
+  Dio get request => _dioInstances[_currentUrlType]!;
+
+  // Đổi BASE URL
+  void switchBaseUrl(BaseUrlType urlType) {
+    _currentUrlType = urlType;
   }
 
-  set setToken(token) {
-    if (token != null) {
-      options.headers["Authorization"] = "Bearer $token";
-    } else {
-      options.headers.remove("Authorization");
+  // Lấy instance Dio theo loại BASE URL
+  Dio getRequestForUrl(BaseUrlType urlType) => _dioInstances[urlType]!;
+
+  // Set token cho tất cả các instance
+  set setToken(String? token) {
+    for (var dio in _dioInstances.values) {
+      if (token != null) {
+        dio.options.headers["Authorization"] = "Bearer $token";
+      } else {
+        dio.options.headers.remove("Authorization");
+      }
     }
   }
 }
 
 final requestObj = MyRequest();
-final request = requestObj.request;
+final homeCleanRequest = requestObj.request;
+final vinWalletRequest = requestObj.getRequestForUrl(BaseUrlType.vinWallet);
 
 class MyHttpOverrides extends HttpOverrides {
   @override

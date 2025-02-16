@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_clean/core/size_config.dart';
 import 'package:home_clean/presentation/blocs/theme/theme_bloc.dart';
+
+import '../../../app_router.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -243,7 +246,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Padding(
               padding: EdgeInsets.all(16),
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  AppRouter.navigateToLogin();
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
@@ -252,13 +257,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(
-                  'Log Out',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+
+                  child: Text('Đăng xuất', style: TextStyle(fontSize: 16 * SizeConfig.ffem)),
+
               ),
             ),
             SizedBox(height: 16),

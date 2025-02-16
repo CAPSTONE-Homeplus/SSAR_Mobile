@@ -28,13 +28,13 @@ final class RegisterAccount extends AuthenticationEvent {
 }
 
 final class LoginAccount extends AuthenticationEvent {
-  final String emailOrUsername;
+  final String username;
   final String password;
 
-  LoginAccount({required this.emailOrUsername, required this.password});
+  LoginAccount({required this.username, required this.password});
 
   @override
-  List<Object?> get props => [emailOrUsername, password];
+  List<Object?> get props => [username, password];
 }
 
 final class LogoutAccount extends AuthenticationEvent {

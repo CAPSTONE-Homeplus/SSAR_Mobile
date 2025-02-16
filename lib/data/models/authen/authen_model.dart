@@ -1,49 +1,41 @@
 class AuthenModel {
-  final String? id;
-  final String? username;
-  final String? email;
-  final String? fullName;
-  final String? address;
-  final String? roleName;
-  final String? token;
-  final String? refreshToken;
-  final String? status;
+  String? accessToken;
+  String? refreshToken;
+  String? userId;
+  String? fullName;
+  String? status;
+  String? role;
 
-  AuthenModel(
-      {this.id,
-      this.username,
-      this.email,
-      this.fullName,
-      this.address,
-      this.roleName,
-      this.token,
-      this.refreshToken,
-      this.status});
+  AuthenModel({
+    this.accessToken,
+    this.refreshToken,
+    this.userId,
+    this.fullName,
+    this.status,
+    this.role,
+  });
 
   factory AuthenModel.fromJson(Map<String, dynamic> json) {
     return AuthenModel(
-        id: json['id'],
-        username: json['username'],
-        email: json['email'],
-        fullName: json['fullName'],
-        address: json['address'],
-        roleName: json['roleName'],
-        token: json['token'],
-        refreshToken: json['refreshToken'],
-        status: json['status']);
+      accessToken: json['accessToken'],
+      refreshToken: json['refreshToken'],
+      userId: json['userId'],
+      fullName: json['fullName'],
+      status: json['status'],
+      role: json['role'],
+    );
   }
 
+
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['username'] = this.username;
-    data['email'] = this.email;
-    data['fullName'] = this.fullName;
-    data['address'] = this.address;
-    data['roleName'] = this.roleName;
-    data['token'] = this.token;
-    data['refreshToken'] = this.refreshToken;
-    data['status'] = this.status;
-    return data;
+    return {
+      'accessToken': accessToken,
+      'refreshToken': refreshToken,
+      'userId': userId,
+      'fullName': fullName,
+      'status': status,
+      'role': role,
+    };
   }
+
 }

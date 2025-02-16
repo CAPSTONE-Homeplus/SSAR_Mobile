@@ -16,7 +16,7 @@ class ServiceRepositoryImpl implements ServiceRepository {
       String? search, String? orderBy, int? page, int? size) async {
     try {
       final response =
-          await request.get('${ApiConstant.SERVICES}', queryParameters: {
+          await homeCleanRequest.get('${ApiConstant.SERVICES}', queryParameters: {
         'search': search,
         'orderBy': orderBy,
         'page': page,

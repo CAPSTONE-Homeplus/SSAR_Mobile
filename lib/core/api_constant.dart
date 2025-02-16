@@ -1,5 +1,9 @@
 class ApiConstant {
-  static const String BASE_URL = "https://homeclean.onrender.com/api/v1";
+  static const String HOME_CLEAN_URL = "https://homeclean.onrender.com/api/v1";
+  static const String VIN_WALLET_URL = "https://vinwallet.onrender.com/api/v1";
+
+  // Authen
+  static const String AUTH = "/auth";
 
   // Service
   static const String SERVICES = "/services";

@@ -1,77 +1,55 @@
 import 'package:dio/dio.dart';
 import 'package:home_clean/core/request.dart';
+import 'package:home_clean/data/datasource/authen_local_datasource.dart';
 import 'package:home_clean/data/repositories/auth/authentication_repository.dart';
 
+import '../../../core/api_constant.dart';
+import '../../../core/exception_handler.dart';
 import '../../models/authen/authen_model.dart';
 import '../../models/authen/create_authen_model.dart';
 import '../../models/authen/login_model.dart';
 
 class AuthenticationRepositoryImpl implements AuthenticationRepository {
-  @override
-  Future<AuthenModel?> loginWithGmail(
-      CreateAuthenModel createAuthenModel) async {
-    try {
-      final response = await request.post(
-        '/api/v1/account/create',
-        data: createAuthenModel.toJson(),
-      );
+  final AuthenticationLocalDataSource localDataSource;
 
-      if (response.statusCode == 200 && response.data != null) {
-        return AuthenModel.fromJson(response.data);
-      } else {
-        print('Request failed with status: ${response.statusCode}');
-        return null;
-      }
-    } on DioException catch (e) {
-      print('Dio error: ${e.response?.statusCode} - ${e.message}');
-      return null;
-    } catch (e) {
-      print('Unexpected error: $e');
-      rethrow;
-    }
-  }
-
-  @override
-  Future<AuthenModel?> registerAccount(
-      CreateAuthenModel createAuthenModel) async {
-    try {
-      final response = await request.post(
-        '/api/v1/account/create',
-        data: createAuthenModel.toJson(),
-      );
-
-      if (response.statusCode == 200 && response.data != null) {
-        return AuthenModel.fromJson(response.data);
-      } else {
-        print('Request failed with status: ${response.statusCode}');
-        return null;
-      }
-    } on DioError catch (e) {
-      print('Dio error: ${e.response?.statusCode} - ${e.message}');
-      return null;
-    } catch (e) {
-      print('Unexpected error: $e');
-      rethrow;
-    }
-  }
-
+  AuthenticationRepositoryImpl({required this.localDataSource});
   @override
   Future<bool> login(LoginModel loginModel) async {
     try {
-      final response = await request.post(
-        '/auth/login',
-        data: loginModel.toJson(),
+      final response = await vinWalletRequest.post(
+        '${ApiConstant.AUTH}/login',
+        data: {
+          'username': loginModel.username,
+          'password': loginModel.password,
+        },
       );
-
       if (response.statusCode == 200 && response.data != null) {
         return true;
       } else {
-        print('Request failed with status: ${response.statusCode}');
-        return false;
+        throw ApiException(
+          errorCode: response.statusCode,
+          errorMessage: response.statusMessage ?? 'Lỗi không xác định',
+          errorStatus: response.statusCode.toString(),
+        );
       }
     } catch (e) {
-      print('Unexpected error: $e');
-      return false;
+      throw ExceptionHandler.handleException(e);
     }
   }
+
+  @override
+  Future<void> clearUser() async {
+    localDataSource.clearSelectedUserName();
+  }
+
+  @override
+  Future<String?> getUserName() async {
+    return localDataSource.getSelectedUserName();
+  }
+
+  @override
+  Future<void> saveUserName(String userName) async {
+     localDataSource.saveSelectedUserName(userName);
+  }
+
 }

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:home_clean/core/validation.dart';
-import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_clean/core/validation.dart';
+import 'package:home_clean/presentation/widgets/address_bottom_sheet.dart';
+import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 
 import '../../../domain/entities/order/create_order.dart';
 import '../../widgets/step_indicator_widget.dart';
-import '../map/map_screen.dart';
 
-class OrderConfirmationScreen extends StatelessWidget {
+class OrderConfirmationScreen extends StatefulWidget {
   final CreateOrder orderDetails;
 
   const OrderConfirmationScreen({
@@ -16,15 +16,25 @@ class OrderConfirmationScreen extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<OrderConfirmationScreen> createState() =>
+      _OrderConfirmationScreenState();
+}
+
+class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
+  @override
   Widget build(BuildContext context) {
+    String selectedBuilding = '';
+    String selectedRoom = '';
+
     return Scaffold(
-      appBar: CustomAppBar(title: 'Xác nhận', onBackPressed: () {
-        Navigator.pop(context);
-      }),
+      appBar: CustomAppBar(
+          title: 'Xác nhận',
+          onBackPressed: () {
+            Navigator.pop(context);
+          }),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Progress indicator
             StepIndicatorWidget(currentStep: 3),
             const SizedBox(height: 8),
             _buildSection(
@@ -32,10 +42,21 @@ class OrderConfirmationScreen extends StatelessWidget {
               icon: Icons.location_on_outlined,
               child: InkWell(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MapScreen(),
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => AddressBottomSheet(
+                      currentAddress: widget.orderDetails.address,
+                      currentBuilding: selectedBuilding,
+                      currentRoom: selectedRoom,
+                      onAddressSelected: (address, building, room) {
+                        setState(() {
+                          widget.orderDetails.address = address;
+                          selectedBuilding = building;
+                          selectedRoom = room;
+                        });
+                      },
                     ),
                   );
                 },
@@ -43,19 +64,28 @@ class OrderConfirmationScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      orderDetails.address,
+                      widget.orderDetails.address,
                       style: GoogleFonts.poppins(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
+                    if (selectedBuilding.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Tòa: $selectedBuilding',
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 8),
                   ],
                 ),
               ),
             ),
 
-            // Service details card
             _buildSection(
               title: 'Chi tiết dịch vụ',
               icon: Icons.cleaning_services_outlined,
@@ -64,15 +94,16 @@ class OrderConfirmationScreen extends StatelessWidget {
                 children: [
                   _buildDetailRow(
                     title: 'Dịch vụ',
-                    value: orderDetails.service.name ?? 'Dọn dẹp căn hộ',
+                    value: widget.orderDetails.service.name ?? 'Dọn dẹp căn hộ',
                     icon: Icons.home_work_outlined,
                   ),
-                  if (orderDetails.emergencyRequest)
+                  if (widget.orderDetails.emergencyRequest)
                     _buildEmergencyBadge(),
                   const SizedBox(height: 12),
                   _buildDetailRow(
                     title: 'Thời gian',
-                    value: '${orderDetails.timeSlot.startTime} - ${orderDetails.timeSlot.endTime}',
+                    value:
+                        '${widget.orderDetails.timeSlot.startTime} - ${widget.orderDetails.timeSlot.endTime}',
                     icon: Icons.access_time,
                   ),
                 ],
@@ -80,42 +111,46 @@ class OrderConfirmationScreen extends StatelessWidget {
             ),
 
             // Selected options
-            if (orderDetails.option.isNotEmpty)
+            if (widget.orderDetails.option.isNotEmpty)
               _buildSection(
                 title: 'Tùy chọn đã chọn',
                 icon: Icons.checklist_outlined,
                 child: Column(
-                  children: orderDetails.option!.map((option) =>
-                      _buildOptionItem(
-                        title: option.name ?? '',
-                        price: option.price ?? 0,
-                      ),
-                  ).toList(),
+                  children: widget.orderDetails.option!
+                      .map(
+                        (option) => _buildOptionItem(
+                          title: option.name ?? '',
+                          price: option.price ?? 0,
+                        ),
+                      )
+                      .toList(),
                 ),
               ),
 
             // Extra services
-            if (orderDetails.extraService.isNotEmpty)
+            if (widget.orderDetails.extraService.isNotEmpty)
               _buildSection(
                 title: 'Dịch vụ thêm',
                 icon: Icons.add_circle_outline,
                 child: Column(
-                  children: orderDetails.extraService.map((service) =>
-                      _buildOptionItem(
-                        title: service.name ?? '',
-                        price: service.price ?? 0,
-                      ),
-                  ).toList(),
+                  children: widget.orderDetails.extraService
+                      .map(
+                        (service) => _buildOptionItem(
+                          title: service.name ?? '',
+                          price: service.price ?? 0,
+                        ),
+                      )
+                      .toList(),
                 ),
               ),
 
             // Notes section
-            if (orderDetails.notes.isNotEmpty)
+            if (widget.orderDetails.notes.isNotEmpty)
               _buildSection(
                 title: 'Ghi chú',
                 icon: Icons.note_outlined,
                 child: Text(
-                  orderDetails.notes,
+                  widget.orderDetails.notes,
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: Colors.grey[700],
@@ -140,8 +175,8 @@ class OrderConfirmationScreen extends StatelessWidget {
     final color = isCompleted
         ? const Color(0xFF1CAF7D)
         : isActive
-        ? const Color(0xFF1CAF7D)
-        : Colors.grey;
+            ? const Color(0xFF1CAF7D)
+            : Colors.grey;
 
     return Column(
       children: [
@@ -160,12 +195,12 @@ class OrderConfirmationScreen extends StatelessWidget {
             child: isCompleted
                 ? const Icon(Icons.check, color: Colors.white, size: 16)
                 : Text(
-              number,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+                    number,
+                    style: TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
           ),
         ),
         const SizedBox(height: 4),

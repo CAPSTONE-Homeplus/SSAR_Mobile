@@ -1,51 +1,21 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AuthenLocalDataSource {
-  AuthenLocalDataSource();
+class AuthenticationLocalDataSource {
+  static const String _selectedUserNameKey = 'selectedUserNameKey';
+  final SharedPreferences sharedPreferences;
 
-  // save method
-  static Future<void> saveToken(String token) async {
-    final sf = await SharedPreferences.getInstance();
-    await sf.setString('token', token);
+  AuthenticationLocalDataSource({required this.sharedPreferences});
+
+  Future<void> saveSelectedUserName(String userName) async {
+    await sharedPreferences.setString(_selectedUserNameKey, userName);
   }
 
-  static Future<void> saveRefreshToken(String refreshToken) async {
-    final sf = await SharedPreferences.getInstance();
-    await sf.setString('refreshToken', refreshToken);
+  Future<String?> getSelectedUserName() {
+    return Future.value(sharedPreferences.getString(_selectedUserNameKey));
   }
 
-  // get method
-  static Future<String?> getToken() async {
-    final sf = await SharedPreferences.getInstance();
-    String? token = sf.getString('token');
-    return token;
+  Future<void> clearSelectedUserName() async {
+    await sharedPreferences.remove(_selectedUserNameKey);
   }
 
-  static Future<String?> getRefreshToken() async {
-    final sf = await SharedPreferences.getInstance();
-    String? refreshToken = sf.getString('refreshToken');
-    return refreshToken;
-  }
-
-  // clear method
-  static Future<void> clearToken() async {
-    final sf = await SharedPreferences.getInstance();
-    await sf.remove('token');
-  }
-
-  static Future<void> clearRefreshToken() async {
-    final sf = await SharedPreferences.getInstance();
-    await sf.remove('refreshToken');
-  }
-
-  static Future<void> saveUserId(String userId) async {
-    final sf = await SharedPreferences.getInstance();
-    await sf.setString('userId', userId);
-  }
-
-  static Future<String?> getUserId() async {
-    final sf = await SharedPreferences.getInstance();
-    String? userId = sf.getString('userId');
-    return userId;
-  }
 }

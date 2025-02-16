@@ -17,7 +17,7 @@ class TimeSlotRepositoryImpl implements TimeSlotRepository {
   ) async {
     try {
       final response =
-          await request.get('${ApiConstant.TIME_SLOTS}', queryParameters: {
+          await homeCleanRequest.get('${ApiConstant.TIME_SLOTS}', queryParameters: {
         'search': search,
         'orderBy': orderBy,
         'page': page,
