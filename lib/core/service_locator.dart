@@ -2,9 +2,11 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
 import 'package:home_clean/domain/repositories/room_repository.dart';
+import 'package:home_clean/domain/repositories/transaction_repository.dart';
 import 'package:home_clean/domain/usecases/auth/login_usecase.dart';
 import 'package:home_clean/domain/usecases/building/get_buildings_usecase.dart';
 import 'package:home_clean/domain/usecases/room/get_rooms_usecase.dart';
+import 'package:home_clean/domain/usecases/transaction/save_transaction_usecase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../data/datasource/service_local_data_source.dart';
@@ -21,6 +23,7 @@ import '../data/repositories/service_category_repository_impl.dart';
 import '../data/repositories/service_repository_impl.dart';
 import '../data/repositories/sub_activity_repository_impl.dart';
 import '../data/repositories/time_slot_repository_impl.dart';
+import '../data/repositories/transaction_repository_impl.dart';
 import '../data/repositories/wallet_repository_impl.dart';
 import '../domain/repositories/authentication_repository.dart';
 import '../domain/repositories/equipment_supply_repository.dart';
@@ -71,6 +74,7 @@ import '../domain/usecases/auth/user_register_usecase.dart';
 import '../domain/usecases/wallet/get_wallet_by_user.dart';
 import '../presentation/blocs/building/building_bloc.dart';
 import '../presentation/blocs/room/room_bloc.dart';
+import '../presentation/blocs/transaction/transation_bloc.dart';
 import '../presentation/blocs/wallet/wallet_bloc.dart';
 
 final sl = GetIt.instance;
@@ -118,6 +122,7 @@ Future<void> setupServiceLocator() async {
           () => WalletRepositoryImpl(authenticationRepository: sl()));
   sl.registerLazySingleton<RoomRepository>(() => RoomRepositoryImpl());
   sl.registerLazySingleton<BuildingRepository>(() => BuildingRepositoryImpl());
+  sl.registerLazySingleton<TransactionRepository>(() => TransactionRepositoryImpl( authenticationRepository: sl()));
 
   // Use Cases
   sl.registerLazySingleton(() => SaveSelectedServiceIds(sl()));
@@ -141,6 +146,7 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => GetRoomsUseCase(sl()));
   sl.registerLazySingleton(() => GetBuildingsUsecase(sl()));
   sl.registerLazySingleton(() => UserRegisterUseCase(sl()));
+  sl.registerLazySingleton(() => SaveTransactionUsecase(sl()));
 
   // local Use Cases
   sl.registerLazySingleton(() => ClearUserFromLocalUseCase(sl()));
@@ -181,4 +187,5 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(() => WalletBloc(getWalletByUser: sl()));
   sl.registerFactory(() => RoomBloc(sl()));
   sl.registerFactory(() => BuildingBloc(buildingRepository: sl()));
+  sl.registerFactory(() => TransactionBloc(sl()));
 }

@@ -1,4 +1,6 @@
-class WalletModel {
+import 'package:equatable/equatable.dart';
+
+class CreateTransaction extends Equatable {
   String? walletId;
   String? userId;
   String? paymentMethodId;
@@ -6,7 +8,7 @@ class WalletModel {
   String? note;
   String? orderId;
 
-  WalletModel({
+  CreateTransaction({
     this.walletId,
     this.userId,
     this.paymentMethodId,
@@ -14,4 +16,14 @@ class WalletModel {
     this.note,
     this.orderId,
   });
+
+  List<Object?> get props => [
+    walletId,
+    userId,
+    paymentMethodId,
+    amount,
+    note,
+    orderId,
+  ];
+
 }

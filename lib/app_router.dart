@@ -7,6 +7,7 @@ import 'package:home_clean/presentation/screens/order_confirmation/order_confirm
 import 'package:home_clean/presentation/screens/register/register_screen.dart';
 import 'package:home_clean/presentation/screens/service_detail/service_detail_screen.dart';
 import 'package:home_clean/presentation/screens/start/splash_screen.dart';
+import 'package:home_clean/presentation/screens/wallet/wallet_screen.dart';
 
 import 'presentation/screens/activity/activity_screen.dart';
 import 'presentation/screens/login/login_screen.dart';
@@ -25,6 +26,7 @@ class AppRouter {
   static const String routeServiceDetail = '/service-detail';
   static const String routeTimeCollection = '/time-collection';
   static const String routeOrderConfirmation = '/order-confirmation';
+  static const String routePayment = '/payment';
 
   static List<GetPage> get routes => [
         GetPage(
@@ -92,6 +94,14 @@ class AppRouter {
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
+        GetPage(
+          name: routePayment,
+          page: () => TopUpScreen(
+              walletUser: Get.arguments,
+          ),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
       ];
 
   static void navigateToLogin() {
@@ -144,6 +154,10 @@ class AppRouter {
 
   static void navigateToRegister() {
     Get.toNamed(routeRegister);
+  }
+
+  static void navigateToPayment(dynamic arguments) {
+    Get.toNamed(routePayment, arguments: arguments);
   }
 
 }

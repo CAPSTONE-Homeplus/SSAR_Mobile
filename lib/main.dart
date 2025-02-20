@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/app_router.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
 import 'package:home_clean/domain/repositories/room_repository.dart';
+import 'package:home_clean/domain/repositories/transaction_repository.dart';
 import 'package:home_clean/presentation/blocs/building/building_bloc.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_bloc.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_bloc.dart';
@@ -19,6 +20,7 @@ import 'package:home_clean/presentation/blocs/service_activity/service_activity_
 import 'package:home_clean/presentation/blocs/service_category/service_category_bloc.dart';
 import 'package:home_clean/presentation/blocs/sub_activity/sub_activity_bloc.dart';
 import 'package:home_clean/presentation/blocs/time_slot/time_slot_bloc.dart';
+import 'package:home_clean/presentation/blocs/transaction/transation_bloc.dart';
 import 'package:home_clean/presentation/blocs/wallet/wallet_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -93,6 +95,7 @@ class HomeClean extends StatelessWidget {
         RepositoryProvider(create: (_) => sl<WalletRepository>()),
         RepositoryProvider(create: (_) => sl<RoomRepository>()),
         RepositoryProvider(create: (_) => sl<BuildingRepository>()),
+        RepositoryProvider(create: (_) => sl<TransactionRepository>()),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -137,6 +140,7 @@ class HomeClean extends StatelessWidget {
           BlocProvider( create: (context) => WalletBloc(getWalletByUser: sl())),
           BlocProvider(create: (context) => RoomBloc(sl())),
           BlocProvider(create: (context) => BuildingBloc(buildingRepository: sl())),
+          BlocProvider(create: (context) => TransactionBloc(sl())),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {

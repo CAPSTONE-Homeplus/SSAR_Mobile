@@ -28,4 +28,7 @@ class ApiConstant {
 
   /// building
   static const String BUILDINGS = "/buildings";
+
+  /// transaction
+  static const String TRANSACTIONS = "/transactions";
 }
