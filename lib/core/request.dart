@@ -1,13 +1,20 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:home_clean/core/api_constant.dart';
+import 'package:home_clean/data/datasource/auth_local_datasource.dart';
+import 'package:home_clean/data/datasource/user_local_datasource.dart';
 
 enum BaseUrlType {
   homeClean,
   vinWallet,
 }
+
+final AuthLocalDataSource _authLocalDataSource = AuthLocalDataSource();
+final UserLocalDatasource _userLocalDatasource = UserLocalDatasource();
 
 Map<String, dynamic> convertToQueryParams(
     [Map<String, dynamic> params = const {}]) {
@@ -132,6 +139,7 @@ class CustomInterceptors extends Interceptor {
 }
 
 class MyRequest {
+
   static final Map<BaseUrlType, String> baseUrls = {
     BaseUrlType.homeClean: ApiConstant.HOME_CLEAN_URL,
     BaseUrlType.vinWallet: ApiConstant.VIN_WALLET_URL,
@@ -164,12 +172,56 @@ class MyRequest {
           return handler.next(e);
         },
         onError: (e, handler) async {
-          if (e.response?.statusCode == 400) {
+          if (e.response?.statusCode == 401) {
+            print("Unauthorized - Attempting token refresh");
+
+            try {
+              final refreshToken = await _authLocalDataSource.getRefreshTokenFromStorage();
+
+              if (refreshToken == null || refreshToken.isEmpty) {
+                // Nếu không có refresh token, logout
+                clearLocalStorageAndLogout();
+                return handler.next(e);
+              }
+
+              // Gọi API để refresh token
+              final refreshResponse = await Dio().post(
+                '${ApiConstant.HOME_CLEAN_URL}/auth/refresh',
+                data: {'refreshToken': refreshToken},
+              );
+
+              if (refreshResponse.statusCode == 200) {
+                // Lấy token mới từ response
+                final newToken = refreshResponse.data['accessToken'];
+                final newRefreshToken = refreshResponse.data['refreshToken'];
+
+                // Lưu token mới vào storage
+                await _authLocalDataSource.saveTokensToStorage(newToken, newRefreshToken);
+
+                // Cập nhật token trong header cho tất cả các instance
+                requestObj.setToken = newToken;
+
+                // Thực hiện lại request ban đầu
+                final options = e.requestOptions;
+                options.headers["Authorization"] = "Bearer $newToken";
+
+                final response = await request.fetch(options);
+                return handler.resolve(response);
+              } else {
+                // Nếu refresh token không thành công
+                clearLocalStorageAndLogout();
+                return handler.next(e);
+              }
+            } catch (refreshError) {
+              print("Token refresh failed: $refreshError");
+              // Nếu có lỗi trong quá trình refresh, logout
+              clearLocalStorageAndLogout();
+              return handler.next(e);
+            }
+          } else if (e.response?.statusCode == 400) {
             print("Bad Request");
           } else if (e.response?.statusCode == 500) {
-            print("Server Error");
-          } else if (e.response?.statusCode == 401) {
-            print("Unauthorized");
+            print("Internal Server Error");
           } else {
             print(e);
           }
@@ -202,6 +254,14 @@ class MyRequest {
     }
   }
 }
+
+Future<void> clearLocalStorageAndLogout() async {
+  await Future.wait([
+    _userLocalDatasource.clearUser(),
+    _authLocalDataSource.clearAuth(),
+  ]);
+}
+
 
 final requestObj = MyRequest();
 final homeCleanRequest = requestObj.request;

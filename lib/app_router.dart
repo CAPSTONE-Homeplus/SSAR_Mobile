@@ -157,7 +157,7 @@ class AppRouter {
   }
 
   static void navigateToPayment(dynamic arguments) {
-    Get.toNamed(routePayment, arguments: arguments);
+    Get.offAllNamed(routePayment, arguments: arguments);
   }
 
 }

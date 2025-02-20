@@ -10,28 +10,25 @@ import '../../../domain/entities/auth/authen.dart';
 import '../../../domain/entities/wallet/wallet.dart';
 import '../../../domain/repositories/wallet_repository.dart';
 import '../../domain/repositories/authentication_repository.dart';
+import '../datasource/auth_local_datasource.dart';
+import '../datasource/user_local_datasource.dart';
+import '../models/authen/authen_model.dart';
 
 class WalletRepositoryImpl implements WalletRepository {
-  final AuthRepository authenticationRepository;
+  final AuthLocalDataSource authLocalDataSource;
+  final UserLocalDatasource userLocalDatasource;
 
-  WalletRepositoryImpl({required this.authenticationRepository});
+  WalletRepositoryImpl({
+    required this.authLocalDataSource,
+    required this.userLocalDatasource,
+  });
   @override
   Future<BaseResponse<Wallet>> getWalletByUser(
       int? page,
       int? size) async {
     try {
-      Authen authen = await authenticationRepository.getUserFromLocal();
-      if (authen.accessToken == null || authen.accessToken!.isEmpty) {
-        return BaseResponse<Wallet>(
-          size: 0,
-          page: 0,
-          total: 0,
-          totalPages: 0,
-          items: [],
-        );
-      }
-      String userId = authen.userId ?? '';
-      String token = authen.accessToken!;
+      AuthenModel? authen = await authLocalDataSource.getAuth();
+      String userId = authen?.userId ?? '';
 
       final response = await vinWalletRequest.get(
         '${ApiConstant.USERS}/$userId/wallets',
@@ -40,12 +37,6 @@ class WalletRepositoryImpl implements WalletRepository {
           'page': page,
           'size': size,
         },
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-          },
-        ),
       );
 
       if (response.statusCode == 200 && response.data != null) {

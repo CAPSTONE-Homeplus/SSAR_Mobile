@@ -3,29 +3,27 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i9;
+import 'dart:async' as _i8;
 
-import 'package:dartz/dartz.dart' as _i6;
-import 'package:home_clean/core/base_model.dart' as _i4;
-import 'package:home_clean/data/models/authen/authen_model.dart' as _i12;
-import 'package:home_clean/data/models/authen/login_model.dart' as _i10;
-import 'package:home_clean/domain/entities/auth/authen.dart' as _i3;
-import 'package:home_clean/domain/entities/building/building.dart' as _i15;
-import 'package:home_clean/domain/entities/room/room.dart' as _i14;
-import 'package:home_clean/domain/entities/user/create_user.dart' as _i11;
+import 'package:dartz/dartz.dart' as _i5;
+import 'package:home_clean/core/base_model.dart' as _i3;
+import 'package:home_clean/data/models/authen/login_model.dart' as _i9;
+import 'package:home_clean/domain/entities/building/building.dart' as _i13;
+import 'package:home_clean/domain/entities/room/room.dart' as _i12;
+import 'package:home_clean/domain/entities/user/create_user.dart' as _i10;
 import 'package:home_clean/domain/entities/user/user.dart' as _i2;
 import 'package:home_clean/domain/repositories/authentication_repository.dart'
-    as _i8;
-import 'package:home_clean/domain/repositories/building_repository.dart' as _i5;
-import 'package:home_clean/domain/repositories/room_repository.dart' as _i7;
-import 'package:home_clean/domain/repositories/user_repository.dart' as _i13;
-import 'package:home_clean/domain/usecases/auth/login_usecase.dart' as _i20;
+    as _i7;
+import 'package:home_clean/domain/repositories/building_repository.dart' as _i4;
+import 'package:home_clean/domain/repositories/room_repository.dart' as _i6;
+import 'package:home_clean/domain/repositories/user_repository.dart' as _i11;
+import 'package:home_clean/domain/usecases/auth/login_usecase.dart' as _i18;
 import 'package:home_clean/domain/usecases/auth/user_register_usecase.dart'
-    as _i19;
+    as _i17;
 import 'package:home_clean/domain/usecases/building/get_buildings_usecase.dart'
-    as _i16;
-import 'package:home_clean/domain/usecases/failure.dart' as _i17;
-import 'package:home_clean/domain/usecases/room/get_rooms_usecase.dart' as _i18;
+    as _i14;
+import 'package:home_clean/domain/usecases/failure.dart' as _i15;
+import 'package:home_clean/domain/usecases/room/get_rooms_usecase.dart' as _i16;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -47,124 +45,119 @@ class _FakeUser_0 extends _i1.SmartFake implements _i2.User {
     : super(parent, parentInvocation);
 }
 
-class _FakeAuthen_1 extends _i1.SmartFake implements _i3.Authen {
-  _FakeAuthen_1(Object parent, Invocation parentInvocation)
+class _FakeBaseResponse_1<T> extends _i1.SmartFake
+    implements _i3.BaseResponse<T> {
+  _FakeBaseResponse_1(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeBaseResponse_2<T> extends _i1.SmartFake
-    implements _i4.BaseResponse<T> {
-  _FakeBaseResponse_2(Object parent, Invocation parentInvocation)
+class _FakeBuildingRepository_2 extends _i1.SmartFake
+    implements _i4.BuildingRepository {
+  _FakeBuildingRepository_2(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeBuildingRepository_3 extends _i1.SmartFake
-    implements _i5.BuildingRepository {
-  _FakeBuildingRepository_3(Object parent, Invocation parentInvocation)
+class _FakeEither_3<L, R> extends _i1.SmartFake implements _i5.Either<L, R> {
+  _FakeEither_3(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeEither_4<L, R> extends _i1.SmartFake implements _i6.Either<L, R> {
-  _FakeEither_4(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
-class _FakeRoomRepository_5 extends _i1.SmartFake
-    implements _i7.RoomRepository {
-  _FakeRoomRepository_5(Object parent, Invocation parentInvocation)
+class _FakeRoomRepository_4 extends _i1.SmartFake
+    implements _i6.RoomRepository {
+  _FakeRoomRepository_4(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
 /// A class which mocks [AuthRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAuthRepository extends _i1.Mock implements _i8.AuthRepository {
+class MockAuthRepository extends _i1.Mock implements _i7.AuthRepository {
   MockAuthRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i9.Future<bool> login(_i10.LoginModel? loginModel) =>
+  _i8.Future<bool> login(_i9.LoginModel? loginModel) =>
       (super.noSuchMethod(
             Invocation.method(#login, [loginModel]),
-            returnValue: _i9.Future<bool>.value(false),
+            returnValue: _i8.Future<bool>.value(false),
           )
-          as _i9.Future<bool>);
+          as _i8.Future<bool>);
 
   @override
-  _i9.Future<_i2.User> createAccount(_i11.CreateUser? createUser) =>
+  _i8.Future<_i2.User> createAccount(_i10.CreateUser? createUser) =>
       (super.noSuchMethod(
             Invocation.method(#createAccount, [createUser]),
-            returnValue: _i9.Future<_i2.User>.value(
+            returnValue: _i8.Future<_i2.User>.value(
               _FakeUser_0(
                 this,
                 Invocation.method(#createAccount, [createUser]),
               ),
             ),
           )
-          as _i9.Future<_i2.User>);
+          as _i8.Future<_i2.User>);
 
   @override
-  _i9.Future<void> saveUserFromLocal(_i12.AuthenModel? authenModel) =>
+  _i8.Future<void> saveUserFromLocal(_i2.User? user) =>
       (super.noSuchMethod(
-            Invocation.method(#saveUserFromLocal, [authenModel]),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            Invocation.method(#saveUserFromLocal, [user]),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i8.Future<void>);
 
   @override
-  _i9.Future<_i3.Authen> getUserFromLocal() =>
+  _i8.Future<_i2.User> getUserFromLocal() =>
       (super.noSuchMethod(
             Invocation.method(#getUserFromLocal, []),
-            returnValue: _i9.Future<_i3.Authen>.value(
-              _FakeAuthen_1(this, Invocation.method(#getUserFromLocal, [])),
+            returnValue: _i8.Future<_i2.User>.value(
+              _FakeUser_0(this, Invocation.method(#getUserFromLocal, [])),
             ),
           )
-          as _i9.Future<_i3.Authen>);
+          as _i8.Future<_i2.User>);
 
   @override
-  _i9.Future<void> clearUserFromLocal() =>
+  _i8.Future<void> clearUserFromLocal() =>
       (super.noSuchMethod(
             Invocation.method(#clearUserFromLocal, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i8.Future<void>);
 }
 
 /// A class which mocks [UserRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockUserRepository extends _i1.Mock implements _i13.UserRepository {
+class MockUserRepository extends _i1.Mock implements _i11.UserRepository {
   MockUserRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i9.Future<_i2.User> createAccount(_i11.CreateUser? createUser) =>
+  _i8.Future<_i2.User> createAccount(_i10.CreateUser? createUser) =>
       (super.noSuchMethod(
             Invocation.method(#createAccount, [createUser]),
-            returnValue: _i9.Future<_i2.User>.value(
+            returnValue: _i8.Future<_i2.User>.value(
               _FakeUser_0(
                 this,
                 Invocation.method(#createAccount, [createUser]),
               ),
             ),
           )
-          as _i9.Future<_i2.User>);
+          as _i8.Future<_i2.User>);
 }
 
 /// A class which mocks [RoomRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockRoomRepository extends _i1.Mock implements _i7.RoomRepository {
+class MockRoomRepository extends _i1.Mock implements _i6.RoomRepository {
   MockRoomRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i9.Future<_i4.BaseResponse<_i14.Room>> getRooms(
+  _i8.Future<_i3.BaseResponse<_i12.Room>> getRooms(
     String? search,
     String? orderBy,
     int? page,
@@ -172,27 +165,27 @@ class MockRoomRepository extends _i1.Mock implements _i7.RoomRepository {
   ) =>
       (super.noSuchMethod(
             Invocation.method(#getRooms, [search, orderBy, page, size]),
-            returnValue: _i9.Future<_i4.BaseResponse<_i14.Room>>.value(
-              _FakeBaseResponse_2<_i14.Room>(
+            returnValue: _i8.Future<_i3.BaseResponse<_i12.Room>>.value(
+              _FakeBaseResponse_1<_i12.Room>(
                 this,
                 Invocation.method(#getRooms, [search, orderBy, page, size]),
               ),
             ),
           )
-          as _i9.Future<_i4.BaseResponse<_i14.Room>>);
+          as _i8.Future<_i3.BaseResponse<_i12.Room>>);
 }
 
 /// A class which mocks [BuildingRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockBuildingRepository extends _i1.Mock
-    implements _i5.BuildingRepository {
+    implements _i4.BuildingRepository {
   MockBuildingRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i9.Future<_i4.BaseResponse<_i15.Building>> getBuildings(
+  _i8.Future<_i3.BaseResponse<_i13.Building>> getBuildings(
     String? search,
     String? orderBy,
     int? page,
@@ -200,126 +193,126 @@ class MockBuildingRepository extends _i1.Mock
   ) =>
       (super.noSuchMethod(
             Invocation.method(#getBuildings, [search, orderBy, page, size]),
-            returnValue: _i9.Future<_i4.BaseResponse<_i15.Building>>.value(
-              _FakeBaseResponse_2<_i15.Building>(
+            returnValue: _i8.Future<_i3.BaseResponse<_i13.Building>>.value(
+              _FakeBaseResponse_1<_i13.Building>(
                 this,
                 Invocation.method(#getBuildings, [search, orderBy, page, size]),
               ),
             ),
           )
-          as _i9.Future<_i4.BaseResponse<_i15.Building>>);
+          as _i8.Future<_i3.BaseResponse<_i13.Building>>);
 }
 
 /// A class which mocks [GetBuildingsUsecase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGetBuildingsUsecase extends _i1.Mock
-    implements _i16.GetBuildingsUsecase {
+    implements _i14.GetBuildingsUsecase {
   MockGetBuildingsUsecase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i5.BuildingRepository get buildingRepository =>
+  _i4.BuildingRepository get buildingRepository =>
       (super.noSuchMethod(
             Invocation.getter(#buildingRepository),
-            returnValue: _FakeBuildingRepository_3(
+            returnValue: _FakeBuildingRepository_2(
               this,
               Invocation.getter(#buildingRepository),
             ),
           )
-          as _i5.BuildingRepository);
+          as _i4.BuildingRepository);
 
   @override
-  _i9.Future<_i6.Either<_i17.Failure, _i4.BaseResponse<_i15.Building>>> call(
-    _i16.GetBuildingsParams? params,
+  _i8.Future<_i5.Either<_i15.Failure, _i3.BaseResponse<_i13.Building>>> call(
+    _i14.GetBuildingsParams? params,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#call, [params]),
-            returnValue: _i9.Future<
-              _i6.Either<_i17.Failure, _i4.BaseResponse<_i15.Building>>
+            returnValue: _i8.Future<
+              _i5.Either<_i15.Failure, _i3.BaseResponse<_i13.Building>>
             >.value(
-              _FakeEither_4<_i17.Failure, _i4.BaseResponse<_i15.Building>>(
+              _FakeEither_3<_i15.Failure, _i3.BaseResponse<_i13.Building>>(
                 this,
                 Invocation.method(#call, [params]),
               ),
             ),
           )
-          as _i9.Future<
-            _i6.Either<_i17.Failure, _i4.BaseResponse<_i15.Building>>
+          as _i8.Future<
+            _i5.Either<_i15.Failure, _i3.BaseResponse<_i13.Building>>
           >);
 }
 
 /// A class which mocks [GetRoomsUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockGetRoomsUseCase extends _i1.Mock implements _i18.GetRoomsUseCase {
+class MockGetRoomsUseCase extends _i1.Mock implements _i16.GetRoomsUseCase {
   MockGetRoomsUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i7.RoomRepository get roomRepository =>
+  _i6.RoomRepository get roomRepository =>
       (super.noSuchMethod(
             Invocation.getter(#roomRepository),
-            returnValue: _FakeRoomRepository_5(
+            returnValue: _FakeRoomRepository_4(
               this,
               Invocation.getter(#roomRepository),
             ),
           )
-          as _i7.RoomRepository);
+          as _i6.RoomRepository);
 
   @override
-  _i9.Future<_i6.Either<_i17.Failure, _i4.BaseResponse<_i14.Room>>> call(
-    _i18.GetRoomsParams? params,
+  _i8.Future<_i5.Either<_i15.Failure, _i3.BaseResponse<_i12.Room>>> call(
+    _i16.GetRoomsParams? params,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#call, [params]),
-            returnValue: _i9.Future<
-              _i6.Either<_i17.Failure, _i4.BaseResponse<_i14.Room>>
+            returnValue: _i8.Future<
+              _i5.Either<_i15.Failure, _i3.BaseResponse<_i12.Room>>
             >.value(
-              _FakeEither_4<_i17.Failure, _i4.BaseResponse<_i14.Room>>(
+              _FakeEither_3<_i15.Failure, _i3.BaseResponse<_i12.Room>>(
                 this,
                 Invocation.method(#call, [params]),
               ),
             ),
           )
-          as _i9.Future<_i6.Either<_i17.Failure, _i4.BaseResponse<_i14.Room>>>);
+          as _i8.Future<_i5.Either<_i15.Failure, _i3.BaseResponse<_i12.Room>>>);
 }
 
 /// A class which mocks [UserRegisterUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockUserRegisterUseCase extends _i1.Mock
-    implements _i19.UserRegisterUseCase {
+    implements _i17.UserRegisterUseCase {
   MockUserRegisterUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i9.Future<_i2.User> call(_i11.CreateUser? createUser) =>
+  _i8.Future<_i2.User> call(_i10.CreateUser? createUser) =>
       (super.noSuchMethod(
             Invocation.method(#call, [createUser]),
-            returnValue: _i9.Future<_i2.User>.value(
+            returnValue: _i8.Future<_i2.User>.value(
               _FakeUser_0(this, Invocation.method(#call, [createUser])),
             ),
           )
-          as _i9.Future<_i2.User>);
+          as _i8.Future<_i2.User>);
 }
 
 /// A class which mocks [LoginUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLoginUseCase extends _i1.Mock implements _i20.LoginUseCase {
+class MockLoginUseCase extends _i1.Mock implements _i18.LoginUseCase {
   MockLoginUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i9.Future<bool> call(_i10.LoginModel? loginModel) =>
+  _i8.Future<bool> call(_i9.LoginModel? loginModel) =>
       (super.noSuchMethod(
             Invocation.method(#call, [loginModel]),
-            returnValue: _i9.Future<bool>.value(false),
+            returnValue: _i8.Future<bool>.value(false),
           )
-          as _i9.Future<bool>);
+          as _i8.Future<bool>);
 }

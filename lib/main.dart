@@ -104,8 +104,7 @@ class HomeClean extends StatelessWidget {
               create: (context) => ThemeBloc(preferences: preferences)),
           BlocProvider(
               create: (context) =>
-                  AuthenticationBloc(loginUseCase: sl(), saveUserToLocalUseCase: sl(),
-                      getUserFromLocalUseCase: sl(), clearUserFromLocalUseCase: sl(), userRegisterUseCase: sl())),
+                  AuthenticationBloc(loginUseCase: sl(), clearUserFromLocalUseCase: sl(), userRegisterUseCase: sl())),
           BlocProvider(
               create: (context) => ServiceBloc(
                   serviceRepository: sl(),

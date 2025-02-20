@@ -1,22 +1,26 @@
-import 'package:dio/dio.dart';
 import 'package:home_clean/core/request.dart';
-import 'package:home_clean/data/datasource/authen_local_datasource.dart';
-import 'package:home_clean/data/mappers/user/create_user_mapper.dart';
+import 'package:home_clean/data/datasource/auth_local_datasource.dart';
+import 'package:home_clean/data/datasource/user_local_datasource.dart';
+import 'package:home_clean/data/models/user/user_model.dart';
 import 'package:home_clean/domain/entities/user/user.dart';
 import 'package:home_clean/domain/repositories/authentication_repository.dart';
 
 import '../../../core/api_constant.dart';
 import '../../../core/exception_handler.dart';
-import '../../../domain/entities/auth/authen.dart';
 import '../../domain/entities/user/create_user.dart';
 import '../mappers/user/user_mapper.dart';
 import '../models/authen/authen_model.dart';
 import '../models/authen/login_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthenticationLocalDataSource localDataSource;
+  final AuthLocalDataSource authLocalDataSource;
+  final UserLocalDatasource userLocalDatasource;
 
-  AuthRepositoryImpl({required this.localDataSource});
+  AuthRepositoryImpl({
+    required this.authLocalDataSource,
+    required this.userLocalDatasource,
+  });
+
   @override
   Future<bool> login(LoginModel loginModel) async {
     try {
@@ -27,16 +31,25 @@ class AuthRepositoryImpl implements AuthRepository {
           'password': loginModel.password,
         },
       );
+
       if (response.statusCode == 200 && response.data != null) {
-        Future.delayed(Duration(seconds: 2));
-        saveUserFromLocal(AuthenModel(
+        AuthenModel authData = AuthenModel(
           accessToken: response.data['accessToken'],
           refreshToken: response.data['refreshToken'],
           userId: response.data['userId'],
           fullName: response.data['fullName'],
           status: response.data['status'],
           role: response.data['role'],
-        ));
+        );
+        await authLocalDataSource.saveAuth(authData);
+
+        final userResponse = await vinWalletRequest.get(
+          '${ApiConstant.USERS}/${authData.userId}',
+        );
+        if (userResponse.statusCode == 200 && userResponse.data != null) {
+          await userLocalDatasource.saveUser(userResponse.data);
+        }
+
         return true;
       } else {
         throw ApiException(
@@ -54,21 +67,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> clearUserFromLocal() async {
-    localDataSource.clearAuthenticationData();
-  }
-
-  @override
-  Future<Authen> getUserFromLocal() async {
     try {
-      AuthenModel authenModel = await localDataSource.getUser();
-      return Authen(
-        accessToken: authenModel.accessToken ?? '',
-        refreshToken: authenModel.refreshToken ?? '',
-        userId: authenModel.userId ?? '',
-        fullName: authenModel.fullName ?? '',
-        status: authenModel.status ?? '',
-        role: authenModel.role ?? '',
-      );
+      await authLocalDataSource.clearAuth();
+      await userLocalDatasource.clearUser();
     } catch (e) {
       throw ExceptionHandler.handleException(e);
     }
@@ -76,8 +77,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
 
   @override
-  Future<void> saveUserFromLocal(AuthenModel authenModel) async {
-    await localDataSource.saveUser(authenModel);
+  Future<void> saveUserFromLocal(User user) async {
+    UserModel userModel = UserMapper.toModel(user);
+    await userLocalDatasource.saveUser(userModel);
   }
 
   @override
@@ -92,7 +94,9 @@ class AuthRepositoryImpl implements AuthRepository {
           "roomCode": createUser.roomCode,
         },
       );
+
       if (response.statusCode == 201 && response.data != null) {
+        await userLocalDatasource.saveUser(response.data);
         User user = UserMapper.toEntity(response.data);
         return user;
       } else {
@@ -104,6 +108,17 @@ class AuthRepositoryImpl implements AuthRepository {
           timestamp: response.data['timestamp'],
         );
       }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<User> getUserFromLocal() async{
+    try {
+      UserModel? userModel = await userLocalDatasource.getUser();
+      User user = UserMapper.toEntity(userModel!);
+      return user;
     } catch (e) {
       throw ExceptionHandler.handleException(e);
     }

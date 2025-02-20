@@ -9,18 +9,25 @@ import '../../core/request.dart';
 import '../../domain/entities/auth/authen.dart';
 import '../../domain/repositories/authentication_repository.dart';
 import '../../domain/repositories/transaction_repository.dart';
+import '../datasource/auth_local_datasource.dart';
+import '../datasource/user_local_datasource.dart';
+import '../models/authen/authen_model.dart';
 import '../models/transaction/create_transaction_model.dart';
 
 class TransactionRepositoryImpl implements TransactionRepository {
-  final AuthRepository authenticationRepository;
+  final AuthLocalDataSource authLocalDataSource;
+  final UserLocalDatasource userLocalDatasource;
 
-  TransactionRepositoryImpl({required this.authenticationRepository});
+  TransactionRepositoryImpl({
+    required this.authLocalDataSource,
+    required this.userLocalDatasource,
+  });
   @override
   Future<Transaction> saveTransaction(CreateTransaction transaction) async {
     try {
-      Authen authen = await authenticationRepository.getUserFromLocal();
-      String userId = authen.userId ?? '';
-      String token = authen.accessToken!;
+      AuthenModel? authModel = await authLocalDataSource.getAuth();
+      String userId = authModel?.userId ?? '';
+      String token = authModel?.accessToken ?? '';
       CreateTransactionModel trans = CreateTransactionMapper.toModel(transaction);
       trans.userId = userId;
       final response = await vinWalletRequest.post(

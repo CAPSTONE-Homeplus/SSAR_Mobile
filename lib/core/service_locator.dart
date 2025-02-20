@@ -10,6 +10,7 @@ import 'package:home_clean/domain/usecases/transaction/save_transaction_usecase.
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../data/datasource/service_local_data_source.dart';
+import '../data/datasource/user_local_datasource.dart';
 import '../data/repositories/authentication_repository_impl.dart';
 import '../data/repositories/building_repository_impl.dart';
 import '../data/repositories/equipment_supply_repository_impl.dart';
@@ -58,7 +59,7 @@ import '../../presentation/blocs/service_category/service_category_bloc.dart';
 import '../../presentation/blocs/sub_activity/sub_activity_bloc.dart';
 import '../../presentation/blocs/theme/theme_bloc.dart';
 import '../../presentation/blocs/time_slot/time_slot_bloc.dart';
-import '../data/datasource/authen_local_datasource.dart';
+import '../data/datasource/auth_local_datasource.dart';
 import '../domain/repositories/option_repository.dart';
 import '../domain/repositories/order_repository.dart';
 import '../domain/repositories/service_activity_repository.dart';
@@ -92,13 +93,17 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<ServiceLocalDataSource>(
         () => ServiceLocalDataSource(sharedPreferences: sl()),
   );
-  sl.registerLazySingleton<AuthenticationLocalDataSource>(
-        () => AuthenticationLocalDataSource(sharedPreferences: sl(), storage: sl()),
+  sl.registerLazySingleton<AuthLocalDataSource>(
+        () => AuthLocalDataSource(),
+  );
+
+  sl.registerLazySingleton<UserLocalDatasource>(
+        () => UserLocalDatasource(),
   );
 
   // Repositories (sử dụng LazySingleton vì chúng ta muốn tái sử dụng đối tượng)
   sl.registerLazySingleton<AuthRepository>(
-          () => AuthRepositoryImpl(localDataSource: sl()));
+          () => AuthRepositoryImpl(authLocalDataSource: sl(), userLocalDatasource: sl()));
 
   sl.registerLazySingleton<ServiceRepository>(
           () => ServiceRepositoryImpl(localDataSource: sl()));
@@ -119,10 +124,10 @@ Future<void> setupServiceLocator() async {
           () => NotificationRepositoryImpl(sl<FlutterLocalNotificationsPlugin>())
   );
   sl.registerLazySingleton<WalletRepository>(
-          () => WalletRepositoryImpl(authenticationRepository: sl()));
+          () => WalletRepositoryImpl(authLocalDataSource: sl(), userLocalDatasource: sl()));
   sl.registerLazySingleton<RoomRepository>(() => RoomRepositoryImpl());
   sl.registerLazySingleton<BuildingRepository>(() => BuildingRepositoryImpl());
-  sl.registerLazySingleton<TransactionRepository>(() => TransactionRepositoryImpl( authenticationRepository: sl()));
+  sl.registerLazySingleton<TransactionRepository>(() => TransactionRepositoryImpl(authLocalDataSource: sl(), userLocalDatasource: sl()));
 
   // Use Cases
   sl.registerLazySingleton(() => SaveSelectedServiceIds(sl()));
@@ -150,15 +155,13 @@ Future<void> setupServiceLocator() async {
 
   // local Use Cases
   sl.registerLazySingleton(() => ClearUserFromLocalUseCase(sl()));
-  sl.registerLazySingleton(() => GetUserFromLocalUseCase(sl()));
-  sl.registerLazySingleton(() => SaveUserToLocalUseCase(sl()));
+  // sl.registerLazySingleton(() => GetUserFromLocalUseCase(sl()));
+  // sl.registerLazySingleton(() => SaveUserToLocalUseCase(sl()));
 
 
   // Blocs (sử dụng Factory vì mỗi bloc sẽ cần một instance mới)
   sl.registerFactory(() => AuthenticationBloc(
       loginUseCase: sl(),
-      saveUserToLocalUseCase: sl(),
-      getUserFromLocalUseCase: sl(),
       clearUserFromLocalUseCase: sl(),
       userRegisterUseCase: sl()));
   sl.registerFactory(() => InternetBloc());

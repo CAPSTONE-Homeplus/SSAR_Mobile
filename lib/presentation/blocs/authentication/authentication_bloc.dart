@@ -19,17 +19,16 @@ part 'authentication_state.dart';
 class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
   final LoginUseCase loginUseCase;
-  final SaveUserToLocalUseCase saveUserToLocalUseCase;
-  final GetUserFromLocalUseCase getUserFromLocalUseCase;
+  // final SaveUserToLocalUseCase saveUserToLocalUseCase;
+  // final GetUserFromLocalUseCase getUserFromLocalUseCase;
   final ClearUserFromLocalUseCase clearUserFromLocalUseCase;
   final UserRegisterUseCase userRegisterUseCase;
 
   AuthenticationBloc({
-    required this.loginUseCase, required this.saveUserToLocalUseCase,
-    required this.getUserFromLocalUseCase, required this.clearUserFromLocalUseCase, required this.userRegisterUseCase})
+    required this.loginUseCase, required this.clearUserFromLocalUseCase, required this.userRegisterUseCase})
       : super(AuthenticationInitial()) {
     on<LoginAccount>(_onLoginAccount);
-    on<GetUserFromLocal>(_getUserFromLocal);
+    // on<GetUserFromLocal>(_getUserFromLocal);
     on<RegisterAccount>(_onRegisterAccount);
   }
 
@@ -56,23 +55,23 @@ class AuthenticationBloc
     }
   }
 
-  Future<void> saveUserToLocal(AuthenModel authModel) async {
-    await saveUserToLocalUseCase.call(authModel);
-  }
+  // Future<void> saveUserToLocal(AuthenModel authModel) async {
+  //   await saveUserToLocalUseCase.call(authModel);
+  // }
 
-  Future<void> _getUserFromLocal(GetUserFromLocal event, Emitter<AuthenticationState> emit) async {
-    emit(AuthenticationLoading());
-    try {
-      final authen = await getUserFromLocalUseCase.call();
-      if (authen != null) {
-        emit(AuthenticationFromLocal(authen: authen));
-      } else {
-        emit(AuthenticationFailed(error: 'Không tìm thấy người dùng!'));
-      }
-    } catch (e) {
-      emit(AuthenticationFailed(error: 'Đã có lỗi xảy ra, vui lòng thử lại: $e'));
-    }
-  }
+  // Future<void> _getUserFromLocal(GetUserFromLocal event, Emitter<AuthenticationState> emit) async {
+  //   emit(AuthenticationLoading());
+  //   try {
+  //     final authen = await getUserFromLocalUseCase.call();
+  //     if (authen != null) {
+  //       emit(AuthenticationFromLocal(authen: authen));
+  //     } else {
+  //       emit(AuthenticationFailed(error: 'Không tìm thấy người dùng!'));
+  //     }
+  //   } catch (e) {
+  //     emit(AuthenticationFailed(error: 'Đã có lỗi xảy ra, vui lòng thử lại: $e'));
+  //   }
+  // }
 
   Future<void> clearUserFromLocal() async {
     await clearUserFromLocalUseCase.call();
