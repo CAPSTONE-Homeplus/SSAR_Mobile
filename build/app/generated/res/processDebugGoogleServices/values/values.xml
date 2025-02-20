@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="gcm_defaultSenderId" translatable="false">379685700483</string>
-    <string name="google_api_key" translatable="false">AIzaSyCbcKioRg6s033C-8Z6_O1KZfmcSlT-lJ0</string>
-    <string name="google_app_id" translatable="false">1:379685700483:android:d13db2f80a0c03d3da2cb6</string>
-    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCbcKioRg6s033C-8Z6_O1KZfmcSlT-lJ0</string>
-    <string name="google_storage_bucket" translatable="false">homeclean-f09fb.firebasestorage.app</string>
-    <string name="project_id" translatable="false">homeclean-f09fb</string>
-</resources>
