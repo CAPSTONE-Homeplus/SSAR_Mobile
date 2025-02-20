@@ -1,5 +1,5 @@
-import '../../../data/repositories/order/order_repository.dart';
 import '../../entities/order/create_order.dart';
+import '../../repositories/order_repository.dart';
 
 class SaveOrderToLocal {
   final OrderRepository repository;

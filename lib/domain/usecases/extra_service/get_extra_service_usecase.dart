@@ -1,6 +1,7 @@
 import 'package:home_clean/core/base_model.dart';
-import 'package:home_clean/data/repositories/extra_service/extra_service_repository.dart';
 import 'package:home_clean/domain/entities/extra_service/extra_service.dart';
+
+import '../../repositories/extra_service_repository.dart';
 
 class GetExtraServiceUsecase {
   final ExtraServiceRepository _extraServiceRepository;

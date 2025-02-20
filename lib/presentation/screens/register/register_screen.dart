@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_clean/core/constant.dart';
+import 'package:home_clean/presentation/blocs/authentication/authentication_bloc.dart';
+import 'package:home_clean/presentation/blocs/building/building_state.dart';
+import 'package:home_clean/presentation/blocs/room/room_event.dart';
+import 'package:home_clean/presentation/blocs/room/room_state.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 
-import '../../blocs/register/register_bloc.dart';
+import '../../../domain/entities/building/building.dart';
+import '../../../domain/entities/room/room.dart';
+import '../../blocs/building/building_bloc.dart';
+import '../../blocs/building/building_event.dart';
+import '../../blocs/room/room_bloc.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -13,10 +22,7 @@ class RegisterScreen extends StatelessWidget {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
-      body: BlocProvider(
-        create: (context) => RegisterBloc(),
-        child: const RegisterView(),
-      ),
+      body: RegisterView(),
     );
   }
 }
@@ -26,10 +32,9 @@ class RegisterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<RegisterBloc, RegisterState>(
+    return BlocConsumer<AuthenticationBloc, AuthenticationState>(
       listener: (context, state) {
         if (state is RegisterSuccess) {
-          // Navigate to home or show success message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Registration successful!'),
@@ -37,30 +42,32 @@ class RegisterView extends StatelessWidget {
             ),
           );
           Navigator.of(context).pop(); // Navigate back to login
-        } else if (state is RegisterFailure) {
+        } else if (state is RegisterFailed) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.error),
+              content: Text("Đăng ký thất bại, vui lòng thử lại"),
               backgroundColor: Colors.red,
             ),
           );
         }
       },
-      child: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 32),
-                const RegisterFormContent(),
-              ],
+        builder: (context, state) {
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildHeader(),
+                    const SizedBox(height: 32),
+                    const RegisterFormContent(),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
+          );
+        }
     );
   }
 
@@ -69,7 +76,7 @@ class RegisterView extends StatelessWidget {
       children: [
         const SizedBox(height: 20),
         Text(
-          'Create Account',
+          'Đăng ký tài khoản',
           style: GoogleFonts.poppins(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -78,7 +85,7 @@ class RegisterView extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'Please fill in the form to continue',
+          'Hãy điền thông tin của bạn để tạo tài khoản',
           style: GoogleFonts.poppins(
             fontSize: 16,
             color: Colors.grey[600],
@@ -103,8 +110,16 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _roomCodeController = TextEditingController();
+  var _buildingCodeController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  late List<Room> availableRooms = [];
+  late List<Building> availableBuildings = [];
+  late RoomBloc _roomBloc;
+  late BuildingBloc _buildingBloc;
+  bool isLoading = true;
+  late Building selectedBuildingObj;
+  late Room selectedRoomObj;
 
   @override
   void dispose() {
@@ -113,7 +128,64 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _roomCodeController.dispose();
+    _buildingCodeController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  void _init() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        setState(() {
+          isLoading = true;
+        });
+        _roomBloc = context.read<RoomBloc>();
+        _buildingBloc = context.read<BuildingBloc>();
+        _roomBloc.add(GetRoomsEvent(search: '', orderBy: '', page: Constant.defaultPage, size: Constant.defaultSize));
+        _buildingBloc.add(GetBuildings(search: '', orderBy: '', page: Constant.defaultPage, size: Constant.defaultSize));
+        final roomComplete = _processRooms();
+        final buildingComplete = _processBuildings();
+        await Future.wait([
+          roomComplete,
+          buildingComplete
+        ]);
+        setState(() {
+          isLoading = false;
+        });
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
+  }
+
+
+  Future<void> _processRooms() async {
+    await for (final state in _roomBloc.stream) {
+      if (state is RoomLoaded && mounted) {
+        setState(() {
+          availableRooms = state.rooms.map((room) => room).toList();
+        });
+        break;
+      }
+    }
+  }
+
+  Future<void> _processBuildings() async {
+    await for (final state in _buildingBloc.stream) {
+      if (state is BuildingLoaded && mounted) {
+        setState(() {
+          availableBuildings = state.buildings.map((building) => building).toList();
+        });
+        break;
+      }
+    }
   }
 
   @override
@@ -125,12 +197,12 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
         children: [
           _buildTextField(
             controller: _fullNameController,
-            label: 'Full Name',
-            hint: 'Enter your full name',
+            label: 'Họ và tên',
+            hint: 'Nhập tên đầy đủ của bạn',
             icon: Icons.person_outline,
             validator: (value) {
               if (value?.isEmpty ?? true) {
-                return 'Please enter your full name';
+                return 'Vui lòng nhập tên đầy đủ';
               }
               return null;
             },
@@ -138,15 +210,15 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
           const SizedBox(height: 16),
           _buildTextField(
             controller: _usernameController,
-            label: 'Username',
-            hint: 'Enter your username',
+            label: 'Tên đăng nhập',
+            hint: 'Nhập tên đăng nhập',
             icon: Icons.account_circle_outlined,
             validator: (value) {
               if (value?.isEmpty ?? true) {
-                return 'Please enter a username';
+                return 'Vui lòng nhập tên đăng nhập';
               }
               if ((value?.length ?? 0) < 4) {
-                return 'Username must be at least 4 characters';
+                return 'Tên đăng nhập phải có ít nhất 4 ký tự';
               }
               return null;
             },
@@ -154,8 +226,8 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
           const SizedBox(height: 16),
           _buildTextField(
             controller: _passwordController,
-            label: 'Password',
-            hint: 'Enter your password',
+            label: 'Mật khẩu',
+            hint: 'Nhập mật khẩu của bạn',
             icon: Icons.lock_outline,
             isPassword: true,
             obscureText: _obscurePassword,
@@ -164,10 +236,10 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
             },
             validator: (value) {
               if (value?.isEmpty ?? true) {
-                return 'Please enter a password';
+                return 'Vui lòng nhập mật khẩu';
               }
               if ((value?.length ?? 0) < 6) {
-                return 'Password must be at least 6 characters';
+                return 'Mật khẩu phải có ít nhất 6 ký tự';
               }
               return null;
             },
@@ -175,8 +247,8 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
           const SizedBox(height: 16),
           _buildTextField(
             controller: _confirmPasswordController,
-            label: 'Confirm Password',
-            hint: 'Confirm your password',
+            label: 'Xác nhận mật khẩu',
+            hint: 'Nhập lại mật khẩu của bạn',
             icon: Icons.lock_outline,
             isPassword: true,
             obscureText: _obscureConfirmPassword,
@@ -185,24 +257,15 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
             },
             validator: (value) {
               if (value != _passwordController.text) {
-                return 'Passwords do not match';
+                return 'Mật khẩu không khớp';
               }
               return null;
             },
           ),
           const SizedBox(height: 16),
-          _buildTextField(
-            controller: _roomCodeController,
-            label: 'Room Code',
-            hint: 'Enter room code',
-            icon: Icons.home_outlined,
-            validator: (value) {
-              if (value?.isEmpty ?? true) {
-                return 'Please enter room code';
-              }
-              return null;
-            },
-          ),
+          _buildBuildingField(),
+          const SizedBox(height: 16),
+          _buildRoomCodeField(),
           const SizedBox(height: 32),
           _buildRegisterButton(),
           const SizedBox(height: 24),
@@ -211,6 +274,124 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
       ),
     );
   }
+
+  Widget _buildBuildingField() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tên tòa nhà (S1, S2, ...)',
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return availableBuildings
+                  .where((building) => building.name != null && building.name!.toLowerCase().contains(textEditingValue.text.toLowerCase()))
+                  .map((building) => building.name!)
+                  .toList();
+            },
+            onSelected: (selectedBuildingName) {
+              _buildingCodeController.text = selectedBuildingName;
+              selectedBuildingObj = availableBuildings.firstWhere((building) => building.name == selectedBuildingName);
+            },
+            fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
+              _buildingCodeController = textEditingController;
+              return TextFormField(
+                controller: _buildingCodeController,
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  hintText: 'Nhập tên tòa nhà',
+                  hintStyle: GoogleFonts.poppins(
+                    fontSize: 15,
+                    color: Colors.grey[400],
+                  ),
+                  prefixIcon: Icon(Icons.home_outlined, color: const Color(0xFF1CAF7D)),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[200]!),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[200]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF1CAF7D)),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      );
+    }
+
+
+
+  Widget _buildRoomCodeField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Số phòng (101, 102, ...)',
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Autocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return availableRooms
+                .where((room) => room.code.toLowerCase().contains(textEditingValue.text.toLowerCase()))
+                .map((room) => room.code)
+                .toList();
+          },
+          onSelected: (selectedRoom) {
+            _roomCodeController.text = selectedRoom;
+            selectedRoomObj = availableRooms.firstWhere((room) => room.name == selectedRoom);
+          },
+          fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
+            return TextFormField(
+              controller: textEditingController,
+              focusNode: focusNode,
+              decoration: InputDecoration(
+                hintText: 'Nhập số phòng',
+                hintStyle: GoogleFonts.poppins(
+                  fontSize: 15,
+                  color: Colors.grey[400],
+                ),
+                prefixIcon: Icon(Icons.meeting_room, color: const Color(0xFF1CAF7D)),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey[200]!),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey[200]!),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF1CAF7D)),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
 
   Widget _buildTextField({
     required TextEditingController controller,
@@ -276,19 +457,19 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
   }
 
   Widget _buildRegisterButton() {
-    return BlocBuilder<RegisterBloc, RegisterState>(
+    return BlocBuilder<AuthenticationBloc, AuthenticationState>(
       builder: (context, state) {
         return ElevatedButton(
-          onPressed: state is RegisterLoading
+          onPressed: state is AuthenticationLoading
               ? null
               : () {
             if (_formKey.currentState?.validate() ?? false) {
-              context.read<RegisterBloc>().add(
-                RegisterSubmitted(
+              context.read<AuthenticationBloc>().add(
+                RegisterAccount(
                   fullName: _fullNameController.text,
                   username: _usernameController.text,
                   password: _passwordController.text,
-                  roomCode: _roomCodeController.text,
+                  roomCode: selectedRoomObj.code,
                 ),
               );
             }
@@ -300,10 +481,10 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: state is RegisterLoading
+          child: state is AuthenticationLoading
               ? const CircularProgressIndicator(color: Colors.white)
               : Text(
-            'Create Account',
+            'Đăng ký',
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -320,7 +501,7 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'Already have an account? ',
+          'Đã có tài khoản?',
           style: GoogleFonts.poppins(
             fontSize: 14,
             color: Colors.grey[600],
@@ -329,7 +510,7 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text(
-            'Sign In',
+            'Đăng nhập',
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w600,

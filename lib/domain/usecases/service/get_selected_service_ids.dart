@@ -1,4 +1,5 @@
-import 'package:home_clean/data/repositories/service/service_repository.dart';
+
+import '../../repositories/service_repository.dart';
 
 class GetSelectedServiceIds {
   final ServiceRepository repository;

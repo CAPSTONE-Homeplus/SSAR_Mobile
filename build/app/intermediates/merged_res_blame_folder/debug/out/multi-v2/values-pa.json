@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.home_clean.app-mergeDebugResources-54:/values-pa/values-pa.xml",
+            "outputFile": "com.example.home_clean.app-mergeDebugResources-55:/values-pa/values-pa.xml",
             "map": [
                 {
                     "source": "C:\\Users\\ADMIN-PC\\.gradle\\caches\\transforms-3\\9353f3ca738d7c408eacae78bd3fe4a8\\transformed\\jetified-credentials-1.2.0-rc01\\res\\values-pa\\values-pa.xml",

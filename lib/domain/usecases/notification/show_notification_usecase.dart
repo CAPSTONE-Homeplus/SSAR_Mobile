@@ -1,4 +1,4 @@
-import '../../../data/repositories/notification/notification_repository.dart';
+import '../../repositories/notification_repository.dart';
 
 class ShowNotificationUseCase {
   final NotificationRepository repository;

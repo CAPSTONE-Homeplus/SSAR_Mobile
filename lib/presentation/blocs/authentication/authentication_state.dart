@@ -17,3 +17,19 @@ class AuthenticationFailed extends AuthenticationState {
 
   AuthenticationFailed({required this.error});
 }
+
+class AuthenticationFromLocal extends AuthenticationState {
+  final Authen authen;
+
+  AuthenticationFromLocal({required this.authen});
+
+}
+
+class RegisterSuccess extends AuthenticationState {
+}
+
+class RegisterFailed extends AuthenticationState {
+  final String error;
+
+  RegisterFailed({required this.error});
+}

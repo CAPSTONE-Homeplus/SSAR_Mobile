@@ -68,6 +68,9 @@ dependencies:
   location: ^8.0.0
   latlong2: ^0.9.1
   flutter_map_animations: ^0.9.0
+  flutter_secure_storage: ^9.2.4
+  test: any
+  dartz: ^0.10.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -75,7 +78,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  build_runner: ^2.4.0
+  mockito: ^5.4.5
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your

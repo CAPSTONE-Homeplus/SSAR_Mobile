@@ -18,5 +18,5 @@ class Constant {
   };
 
   static const int defaultPage = 1;
-  static const int defaultSize = 1000;
+  static const int defaultSize = 100;
 }

@@ -1,5 +1,5 @@
-import '../../../data/repositories/order/order_repository.dart';
 import '../../entities/order/order.dart';
+import '../../repositories/order_repository.dart';
 
 class GetOrderFromLocal {
   final OrderRepository repository;

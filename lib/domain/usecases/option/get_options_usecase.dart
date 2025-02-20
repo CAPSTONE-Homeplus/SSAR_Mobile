@@ -1,7 +1,7 @@
 import 'package:home_clean/domain/entities/option/option.dart';
 
 import '../../../core/base_model.dart';
-import '../../../data/repositories/option/option_repository.dart';
+import '../../repositories/option_repository.dart';
 
 class GetOptionsUsecase {
   final OptionRepository _optionRepository;

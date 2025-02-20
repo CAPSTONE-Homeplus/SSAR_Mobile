@@ -1,30 +1,6 @@
 part of 'authentication_bloc.dart';
 
-sealed class AuthenticationEvent extends Equatable {
-  const AuthenticationEvent();
-}
-
-final class StartAuthen extends AuthenticationEvent {
-  @override
-  List<Object?> get props => [];
-}
-
-final class RegisterAccount extends AuthenticationEvent {
-  final String userName;
-  final String password;
-  final String email;
-  final String roleName;
-  final String phoneNumber;
-
-  RegisterAccount(
-      {required this.userName,
-      required this.password,
-      required this.email,
-      required this.roleName,
-      required this.phoneNumber});
-
-  @override
-  List<Object?> get props => [userName, password, email, roleName, phoneNumber];
+abstract class AuthenticationEvent {
 }
 
 final class LoginAccount extends AuthenticationEvent {
@@ -32,18 +8,22 @@ final class LoginAccount extends AuthenticationEvent {
   final String password;
 
   LoginAccount({required this.username, required this.password});
-
-  @override
-  List<Object?> get props => [username, password];
 }
 
-final class LogoutAccount extends AuthenticationEvent {
+class GetUserFromLocal extends AuthenticationEvent {
+  final Authen authen;
+
+  GetUserFromLocal({required this.authen});
+
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [authen];
 }
 
-final class LoginGmail extends AuthenticationEvent {
-  LoginGmail();
-  @override
-  List<Object?> get props => [];
+class RegisterAccount extends AuthenticationEvent {
+  final String fullName;
+  final String username;
+  final String password;
+  final String roomCode;
+
+  RegisterAccount({required this.fullName, required this.username, required this.password, required this.roomCode});
 }

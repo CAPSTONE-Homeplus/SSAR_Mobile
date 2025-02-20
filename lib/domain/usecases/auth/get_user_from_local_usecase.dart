@@ -1,10 +1,13 @@
-import '../../../data/repositories/auth/authentication_repository.dart';
+import 'package:home_clean/data/models/authen/authen_model.dart';
+
+import '../../repositories/authentication_repository.dart';
+import '../../entities/auth/authen.dart';
 
 class GetUserFromLocalUseCase {
-  final AuthenticationRepository _authenticationRepository;
+  final AuthRepository _authenticationRepository;
   GetUserFromLocalUseCase(this._authenticationRepository);
 
-  Future<String?> call() async {
-    return await _authenticationRepository.getUserName();
+  Future<Authen> call() async {
+    return await _authenticationRepository.getUserFromLocal();
   }
 }

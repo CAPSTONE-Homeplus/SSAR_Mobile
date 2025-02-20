@@ -1,6 +1,7 @@
 import 'package:home_clean/core/base_model.dart';
-import 'package:home_clean/data/repositories/equipment_supply/equipment_supply_repository.dart';
 import 'package:home_clean/domain/entities/equipment_supply/equipment_supply.dart';
+
+import '../../repositories/equipment_supply_repository.dart';
 
 class GetEquipmentSuppliesUsecase {
   final EquipmentSupplyRepository _equipmentRepository;

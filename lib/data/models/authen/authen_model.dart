@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class AuthenModel {
   String? accessToken;
   String? refreshToken;
@@ -15,18 +17,7 @@ class AuthenModel {
     this.role,
   });
 
-  factory AuthenModel.fromJson(Map<String, dynamic> json) {
-    return AuthenModel(
-      accessToken: json['accessToken'],
-      refreshToken: json['refreshToken'],
-      userId: json['userId'],
-      fullName: json['fullName'],
-      status: json['status'],
-      role: json['role'],
-    );
-  }
-
-
+  /// Chuyển đối tượng thành JSON (dùng để lưu)
   Map<String, dynamic> toJson() {
     return {
       'accessToken': accessToken,
@@ -38,4 +29,16 @@ class AuthenModel {
     };
   }
 
+  /// Chuyển JSON string thành đối tượng (dùng khi lấy dữ liệu)
+  factory AuthenModel.fromJson(String jsonString) {
+    Map<String, dynamic> jsonMap = json.decode(jsonString);
+    return AuthenModel(
+      accessToken: jsonMap['accessToken'],
+      refreshToken: jsonMap['refreshToken'],
+      userId: jsonMap['userId'],
+      fullName: jsonMap['fullName'],
+      status: jsonMap['status'],
+      role: jsonMap['role'],
+    );
+  }
 }

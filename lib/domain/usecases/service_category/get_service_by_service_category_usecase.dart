@@ -1,6 +1,7 @@
 import 'package:home_clean/core/base_model.dart';
-import 'package:home_clean/data/repositories/service_category/service_category_repository.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
+
+import '../../repositories/service_category_repository.dart';
 
 class GetServiceByServiceCategoryUsecase {
   final ServiceCategoryRepository _serviceCategoryRepository;

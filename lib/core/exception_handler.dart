@@ -1,53 +1,75 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
+
+import 'dart:io';
 import 'package:dio/dio.dart';
 
 class ExceptionHandler {
   static ApiException handleException(dynamic error) {
     try {
-      // Xử lý Dio errors
+      // Xử lý lỗi từ Dio (API)
       if (error is DioException) {
+        final responseData = error.response?.data;
         return ApiException(
-          errorCode: error.response?.statusCode ?? -1,
-          errorMessage: error.response?.statusMessage ?? 'Dio Error',
-          errorStatus: error.response?.statusCode.toString() ?? 'UNKNOWN_ERROR',
+          traceId: responseData?['traceId'],
+          code: error.response?.statusCode ?? -1,
+          message: responseData?['message'] ?? 'Lỗi từ máy chủ',
+          description: responseData?['description'],
+          timestamp: responseData?['timestamp'],
           originalException: error,
         );
       }
 
-      // Xử lý các ngoại lệ mạng khác
+      // Xử lý các lỗi về kết nối mạng
       if (error is SocketException) {
         return ApiException(
-          errorCode: -1,
-          errorMessage: 'Không có kết nối mạng',
-          errorStatus: 'NETWORK_ERROR',
+          code: -1,
+          message: 'Không có kết nối mạng',
+          description: 'Vui lòng kiểm tra lại kết nối Internet',
+          timestamp: DateTime.now().toIso8601String(),
           originalException: error,
         );
       }
 
-      // Xử lý các ngoại lệ HTTP
+      // Xử lý lỗi HTTP
       if (error is HttpException) {
         return ApiException(
-          errorCode: -2,
-          errorMessage: 'Lỗi kết nối HTTP',
-          errorStatus: 'HTTP_ERROR',
+          code: -2,
+          message: 'Lỗi HTTP',
+          description: 'Máy chủ phản hồi không hợp lệ',
+          timestamp: DateTime.now().toIso8601String(),
           originalException: error,
         );
       }
 
-      // Xử lý các ngoại lệ không xác định
+      // Xử lý lỗi timeout
+      if (error is TimeoutException) {
+        return ApiException(
+          code: -3,
+          message: 'Yêu cầu hết thời gian chờ',
+          description: 'Máy chủ không phản hồi kịp thời',
+          timestamp: DateTime.now().toIso8601String(),
+          originalException: error,
+        );
+      }
+
+      // Xử lý lỗi không xác định
       return ApiException(
-        errorCode: -3,
-        errorMessage: error.toString(),
-        errorStatus: 'UNKNOWN_ERROR',
+        code: -4,
+        message: 'Lỗi không xác định',
+        description: error.toString(),
+        timestamp: DateTime.now().toIso8601String(),
         originalException: error,
       );
     } catch (e) {
-      // Trường hợp xử lý ngoại lệ bị lỗi
+      // Trường hợp bản thân ExceptionHandler bị lỗi
       return ApiException(
-        errorCode: -4,
-        errorMessage: 'Lỗi không xác định khi xử lý ngoại lệ',
-        errorStatus: 'EXCEPTION_HANDLING_ERROR',
+        code: -5,
+        message: 'Lỗi khi xử lý ngoại lệ',
+        description: e.toString(),
+        timestamp: DateTime.now().toIso8601String(),
         originalException: e,
       );
     }
@@ -55,24 +77,41 @@ class ExceptionHandler {
 }
 
 class ApiException implements Exception {
-  final int? errorCode;
-  final String? errorMessage;
-  final String? errorStatus;
+  final String? traceId;
+  final int code;
+  final String message;
+  final String? description;
+  final String timestamp;
   final dynamic originalException;
 
   ApiException({
-    this.errorCode,
-    this.errorMessage,
-    required this.errorStatus,
+    this.traceId,
+    required this.code,
+    required this.message,
+    this.description,
+    required this.timestamp,
     this.originalException,
   });
+
+  // Tạo ApiException từ JSON
+  factory ApiException.fromJson(Map<String, dynamic> json) {
+    return ApiException(
+      traceId: json['traceId'],
+      code: json['code'] ?? -1,
+      message: json['message'] ?? 'Lỗi không xác định',
+      description: json['description'],
+      timestamp: json['timestamp'] ?? DateTime.now().toIso8601String(),
+    );
+  }
 
   @override
   String toString() {
     return 'ApiException: '
-        'errorCode=$errorCode, '
-        'errorMessage=$errorMessage, '
-        'errorStatus=$errorStatus, '
+        'traceId=$traceId, '
+        'code=$code, '
+        'message=$message, '
+        'description=$description, '
+        'timestamp=$timestamp, '
         'originalException=$originalException';
   }
 }

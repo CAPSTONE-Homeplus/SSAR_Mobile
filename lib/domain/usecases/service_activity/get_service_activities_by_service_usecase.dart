@@ -1,6 +1,7 @@
 import 'package:home_clean/core/base_model.dart';
-import 'package:home_clean/data/repositories/service_activity/service_activity_repository.dart';
 import 'package:home_clean/domain/entities/service_activity/service_activity.dart';
+
+import '../../repositories/service_activity_repository.dart';
 
 class GetServiceActivitiesByServiceUsecase {
   final ServiceActivityRepository _serviceActivityRepository;

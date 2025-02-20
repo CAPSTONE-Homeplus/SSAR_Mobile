@@ -1,8 +1,8 @@
 import '../../../data/models/authen/login_model.dart';
-import '../../../data/repositories/auth/authentication_repository.dart';
+import '../../repositories/authentication_repository.dart';
 
 class LoginUseCase {
-  final AuthenticationRepository _authenticationRepository;
+  final AuthRepository _authenticationRepository;
 
   LoginUseCase(this._authenticationRepository);
 

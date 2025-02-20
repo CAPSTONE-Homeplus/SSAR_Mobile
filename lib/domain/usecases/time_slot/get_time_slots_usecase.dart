@@ -1,7 +1,8 @@
 import 'package:home_clean/core/base_model.dart';
 import 'package:home_clean/domain/entities/time_slot/time_slot.dart';
 
-import '../../../data/repositories/time_slot/time_slot_repository.dart';
+import '../../repositories/time_slot_repository.dart';
+
 
 class GetTimeSlotsUsecase {
   final TimeSlotRepository _timeSlotRepository;

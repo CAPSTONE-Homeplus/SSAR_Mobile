@@ -1,10 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_clean/core/constant.dart';
-import 'package:home_clean/data/repositories/service/service_repository.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
 import 'package:home_clean/domain/usecases/service/clear_selected_service_ids.dart';
 import 'package:home_clean/domain/usecases/service/get_selected_service_ids.dart';
 import 'package:home_clean/domain/usecases/service/save_selected_service_ids.dart';
+
+import '../../../domain/repositories/service_repository.dart';
 
 part 'service_event.dart';
 part 'service_state.dart';

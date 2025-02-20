@@ -1,11 +1,13 @@
-import '../../../data/repositories/auth/authentication_repository.dart';
+import 'package:home_clean/data/models/authen/authen_model.dart';
+
+import '../../repositories/authentication_repository.dart';
 
 class SaveUserToLocalUseCase {
-  final AuthenticationRepository _authenticationRepository;
+  final AuthRepository _authenticationRepository;
 
   SaveUserToLocalUseCase(this._authenticationRepository);
 
-  Future<void> call(String userName) async {
-    return await _authenticationRepository.saveUserName(userName);
+  Future<void> call(AuthenModel authModel) async {
+    return await _authenticationRepository.saveUserFromLocal(authModel);
   }
 }

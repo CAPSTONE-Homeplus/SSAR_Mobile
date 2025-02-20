@@ -1,4 +1,5 @@
-import '../../../data/repositories/order/order_repository.dart';
+
+import '../../repositories/order_repository.dart';
 
 class DeleteOrderFromLocal {
   final OrderRepository repository;

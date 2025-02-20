@@ -1,0 +1,13 @@
+{
+  "id": "1",
+  "name": "Living Room",
+  "status": "active",
+  "size": 25,
+  "furnitureIncluded": true,
+  "createdAt": "2023-01-01T12:00:00Z",
+  "updatedAt": "2023-01-10T15:30:00Z",
+  "squareMeters": "25.5",
+  "houseId": "house_01",
+  "roomTypeId": "room_type_01",
+  "code": "LR123"
+}

@@ -1,30 +1,31 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:home_clean/domain/repositories/building_repository.dart';
+import 'package:home_clean/domain/repositories/room_repository.dart';
 import 'package:home_clean/domain/usecases/auth/login_usecase.dart';
+import 'package:home_clean/domain/usecases/building/get_buildings_usecase.dart';
+import 'package:home_clean/domain/usecases/room/get_rooms_usecase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../data/datasource/service_local_data_source.dart';
-import '../../data/repositories/auth/authentication_repository.dart';
-import '../../data/repositories/auth/authentication_repository_impl.dart';
-import '../../data/repositories/equipment_supply/equipment_supply_repository.dart';
-import '../../data/repositories/equipment_supply/equipment_supply_repository_impl.dart';
-import '../../data/repositories/extra_service/extra_service_repository.dart';
-import '../../data/repositories/extra_service/extra_service_repository_impl.dart';
-import '../../data/repositories/notification/notification_repository.dart';
-import '../../data/repositories/notification/notification_repository_impl.dart';
-import '../../data/repositories/option/option_repository.dart';
-import '../../data/repositories/option/option_repository_impl.dart';
-import '../../data/repositories/order/order_repository.dart';
-import '../../data/repositories/order/order_repository_impl.dart';
-import '../../data/repositories/service/service_repository.dart';
-import '../../data/repositories/service/service_repository_impl.dart';
-import '../../data/repositories/service_activity/service_activity_repository.dart';
-import '../../data/repositories/service_activity/service_activity_repository_impl.dart';
-import '../../data/repositories/service_category/service_category_repository.dart';
-import '../../data/repositories/service_category/service_category_repository_impl.dart';
-import '../../data/repositories/sub_activity/sub_activity_repository.dart';
-import '../../data/repositories/sub_activity/sub_activity_repository_impl.dart';
-import '../../data/repositories/time_slot/time_slot_repository.dart';
-import '../../data/repositories/time_slot/time_slot_repository_impl.dart';
+import '../data/repositories/authentication_repository_impl.dart';
+import '../data/repositories/building_repository_impl.dart';
+import '../data/repositories/equipment_supply_repository_impl.dart';
+import '../data/repositories/extra_service_repository_impl.dart';
+import '../data/repositories/notification_repository_impl.dart';
+import '../data/repositories/option_repository_impl.dart';
+import '../data/repositories/order_repository_impl.dart';
+import '../data/repositories/room_repository_impl.dart';
+import '../data/repositories/service_activity_repository_impl.dart';
+import '../data/repositories/service_category_repository_impl.dart';
+import '../data/repositories/service_repository_impl.dart';
+import '../data/repositories/sub_activity_repository_impl.dart';
+import '../data/repositories/time_slot_repository_impl.dart';
+import '../data/repositories/wallet_repository_impl.dart';
+import '../domain/repositories/authentication_repository.dart';
+import '../domain/repositories/equipment_supply_repository.dart';
+import '../domain/repositories/extra_service_repository.dart';
+import '../domain/repositories/notification_repository.dart';
 import '../../domain/usecases/equipment_supply/get_equipment_supplies_usecase.dart';
 import '../../domain/usecases/extra_service/get_extra_service_usecase.dart';
 import '../../domain/usecases/option/get_options_usecase.dart';
@@ -55,9 +56,22 @@ import '../../presentation/blocs/sub_activity/sub_activity_bloc.dart';
 import '../../presentation/blocs/theme/theme_bloc.dart';
 import '../../presentation/blocs/time_slot/time_slot_bloc.dart';
 import '../data/datasource/authen_local_datasource.dart';
+import '../domain/repositories/option_repository.dart';
+import '../domain/repositories/order_repository.dart';
+import '../domain/repositories/service_activity_repository.dart';
+import '../domain/repositories/service_category_repository.dart';
+import '../domain/repositories/service_repository.dart';
+import '../domain/repositories/sub_activity_repository.dart';
+import '../domain/repositories/time_slot_repository.dart';
+import '../domain/repositories/wallet_repository.dart';
 import '../domain/usecases/auth/clear_user_from_local_usecase.dart';
 import '../domain/usecases/auth/get_user_from_local_usecase.dart';
 import '../domain/usecases/auth/save_user_to_local_usecase.dart';
+import '../domain/usecases/auth/user_register_usecase.dart';
+import '../domain/usecases/wallet/get_wallet_by_user.dart';
+import '../presentation/blocs/building/building_bloc.dart';
+import '../presentation/blocs/room/room_bloc.dart';
+import '../presentation/blocs/wallet/wallet_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -66,19 +80,21 @@ Future<void> setupServiceLocator() async {
 
   // External
   final sharedPreferences = await SharedPreferences.getInstance();
+  final storage = FlutterSecureStorage();
   sl.registerLazySingleton(() => sharedPreferences);
+  sl.registerLazySingleton(() => storage);
 
   // LocalDataSources
   sl.registerLazySingleton<ServiceLocalDataSource>(
         () => ServiceLocalDataSource(sharedPreferences: sl()),
   );
   sl.registerLazySingleton<AuthenticationLocalDataSource>(
-        () => AuthenticationLocalDataSource(sharedPreferences: sl()),
+        () => AuthenticationLocalDataSource(sharedPreferences: sl(), storage: sl()),
   );
 
   // Repositories (sử dụng LazySingleton vì chúng ta muốn tái sử dụng đối tượng)
-  sl.registerLazySingleton<AuthenticationRepository>(
-          () => AuthenticationRepositoryImpl(localDataSource: sl()));
+  sl.registerLazySingleton<AuthRepository>(
+          () => AuthRepositoryImpl(localDataSource: sl()));
 
   sl.registerLazySingleton<ServiceRepository>(
           () => ServiceRepositoryImpl(localDataSource: sl()));
@@ -98,6 +114,10 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<NotificationRepository>(
           () => NotificationRepositoryImpl(sl<FlutterLocalNotificationsPlugin>())
   );
+  sl.registerLazySingleton<WalletRepository>(
+          () => WalletRepositoryImpl(authenticationRepository: sl()));
+  sl.registerLazySingleton<RoomRepository>(() => RoomRepositoryImpl());
+  sl.registerLazySingleton<BuildingRepository>(() => BuildingRepositoryImpl());
 
   // Use Cases
   sl.registerLazySingleton(() => SaveSelectedServiceIds(sl()));
@@ -117,7 +137,10 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => InitializeNotificationUseCase (sl()));
   sl.registerLazySingleton(() => ShowNotificationUseCase (sl()));
   sl.registerLazySingleton(() => LoginUseCase(sl()));
-
+  sl.registerLazySingleton(() => GetWalletByUser(sl()));
+  sl.registerLazySingleton(() => GetRoomsUseCase(sl()));
+  sl.registerLazySingleton(() => GetBuildingsUsecase(sl()));
+  sl.registerLazySingleton(() => UserRegisterUseCase(sl()));
 
   // local Use Cases
   sl.registerLazySingleton(() => ClearUserFromLocalUseCase(sl()));
@@ -130,7 +153,8 @@ Future<void> setupServiceLocator() async {
       loginUseCase: sl(),
       saveUserToLocalUseCase: sl(),
       getUserFromLocalUseCase: sl(),
-      clearUserFromLocalUseCase: sl()));
+      clearUserFromLocalUseCase: sl(),
+      userRegisterUseCase: sl()));
   sl.registerFactory(() => InternetBloc());
   sl.registerFactory(() => ThemeBloc(preferences: sl()));
   sl.registerFactory(
@@ -154,4 +178,7 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(() => OrderBloc(createOrder: sl(), saveOrderToLocal: sl(), getOrderFromLocal: sl(), deleteOrderFromLocal: sl()));
   sl.registerFactory(() => NotificationBloc(
       initializeNotificationUseCase: sl(), showNotificationUseCase: sl()));
+  sl.registerFactory(() => WalletBloc(getWalletByUser: sl()));
+  sl.registerFactory(() => RoomBloc(sl()));
+  sl.registerFactory(() => BuildingBloc(buildingRepository: sl()));
 }

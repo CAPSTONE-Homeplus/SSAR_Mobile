@@ -59,7 +59,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   bool isLoading = true;
   final Map<String, List<SubActivity>> _serviceActivities = {};
   int _totalPrice = 0;
-  String _selectedPaymentMethod = 'Tiền mặt';
   late TimeSlotBloc _timeSlotBloc;
   List<TimeSlot> timeSlots = [];
   late TimeSlot _selectedTimeSlot  = TimeSlot(id: '', startTime: '', endTime: '');

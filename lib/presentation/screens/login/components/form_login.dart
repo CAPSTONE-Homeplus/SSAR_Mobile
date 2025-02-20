@@ -2,19 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/app_router.dart';
-import 'package:home_clean/core/size_config.dart';
-
 import '../../../blocs/authentication/authentication_bloc.dart';
 import '../../../blocs/internet/internet_bloc.dart';
 import '../../../widgets/notification.dart';
 
 class FormLogin extends StatefulWidget {
-  const FormLogin({
-    super.key,
-    required this.fem,
-    required this.hem,
-    required this.ffem,
-  });
+  const FormLogin({super.key, required this.fem, required this.hem, required this.ffem});
 
   final double fem;
   final double hem;
@@ -26,82 +19,78 @@ class FormLogin extends StatefulWidget {
 
 class _FormLoginState extends State<FormLogin> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController userNameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController _userNameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
-
-  final Color primaryColor = const Color(0xFF1CAF7D);
+  final Color _primaryColor = const Color(0xFF1CAF7D);
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
-    final authState = context.watch<AuthenticationBloc>().state;
-    var loginWidget = (switch (authState) {
-      AuthenticationInitial() => _buildLoginForm(),
-      AuthenticationFailed(error: final error) => _buildLoginForm(error: error),
-      AuthenticationSuccess() => _buildLoginForm(),
-      AuthenticationLoading() => _buildLoginForm(),
-      AuthenticationState() => throw UnimplementedError(),
-    });
-
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          loginWidget,
-          SizedBox(height: 25 * widget.hem),
-          _buildLoginButton(context),
-          SizedBox(height: 16 * widget.hem),
-          _buildDivider(),
-          SizedBox(height: 8 * widget.hem),
-          _buildRegisterButton(),
-        ],
+    return BlocListener<AuthenticationBloc, AuthenticationState>(
+      listener: (context, state) {
+        if (state is AuthenticationSuccess) {
+          AppRouter.navigateToHome();
+        } else if (state is AuthenticationFailed) {
+          NotificationApp.show(context, state.error, backgroundColor: Colors.red.shade400, icon: Icons.error);
+          setState(() {
+            _isLoading = false; // Dừng loading khi lỗi xảy ra
+          });
+        } else if (state is AuthenticationLoading) {
+          setState(() {
+            _isLoading = true;
+          });
+          Future.delayed(Duration(seconds: 2), () {
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+              });
+            }
+          });
+        }
+      },
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildLoginForm(),
+            SizedBox(height: 25 * widget.hem),
+            _buildLoginButton(),
+            SizedBox(height: 16 * widget.hem),
+            _buildDivider(),
+            SizedBox(height: 8 * widget.hem),
+            _buildRegisterButton(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildLoginForm({String? error}) {
+  Widget _buildLoginForm() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildTextField(
-          controller: userNameController,
-          hint: 'Username or Email',
+          controller: _userNameController,
+          hint: 'Tên đăng nhập',
           icon: Icons.person_outline,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter username';
-            }
-            return null;
-          },
+          validator: (value) => value?.isEmpty == true ? 'Tên đăng nhập không được để trống' : null,
         ),
         SizedBox(height: 16 * widget.hem),
         _buildTextField(
-          controller: passwordController,
-          hint: 'Password',
+          controller: _passwordController,
+          hint: 'Mật khẩu',
           icon: Icons.lock_outline,
           isPassword: true,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter password';
-            }
-            return null;
-          },
+          validator: (value) => value?.isEmpty == true ? 'Mật khẩu không được để trống' : null,
         ),
         SizedBox(height: 8 * widget.hem),
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            onPressed: () {
-              // Handle forgot password
-            },
-            child: Text(
-              'Forgot Password?',
-              style: GoogleFonts.poppins(
-                fontSize: 14 * widget.ffem,
-                color: primaryColor,
-              ),
-            ),
+            onPressed: () {},
+            child: Text('Quên mật khẩu?', style: GoogleFonts.poppins(fontSize: 14 * widget.ffem, color: _primaryColor)),
           ),
         ),
       ],
@@ -122,113 +111,59 @@ class _FormLoginState extends State<FormLogin> {
       style: GoogleFonts.poppins(fontSize: 15 * widget.ffem),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: GoogleFonts.poppins(
-          fontSize: 15 * widget.ffem,
-          color: Colors.grey.shade400,
-        ),
-        prefixIcon: Icon(icon, color: primaryColor),
+        hintStyle: GoogleFonts.poppins(fontSize: 15 * widget.ffem, color: Colors.grey.shade400),
+        prefixIcon: Icon(icon, color: _primaryColor),
         suffixIcon: isPassword
             ? IconButton(
-          icon: Icon(
-            _obscureText ? Icons.visibility_off : Icons.visibility,
-            color: Colors.grey,
-          ),
-          onPressed: () {
-            setState(() {
-              _obscureText = !_obscureText;
-            });
-          },
+          icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
+          onPressed: () => setState(() => _obscureText = !_obscureText),
         )
             : null,
         filled: true,
         fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12 * widget.fem),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12 * widget.fem),
-          borderSide: BorderSide(color: Colors.grey.shade200),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12 * widget.fem),
-          borderSide: BorderSide(color: primaryColor),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12 * widget.fem), borderSide: BorderSide.none),
       ),
     );
   }
 
-  Widget _buildLoginButton(BuildContext context) {
-    return BlocListener<AuthenticationBloc, AuthenticationState>(
-      listener: (context, state) {
-        if (state is AuthenticationSuccess) {
-          AppRouter.navigateToHome();
-        } else if (state is AuthenticationFailed) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error)),
-          );
-        }
-      },
-      child: ElevatedButton(
-        onPressed: () {
-          if (context.read<InternetBloc>().state is Connected) {
-            if (_formKey.currentState!.validate()) {
-              context.read<AuthenticationBloc>().add(
-                LoginAccount(
-                  username: userNameController.text.trim(),
-                  password: passwordController.text,
-                ),
-              );
-            }
-          } else {
-            NotificationApp.show(
-              context,
-              'Không có kết nối Internet!',
-              backgroundColor: Colors.red.shade400,
-              icon: Icons.error,
+  Widget _buildLoginButton() {
+    return ElevatedButton(
+      onPressed: _isLoading
+          ? null
+          : () {
+        if (context.read<InternetBloc>().state is Connected) {
+          if (_formKey.currentState!.validate()) {
+            context.read<AuthenticationBloc>().add(
+              LoginAccount(username: _userNameController.text.trim(), password: _passwordController.text),
             );
           }
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: primaryColor,
-          padding: EdgeInsets.symmetric(vertical: 16 * widget.hem),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12 * widget.fem),
-          ),
-        ),
-        child: Text(
-          'Đăng nhập',
-          style: GoogleFonts.poppins(
-            fontSize: 16 * widget.ffem,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
+        } else {
+          NotificationApp.show(context, 'Không có kết nối Internet!', backgroundColor: Colors.red.shade400, icon: Icons.error);
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _primaryColor,
+        padding: EdgeInsets.symmetric(vertical: 16 * widget.hem),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12 * widget.fem)),
+      ),
+      child: _isLoading
+          ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white)) // Hiển thị loading khi _isLoading = true
+          : Text(
+        'Đăng nhập',
+        style: GoogleFonts.poppins(fontSize: 16 * widget.ffem, fontWeight: FontWeight.w600, color: Colors.white),
       ),
     );
   }
-
 
   Widget _buildRegisterButton() {
     return ElevatedButton(
-      onPressed: () {
-          AppRouter.navigateToRegister();
-        },
+      onPressed: AppRouter.navigateToRegister,
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.grey.shade400,
         padding: EdgeInsets.symmetric(vertical: 16 * widget.hem),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12 * widget.fem),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12 * widget.fem)),
       ),
-      child: Text(
-        'Tạo tài khoản mới',
-        style: GoogleFonts.poppins(
-          fontSize: 16 * widget.ffem,
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
-        ),
-      ),
+      child: Text('Tạo tài khoản mới', style: GoogleFonts.poppins(fontSize: 16 * widget.ffem, fontWeight: FontWeight.w600, color: Colors.white)),
     );
   }
 
@@ -238,13 +173,7 @@ class _FormLoginState extends State<FormLogin> {
         Expanded(child: Divider(color: Colors.grey.shade300)),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16 * widget.fem),
-          child: Text(
-            'Hoặc',
-            style: GoogleFonts.poppins(
-              fontSize: 14 * widget.ffem,
-              color: Colors.grey.shade600,
-            ),
-          ),
+          child: Text('Hoặc', style: GoogleFonts.poppins(fontSize: 14 * widget.ffem, color: Colors.grey.shade600)),
         ),
         Expanded(child: Divider(color: Colors.grey.shade300)),
       ],
@@ -253,8 +182,8 @@ class _FormLoginState extends State<FormLogin> {
 
   @override
   void dispose() {
-    userNameController.dispose();
-    passwordController.dispose();
+    _userNameController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 }

@@ -6,7 +6,9 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/app_router.dart';
-import 'package:home_clean/data/repositories/order/order_repository.dart';
+import 'package:home_clean/domain/repositories/building_repository.dart';
+import 'package:home_clean/domain/repositories/room_repository.dart';
+import 'package:home_clean/presentation/blocs/building/building_bloc.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_bloc.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_bloc.dart';
 import 'package:home_clean/presentation/blocs/notification/notification_bloc.dart';
@@ -17,23 +19,27 @@ import 'package:home_clean/presentation/blocs/service_activity/service_activity_
 import 'package:home_clean/presentation/blocs/service_category/service_category_bloc.dart';
 import 'package:home_clean/presentation/blocs/sub_activity/sub_activity_bloc.dart';
 import 'package:home_clean/presentation/blocs/time_slot/time_slot_bloc.dart';
+import 'package:home_clean/presentation/blocs/wallet/wallet_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/service_locator.dart';
-import 'data/repositories/auth/authentication_repository.dart';
-import 'data/repositories/equipment_supply/equipment_supply_repository.dart';
-import 'data/repositories/extra_service/extra_service_repository.dart';
-import 'data/repositories/notification/notification_repository.dart';
-import 'data/repositories/option/option_repository.dart';
-import 'data/repositories/service/service_repository.dart';
-import 'data/repositories/service_activity/service_activity_repository.dart';
-import 'data/repositories/service_category/service_category_repository.dart';
-import 'data/repositories/sub_activity/sub_activity_repository.dart';
-import 'data/repositories/time_slot/time_slot_repository.dart';
+import 'domain/repositories/authentication_repository.dart';
+import 'domain/repositories/equipment_supply_repository.dart';
+import 'domain/repositories/extra_service_repository.dart';
+import 'domain/repositories/notification_repository.dart';
+import 'domain/repositories/option_repository.dart';
+import 'domain/repositories/order_repository.dart';
+import 'domain/repositories/service_activity_repository.dart';
+import 'domain/repositories/service_category_repository.dart';
+import 'domain/repositories/service_repository.dart';
+import 'domain/repositories/sub_activity_repository.dart';
+import 'domain/repositories/time_slot_repository.dart';
+import 'domain/repositories/wallet_repository.dart';
 import 'domain/usecases/notification/initialize_notification_usecase.dart';
 import 'presentation/blocs/authentication/authentication_bloc.dart';
 import 'presentation/blocs/internet/internet_bloc.dart';
+import 'presentation/blocs/room/room_bloc.dart';
 import 'presentation/blocs/theme/theme_bloc.dart';
 
 final sl = GetIt.instance;
@@ -63,8 +69,8 @@ class HomeClean extends StatelessWidget {
     // MultiRepositoryProvider để cung cấp nhiều repository cho ứng dụng
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<AuthenticationRepository>(
-            create: (_) => sl<AuthenticationRepository>()),
+        RepositoryProvider<AuthRepository>(
+            create: (_) => sl<AuthRepository>()),
         RepositoryProvider<ServiceRepository>(
             create: (_) => sl<ServiceRepository>()),
         RepositoryProvider<ServiceCategoryRepository>(
@@ -84,6 +90,9 @@ class HomeClean extends StatelessWidget {
         RepositoryProvider<OrderRepository>(
             create: (_) => sl<OrderRepository>()),
         RepositoryProvider(create: (_) => sl<NotificationRepository>()),
+        RepositoryProvider(create: (_) => sl<WalletRepository>()),
+        RepositoryProvider(create: (_) => sl<RoomRepository>()),
+        RepositoryProvider(create: (_) => sl<BuildingRepository>()),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -93,7 +102,7 @@ class HomeClean extends StatelessWidget {
           BlocProvider(
               create: (context) =>
                   AuthenticationBloc(loginUseCase: sl(), saveUserToLocalUseCase: sl(),
-                      getUserFromLocalUseCase: sl(), clearUserFromLocalUseCase: sl())),
+                      getUserFromLocalUseCase: sl(), clearUserFromLocalUseCase: sl(), userRegisterUseCase: sl())),
           BlocProvider(
               create: (context) => ServiceBloc(
                   serviceRepository: sl(),
@@ -125,6 +134,9 @@ class HomeClean extends StatelessWidget {
               create: (context) => NotificationBloc(
                   initializeNotificationUseCase: sl(),
                   showNotificationUseCase: sl())),
+          BlocProvider( create: (context) => WalletBloc(getWalletByUser: sl())),
+          BlocProvider(create: (context) => RoomBloc(sl())),
+          BlocProvider(create: (context) => BuildingBloc(buildingRepository: sl())),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {
@@ -142,7 +154,7 @@ class HomeClean extends StatelessWidget {
                 textTheme: GoogleFonts.notoSansTextTheme(themeData.textTheme),
               ),
               getPages: AppRouter.routes,
-              initialRoute: AppRouter.routeLogin,
+              initialRoute: AppRouter.routeHome,
             );
           },
         ),

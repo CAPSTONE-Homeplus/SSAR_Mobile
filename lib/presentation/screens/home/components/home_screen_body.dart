@@ -1,22 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/app_router.dart';
 import 'package:home_clean/core/app_text_styles.dart';
+import 'package:home_clean/core/validation.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
 
 import '../../../../core/constant.dart';
 import '../../../../core/size_config.dart';
+import '../../../../domain/entities/wallet/wallet.dart';
+import '../../../blocs/wallet/wallet_bloc.dart';
+import '../../../blocs/wallet/wallet_event.dart';
+import '../../../blocs/wallet/wallet_state.dart';
 import '../../../widgets/address_bottom_sheet.dart';
 
 class HomeScreenBody extends StatefulWidget {
   List<Service> servicesToFetch;
-  HomeScreenBody({super.key, required this.servicesToFetch});
+  List<Wallet> walletUser = [];
+  HomeScreenBody({super.key, required this.servicesToFetch, required this.walletUser});
 
   @override
   State<HomeScreenBody> createState() => _HomeScreenBodyState();
 }
 
 class _HomeScreenBodyState extends State<HomeScreenBody> {
+
   @override
   void initState() {
     super.initState();
@@ -24,11 +32,11 @@ class _HomeScreenBodyState extends State<HomeScreenBody> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildHomeScreen(widget.servicesToFetch, context);
+    return _buildHomeScreen(widget.servicesToFetch, context, widget.walletUser);
   }
 }
 
-Widget _buildHomeScreen(List<Service> services, BuildContext context) {
+Widget _buildHomeScreen(List<Service> services, BuildContext context, List<Wallet> walletUser) {
   String selectedBuilding = '';
   String selectedRoom = '';
   String defaultAddress = 'Ho Chi Minh City';
@@ -98,48 +106,115 @@ Widget _buildHomeScreen(List<Service> services, BuildContext context) {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Balance Card
             Container(
               margin: EdgeInsets.all(16 * fem),
               padding: EdgeInsets.all(16 * fem),
               decoration: BoxDecoration(
                 color: Color(0xFF1CAF7D),
-                borderRadius:
-                    BorderRadius.circular(12 * fem),
+                borderRadius: BorderRadius.circular(12 * fem),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0xFF1CAF7D).withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
                     children: [
+                      Icon(
+                        Icons.stars_rounded,
+                        color: Colors.white70,
+                        size: 16 * fem,
+                      ),
+                      SizedBox(width: 4 * fem),
                       Text(
-                        'Số dư tài khoản',
+                        'Điểm tích lũy',
                         style: GoogleFonts.poppins(
                           color: Colors.white70,
                           fontSize: 14 * ffem,
-                        ),
-                      ),
-                      SizedBox(height: 4 * fem),
-                      Text(
-                        '500,000 đ',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 24 * ffem,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Color(0xFF1CAF7D),
-                      elevation: 0,
-                      padding: EdgeInsets.symmetric(horizontal: 20 * hem),
+                  SizedBox(height: 12 * fem),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12 * fem,
+                      mainAxisSpacing: 12 * fem,
+                      childAspectRatio: 1.6,
                     ),
-                    child: Text('Top up'),
+                    itemCount: walletUser.length,
+                    itemBuilder: (context, index) => Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12 * fem),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.1),
+                          width: 1,
+                        ),
+                      ),
+                      padding: EdgeInsets.all(12 * fem),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                index == 0 ? Icons.wallet_membership : Icons.card_membership,
+                                color: Colors.white70,
+                                size: 14 * fem,
+                              ),
+                              SizedBox(width: 4 * fem),
+                              Expanded(
+                                child: Text(
+                                  '${walletUser[index].name}',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white70,
+                                    fontSize: 10 * ffem,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8 * fem),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '${Validation.formatCurrency(walletUser[index].balance ?? 0)}',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontSize: 20 * ffem,
+                                  fontWeight: FontWeight.bold,
+                                  height: 1,
+                                ),
+                              ),
+                              SizedBox(width: 4 * fem),
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 2 * fem),
+                                child: Icon(
+                                  Icons.circle_notifications,
+                                  color: Colors.yellow,
+                                  size: 16 * fem,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),

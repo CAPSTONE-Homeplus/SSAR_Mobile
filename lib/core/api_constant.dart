@@ -2,21 +2,30 @@ class ApiConstant {
   static const String HOME_CLEAN_URL = "https://homeclean.onrender.com/api/v1";
   static const String VIN_WALLET_URL = "https://vinwallet.onrender.com/api/v1";
 
-  // Authen
+  /// Authen
   static const String AUTH = "/auth";
 
-  // Service
+  /// User
+  static const String USERS = "/users";
+
+  /// Service
   static const String SERVICES = "/services";
 
-  // service category
+  /// service category
   static const String SERVICE_CATEGORIES = "/service-categories";
 
-  // service activity
+  /// service activity
   static const String SERVICE_ACTIVITIES = "/service-activities";
 
-  // sub activity
+  /// sub activity
   static const String SUB_ACTIVITIES = "/sub-activities";
 
-  // time slot
+  /// time slot
   static const String TIME_SLOTS = "/time-slots";
+
+  /// room
+  static const String ROOMS = "/rooms";
+
+  /// building
+  static const String BUILDINGS = "/buildings";
 }
