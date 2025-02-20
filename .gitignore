@@ -8,6 +8,7 @@
 
 ### Firebase Patch ###
 .runtimeconfig.json
+
 .firebase/
 
 ### Flutter ###
