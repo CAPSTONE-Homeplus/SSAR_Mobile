@@ -22,8 +22,8 @@ workflows:
 
       - name: Generate coverage report
         script: |
-          sudo apt-get install -y lcov
-          genhtml coverage/lcov.info -o coverage/html
+          flutter pub global activate flutter_lcov
+          flutter_lcov -i coverage/lcov.info -o coverage/html
 
       - name: Upload coverage to Codecov
         script: |
@@ -38,4 +38,5 @@ workflows:
       email:
         recipients:
           - "9.10nguyenhuubao@gmail.com"
+
       
