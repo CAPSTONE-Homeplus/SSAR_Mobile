@@ -1,10 +1,23 @@
 workflows:
   flutter-test:
     name: Flutter Test & Coverage
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+        - pattern: develop
+          include: true
     environment:
       flutter: stable
       groups:
         - my_env_variables
+    scripts:
+    - name: Increase Git buffer size
+      script: |
+        git config --global http.postBuffer 524288000
+        git config --global core.compression 0
     scripts:
       - name: Prebuild Script
         script: |
