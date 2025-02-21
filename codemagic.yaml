@@ -1,0 +1,26 @@
+workflows:
+  flutter-test:
+    name: Flutter Test & Coverage
+    environment:
+      flutter: stable
+      groups:
+        - my_env_variables
+    scripts:
+      - name: Prebuild Script
+        script: |
+          flutter clean
+          flutter pub get
+          cp .env.example .env
+
+      - name: Run tests with coverage
+        script: |
+          flutter test --coverage
+
+      - name: Post-Test Script
+        script: |
+          sudo apt-get install -y lcov
+          genhtml coverage/lcov.info -o coverage/html
+          bash <(curl -s https://codecov.io/bash) || echo "Codecov upload failed"
+
+    artifacts:
+      - coverage/html/**
