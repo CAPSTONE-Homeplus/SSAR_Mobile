@@ -1,4 +1,4 @@
-import '../../../data/models/authen/login_model.dart';
+import '../../../data/models/auth/login_model.dart';
 import '../../repositories/authentication_repository.dart';
 
 class LoginUseCase {

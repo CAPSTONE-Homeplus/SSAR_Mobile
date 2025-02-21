@@ -3,9 +3,6 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
-import 'dart:io';
-import 'package:dio/dio.dart';
-
 class ExceptionHandler {
   static ApiException handleException(dynamic error) {
     try {

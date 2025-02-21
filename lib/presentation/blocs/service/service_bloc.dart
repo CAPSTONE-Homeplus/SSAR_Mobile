@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_clean/core/constant.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
-import 'package:home_clean/domain/usecases/service/clear_selected_service_ids.dart';
-import 'package:home_clean/domain/usecases/service/get_selected_service_ids.dart';
-import 'package:home_clean/domain/usecases/service/save_selected_service_ids.dart';
+import 'package:home_clean/domain/use_cases/service/clear_selected_service_ids.dart';
+import 'package:home_clean/domain/use_cases/service/get_selected_service_ids.dart';
+import 'package:home_clean/domain/use_cases/service/save_selected_service_ids.dart';
 
 import '../../../domain/repositories/service_repository.dart';
 

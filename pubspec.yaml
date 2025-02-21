@@ -45,7 +45,7 @@ dependencies:
   firebase_auth: ^5.3.1
   panara_dialogs: ^0.1.5
   connectivity_plus: ^6.1.0
-  shared_preferences: ^2.3.3
+  shared_preferences: ^2.5.2
   carousel_slider: ^5.0.0
   toastification: ^2.3.0
   json_annotation: ^4.9.0
@@ -71,6 +71,8 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   test: any
   dartz: ^0.10.1
+  webview_flutter: ^4.10.0
+  flutter_dotenv: ^5.2.1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -103,3 +105,4 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/.env

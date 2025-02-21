@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant.dart';
-import 'package:home_clean/presentation/blocs/authentication/authentication_bloc.dart';
 import 'package:home_clean/presentation/blocs/building/building_state.dart';
 import 'package:home_clean/presentation/blocs/room/room_event.dart';
 import 'package:home_clean/presentation/blocs/room/room_state.dart';
-import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 
 import '../../../domain/entities/building/building.dart';
 import '../../../domain/entities/room/room.dart';
+import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/building/building_bloc.dart';
 import '../../blocs/building/building_event.dart';
 import '../../blocs/room/room_bloc.dart';
@@ -32,7 +31,7 @@ class RegisterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthenticationBloc, AuthenticationState>(
+    return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is RegisterSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -148,7 +147,7 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
         _buildingBloc = context.read<BuildingBloc>();
         _roomBloc.add(GetRoomsEvent(search: '', orderBy: '', page: Constant.defaultPage, size: Constant.defaultSize));
         _buildingBloc.add(GetBuildings(search: '', orderBy: '', page: Constant.defaultPage, size: Constant.defaultSize));
-        final roomComplete = _processRooms();
+        final roomComplete = _processHouse();
         final buildingComplete = _processBuildings();
         await Future.wait([
           roomComplete,
@@ -166,7 +165,7 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
   }
 
 
-  Future<void> _processRooms() async {
+  Future<void> _processBuildings() async {
     await for (final state in _roomBloc.stream) {
       if (state is RoomLoaded && mounted) {
         setState(() {
@@ -177,7 +176,7 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
     }
   }
 
-  Future<void> _processBuildings() async {
+  Future<void> _processHouse() async {
     await for (final state in _buildingBloc.stream) {
       if (state is BuildingLoaded && mounted) {
         setState(() {
@@ -457,19 +456,20 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
   }
 
   Widget _buildRegisterButton() {
-    return BlocBuilder<AuthenticationBloc, AuthenticationState>(
+    return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         return ElevatedButton(
           onPressed: state is AuthenticationLoading
               ? null
               : () {
             if (_formKey.currentState?.validate() ?? false) {
-              context.read<AuthenticationBloc>().add(
+              context.read<AuthBloc>().add(
                 RegisterAccount(
                   fullName: _fullNameController.text,
                   username: _usernameController.text,
                   password: _passwordController.text,
-                  roomCode: selectedRoomObj.code,
+                  buildingCode: selectedBuildingObj.code ?? '',
+                  houseCode: selectedRoomObj.code,
                 ),
               );
             }

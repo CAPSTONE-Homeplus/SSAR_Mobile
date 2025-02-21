@@ -17,7 +17,7 @@ class ServiceRepositoryImpl implements ServiceRepository {
       String? search, String? orderBy, int? page, int? size) async {
     try {
       final response =
-          await homeCleanRequest.get('${ApiConstant.SERVICES}', queryParameters: {
+          await homeCleanRequest.get(ApiConstant.services, queryParameters: {
         'search': search,
         'orderBy': orderBy,
         'page': page,
@@ -26,7 +26,7 @@ class ServiceRepositoryImpl implements ServiceRepository {
 
       if (response.statusCode == 200 && response.data != null) {
         List<dynamic> data = response.data['items'] ?? [];
-
+        localDataSource.saveService(response.data);
         List<Service> serviceList = data
             .map((item) => ServiceMapper.toEntity(ServiceModel.fromJson(item)))
             .toList();
@@ -54,16 +54,20 @@ class ServiceRepositoryImpl implements ServiceRepository {
 
   @override
   Future<void> clearSelectedServiceIds() {
-    return localDataSource.clearSelectedServiceIds();
+    // TODO: implement clearSelectedServiceIds
+    throw UnimplementedError();
   }
 
   @override
   Future<List<String>?> getSelectedServiceIds() {
-    return localDataSource.getSelectedServiceIds();
+    // TODO: implement getSelectedServiceIds
+    throw UnimplementedError();
   }
 
   @override
   Future<void> saveSelectedServiceIds(List<String> ids) {
-    return localDataSource.saveSelectedServiceIds(ids);
+    // TODO: implement saveSelectedServiceIds
+    throw UnimplementedError();
   }
+
 }

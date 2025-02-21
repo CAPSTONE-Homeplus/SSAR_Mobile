@@ -10,7 +10,7 @@ class CreateOrder {
   bool emergencyRequest;
   TimeSlot timeSlot;
   Service service;
-  String userId;
+  String? userId;
   List<Option> option;
   List<ExtraService> extraService;
 
@@ -20,7 +20,7 @@ class CreateOrder {
     required this.emergencyRequest,
     required this.timeSlot,
     required this.service,
-    required this.userId,
+    this.userId,
     required this.option,
     required this.extraService,
   });

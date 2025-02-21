@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_clean/data/models/auth/login_model.dart';
 import 'package:home_clean/domain/entities/user/create_user.dart';
 import 'package:home_clean/domain/entities/user/user.dart';
-import 'package:home_clean/domain/usecases/auth/login_usecase.dart';
-import 'package:home_clean/domain/usecases/auth/user_register_usecase.dart';
+import 'package:home_clean/domain/use_cases/auth/login_usecase.dart';
+import 'package:home_clean/domain/use_cases/auth/user_register_usecase.dart';
 import 'package:mockito/mockito.dart';
-import 'package:home_clean/data/models/authen/login_model.dart';
 
 import '../../../helper/test_helper.mocks.dart';
 
@@ -57,14 +57,15 @@ void main() {
         username: 'testuser',
         password: 'testpass',
         fullName: 'Test User',
-        roomCode: 'room_code',
+        buildingCode: 'buildingCode',
+        houseCode: 'houseCode',
       );
       final expectedUser = User(
         id: 'user_id',
         fullName: 'Test User',
         status: 'active',
-        roomId: 'room_id',
-        extraField: 'extra',
+        houseId: null,
+        extraField: null,
         createdAt: '2021-09-01',
         updatedAt: '2021-09-01',
         username: 'testuser',
@@ -81,7 +82,7 @@ void main() {
       expect(result.username, expectedUser.username);
       expect(result.role, expectedUser.role);
       expect(result.status, expectedUser.status);
-      expect(result.roomId, expectedUser.roomId);
+      expect(result.houseId, expectedUser.houseId);
       expect(result.extraField, expectedUser.extraField);
       expect(result.createdAt, expectedUser.createdAt);
       expect(result.updatedAt, expectedUser.updatedAt);
@@ -94,7 +95,8 @@ void main() {
         username: 'testuser',
         password: 'testpass',
         fullName: 'Test User',
-        roomCode: 'room_code',
+        buildingCode: 'buildingCode',
+        houseCode: 'houseCode',
       );
       when(repository.createAccount(createUser)).thenThrow(Exception('Error creating account'));
 
@@ -107,7 +109,8 @@ void main() {
         username: 'testuser',
         password: 'testpass',
         fullName: 'Test User',
-        roomCode: 'room_code',
+        buildingCode: 'buildingCode',
+        houseCode: 'houseCode',
       );
       when(repository.createAccount(createUser)).thenThrow(Exception('Username is existed'));
 
@@ -120,7 +123,8 @@ void main() {
         username: 'testuser',
         password: 'testpass',
         fullName: 'Test User',
-        roomCode: 'room_code',
+        buildingCode: 'buildingCode',
+        houseCode: 'houseCode',
       );
       when(repository.createAccount(createUser)).thenThrow(Exception('Account creation failed'));
 
@@ -133,7 +137,8 @@ void main() {
         username: 'testuser',
         password: 'testpass',
         fullName: 'Test User',
-        roomCode: 'room_code',
+        buildingCode: 'buildingCode',
+        houseCode: 'houseCode',
       );
       when(repository.createAccount(createUser)).thenThrow(Exception('Invalid username or password'));
 

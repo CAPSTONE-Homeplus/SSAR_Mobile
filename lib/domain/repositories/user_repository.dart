@@ -4,4 +4,5 @@ import '../entities/user/user.dart';
 
 abstract class UserRepository {
   Future<User> createAccount(CreateUser createUser);
+  Future<User> getUser(String userId);
 }

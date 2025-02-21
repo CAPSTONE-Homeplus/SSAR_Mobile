@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_it/get_it.dart';
@@ -9,6 +10,8 @@ import 'package:home_clean/app_router.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
 import 'package:home_clean/domain/repositories/room_repository.dart';
 import 'package:home_clean/domain/repositories/transaction_repository.dart';
+import 'package:home_clean/domain/repositories/user_repository.dart';
+import 'package:home_clean/presentation/blocs/auth/auth_bloc.dart';
 import 'package:home_clean/presentation/blocs/building/building_bloc.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_bloc.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_bloc.dart';
@@ -38,8 +41,7 @@ import 'domain/repositories/service_repository.dart';
 import 'domain/repositories/sub_activity_repository.dart';
 import 'domain/repositories/time_slot_repository.dart';
 import 'domain/repositories/wallet_repository.dart';
-import 'domain/usecases/notification/initialize_notification_usecase.dart';
-import 'presentation/blocs/authentication/authentication_bloc.dart';
+import 'domain/use_cases/notification/initialize_notification_usecase.dart';
 import 'presentation/blocs/internet/internet_bloc.dart';
 import 'presentation/blocs/room/room_bloc.dart';
 import 'presentation/blocs/theme/theme_bloc.dart';
@@ -52,6 +54,7 @@ late InitializeNotificationUseCase _initializeNotificationUseCase;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: "assets/.env");
   await Firebase.initializeApp();
   await setupServiceLocator();
   _initializeNotificationUseCase = InitializeNotificationUseCase(sl());
@@ -73,6 +76,8 @@ class HomeClean extends StatelessWidget {
       providers: [
         RepositoryProvider<AuthRepository>(
             create: (_) => sl<AuthRepository>()),
+        RepositoryProvider<UserRepository>(
+            create: (_) => sl<UserRepository>()),
         RepositoryProvider<ServiceRepository>(
             create: (_) => sl<ServiceRepository>()),
         RepositoryProvider<ServiceCategoryRepository>(
@@ -104,7 +109,7 @@ class HomeClean extends StatelessWidget {
               create: (context) => ThemeBloc(preferences: preferences)),
           BlocProvider(
               create: (context) =>
-                  AuthenticationBloc(loginUseCase: sl(), clearUserFromLocalUseCase: sl(), userRegisterUseCase: sl())),
+                  AuthBloc(loginUseCase: sl(), clearUserFromLocalUseCase: sl(), userRegisterUseCase: sl())),
           BlocProvider(
               create: (context) => ServiceBloc(
                   serviceRepository: sl(),
@@ -131,7 +136,7 @@ class HomeClean extends StatelessWidget {
                   EquipmentSupplyBloc(getEquipmentSuppliesUsecase: sl())),
           BlocProvider(
               create: (context) => TimeSlotBloc(getTimeSlotsUsecase: sl())),
-          BlocProvider(create: (context) => OrderBloc(createOrder: sl(), saveOrderToLocal: sl(), getOrderFromLocal: sl(), deleteOrderFromLocal: sl())),
+          BlocProvider(create: (context) => OrderBloc(createOrderUseCase: sl())),
           BlocProvider(
               create: (context) => NotificationBloc(
                   initializeNotificationUseCase: sl(),
@@ -157,7 +162,7 @@ class HomeClean extends StatelessWidget {
                 textTheme: GoogleFonts.notoSansTextTheme(themeData.textTheme),
               ),
               getPages: AppRouter.routes,
-              initialRoute: AppRouter.routeHome,
+              initialRoute: AppRouter.routeSplash,
             );
           },
         ),

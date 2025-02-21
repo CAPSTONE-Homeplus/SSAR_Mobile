@@ -7,7 +7,7 @@ class OrderInitial extends OrderState {}
 class OrderLoading extends OrderState {}
 
 class OrderCreated extends OrderState {
-  final Order order;
+  final Orders order;
 
   OrderCreated(this.order);
 }
@@ -20,7 +20,7 @@ class TemporaryOrder extends OrderState {
 class OrderSavedToLocal extends OrderState {}
 
 class OrderLoadedFromLocal extends OrderState {
-  final Order order;
+  final Orders order;
 
   OrderLoadedFromLocal(this.order);
 }
@@ -31,4 +31,10 @@ class OrderError extends OrderState {
   final String message;
 
   OrderError(this.message);
+}
+
+class OrderException extends OrderState {
+  final String message;
+
+  OrderException(this.message);
 }

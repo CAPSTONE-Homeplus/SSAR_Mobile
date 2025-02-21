@@ -31,7 +31,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         .withUrl(
           'https://vinwallet.onrender.com/vinWalletHub',
           options: HttpConnectionOptions(
-            headers: MessageHeaders()..setHeaderValue('userId', '161e1a9d-8bca-48c6-b52e-9814594f685b'),
+            headers: MessageHeaders()..setHeaderValue('houseId', '7ba29697-37eb-4062-bd43-1ee399e33868'),
           ),
         )
         .withAutomaticReconnect()
@@ -45,7 +45,10 @@ class NotificationRepositoryImpl implements NotificationRepository {
       print('📩 Nhận sự kiện ReceiveNotificationToUser: $arguments');
       _handleSignalRNotification(arguments);
     });
-
+    hubConnection.on('ReceiveNotificationToGroup', (arguments) {
+      print('📩 Nhận sự kiện ReceiveNotificationToGroup: $arguments');
+      _handleSignalRNotification(arguments);
+    });
     _startSignalRConnection();
   }
 

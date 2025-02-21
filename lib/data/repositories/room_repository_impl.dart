@@ -16,7 +16,7 @@ class RoomRepositoryImpl implements RoomRepository {
       int? size,) async{
     try {
       final response = await homeCleanRequest.get(
-          ApiConstant.ROOMS,
+          ApiConstant.rooms,
           queryParameters: {
             'search': search,
             'orderby': orderBy,

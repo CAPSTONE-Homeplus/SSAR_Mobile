@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:home_clean/domain/entities/transaction/transaction.dart';
 import 'package:home_clean/domain/repositories/transaction_repository.dart';
-import 'package:home_clean/domain/usecases/failure.dart';
+import 'package:home_clean/domain/use_cases/failure.dart';
 import '../../entities/transaction/create_transaction.dart';
 import '../base_usecase.dart';
 

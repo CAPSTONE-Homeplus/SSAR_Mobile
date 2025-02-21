@@ -19,7 +19,7 @@ class OptionRepositoryImpl implements OptionRepository {
   ) async {
     try {
       final response = await homeCleanRequest
-          .get('${ApiConstant.SERVICES}/$serviceId/options', queryParameters: {
+          .get('${ApiConstant.services}/$serviceId/options', queryParameters: {
         'id': serviceId,
         'search': search,
         'orderBy': orderBy,

@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/flutter,androidstudio,visualstudiocode,firebase
 # Edit at https://www.toptal.com/developers/gitignore?templates=flutter,androidstudio,visualstudiocode,firebase
 
+### dotenv ###
+assets/.env
+
 ### Firebase ###
 .idea
 **/node_modules/*

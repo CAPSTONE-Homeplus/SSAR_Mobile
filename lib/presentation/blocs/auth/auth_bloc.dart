@@ -1,30 +1,28 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/data/models/authen/authen_model.dart';
 import 'package:home_clean/domain/repositories/authentication_repository.dart';
 
-import '../../../data/models/user/create_user_model.dart';
-import '../../../data/models/authen/login_model.dart';
-import '../../../domain/entities/auth/authen.dart';
+import '../../../core/exception_handler.dart';
+import '../../../data/models/auth/auth_model.dart';
+import '../../../data/models/auth/login_model.dart';
+import '../../../domain/entities/auth/auth.dart';
 import '../../../domain/entities/user/create_user.dart';
-import '../../../domain/usecases/auth/clear_user_from_local_usecase.dart';
-import '../../../domain/usecases/auth/get_user_from_local_usecase.dart';
-import '../../../domain/usecases/auth/login_usecase.dart';
-import '../../../domain/usecases/auth/save_user_to_local_usecase.dart';
-import '../../../domain/usecases/auth/user_register_usecase.dart';
+import '../../../domain/use_cases/auth/clear_user_from_local_usecase.dart';
+import '../../../domain/use_cases/auth/login_usecase.dart';
+import '../../../domain/use_cases/auth/user_register_usecase.dart';
 
-part 'authentication_event.dart';
+part 'auth_event.dart';
 part 'authentication_state.dart';
 
-class AuthenticationBloc
-    extends Bloc<AuthenticationEvent, AuthenticationState> {
+class AuthBloc
+    extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
   // final SaveUserToLocalUseCase saveUserToLocalUseCase;
   // final GetUserFromLocalUseCase getUserFromLocalUseCase;
   final ClearUserFromLocalUseCase clearUserFromLocalUseCase;
   final UserRegisterUseCase userRegisterUseCase;
 
-  AuthenticationBloc({
+  AuthBloc({
     required this.loginUseCase, required this.clearUserFromLocalUseCase, required this.userRegisterUseCase})
       : super(AuthenticationInitial()) {
     on<LoginAccount>(_onLoginAccount);
@@ -33,7 +31,7 @@ class AuthenticationBloc
   }
 
   Future<void> _onLoginAccount(
-      LoginAccount event, Emitter<AuthenticationState> emit) async {
+      LoginAccount event, Emitter<AuthState> emit) async {
     emit(AuthenticationLoading());
     try {
       final isSuccess = await loginUseCase.call(
@@ -46,12 +44,14 @@ class AuthenticationBloc
       if (isSuccess) {
         emit(AuthenticationSuccess());
       } else {
-        emit(AuthenticationFailed(
-            error: 'Tên đăng nhập hoặc mật khẩu không đúng!'));
+        emit(AuthenticationFailed(error: "Tên đăng nhập hoặc mật khẩu không đúng!"));
       }
     } catch (e) {
-      emit(AuthenticationFailed(
-          error: 'Đã có lỗi xảy ra, vui lòng thử lại: $e'));
+      if (e is ApiException) {
+        emit(AuthenticationFailed(error: e.description ?? "Đã có lỗi xảy ra!"));
+      } else {
+        emit(AuthenticationFailed(error: "Đã có lỗi xảy ra, vui lòng thử lại."));
+      }
     }
   }
 
@@ -78,7 +78,7 @@ class AuthenticationBloc
   }
 
   Future<void> _onRegisterAccount(
-      RegisterAccount event, Emitter<AuthenticationState> emit) async {
+      RegisterAccount event, Emitter<AuthState> emit) async {
     emit(AuthenticationLoading());
     try {
       final isSuccess = await userRegisterUseCase.call(
@@ -86,11 +86,12 @@ class AuthenticationBloc
           fullName: event.fullName,
           username: event.username,
           password: event.password,
-          roomCode: event.roomCode,
+          buildingCode: event.buildingCode,
+          houseCode: event.houseCode,
         ),
       );
 
-      if (isSuccess is AuthenModel) {
+      if (isSuccess is AuthModel) {
         emit(RegisterSuccess());
       } else {
         emit(RegisterFailed(

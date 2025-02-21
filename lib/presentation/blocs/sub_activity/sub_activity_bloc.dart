@@ -3,7 +3,7 @@ import 'package:home_clean/core/constant.dart';
 import 'package:home_clean/presentation/blocs/sub_activity/sub_activity_event.dart';
 import 'package:home_clean/presentation/blocs/sub_activity/sub_activity_state.dart';
 
-import '../../../domain/usecases/sub_activity/get_sub_activities_usecase.dart';
+import '../../../domain/use_cases/sub_activity/get_sub_activities_usecase.dart';
 
 class SubActivityBloc extends Bloc<SubActivityEvent, SubActivityState> {
   final GetSubActivitiesUsecase getSubActivitiesUsecase;

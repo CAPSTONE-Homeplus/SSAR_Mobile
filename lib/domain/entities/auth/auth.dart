@@ -1,7 +1,7 @@
-import 'package:home_clean/data/models/authen/authen_model.dart';
+import '../../../data/models/auth/auth_model.dart';
 
-class Authen extends AuthenModel {
-  Authen({
+class Auth extends AuthModel {
+  Auth({
     required String accessToken,
     required String refreshToken,
     required String userId,

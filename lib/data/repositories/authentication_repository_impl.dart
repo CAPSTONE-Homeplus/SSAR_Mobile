@@ -1,31 +1,38 @@
 import 'package:home_clean/core/request.dart';
 import 'package:home_clean/data/datasource/auth_local_datasource.dart';
 import 'package:home_clean/data/datasource/user_local_datasource.dart';
+import 'package:home_clean/data/mappers/auth/auth_mapper.dart';
 import 'package:home_clean/data/models/user/user_model.dart';
 import 'package:home_clean/domain/entities/user/user.dart';
 import 'package:home_clean/domain/repositories/authentication_repository.dart';
 
 import '../../../core/api_constant.dart';
 import '../../../core/exception_handler.dart';
+import '../../domain/entities/auth/auth.dart';
 import '../../domain/entities/user/create_user.dart';
+import '../../domain/repositories/user_repository.dart';
 import '../mappers/user/user_mapper.dart';
-import '../models/authen/authen_model.dart';
-import '../models/authen/login_model.dart';
+import '../models/auth/login_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthLocalDataSource authLocalDataSource;
   final UserLocalDatasource userLocalDatasource;
+  final UserRepository userRepository;
 
   AuthRepositoryImpl({
     required this.authLocalDataSource,
     required this.userLocalDatasource,
+    required this.userRepository,
   });
 
   @override
   Future<bool> login(LoginModel loginModel) async {
     try {
+      authLocalDataSource.clearAuth();
+      userLocalDatasource.clearUser();
+
       final response = await vinWalletRequest.post(
-        '${ApiConstant.AUTH}/login',
+        '${ApiConstant.auth}/login',
         data: {
           'username': loginModel.username,
           'password': loginModel.password,
@@ -33,23 +40,11 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       if (response.statusCode == 200 && response.data != null) {
-        AuthenModel authData = AuthenModel(
-          accessToken: response.data['accessToken'],
-          refreshToken: response.data['refreshToken'],
-          userId: response.data['userId'],
-          fullName: response.data['fullName'],
-          status: response.data['status'],
-          role: response.data['role'],
-        );
-        await authLocalDataSource.saveAuth(authData);
-
-        final userResponse = await vinWalletRequest.get(
-          '${ApiConstant.USERS}/${authData.userId}',
-        );
-        if (userResponse.statusCode == 200 && userResponse.data != null) {
-          await userLocalDatasource.saveUser(userResponse.data);
-        }
-
+        await authLocalDataSource.saveAuth(response.data);
+        final accessToken = await authLocalDataSource.getAccessTokenFromStorage();
+        vinWalletRequest.options.headers['Authorization'] = 'Bearer $accessToken';
+        homeCleanRequest.options.headers['Authorization'] = 'Bearer $accessToken';
+        userRepository.getUser(response.data['userId']);
         return true;
       } else {
         throw ApiException(
@@ -65,6 +60,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+
   @override
   Future<void> clearUserFromLocal() async {
     try {
@@ -78,20 +74,21 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> saveUserFromLocal(User user) async {
-    UserModel userModel = UserMapper.toModel(user);
-    await userLocalDatasource.saveUser(userModel);
+    // UserModel userModel = UserMapper.toModel(user);
+    // await userLocalDatasource.saveUser(userModel);
   }
 
   @override
   Future<User> createAccount(CreateUser createUser) async {
     try {
       final response = await vinWalletRequest.post(
-        ApiConstant.USERS,
+        ApiConstant.users,
         data: {
           "fullName": createUser.fullName,
           "username": createUser.username,
           "password": createUser.password,
-          "roomCode": createUser.roomCode,
+          "buildingCode": createUser.buildingCode,
+          "houseCode": createUser.houseCode,
         },
       );
 
@@ -116,9 +113,42 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<User> getUserFromLocal() async{
     try {
-      UserModel? userModel = await userLocalDatasource.getUser();
-      User user = UserMapper.toEntity(userModel!);
+      UserModel? userModel = UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
+      User user = UserMapper.toEntity(userModel);
       return user;
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<Auth> refreshToken() async{
+    try {
+      final user = UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
+      final auth = AuthMapper.toModel(await authLocalDataSource.getAuth() ?? {});
+      final response = await vinWalletRequest.post(
+        '${ApiConstant.auth}/refresh-token',
+        data: {
+          "userId": user.id,
+          "refreshToken": auth.refreshToken,
+        },
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        await authLocalDataSource.saveAuth(response.data);
+        final accessToken = await authLocalDataSource.getAccessTokenFromStorage();
+        vinWalletRequest.options.headers['Authorization'] = 'Bearer $accessToken';
+        userRepository.getUser(response.data['userId']);
+        return AuthMapper.toEntity(response.data);
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
     } catch (e) {
       throw ExceptionHandler.handleException(e);
     }

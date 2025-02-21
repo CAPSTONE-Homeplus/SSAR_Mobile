@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_clean/core/colors.dart';
 import 'package:home_clean/core/size_config.dart';
 import 'package:home_clean/core/validation.dart';
 import 'package:home_clean/presentation/blocs/transaction/transaction_state.dart';
@@ -12,6 +13,7 @@ import '../../../domain/entities/transaction/create_transaction.dart';
 import '../../../domain/entities/wallet/wallet.dart';
 import '../../blocs/transaction/transaction_event.dart';
 import '../../blocs/transaction/transation_bloc.dart';
+import '../payment_screen/payment_screen.dart';
 
 class TopUpScreen extends StatefulWidget {
   List<Wallet> walletUser = [];
@@ -80,7 +82,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primaryColor,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
@@ -112,6 +114,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
               _buildSuggestedAmounts(fem, ffem),
               const SizedBox(height: 40),
               _buildTopUpButton(fem, ffem),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -577,14 +580,14 @@ class _TopUpScreenState extends State<TopUpScreen> {
         listener: (context, state) async {
           if (state is TransactionSuccess) {
             if (state.transaction.paymentUrl != null) {
-              Uri url = Uri.parse(state.transaction.paymentUrl!);
-              if (await canLaunchUrl(url)) {
-                await launchUrl(url, mode: LaunchMode.externalApplication);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Không thể mở trang thanh toán")),
-                );
-              }
+              // Open WebView instead of external browser
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => PaymentWebView(
+                    paymentUrl: state.transaction.paymentUrl!,
+                  ),
+                ),
+              );
             }
           }
         },
@@ -592,7 +595,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
           return ElevatedButton(
             onPressed: () {
               if (_formKey.currentState!.validate()) {
-                _onProcess();
+                _showConfirmationDialog(fem, ffem);
               }
             },
             style: ElevatedButton.styleFrom(
@@ -630,7 +633,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
     final amount = _amountController.text;
     final walletType = _selectedWalletType == 'personal' ? 'Ví cá nhân' : 'Ví chung';
     final paymentMethod = _selectedPaymentMethod == 'banking'
-        ? 'Chuyển khoản ngân hàng'
+        ? 'Chuyển khoản'
         : _selectedPaymentMethod == 'paypal'
         ? 'PayPal'
         : 'Ví MoMo';
@@ -705,9 +708,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
-              // Process payment and show success
-              _showSuccessDialog(fem, ffem);
+              _onProcess();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF1CAF7D),

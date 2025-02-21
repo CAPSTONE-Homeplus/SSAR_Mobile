@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/app_router.dart';
-import '../../../blocs/authentication/authentication_bloc.dart';
+import '../../../blocs/auth/auth_bloc.dart';
 import '../../../blocs/internet/internet_bloc.dart';
-import '../../../widgets/notification.dart';
 
 class FormLogin extends StatefulWidget {
   const FormLogin({super.key, required this.fem, required this.hem, required this.ffem});
@@ -24,28 +23,27 @@ class _FormLoginState extends State<FormLogin> {
   bool _obscureText = true;
   final Color _primaryColor = const Color(0xFF1CAF7D);
   bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthenticationBloc, AuthenticationState>(
+    return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthenticationSuccess) {
           AppRouter.navigateToHome();
         } else if (state is AuthenticationFailed) {
-          NotificationApp.show(context, state.error, backgroundColor: Colors.red.shade400, icon: Icons.error);
           setState(() {
-            _isLoading = false; // Dừng loading khi lỗi xảy ra
+            _isLoading = false;
+            _errorMessage = state.error;
           });
         } else if (state is AuthenticationLoading) {
           setState(() {
             _isLoading = true;
+            _errorMessage = null;
           });
-          Future.delayed(Duration(seconds: 2), () {
-            if (mounted) {
-              setState(() {
-                _isLoading = false;
-              });
-            }
+        } else {
+          setState(() {
+            _isLoading = false;
           });
         }
       },
@@ -55,7 +53,16 @@ class _FormLoginState extends State<FormLogin> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildLoginForm(),
-            SizedBox(height: 25 * widget.hem),
+            if (_errorMessage != null)
+              Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Text(
+                  _errorMessage!,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(color: Colors.red, fontSize: 14),
+                ),
+              ),
+            SizedBox(height: 6 * widget.hem),
             _buildLoginButton(),
             SizedBox(height: 16 * widget.hem),
             _buildDivider(),
@@ -133,12 +140,17 @@ class _FormLoginState extends State<FormLogin> {
           : () {
         if (context.read<InternetBloc>().state is Connected) {
           if (_formKey.currentState!.validate()) {
-            context.read<AuthenticationBloc>().add(
-              LoginAccount(username: _userNameController.text.trim(), password: _passwordController.text),
+            context.read<AuthBloc>().add(
+              LoginAccount(
+                username: _userNameController.text.trim(),
+                password: _passwordController.text,
+              ),
             );
           }
         } else {
-          NotificationApp.show(context, 'Không có kết nối Internet!', backgroundColor: Colors.red.shade400, icon: Icons.error);
+          setState(() {
+            _errorMessage = 'Không có kết nối Internet!';
+          });
         }
       },
       style: ElevatedButton.styleFrom(
@@ -147,13 +159,21 @@ class _FormLoginState extends State<FormLogin> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12 * widget.fem)),
       ),
       child: _isLoading
-          ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white)) // Hiển thị loading khi _isLoading = true
+          ? SizedBox(
+        height: 24,
+        width: 24,
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          strokeWidth: 2,
+        ),
+      )
           : Text(
         'Đăng nhập',
         style: GoogleFonts.poppins(fontSize: 16 * widget.ffem, fontWeight: FontWeight.w600, color: Colors.white),
       ),
     );
   }
+
 
   Widget _buildRegisterButton() {
     return ElevatedButton(

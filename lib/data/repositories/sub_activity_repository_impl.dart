@@ -19,7 +19,7 @@ class SubActivityRepositoryImpl implements SubActivityRepository {
   ) async {
     try {
       final response = await homeCleanRequest.get(
-          '${ApiConstant.SERVICE_ACTIVITIES}/$activityId/service-sub-activities',
+          '${ApiConstant.serviceActivities}/$activityId/service-sub-activities',
           queryParameters: {
             'id': activityId,
             'search': search,

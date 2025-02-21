@@ -6,10 +6,10 @@ import '../../data/models/order/create_order_model.dart';
 
 abstract class OrderRepository {
   // API
-  Future<Order> createOrder(CreateOrder createOrder);
+  Future<Orders> createOrder(CreateOrder createOrder);
 
   // Local DB
   Future<void> saveOrderToLocal(CreateOrder createOrder);
-  Future<Order?> getOrderFromLocal();
+  Future<Orders?> getOrderFromLocal();
   Future<void> deleteOrderFromLocal();
 }

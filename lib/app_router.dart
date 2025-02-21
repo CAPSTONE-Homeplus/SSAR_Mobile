@@ -1,4 +1,3 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
 import 'package:home_clean/presentation/screens/home/home_screen.dart';
@@ -157,7 +156,7 @@ class AppRouter {
   }
 
   static void navigateToPayment(dynamic arguments) {
-    Get.offAllNamed(routePayment, arguments: arguments);
+    Get.toNamed(routePayment, arguments: arguments);
   }
 
 }

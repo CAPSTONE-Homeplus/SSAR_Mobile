@@ -3,7 +3,7 @@ import 'package:home_clean/core/constant.dart';
 import 'package:home_clean/presentation/blocs/time_slot/time_slot_event.dart';
 import 'package:home_clean/presentation/blocs/time_slot/time_slot_state.dart';
 
-import '../../../domain/usecases/time_slot/get_time_slots_usecase.dart';
+import '../../../domain/use_cases/time_slot/get_time_slots_usecase.dart';
 
 class TimeSlotBloc extends Bloc<TimeSlotEvent, TimeSlotState> {
   final GetTimeSlotsUsecase getTimeSlotsUsecase;

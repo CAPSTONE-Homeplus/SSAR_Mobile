@@ -4,7 +4,7 @@ class User extends Equatable {
   String? id;
   String? fullName;
   String? status;
-  String? roomId;
+  String? houseId;
   String? extraField;
   String? createdAt;
   String? updatedAt;
@@ -15,7 +15,7 @@ class User extends Equatable {
     this.id,
     this.fullName,
     this.status,
-    this.roomId,
+    this.houseId,
     this.extraField,
     this.createdAt,
     this.updatedAt,
@@ -25,14 +25,14 @@ class User extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        fullName,
-        status,
-        roomId,
-        extraField,
-        createdAt,
-        updatedAt,
-        username,
-        role,
-      ];
+    id,
+    fullName,
+    status,
+    houseId,
+    extraField,
+    createdAt,
+    updatedAt,
+    username,
+    role,
+  ];
 }

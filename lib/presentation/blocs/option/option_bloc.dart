@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_clean/core/constant.dart';
-import 'package:home_clean/domain/usecases/option/get_options_usecase.dart';
+import 'package:home_clean/domain/use_cases/option/get_options_usecase.dart';
 import 'package:home_clean/presentation/blocs/option/option_event.dart';
 import 'package:home_clean/presentation/blocs/option/option_state.dart';
 

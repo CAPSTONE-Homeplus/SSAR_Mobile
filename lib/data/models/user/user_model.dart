@@ -2,19 +2,18 @@ class UserModel {
   String? id;
   String? fullName;
   String? status;
-  String? roomId;
+  String? houseId;
   String? extraField;
   String? createdAt;
   String? updatedAt;
   String? username;
   String? role;
 
-
   UserModel({
     this.id,
     this.fullName,
     this.status,
-    this.roomId,
+    this.houseId,
     this.extraField,
     this.createdAt,
     this.updatedAt,
@@ -27,7 +26,7 @@ class UserModel {
       id: json['id'],
       fullName: json['fullName'],
       status: json['status'],
-      roomId: json['roomId'],
+      houseId: json['houseId'],
       extraField: json['extraField'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
@@ -37,16 +36,16 @@ class UserModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['fullName'] = fullName;
-    data['status'] = status;
-    data['roomId'] = roomId;
-    data['extraField'] = extraField;
-    data['createdAt'] = createdAt;
-    data['updatedAt'] = updatedAt;
-    data['username'] = username;
-    data['role'] = role;
-    return data;
+    return {
+      'id': id,
+      'fullName': fullName,
+      'status': status,
+      'houseId': houseId,
+      'extraField': extraField,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'username': username,
+      'role': role,
+    };
   }
 }

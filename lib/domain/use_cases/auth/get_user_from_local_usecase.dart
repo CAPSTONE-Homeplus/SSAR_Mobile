@@ -1,7 +1,7 @@
-// import 'package:home_clean/data/models/authen/authen_model.dart';
+// import 'package:home_clean/data/models/authen/auth_model.dart';
 //
 // import '../../repositories/authentication_repository.dart';
-// import '../../entities/auth/authen.dart';
+// import '../../entities/auth/auth.dart';
 //
 // class GetUserFromLocalUseCase {
 //   final AuthRepository _authenticationRepository;

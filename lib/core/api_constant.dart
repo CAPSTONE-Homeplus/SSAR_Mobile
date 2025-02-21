@@ -1,34 +1,39 @@
-class ApiConstant {
-  static const String HOME_CLEAN_URL = "https://homeclean.onrender.com/api/v1";
-  static const String VIN_WALLET_URL = "https://vinwallet.onrender.com/api/v1";
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-  /// Authen
-  static const String AUTH = "/auth";
+class ApiConstant {
+  static final String homeCleanUrl = dotenv.env['homeCleanUrl'] ?? 'https://default-homeclean.com/api/v1';
+  static final String vinWalletUrl = dotenv.env['vinWalletUrl'] ?? 'https://default-vinwallet.com/api/v1';
+
+  /// Authed
+  static const String auth = "/auth";
 
   /// User
-  static const String USERS = "/users";
+  static const String users = "/users";
 
   /// Service
-  static const String SERVICES = "/services";
+  static const String services = "/services";
 
-  /// service category
-  static const String SERVICE_CATEGORIES = "/service-categories";
+  /// Service category
+  static const String serviceCategories = "/service-categories";
 
-  /// service activity
-  static const String SERVICE_ACTIVITIES = "/service-activities";
+  /// Service activity
+  static const String serviceActivities = "/service-activities";
 
-  /// sub activity
-  static const String SUB_ACTIVITIES = "/sub-activities";
+  /// Sub activity
+  static const String subActivities = "/sub-activities";
 
-  /// time slot
-  static const String TIME_SLOTS = "/time-slots";
+  /// Time slot
+  static const String timeSlots = "/time-slots";
 
-  /// room
-  static const String ROOMS = "/rooms";
+  /// Room
+  static const String rooms = "/rooms";
 
-  /// building
-  static const String BUILDINGS = "/buildings";
+  /// Building
+  static const String buildings = "/buildings";
 
-  /// transaction
-  static const String TRANSACTIONS = "/transactions";
+  /// Transaction
+  static const String transactions = "/transactions";
+
+  /// Order
+  static const String orders = "/orders";
 }

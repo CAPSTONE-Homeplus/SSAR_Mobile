@@ -1,7 +1,7 @@
 import '../extra_service/extra_service.dart';
 import '../option/option.dart';
 
-class Order {
+class Orders {
   String? id;
   String? note;
   int? price;
@@ -39,7 +39,7 @@ class Order {
   List<ExtraService>? extraServices;
   List<Option>? options;
 
-  Order({
+  Orders({
     this.id,
     this.note,
     this.price,

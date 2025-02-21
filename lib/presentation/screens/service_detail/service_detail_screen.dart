@@ -212,7 +212,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   void _handleCreateOrder(bool isEmergency) {
     final createOrder = CreateOrder(
-      userId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
       service: widget.service,
       option: _selectedOptions,
       extraService: _selectedExtraServices,

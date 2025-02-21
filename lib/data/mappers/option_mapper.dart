@@ -35,4 +35,12 @@ class OptionMapper {
       serviceId: entity.serviceId,
     );
   }
+
+  static List<Option> toListEntity(List<OptionModel> data) {
+    return data.map((item) => toEntity(item)).toList();
+  }
+
+  static List<OptionModel> toListModel(List<Option> data) {
+    return data.map((item) => toModel(item)).toList();
+  }
 }

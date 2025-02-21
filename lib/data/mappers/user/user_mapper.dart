@@ -8,8 +8,8 @@ class UserMapper {
       id: userModel.id ?? '',
       fullName: userModel.fullName ?? '',
       status: userModel.status ?? '',
-      roomId: userModel.roomId ?? '',
-      extraField: userModel.extraField ?? '',
+      houseId: userModel.houseId,
+      extraField: userModel.extraField,
       createdAt: userModel.createdAt ?? '',
       updatedAt: userModel.updatedAt ?? '',
       username: userModel.username ?? '',
@@ -17,12 +17,26 @@ class UserMapper {
     );
   }
 
-  static UserModel toModel(User user) {
+  static UserModel toModel(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'],
+      fullName: json['fullName'],
+      status: json['status'],
+      houseId: json['houseId'],
+      extraField: json['extraField'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+      username: json['username'],
+      role: json['role'],
+    );
+  }
+
+  static UserModel toModelFromEntity(User user) {
     return UserModel(
       id: user.id,
       fullName: user.fullName,
       status: user.status,
-      roomId: user.roomId,
+      houseId: user.houseId,
       extraField: user.extraField,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
@@ -30,4 +44,5 @@ class UserMapper {
       role: user.role,
     );
   }
+
 }

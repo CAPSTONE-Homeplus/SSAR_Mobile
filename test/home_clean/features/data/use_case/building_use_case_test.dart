@@ -2,8 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_clean/core/base_model.dart';
 import 'package:home_clean/domain/entities/building/building.dart';
-import 'package:home_clean/domain/usecases/building/get_buildings_usecase.dart';
-import 'package:home_clean/domain/usecases/failure.dart';
+import 'package:home_clean/domain/use_cases/building/get_buildings_usecase.dart';
+import 'package:home_clean/domain/use_cases/failure.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../helper/test_helper.mocks.dart';

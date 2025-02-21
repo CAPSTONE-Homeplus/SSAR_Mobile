@@ -400,10 +400,10 @@ class WalletCardWidget extends StatelessWidget {
               Container(
                 constraints: BoxConstraints(maxWidth: 100 * fem),
                 child: Text(
-                  '${Validation.formatCurrency(wallet.balance ?? 0)}',
+                  Validation.formatCurrency(wallet.balance ?? 0),
                   style: GoogleFonts.poppins(
                     color: Colors.white,
-                    fontSize: 20 * ffem,
+                    fontSize: 18 * ffem,
                     fontWeight: FontWeight.bold,
                     height: 1,
                     letterSpacing: -0.5,

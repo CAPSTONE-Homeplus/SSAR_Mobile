@@ -1,10 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_clean/domain/usecases/failure.dart';
-import 'package:home_clean/domain/usecases/room/get_rooms_usecase.dart';
+import 'package:home_clean/domain/use_cases/failure.dart';
+import 'package:home_clean/domain/use_cases/room/get_rooms_usecase.dart';
 import 'package:mockito/mockito.dart';
 import 'package:home_clean/domain/entities/room/room.dart';
-import 'package:home_clean/domain/repositories/room_repository.dart';
 import 'package:home_clean/core/base_model.dart';
 
 import '../../../helper/test_helper.mocks.dart';

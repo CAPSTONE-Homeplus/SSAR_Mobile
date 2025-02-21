@@ -1,9 +1,10 @@
-import 'package:home_clean/data/models/authen/authen_model.dart';
-import 'package:home_clean/domain/entities/auth/authen.dart';
+import 'package:home_clean/domain/entities/auth/auth.dart';
+
+import '../../models/auth/auth_model.dart';
 
 class AuthMapper {
-  static Authen toEntity (AuthenModel model) {
-    return Authen(
+  static Auth toEntity (AuthModel model) {
+    return Auth(
       accessToken: model.accessToken ?? '',
       refreshToken: model.refreshToken ?? '',
       userId: model.userId ?? '',
@@ -13,14 +14,14 @@ class AuthMapper {
     );
   }
 
-  static AuthenModel toModel (Authen entity) {
-    return AuthenModel(
-      accessToken: entity.accessToken,
-      refreshToken: entity.refreshToken,
-      userId: entity.userId,
-      fullName: entity.fullName,
-      status: entity.status,
-      role: entity.role,
+  static AuthModel toModel(Map<String, dynamic> json) {
+    return AuthModel(
+      accessToken: json['accessToken'],
+      refreshToken: json['refreshToken'],
+      userId: json['userId'],
+      fullName: json['fullName'],
+      status: json['status'],
+      role: json['role'],
     );
   }
 }

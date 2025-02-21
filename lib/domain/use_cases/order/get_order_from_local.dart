@@ -6,7 +6,7 @@ class GetOrderFromLocal {
 
   GetOrderFromLocal(this.repository);
 
-  Future<Order?> call() async {
+  Future<Orders?> call() async {
     return await repository.getOrderFromLocal();
   }
 }

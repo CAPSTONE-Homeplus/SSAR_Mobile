@@ -1,18 +1,16 @@
-import 'package:dio/dio.dart';
 import 'package:home_clean/core/base_model.dart';
+import 'package:home_clean/data/mappers/auth/auth_mapper.dart';
 import 'package:home_clean/data/mappers/wallet_mapper.dart';
 import 'package:home_clean/data/models/wallet/wallet_model.dart';
 
 import '../../../core/api_constant.dart';
 import '../../../core/exception_handler.dart';
 import '../../../core/request.dart';
-import '../../../domain/entities/auth/authen.dart';
 import '../../../domain/entities/wallet/wallet.dart';
 import '../../../domain/repositories/wallet_repository.dart';
-import '../../domain/repositories/authentication_repository.dart';
 import '../datasource/auth_local_datasource.dart';
 import '../datasource/user_local_datasource.dart';
-import '../models/authen/authen_model.dart';
+import '../models/auth/auth_model.dart';
 
 class WalletRepositoryImpl implements WalletRepository {
   final AuthLocalDataSource authLocalDataSource;
@@ -27,11 +25,11 @@ class WalletRepositoryImpl implements WalletRepository {
       int? page,
       int? size) async {
     try {
-      AuthenModel? authen = await authLocalDataSource.getAuth();
-      String userId = authen?.userId ?? '';
+      AuthModel? authModel = AuthMapper.toModel(await authLocalDataSource.getAuth() ?? {});
+      String userId = authModel.userId ?? '';
 
       final response = await vinWalletRequest.get(
-        '${ApiConstant.USERS}/$userId/wallets',
+        '${ApiConstant.users}/$userId/wallets',
         queryParameters: {
           'id': userId,
           'page': page,

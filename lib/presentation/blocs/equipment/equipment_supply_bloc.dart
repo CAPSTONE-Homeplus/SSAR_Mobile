@@ -3,7 +3,7 @@ import 'package:home_clean/core/constant.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_event.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_state.dart';
 
-import '../../../domain/usecases/equipment_supply/get_equipment_supplies_usecase.dart';
+import '../../../domain/use_cases/equipment_supply/get_equipment_supplies_usecase.dart';
 
 class EquipmentSupplyBloc
     extends Bloc<EquipmentSupplyEvent, EquipmentSupplyState> {

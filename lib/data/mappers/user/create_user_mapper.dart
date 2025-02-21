@@ -8,7 +8,8 @@ class CreateUserMapper {
       username: model.username ?? '',
       password: model.password ?? '',
       fullName: model.fullName ?? '',
-      roomCode: model.roomCode ?? '',
+      buildingCode: model.buildingCode ?? '',
+      houseCode: model.houseCode ?? '',
     );
   }
 
@@ -17,7 +18,8 @@ class CreateUserMapper {
       username: entity.username,
       password: entity.password,
       fullName: entity.fullName,
-      roomCode: entity.roomCode,
+      buildingCode: entity.buildingCode ?? '',
+      houseCode: entity.houseCode ?? '',
     );
   }
 }

@@ -1,17 +1,15 @@
 import 'package:dio/dio.dart';
+import 'package:home_clean/data/mappers/auth/auth_mapper.dart';
 import 'package:home_clean/data/mappers/transaction/create_transaction_mapper.dart';
-import 'package:home_clean/data/models/transaction/transaction_model.dart';
 import 'package:home_clean/domain/entities/transaction/create_transaction.dart';
 import 'package:home_clean/domain/entities/transaction/transaction.dart';
 import '../../core/api_constant.dart';
 import '../../core/exception_handler.dart';
 import '../../core/request.dart';
-import '../../domain/entities/auth/authen.dart';
-import '../../domain/repositories/authentication_repository.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../datasource/auth_local_datasource.dart';
 import '../datasource/user_local_datasource.dart';
-import '../models/authen/authen_model.dart';
+import '../models/auth/auth_model.dart';
 import '../models/transaction/create_transaction_model.dart';
 
 class TransactionRepositoryImpl implements TransactionRepository {
@@ -25,13 +23,13 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Future<Transaction> saveTransaction(CreateTransaction transaction) async {
     try {
-      AuthenModel? authModel = await authLocalDataSource.getAuth();
-      String userId = authModel?.userId ?? '';
-      String token = authModel?.accessToken ?? '';
+      AuthModel? authModel = AuthMapper.toModel(await authLocalDataSource.getAuth() ?? {});
+      String userId = authModel.userId ?? '';
+      String token = authModel.accessToken ?? '';
       CreateTransactionModel trans = CreateTransactionMapper.toModel(transaction);
       trans.userId = userId;
       final response = await vinWalletRequest.post(
-        ApiConstant.TRANSACTIONS,
+        ApiConstant.transactions,
         data: trans.toJson(),
         options: Options(
           headers: {

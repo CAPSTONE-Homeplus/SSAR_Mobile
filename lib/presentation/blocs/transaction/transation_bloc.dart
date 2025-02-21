@@ -1,5 +1,5 @@
 import 'package:bloc/bloc.dart';
-import '../../../domain/usecases/transaction/save_transaction_usecase.dart';
+import '../../../domain/use_cases/transaction/save_transaction_usecase.dart';
 import 'transaction_event.dart';
 import 'transaction_state.dart';
 

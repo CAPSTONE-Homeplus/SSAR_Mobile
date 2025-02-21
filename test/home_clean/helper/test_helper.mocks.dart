@@ -3,27 +3,71 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i8;
+import 'dart:async' as _i13;
 
-import 'package:dartz/dartz.dart' as _i5;
-import 'package:home_clean/core/base_model.dart' as _i3;
-import 'package:home_clean/data/models/authen/login_model.dart' as _i9;
-import 'package:home_clean/domain/entities/building/building.dart' as _i13;
-import 'package:home_clean/domain/entities/room/room.dart' as _i12;
-import 'package:home_clean/domain/entities/user/create_user.dart' as _i10;
+import 'package:dartz/dartz.dart' as _i8;
+import 'package:home_clean/core/base_model.dart' as _i4;
+import 'package:home_clean/data/models/auth/login_model.dart' as _i14;
+import 'package:home_clean/domain/entities/auth/auth.dart' as _i3;
+import 'package:home_clean/domain/entities/building/building.dart' as _i18;
+import 'package:home_clean/domain/entities/equipment_supply/equipment_supply.dart'
+    as _i34;
+import 'package:home_clean/domain/entities/extra_service/extra_service.dart'
+    as _i36;
+import 'package:home_clean/domain/entities/option/option.dart' as _i38;
+import 'package:home_clean/domain/entities/order/create_order.dart' as _i24;
+import 'package:home_clean/domain/entities/order/order.dart' as _i6;
+import 'package:home_clean/domain/entities/room/room.dart' as _i17;
+import 'package:home_clean/domain/entities/service/service.dart' as _i23;
+import 'package:home_clean/domain/entities/service_activity/service_activity.dart'
+    as _i40;
+import 'package:home_clean/domain/entities/service_category/service_category.dart'
+    as _i45;
+import 'package:home_clean/domain/entities/sub_activity/sub_activity.dart'
+    as _i42;
+import 'package:home_clean/domain/entities/transaction/create_transaction.dart'
+    as _i21;
+import 'package:home_clean/domain/entities/transaction/transaction.dart' as _i5;
+import 'package:home_clean/domain/entities/user/create_user.dart' as _i15;
 import 'package:home_clean/domain/entities/user/user.dart' as _i2;
+import 'package:home_clean/domain/entities/wallet/wallet.dart' as _i20;
 import 'package:home_clean/domain/repositories/authentication_repository.dart'
-    as _i7;
-import 'package:home_clean/domain/repositories/building_repository.dart' as _i4;
-import 'package:home_clean/domain/repositories/room_repository.dart' as _i6;
-import 'package:home_clean/domain/repositories/user_repository.dart' as _i11;
-import 'package:home_clean/domain/usecases/auth/login_usecase.dart' as _i18;
-import 'package:home_clean/domain/usecases/auth/user_register_usecase.dart'
-    as _i17;
-import 'package:home_clean/domain/usecases/building/get_buildings_usecase.dart'
-    as _i14;
-import 'package:home_clean/domain/usecases/failure.dart' as _i15;
-import 'package:home_clean/domain/usecases/room/get_rooms_usecase.dart' as _i16;
+    as _i12;
+import 'package:home_clean/domain/repositories/building_repository.dart' as _i7;
+import 'package:home_clean/domain/repositories/order_repository.dart' as _i10;
+import 'package:home_clean/domain/repositories/room_repository.dart' as _i9;
+import 'package:home_clean/domain/repositories/service_repository.dart' as _i22;
+import 'package:home_clean/domain/repositories/transaction_repository.dart'
+    as _i11;
+import 'package:home_clean/domain/repositories/user_repository.dart' as _i16;
+import 'package:home_clean/domain/repositories/wallet_repository.dart' as _i19;
+import 'package:home_clean/domain/use_cases/auth/login_usecase.dart' as _i29;
+import 'package:home_clean/domain/use_cases/auth/user_register_usecase.dart'
+    as _i28;
+import 'package:home_clean/domain/use_cases/building/get_buildings_usecase.dart'
+    as _i25;
+import 'package:home_clean/domain/use_cases/equipment_supply/get_equipment_supplies_usecase.dart'
+    as _i33;
+import 'package:home_clean/domain/use_cases/extra_service/get_extra_service_usecase.dart'
+    as _i35;
+import 'package:home_clean/domain/use_cases/failure.dart' as _i26;
+import 'package:home_clean/domain/use_cases/option/get_options_usecase.dart'
+    as _i37;
+import 'package:home_clean/domain/use_cases/order/create_orders_usecase.dart'
+    as _i30;
+import 'package:home_clean/domain/use_cases/room/get_rooms_usecase.dart' as _i27;
+import 'package:home_clean/domain/use_cases/service_activity/get_service_activities_by_service_usecase.dart'
+    as _i39;
+import 'package:home_clean/domain/use_cases/service_category/get_service_by_service_category_usecase.dart'
+    as _i43;
+import 'package:home_clean/domain/use_cases/service_category/get_service_categories_usecase.dart'
+    as _i44;
+import 'package:home_clean/domain/use_cases/sub_activity/get_sub_activities_usecase.dart'
+    as _i41;
+import 'package:home_clean/domain/use_cases/transaction/save_transaction_usecase.dart'
+    as _i31;
+import 'package:home_clean/domain/use_cases/wallet/get_wallet_by_user.dart'
+    as _i32;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -45,119 +89,166 @@ class _FakeUser_0 extends _i1.SmartFake implements _i2.User {
     : super(parent, parentInvocation);
 }
 
-class _FakeBaseResponse_1<T> extends _i1.SmartFake
-    implements _i3.BaseResponse<T> {
-  _FakeBaseResponse_1(Object parent, Invocation parentInvocation)
+class _FakeAuth_1 extends _i1.SmartFake implements _i3.Auth {
+  _FakeAuth_1(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeBuildingRepository_2 extends _i1.SmartFake
-    implements _i4.BuildingRepository {
-  _FakeBuildingRepository_2(Object parent, Invocation parentInvocation)
+class _FakeBaseResponse_2<T> extends _i1.SmartFake
+    implements _i4.BaseResponse<T> {
+  _FakeBaseResponse_2(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeEither_3<L, R> extends _i1.SmartFake implements _i5.Either<L, R> {
-  _FakeEither_3(Object parent, Invocation parentInvocation)
+class _FakeTransaction_3 extends _i1.SmartFake implements _i5.Transaction {
+  _FakeTransaction_3(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeRoomRepository_4 extends _i1.SmartFake
-    implements _i6.RoomRepository {
-  _FakeRoomRepository_4(Object parent, Invocation parentInvocation)
+class _FakeOrders_4 extends _i1.SmartFake implements _i6.Orders {
+  _FakeOrders_4(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeBuildingRepository_5 extends _i1.SmartFake
+    implements _i7.BuildingRepository {
+  _FakeBuildingRepository_5(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeEither_6<L, R> extends _i1.SmartFake implements _i8.Either<L, R> {
+  _FakeEither_6(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeRoomRepository_7 extends _i1.SmartFake
+    implements _i9.RoomRepository {
+  _FakeRoomRepository_7(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeOrderRepository_8 extends _i1.SmartFake
+    implements _i10.OrderRepository {
+  _FakeOrderRepository_8(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeTransactionRepository_9 extends _i1.SmartFake
+    implements _i11.TransactionRepository {
+  _FakeTransactionRepository_9(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
 /// A class which mocks [AuthRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAuthRepository extends _i1.Mock implements _i7.AuthRepository {
+class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
   MockAuthRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i8.Future<bool> login(_i9.LoginModel? loginModel) =>
+  _i13.Future<bool> login(_i14.LoginModel? loginModel) =>
       (super.noSuchMethod(
             Invocation.method(#login, [loginModel]),
-            returnValue: _i8.Future<bool>.value(false),
+            returnValue: _i13.Future<bool>.value(false),
           )
-          as _i8.Future<bool>);
+          as _i13.Future<bool>);
 
   @override
-  _i8.Future<_i2.User> createAccount(_i10.CreateUser? createUser) =>
+  _i13.Future<_i2.User> createAccount(_i15.CreateUser? createUser) =>
       (super.noSuchMethod(
             Invocation.method(#createAccount, [createUser]),
-            returnValue: _i8.Future<_i2.User>.value(
+            returnValue: _i13.Future<_i2.User>.value(
               _FakeUser_0(
                 this,
                 Invocation.method(#createAccount, [createUser]),
               ),
             ),
           )
-          as _i8.Future<_i2.User>);
+          as _i13.Future<_i2.User>);
 
   @override
-  _i8.Future<void> saveUserFromLocal(_i2.User? user) =>
+  _i13.Future<_i3.Auth> refreshToken() =>
+      (super.noSuchMethod(
+            Invocation.method(#refreshToken, []),
+            returnValue: _i13.Future<_i3.Auth>.value(
+              _FakeAuth_1(this, Invocation.method(#refreshToken, [])),
+            ),
+          )
+          as _i13.Future<_i3.Auth>);
+
+  @override
+  _i13.Future<void> saveUserFromLocal(_i2.User? user) =>
       (super.noSuchMethod(
             Invocation.method(#saveUserFromLocal, [user]),
-            returnValue: _i8.Future<void>.value(),
-            returnValueForMissingStub: _i8.Future<void>.value(),
+            returnValue: _i13.Future<void>.value(),
+            returnValueForMissingStub: _i13.Future<void>.value(),
           )
-          as _i8.Future<void>);
+          as _i13.Future<void>);
 
   @override
-  _i8.Future<_i2.User> getUserFromLocal() =>
+  _i13.Future<_i2.User> getUserFromLocal() =>
       (super.noSuchMethod(
             Invocation.method(#getUserFromLocal, []),
-            returnValue: _i8.Future<_i2.User>.value(
+            returnValue: _i13.Future<_i2.User>.value(
               _FakeUser_0(this, Invocation.method(#getUserFromLocal, [])),
             ),
           )
-          as _i8.Future<_i2.User>);
+          as _i13.Future<_i2.User>);
 
   @override
-  _i8.Future<void> clearUserFromLocal() =>
+  _i13.Future<void> clearUserFromLocal() =>
       (super.noSuchMethod(
             Invocation.method(#clearUserFromLocal, []),
-            returnValue: _i8.Future<void>.value(),
-            returnValueForMissingStub: _i8.Future<void>.value(),
+            returnValue: _i13.Future<void>.value(),
+            returnValueForMissingStub: _i13.Future<void>.value(),
           )
-          as _i8.Future<void>);
+          as _i13.Future<void>);
 }
 
 /// A class which mocks [UserRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockUserRepository extends _i1.Mock implements _i11.UserRepository {
+class MockUserRepository extends _i1.Mock implements _i16.UserRepository {
   MockUserRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i8.Future<_i2.User> createAccount(_i10.CreateUser? createUser) =>
+  _i13.Future<_i2.User> createAccount(_i15.CreateUser? createUser) =>
       (super.noSuchMethod(
             Invocation.method(#createAccount, [createUser]),
-            returnValue: _i8.Future<_i2.User>.value(
+            returnValue: _i13.Future<_i2.User>.value(
               _FakeUser_0(
                 this,
                 Invocation.method(#createAccount, [createUser]),
               ),
             ),
           )
-          as _i8.Future<_i2.User>);
+          as _i13.Future<_i2.User>);
+
+  @override
+  _i13.Future<_i2.User> getUser(String? userId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getUser, [userId]),
+            returnValue: _i13.Future<_i2.User>.value(
+              _FakeUser_0(this, Invocation.method(#getUser, [userId])),
+            ),
+          )
+          as _i13.Future<_i2.User>);
 }
 
 /// A class which mocks [RoomRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockRoomRepository extends _i1.Mock implements _i6.RoomRepository {
+class MockRoomRepository extends _i1.Mock implements _i9.RoomRepository {
   MockRoomRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i8.Future<_i3.BaseResponse<_i12.Room>> getRooms(
+  _i13.Future<_i4.BaseResponse<_i17.Room>> getRooms(
     String? search,
     String? orderBy,
     int? page,
@@ -165,27 +256,27 @@ class MockRoomRepository extends _i1.Mock implements _i6.RoomRepository {
   ) =>
       (super.noSuchMethod(
             Invocation.method(#getRooms, [search, orderBy, page, size]),
-            returnValue: _i8.Future<_i3.BaseResponse<_i12.Room>>.value(
-              _FakeBaseResponse_1<_i12.Room>(
+            returnValue: _i13.Future<_i4.BaseResponse<_i17.Room>>.value(
+              _FakeBaseResponse_2<_i17.Room>(
                 this,
                 Invocation.method(#getRooms, [search, orderBy, page, size]),
               ),
             ),
           )
-          as _i8.Future<_i3.BaseResponse<_i12.Room>>);
+          as _i13.Future<_i4.BaseResponse<_i17.Room>>);
 }
 
 /// A class which mocks [BuildingRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockBuildingRepository extends _i1.Mock
-    implements _i4.BuildingRepository {
+    implements _i7.BuildingRepository {
   MockBuildingRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i8.Future<_i3.BaseResponse<_i13.Building>> getBuildings(
+  _i13.Future<_i4.BaseResponse<_i18.Building>> getBuildings(
     String? search,
     String? orderBy,
     int? page,
@@ -193,126 +284,652 @@ class MockBuildingRepository extends _i1.Mock
   ) =>
       (super.noSuchMethod(
             Invocation.method(#getBuildings, [search, orderBy, page, size]),
-            returnValue: _i8.Future<_i3.BaseResponse<_i13.Building>>.value(
-              _FakeBaseResponse_1<_i13.Building>(
+            returnValue: _i13.Future<_i4.BaseResponse<_i18.Building>>.value(
+              _FakeBaseResponse_2<_i18.Building>(
                 this,
                 Invocation.method(#getBuildings, [search, orderBy, page, size]),
               ),
             ),
           )
-          as _i8.Future<_i3.BaseResponse<_i13.Building>>);
+          as _i13.Future<_i4.BaseResponse<_i18.Building>>);
+}
+
+/// A class which mocks [WalletRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockWalletRepository extends _i1.Mock implements _i19.WalletRepository {
+  MockWalletRepository() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i13.Future<_i4.BaseResponse<_i20.Wallet>> getWalletByUser(
+    int? page,
+    int? size,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getWalletByUser, [page, size]),
+            returnValue: _i13.Future<_i4.BaseResponse<_i20.Wallet>>.value(
+              _FakeBaseResponse_2<_i20.Wallet>(
+                this,
+                Invocation.method(#getWalletByUser, [page, size]),
+              ),
+            ),
+          )
+          as _i13.Future<_i4.BaseResponse<_i20.Wallet>>);
+}
+
+/// A class which mocks [TransactionRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockTransactionRepository extends _i1.Mock
+    implements _i11.TransactionRepository {
+  MockTransactionRepository() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i13.Future<_i5.Transaction> saveTransaction(
+    _i21.CreateTransaction? transaction,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveTransaction, [transaction]),
+            returnValue: _i13.Future<_i5.Transaction>.value(
+              _FakeTransaction_3(
+                this,
+                Invocation.method(#saveTransaction, [transaction]),
+              ),
+            ),
+          )
+          as _i13.Future<_i5.Transaction>);
+}
+
+/// A class which mocks [ServiceRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockServiceRepository extends _i1.Mock implements _i22.ServiceRepository {
+  MockServiceRepository() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i13.Future<_i4.BaseResponse<_i23.Service>> getServices(
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getServices, [search, orderBy, page, size]),
+            returnValue: _i13.Future<_i4.BaseResponse<_i23.Service>>.value(
+              _FakeBaseResponse_2<_i23.Service>(
+                this,
+                Invocation.method(#getServices, [search, orderBy, page, size]),
+              ),
+            ),
+          )
+          as _i13.Future<_i4.BaseResponse<_i23.Service>>);
+
+  @override
+  _i13.Future<void> saveSelectedServiceIds(List<String>? ids) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveSelectedServiceIds, [ids]),
+            returnValue: _i13.Future<void>.value(),
+            returnValueForMissingStub: _i13.Future<void>.value(),
+          )
+          as _i13.Future<void>);
+
+  @override
+  _i13.Future<List<String>?> getSelectedServiceIds() =>
+      (super.noSuchMethod(
+            Invocation.method(#getSelectedServiceIds, []),
+            returnValue: _i13.Future<List<String>?>.value(),
+          )
+          as _i13.Future<List<String>?>);
+
+  @override
+  _i13.Future<void> clearSelectedServiceIds() =>
+      (super.noSuchMethod(
+            Invocation.method(#clearSelectedServiceIds, []),
+            returnValue: _i13.Future<void>.value(),
+            returnValueForMissingStub: _i13.Future<void>.value(),
+          )
+          as _i13.Future<void>);
+}
+
+/// A class which mocks [OrderRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockOrderRepository extends _i1.Mock implements _i10.OrderRepository {
+  MockOrderRepository() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i13.Future<_i6.Orders> createOrder(_i24.CreateOrder? createOrder) =>
+      (super.noSuchMethod(
+            Invocation.method(#createOrder, [createOrder]),
+            returnValue: _i13.Future<_i6.Orders>.value(
+              _FakeOrders_4(
+                this,
+                Invocation.method(#createOrder, [createOrder]),
+              ),
+            ),
+          )
+          as _i13.Future<_i6.Orders>);
+
+  @override
+  _i13.Future<void> saveOrderToLocal(_i24.CreateOrder? createOrder) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveOrderToLocal, [createOrder]),
+            returnValue: _i13.Future<void>.value(),
+            returnValueForMissingStub: _i13.Future<void>.value(),
+          )
+          as _i13.Future<void>);
+
+  @override
+  _i13.Future<_i6.Orders?> getOrderFromLocal() =>
+      (super.noSuchMethod(
+            Invocation.method(#getOrderFromLocal, []),
+            returnValue: _i13.Future<_i6.Orders?>.value(),
+          )
+          as _i13.Future<_i6.Orders?>);
+
+  @override
+  _i13.Future<void> deleteOrderFromLocal() =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteOrderFromLocal, []),
+            returnValue: _i13.Future<void>.value(),
+            returnValueForMissingStub: _i13.Future<void>.value(),
+          )
+          as _i13.Future<void>);
 }
 
 /// A class which mocks [GetBuildingsUsecase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGetBuildingsUsecase extends _i1.Mock
-    implements _i14.GetBuildingsUsecase {
+    implements _i25.GetBuildingsUsecase {
   MockGetBuildingsUsecase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.BuildingRepository get buildingRepository =>
+  _i7.BuildingRepository get buildingRepository =>
       (super.noSuchMethod(
             Invocation.getter(#buildingRepository),
-            returnValue: _FakeBuildingRepository_2(
+            returnValue: _FakeBuildingRepository_5(
               this,
               Invocation.getter(#buildingRepository),
             ),
           )
-          as _i4.BuildingRepository);
+          as _i7.BuildingRepository);
 
   @override
-  _i8.Future<_i5.Either<_i15.Failure, _i3.BaseResponse<_i13.Building>>> call(
-    _i14.GetBuildingsParams? params,
+  _i13.Future<_i8.Either<_i26.Failure, _i4.BaseResponse<_i18.Building>>> call(
+    _i25.GetBuildingsParams? params,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#call, [params]),
-            returnValue: _i8.Future<
-              _i5.Either<_i15.Failure, _i3.BaseResponse<_i13.Building>>
+            returnValue: _i13.Future<
+              _i8.Either<_i26.Failure, _i4.BaseResponse<_i18.Building>>
             >.value(
-              _FakeEither_3<_i15.Failure, _i3.BaseResponse<_i13.Building>>(
+              _FakeEither_6<_i26.Failure, _i4.BaseResponse<_i18.Building>>(
                 this,
                 Invocation.method(#call, [params]),
               ),
             ),
           )
-          as _i8.Future<
-            _i5.Either<_i15.Failure, _i3.BaseResponse<_i13.Building>>
+          as _i13.Future<
+            _i8.Either<_i26.Failure, _i4.BaseResponse<_i18.Building>>
           >);
 }
 
 /// A class which mocks [GetRoomsUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockGetRoomsUseCase extends _i1.Mock implements _i16.GetRoomsUseCase {
+class MockGetRoomsUseCase extends _i1.Mock implements _i27.GetRoomsUseCase {
   MockGetRoomsUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i6.RoomRepository get roomRepository =>
+  _i9.RoomRepository get roomRepository =>
       (super.noSuchMethod(
             Invocation.getter(#roomRepository),
-            returnValue: _FakeRoomRepository_4(
+            returnValue: _FakeRoomRepository_7(
               this,
               Invocation.getter(#roomRepository),
             ),
           )
-          as _i6.RoomRepository);
+          as _i9.RoomRepository);
 
   @override
-  _i8.Future<_i5.Either<_i15.Failure, _i3.BaseResponse<_i12.Room>>> call(
-    _i16.GetRoomsParams? params,
+  _i13.Future<_i8.Either<_i26.Failure, _i4.BaseResponse<_i17.Room>>> call(
+    _i27.GetRoomsParams? params,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#call, [params]),
-            returnValue: _i8.Future<
-              _i5.Either<_i15.Failure, _i3.BaseResponse<_i12.Room>>
+            returnValue: _i13.Future<
+              _i8.Either<_i26.Failure, _i4.BaseResponse<_i17.Room>>
             >.value(
-              _FakeEither_3<_i15.Failure, _i3.BaseResponse<_i12.Room>>(
+              _FakeEither_6<_i26.Failure, _i4.BaseResponse<_i17.Room>>(
                 this,
                 Invocation.method(#call, [params]),
               ),
             ),
           )
-          as _i8.Future<_i5.Either<_i15.Failure, _i3.BaseResponse<_i12.Room>>>);
+          as _i13.Future<
+            _i8.Either<_i26.Failure, _i4.BaseResponse<_i17.Room>>
+          >);
 }
 
 /// A class which mocks [UserRegisterUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockUserRegisterUseCase extends _i1.Mock
-    implements _i17.UserRegisterUseCase {
+    implements _i28.UserRegisterUseCase {
   MockUserRegisterUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i8.Future<_i2.User> call(_i10.CreateUser? createUser) =>
+  _i13.Future<_i2.User> call(_i15.CreateUser? createUser) =>
       (super.noSuchMethod(
             Invocation.method(#call, [createUser]),
-            returnValue: _i8.Future<_i2.User>.value(
+            returnValue: _i13.Future<_i2.User>.value(
               _FakeUser_0(this, Invocation.method(#call, [createUser])),
             ),
           )
-          as _i8.Future<_i2.User>);
+          as _i13.Future<_i2.User>);
 }
 
 /// A class which mocks [LoginUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLoginUseCase extends _i1.Mock implements _i18.LoginUseCase {
+class MockLoginUseCase extends _i1.Mock implements _i29.LoginUseCase {
   MockLoginUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i8.Future<bool> call(_i9.LoginModel? loginModel) =>
+  _i13.Future<bool> call(_i14.LoginModel? loginModel) =>
       (super.noSuchMethod(
             Invocation.method(#call, [loginModel]),
-            returnValue: _i8.Future<bool>.value(false),
+            returnValue: _i13.Future<bool>.value(false),
           )
-          as _i8.Future<bool>);
+          as _i13.Future<bool>);
+}
+
+/// A class which mocks [CreateOrderUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockCreateOrderUseCase extends _i1.Mock
+    implements _i30.CreateOrderUseCase {
+  MockCreateOrderUseCase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i10.OrderRepository get repository =>
+      (super.noSuchMethod(
+            Invocation.getter(#repository),
+            returnValue: _FakeOrderRepository_8(
+              this,
+              Invocation.getter(#repository),
+            ),
+          )
+          as _i10.OrderRepository);
+
+  @override
+  _i13.Future<_i8.Either<_i26.Failure, _i6.Orders>> call(
+    _i30.SaveOrderParams? params,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [params]),
+            returnValue:
+                _i13.Future<_i8.Either<_i26.Failure, _i6.Orders>>.value(
+                  _FakeEither_6<_i26.Failure, _i6.Orders>(
+                    this,
+                    Invocation.method(#call, [params]),
+                  ),
+                ),
+          )
+          as _i13.Future<_i8.Either<_i26.Failure, _i6.Orders>>);
+}
+
+/// A class which mocks [SaveTransactionUsecase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSaveTransactionUsecase extends _i1.Mock
+    implements _i31.SaveTransactionUsecase {
+  MockSaveTransactionUsecase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i11.TransactionRepository get repository =>
+      (super.noSuchMethod(
+            Invocation.getter(#repository),
+            returnValue: _FakeTransactionRepository_9(
+              this,
+              Invocation.getter(#repository),
+            ),
+          )
+          as _i11.TransactionRepository);
+
+  @override
+  _i13.Future<_i8.Either<_i26.Failure, _i5.Transaction>> call(
+    _i31.SaveTransactionParams? params,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [params]),
+            returnValue:
+                _i13.Future<_i8.Either<_i26.Failure, _i5.Transaction>>.value(
+                  _FakeEither_6<_i26.Failure, _i5.Transaction>(
+                    this,
+                    Invocation.method(#call, [params]),
+                  ),
+                ),
+          )
+          as _i13.Future<_i8.Either<_i26.Failure, _i5.Transaction>>);
+}
+
+/// A class which mocks [GetWalletByUserUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetWalletByUserUseCase extends _i1.Mock
+    implements _i32.GetWalletByUserUseCase {
+  MockGetWalletByUserUseCase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i13.Future<_i4.BaseResponse<_i20.Wallet>> execute(int? page, int? size) =>
+      (super.noSuchMethod(
+            Invocation.method(#execute, [page, size]),
+            returnValue: _i13.Future<_i4.BaseResponse<_i20.Wallet>>.value(
+              _FakeBaseResponse_2<_i20.Wallet>(
+                this,
+                Invocation.method(#execute, [page, size]),
+              ),
+            ),
+          )
+          as _i13.Future<_i4.BaseResponse<_i20.Wallet>>);
+}
+
+/// A class which mocks [GetEquipmentSuppliesUsecase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetEquipmentSuppliesUsecase extends _i1.Mock
+    implements _i33.GetEquipmentSuppliesUsecase {
+  MockGetEquipmentSuppliesUsecase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i13.Future<_i4.BaseResponse<_i34.EquipmentSupply>> execute(
+    String? serviceId,
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#execute, [
+              serviceId,
+              search,
+              orderBy,
+              page,
+              size,
+            ]),
+            returnValue:
+                _i13.Future<_i4.BaseResponse<_i34.EquipmentSupply>>.value(
+                  _FakeBaseResponse_2<_i34.EquipmentSupply>(
+                    this,
+                    Invocation.method(#execute, [
+                      serviceId,
+                      search,
+                      orderBy,
+                      page,
+                      size,
+                    ]),
+                  ),
+                ),
+          )
+          as _i13.Future<_i4.BaseResponse<_i34.EquipmentSupply>>);
+}
+
+/// A class which mocks [GetExtraServiceUsecase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetExtraServiceUsecase extends _i1.Mock
+    implements _i35.GetExtraServiceUsecase {
+  MockGetExtraServiceUsecase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i13.Future<_i4.BaseResponse<_i36.ExtraService>> execute(
+    String? serviceId,
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#execute, [
+              serviceId,
+              search,
+              orderBy,
+              page,
+              size,
+            ]),
+            returnValue: _i13.Future<_i4.BaseResponse<_i36.ExtraService>>.value(
+              _FakeBaseResponse_2<_i36.ExtraService>(
+                this,
+                Invocation.method(#execute, [
+                  serviceId,
+                  search,
+                  orderBy,
+                  page,
+                  size,
+                ]),
+              ),
+            ),
+          )
+          as _i13.Future<_i4.BaseResponse<_i36.ExtraService>>);
+}
+
+/// A class which mocks [GetOptionsUsecase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetOptionsUsecase extends _i1.Mock implements _i37.GetOptionsUsecase {
+  MockGetOptionsUsecase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i13.Future<_i4.BaseResponse<_i38.Option>> execute(
+    String? serviceId,
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#execute, [
+              serviceId,
+              search,
+              orderBy,
+              page,
+              size,
+            ]),
+            returnValue: _i13.Future<_i4.BaseResponse<_i38.Option>>.value(
+              _FakeBaseResponse_2<_i38.Option>(
+                this,
+                Invocation.method(#execute, [
+                  serviceId,
+                  search,
+                  orderBy,
+                  page,
+                  size,
+                ]),
+              ),
+            ),
+          )
+          as _i13.Future<_i4.BaseResponse<_i38.Option>>);
+}
+
+/// A class which mocks [GetServiceActivitiesByServiceUsecase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetServiceActivitiesByServiceUsecase extends _i1.Mock
+    implements _i39.GetServiceActivitiesByServiceUsecase {
+  MockGetServiceActivitiesByServiceUsecase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i13.Future<_i4.BaseResponse<_i40.ServiceActivity>> execute(
+    String? serviceId,
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#execute, [
+              serviceId,
+              search,
+              orderBy,
+              page,
+              size,
+            ]),
+            returnValue:
+                _i13.Future<_i4.BaseResponse<_i40.ServiceActivity>>.value(
+                  _FakeBaseResponse_2<_i40.ServiceActivity>(
+                    this,
+                    Invocation.method(#execute, [
+                      serviceId,
+                      search,
+                      orderBy,
+                      page,
+                      size,
+                    ]),
+                  ),
+                ),
+          )
+          as _i13.Future<_i4.BaseResponse<_i40.ServiceActivity>>);
+}
+
+/// A class which mocks [GetSubActivitiesUsecase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetSubActivitiesUsecase extends _i1.Mock
+    implements _i41.GetSubActivitiesUsecase {
+  MockGetSubActivitiesUsecase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i13.Future<_i4.BaseResponse<_i42.SubActivity>> execute(
+    String? serviceActivityId,
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#execute, [
+              serviceActivityId,
+              search,
+              orderBy,
+              page,
+              size,
+            ]),
+            returnValue: _i13.Future<_i4.BaseResponse<_i42.SubActivity>>.value(
+              _FakeBaseResponse_2<_i42.SubActivity>(
+                this,
+                Invocation.method(#execute, [
+                  serviceActivityId,
+                  search,
+                  orderBy,
+                  page,
+                  size,
+                ]),
+              ),
+            ),
+          )
+          as _i13.Future<_i4.BaseResponse<_i42.SubActivity>>);
+}
+
+/// A class which mocks [GetServiceByServiceCategoryUsecase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetServiceByServiceCategoryUsecase extends _i1.Mock
+    implements _i43.GetServiceByServiceCategoryUsecase {
+  MockGetServiceByServiceCategoryUsecase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i13.Future<_i4.BaseResponse<_i23.Service>> execute(
+    String? serviceCategoryId,
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#execute, [
+              serviceCategoryId,
+              search,
+              orderBy,
+              page,
+              size,
+            ]),
+            returnValue: _i13.Future<_i4.BaseResponse<_i23.Service>>.value(
+              _FakeBaseResponse_2<_i23.Service>(
+                this,
+                Invocation.method(#execute, [
+                  serviceCategoryId,
+                  search,
+                  orderBy,
+                  page,
+                  size,
+                ]),
+              ),
+            ),
+          )
+          as _i13.Future<_i4.BaseResponse<_i23.Service>>);
+}
+
+/// A class which mocks [GetServiceCategoriesUsecase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetServiceCategoriesUsecase extends _i1.Mock
+    implements _i44.GetServiceCategoriesUsecase {
+  MockGetServiceCategoriesUsecase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i13.Future<_i4.BaseResponse<_i45.ServiceCategory>> execute(
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#execute, [search, orderBy, page, size]),
+            returnValue:
+                _i13.Future<_i4.BaseResponse<_i45.ServiceCategory>>.value(
+                  _FakeBaseResponse_2<_i45.ServiceCategory>(
+                    this,
+                    Invocation.method(#execute, [search, orderBy, page, size]),
+                  ),
+                ),
+          )
+          as _i13.Future<_i4.BaseResponse<_i45.ServiceCategory>>);
 }

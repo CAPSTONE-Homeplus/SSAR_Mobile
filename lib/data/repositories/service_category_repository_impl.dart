@@ -21,7 +21,7 @@ class ServiceCategoryRepositoryImpl implements ServiceCategoryRepository {
   ) async {
     try {
       final response = await homeCleanRequest
-          .get('${ApiConstant.SERVICE_CATEGORIES}', queryParameters: {
+          .get(ApiConstant.serviceCategories, queryParameters: {
         'search': search,
         'orderBy': orderBy,
         'page': page,
@@ -67,7 +67,7 @@ class ServiceCategoryRepositoryImpl implements ServiceCategoryRepository {
   ) async {
     try {
       final response = await homeCleanRequest.get(
-          '${ApiConstant.SERVICE_CATEGORIES}/$serviceCategoryId/services',
+          '${ApiConstant.serviceCategories}/$serviceCategoryId/services',
           queryParameters: {
             'id': serviceCategoryId,
             'search': search,

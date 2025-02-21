@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../domain/usecases/notification/initialize_notification_usecase.dart';
-import '../../../domain/usecases/notification/show_notification_usecase.dart';
+import '../../../domain/use_cases/notification/initialize_notification_usecase.dart';
+import '../../../domain/use_cases/notification/show_notification_usecase.dart';
 
 part 'notification_event.dart';
 part 'notification_state.dart';

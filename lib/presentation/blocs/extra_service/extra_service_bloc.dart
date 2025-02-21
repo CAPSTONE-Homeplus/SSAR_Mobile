@@ -3,7 +3,7 @@ import 'package:home_clean/core/constant.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_event.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_state.dart';
 
-import '../../../domain/usecases/extra_service/get_extra_service_usecase.dart';
+import '../../../domain/use_cases/extra_service/get_extra_service_usecase.dart';
 
 class ExtraServiceBloc extends Bloc<ExtraServiceEvent, ExtraServiceState> {
   final GetExtraServiceUsecase getExtraServiceUsecase;

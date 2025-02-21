@@ -29,4 +29,15 @@ class ExtraServiceMapper {
       serviceId: entity.serviceId,
     );
   }
+
+  static List<ExtraService> toListEntity(List<ExtraServiceModel> data) {
+    return data.map((item) => toEntity(item)).toList();
+  }
+
+
+  static List<ExtraServiceModel> toListModel(List<ExtraService> data) {
+    return data.map((item) => toModel(item)).toList();
+  }
+
+
 }

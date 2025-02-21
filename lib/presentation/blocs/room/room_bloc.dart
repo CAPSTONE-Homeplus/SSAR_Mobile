@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_clean/presentation/blocs/room/room_event.dart';
 import 'package:home_clean/presentation/blocs/room/room_state.dart';
 
-import '../../../domain/usecases/room/get_rooms_usecase.dart';
+import '../../../domain/use_cases/room/get_rooms_usecase.dart';
 
 class RoomBloc extends Bloc<RoomEvent, RoomState> {
   final GetRoomsUseCase getRoomsUseCase;

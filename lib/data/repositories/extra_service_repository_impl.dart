@@ -19,7 +19,7 @@ class ExtraServiceRepositoryImpl implements ExtraServiceRepository {
   ) async {
     try {
       final response = await homeCleanRequest.get(
-          '${ApiConstant.SERVICES}/$serviceId/extra-services',
+          '${ApiConstant.services}/$serviceId/extra-services',
           queryParameters: {
             'id': serviceId,
             'search': search,

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-class AuthenModel {
+class AuthModel {
   String? accessToken;
   String? refreshToken;
   String? userId;
@@ -8,7 +8,7 @@ class AuthenModel {
   String? status;
   String? role;
 
-  AuthenModel({
+  AuthModel({
     this.accessToken,
     this.refreshToken,
     this.userId,
@@ -30,9 +30,9 @@ class AuthenModel {
   }
 
   /// Chuyển JSON string thành đối tượng (dùng khi lấy dữ liệu)
-  factory AuthenModel.fromJson(String jsonString) {
+  factory AuthModel.fromJson(String jsonString) {
     Map<String, dynamic> jsonMap = json.decode(jsonString);
-    return AuthenModel(
+    return AuthModel(
       accessToken: jsonMap['accessToken'],
       refreshToken: jsonMap['refreshToken'],
       userId: jsonMap['userId'],

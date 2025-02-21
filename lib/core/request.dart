@@ -1,12 +1,12 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:home_clean/core/api_constant.dart';
 import 'package:home_clean/data/datasource/auth_local_datasource.dart';
 import 'package:home_clean/data/datasource/user_local_datasource.dart';
+
+import '../data/mappers/user/user_mapper.dart';
 
 enum BaseUrlType {
   homeClean,
@@ -71,13 +71,12 @@ class RetryInterceptor extends Interceptor {
   RetryInterceptor({required this.dio, this.maxRetries = 3});
 
   @override
-  Future<void> onError(DioError err, ErrorInterceptorHandler handler) async {
+  Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
     if (_shouldRetry(err) && maxRetries > 0) {
       int retryCount = 0;
       while (retryCount < maxRetries) {
         retryCount++;
         try {
-          print('Retry attempt $retryCount');
           final response = await dio.request(
             err.requestOptions.path,
             options: Options(
@@ -98,11 +97,11 @@ class RetryInterceptor extends Interceptor {
     return super.onError(err, handler);
   }
 
-  bool _shouldRetry(DioError err) {
-    return err.type == DioErrorType.connectionTimeout ||
-        err.type == DioErrorType.sendTimeout ||
-        err.type == DioErrorType.receiveTimeout ||
-        err.type == DioErrorType.connectionError;
+  bool _shouldRetry(DioException err) {
+    return err.type == DioExceptionType.connectionTimeout ||
+        err.type == DioExceptionType.sendTimeout ||
+        err.type == DioExceptionType.receiveTimeout ||
+        err.type == DioExceptionType.connectionError;
   }
 }
 
@@ -141,8 +140,8 @@ class CustomInterceptors extends Interceptor {
 class MyRequest {
 
   static final Map<BaseUrlType, String> baseUrls = {
-    BaseUrlType.homeClean: ApiConstant.HOME_CLEAN_URL,
-    BaseUrlType.vinWallet: ApiConstant.VIN_WALLET_URL,
+    BaseUrlType.homeClean: ApiConstant.homeCleanUrl,
+    BaseUrlType.vinWallet: ApiConstant.vinWalletUrl ,
   };
 
   static BaseOptions getOptions(BaseUrlType urlType) => BaseOptions(
@@ -177,17 +176,17 @@ class MyRequest {
 
             try {
               final refreshToken = await _authLocalDataSource.getRefreshTokenFromStorage();
+              final userId = UserMapper.toModel(await _userLocalDatasource.getUser() ?? {}).id;
 
               if (refreshToken == null || refreshToken.isEmpty) {
-                // Nếu không có refresh token, logout
                 clearLocalStorageAndLogout();
                 return handler.next(e);
               }
 
               // Gọi API để refresh token
               final refreshResponse = await Dio().post(
-                '${ApiConstant.HOME_CLEAN_URL}/auth/refresh',
-                data: {'refreshToken': refreshToken},
+                '/auth/refresh',
+                data: {'userId' : userId,'refreshToken': refreshToken},
               );
 
               if (refreshResponse.statusCode == 200) {

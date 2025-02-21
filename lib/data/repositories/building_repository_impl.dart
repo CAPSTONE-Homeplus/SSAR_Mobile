@@ -13,7 +13,7 @@ class BuildingRepositoryImpl implements BuildingRepository {
   Future<BaseResponse<Building>> getBuildings(String? search, String? orderBy, int? page, int? size) async{
     try {
       final response = await homeCleanRequest.get(
-          ApiConstant.BUILDINGS,
+          ApiConstant.buildings,
           queryParameters: {
             'search': search,
             'orderBy': orderBy,

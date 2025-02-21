@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/validation.dart';
 import 'package:home_clean/presentation/widgets/address_bottom_sheet.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 
 import '../../../domain/entities/order/create_order.dart';
+import '../../blocs/order/order_bloc.dart';
 import '../../widgets/step_indicator_widget.dart';
 
 class OrderConfirmationScreen extends StatefulWidget {
@@ -28,143 +30,161 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
 
     return Scaffold(
       appBar: CustomAppBar(
-          title: 'Xác nhận',
-          onBackPressed: () {
-            Navigator.pop(context);
-          }),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            StepIndicatorWidget(currentStep: 3),
-            const SizedBox(height: 8),
-            _buildSection(
-              title: 'Địa chỉ',
-              icon: Icons.location_on_outlined,
-              child: InkWell(
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) => AddressBottomSheet(
-                      currentAddress: widget.orderDetails.address,
-                      currentBuilding: selectedBuilding,
-                      currentRoom: selectedRoom,
-                      onAddressSelected: (address, building, room) {
-                        setState(() {
-                          widget.orderDetails.address = address;
-                          selectedBuilding = building;
-                          selectedRoom = room;
-                        });
-                      },
-                    ),
-                  );
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.orderDetails.address,
-                      style: GoogleFonts.poppins(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    if (selectedBuilding.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        'Tòa: $selectedBuilding',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          color: Colors.grey[600],
+        title: 'Xác nhận',
+        onBackPressed: () {
+          Navigator.pop(context);
+        },
+      ),
+      body: BlocConsumer<OrderBloc, OrderState>(
+        listener: (context, state) {
+          if (state is OrderCreated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Đơn hàng đã được tạo thành công!')),
+            );
+          } else if (state is OrderError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is OrderLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                StepIndicatorWidget(currentStep: 3),
+                const SizedBox(height: 8),
+                _buildSection(
+                  title: 'Địa chỉ',
+                  icon: Icons.location_on_outlined,
+                  child: InkWell(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => AddressBottomSheet(
+                          currentAddress: widget.orderDetails.address,
+                          currentBuilding: selectedBuilding,
+                          currentRoom: selectedRoom,
+                          onAddressSelected: (address, building, room) {
+                            setState(() {
+                              widget.orderDetails.address = address;
+                              selectedBuilding = building;
+                              selectedRoom = room;
+                            });
+                          },
                         ),
+                      );
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.orderDetails.address,
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        if (selectedBuilding.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            'Tòa: $selectedBuilding',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                  ),
+                ),
+
+                _buildSection(
+                  title: 'Chi tiết dịch vụ',
+                  icon: Icons.cleaning_services_outlined,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildDetailRow(
+                        title: 'Dịch vụ',
+                        value: widget.orderDetails.service.name ?? 'Dọn dẹp căn hộ',
+                        icon: Icons.home_work_outlined,
+                      ),
+                      if (widget.orderDetails.emergencyRequest) _buildEmergencyBadge(),
+                      const SizedBox(height: 12),
+                      _buildDetailRow(
+                        title: 'Thời gian',
+                        value:
+                        '${widget.orderDetails.timeSlot.startTime} - ${widget.orderDetails.timeSlot.endTime}',
+                        icon: Icons.access_time,
                       ),
                     ],
-                    const SizedBox(height: 8),
-                  ],
+                  ),
                 ),
-              ),
-            ),
 
-            _buildSection(
-              title: 'Chi tiết dịch vụ',
-              icon: Icons.cleaning_services_outlined,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildDetailRow(
-                    title: 'Dịch vụ',
-                    value: widget.orderDetails.service.name ?? 'Dọn dẹp căn hộ',
-                    icon: Icons.home_work_outlined,
-                  ),
-                  if (widget.orderDetails.emergencyRequest)
-                    _buildEmergencyBadge(),
-                  const SizedBox(height: 12),
-                  _buildDetailRow(
-                    title: 'Thời gian',
-                    value:
-                        '${widget.orderDetails.timeSlot.startTime} - ${widget.orderDetails.timeSlot.endTime}',
-                    icon: Icons.access_time,
-                  ),
-                ],
-              ),
-            ),
-
-            // Selected options
-            if (widget.orderDetails.option.isNotEmpty)
-              _buildSection(
-                title: 'Tùy chọn đã chọn',
-                icon: Icons.checklist_outlined,
-                child: Column(
-                  children: widget.orderDetails.option!
-                      .map(
-                        (option) => _buildOptionItem(
+                if (widget.orderDetails.option.isNotEmpty)
+                  _buildSection(
+                    title: 'Tùy chọn đã chọn',
+                    icon: Icons.checklist_outlined,
+                    child: Column(
+                      children: widget.orderDetails.option
+                          .map(
+                            (option) => _buildOptionItem(
                           title: option.name ?? '',
                           price: option.price ?? 0,
                         ),
                       )
-                      .toList(),
-                ),
-              ),
+                          .toList(),
+                    ),
+                  ),
 
-            // Extra services
-            if (widget.orderDetails.extraService.isNotEmpty)
-              _buildSection(
-                title: 'Dịch vụ thêm',
-                icon: Icons.add_circle_outline,
-                child: Column(
-                  children: widget.orderDetails.extraService
-                      .map(
-                        (service) => _buildOptionItem(
+                if (widget.orderDetails.extraService.isNotEmpty)
+                  _buildSection(
+                    title: 'Dịch vụ thêm',
+                    icon: Icons.add_circle_outline,
+                    child: Column(
+                      children: widget.orderDetails.extraService
+                          .map(
+                            (service) => _buildOptionItem(
                           title: service.name ?? '',
                           price: service.price ?? 0,
                         ),
                       )
-                      .toList(),
-                ),
-              ),
-
-            // Notes section
-            if (widget.orderDetails.notes.isNotEmpty)
-              _buildSection(
-                title: 'Ghi chú',
-                icon: Icons.note_outlined,
-                child: Text(
-                  widget.orderDetails.notes,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: Colors.grey[700],
+                          .toList(),
+                    ),
                   ),
-                ),
-              ),
 
-            const SizedBox(height: 100), // Space for bottom bar
-          ],
-        ),
+                if (widget.orderDetails.notes.isNotEmpty)
+                  _buildSection(
+                    title: 'Ghi chú',
+                    icon: Icons.note_outlined,
+                    child: Text(
+                      widget.orderDetails.notes,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
+
+                const SizedBox(height: 100),
+              ],
+            ),
+          );
+        },
       ),
       bottomNavigationBar: _buildBottomBar(context),
     );
-  }
+
+
+}
 
   Widget _buildStepIndicator({
     required String number,
@@ -381,7 +401,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       child: SafeArea(
         child: ElevatedButton(
           onPressed: () {
-            // TODO: Implement order confirmation
+            context.read<OrderBloc>().add(CreateOrderEvent(widget.orderDetails));
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF1CAF7D),

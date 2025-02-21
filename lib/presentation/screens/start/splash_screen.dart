@@ -1,7 +1,10 @@
-// splash_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_clean/app_router.dart';
+import 'package:home_clean/presentation/screens/login/login_screen.dart';
 
+import '../../../core/request.dart';
+import '../../../data/datasource/auth_local_datasource.dart';
 import '../../widgets/bottom_navigation.dart';
 import '../home/home_screen.dart';
 
@@ -44,21 +47,53 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // Navigate to home screen after animation
-    Future.delayed(Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              BottomNavigation(child: HomeScreen()),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            var fadeAnimation =
-                Tween<double>(begin: 0.0, end: 1.0).animate(animation);
-            return FadeTransition(opacity: fadeAnimation, child: child);
-          },
-          transitionDuration: Duration(milliseconds: 500),
-        ),
-      );
-    });
+    // Kiểm tra trạng thái đăng nhập
+    checkLoginStatus();
+  }
+
+  Future<void> checkLoginStatus() async {
+    await Future.delayed(Duration(seconds: 3)); // Chờ animation
+
+    String? accessToken = await AuthLocalDataSource().getAccessTokenFromStorage();
+    String? refreshToken = await AuthLocalDataSource().getRefreshTokenFromStorage();
+
+    if (accessToken != null && refreshToken != null) {
+      vinWalletRequest.options.headers['Authorization'] = 'Bearer $accessToken';
+      homeCleanRequest.options.headers['Authorization'] = 'Bearer $accessToken';
+      AppRouter.navigateToHome();
+    } else {
+      navigateToLogin();
+    }
+  }
+
+
+  void navigateToHome() {
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            BottomNavigation(child: HomeScreen()),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          var fadeAnimation =
+          Tween<double>(begin: 0.0, end: 1.0).animate(animation);
+          return FadeTransition(opacity: fadeAnimation, child: child);
+        },
+        transitionDuration: Duration(milliseconds: 500),
+      ),
+    );
+  }
+
+  void navigateToLogin() {
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => LoginScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          var fadeAnimation =
+          Tween<double>(begin: 0.0, end: 1.0).animate(animation);
+          return FadeTransition(opacity: fadeAnimation, child: child);
+        },
+        transitionDuration: Duration(milliseconds: 500),
+      ),
+    );
   }
 
   @override
