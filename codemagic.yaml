@@ -19,6 +19,12 @@ workflows:
         git config --global http.postBuffer 524288000
         git config --global core.compression 0
     scripts:
+      - name: Install lcov
+        script: |
+          sudo apt-get update
+          sudo apt-get install -y lcov
+
+    scripts:
       - name: Prebuild Script
         script: |
           flutter clean
