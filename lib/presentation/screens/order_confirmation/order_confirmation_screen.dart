@@ -1,28 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:home_clean/core/validation.dart';
+import 'package:home_clean/core/constant/colors.dart';
+import 'package:home_clean/core/enums/wallet_enums.dart';
+import 'package:home_clean/core/format/validation.dart';
+import 'package:home_clean/domain/entities/transaction/create_transaction.dart';
 import 'package:home_clean/presentation/widgets/address_bottom_sheet.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 
 import '../../../domain/entities/order/create_order.dart';
 import '../../blocs/order/order_bloc.dart';
+import '../../blocs/transaction/transaction_event.dart';
+import '../../blocs/transaction/transaction_state.dart';
+import '../../blocs/transaction/transation_bloc.dart';
+import '../../blocs/wallet/wallet_bloc.dart';
+import '../../blocs/wallet/wallet_state.dart';
 import '../../widgets/step_indicator_widget.dart';
 
 class OrderConfirmationScreen extends StatefulWidget {
   final CreateOrder orderDetails;
 
   const OrderConfirmationScreen({
-    Key? key,
+    super.key,
     required this.orderDetails,
-  }) : super(key: key);
+  });
 
   @override
   State<OrderConfirmationScreen> createState() =>
       _OrderConfirmationScreenState();
 }
 
+
 class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
+  String? selectedWalletId;
+
   @override
   Widget build(BuildContext context) {
     String selectedBuilding = '';
@@ -38,9 +49,18 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       body: BlocConsumer<OrderBloc, OrderState>(
         listener: (context, state) {
           if (state is OrderCreated) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Đơn hàng đã được tạo thành công!')),
+            context.read<TransactionBloc>().add(
+              SaveTransactionEvent(
+                CreateTransaction(
+                  walletId: selectedWalletId,
+                  paymentMethodId: '15890b1a-f5a6-42c3-8f37-541029189722',
+                  amount: '0',
+                  note: 'Thanh toán dịch vụ',
+                  orderId: state.order.id,
+                ),
+              ),
             );
+            _showTransactionPopup(context);
           } else if (state is OrderError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
@@ -48,10 +68,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
           }
         },
         builder: (context, state) {
-          if (state is OrderLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
           return SingleChildScrollView(
             child: Column(
               children: [
@@ -160,20 +176,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                           .toList(),
                     ),
                   ),
-
-                if (widget.orderDetails.notes.isNotEmpty)
-                  _buildSection(
-                    title: 'Ghi chú',
-                    icon: Icons.note_outlined,
-                    child: Text(
-                      widget.orderDetails.notes,
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                  ),
-
+                _buildWallet( context),
                 const SizedBox(height: 100),
               ],
             ),
@@ -182,67 +185,190 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       ),
       bottomNavigationBar: _buildBottomBar(context),
     );
-
-
 }
 
-  Widget _buildStepIndicator({
-    required String number,
-    required String title,
-    bool isCompleted = false,
-    bool isActive = false,
-  }) {
-    final color = isCompleted
-        ? const Color(0xFF1CAF7D)
-        : isActive
-            ? const Color(0xFF1CAF7D)
-            : Colors.grey;
-
-    return Column(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: isCompleted ? color : Colors.transparent,
-            border: Border.all(
-              color: color,
-              width: 2,
+  Widget _buildWallet(BuildContext context) {
+    return BlocBuilder<WalletBloc, WalletState>(
+      builder: (context, state) {
+        if (state is WalletLoading) {
+          return const Center(
+            child: CircularProgressIndicator(
+              color: Colors.green,
+              strokeWidth: 3,
             ),
-            shape: BoxShape.circle,
+          );
+        } else if (state is WalletLoaded) {
+          return _buildSection(
+            title: 'Chọn ví thanh toán',
+            icon: Icons.account_balance_wallet_outlined,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              child: ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: state.wallets.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final wallet = state.wallets[index];
+                  final isSelected = wallet.id == selectedWalletId;
+                  final walletTitle = wallet.type == WalletType.personal
+                      ? '${wallet.type} (Ví riêng)'
+                      : wallet.type;
+
+                  return _buildPaymentOption(
+                    title: walletTitle ?? '',
+                    balance: wallet.balance ?? 0,
+                    icon: Icons.account_balance,
+                    isSelected: isSelected,
+                    onTap: () {
+                      setState(() {
+                        selectedWalletId = wallet.id;
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+          );
+        } else if (state is WalletError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+                const SizedBox(height: 16),
+                Text(
+                  "Lỗi: ${state.message}",
+                  style: GoogleFonts.poppins(
+                    color: Colors.red[700],
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        }
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.account_balance_wallet_outlined,
+                  size: 48, color: Colors.grey[400]),
+              const SizedBox(height: 16),
+              Text(
+                "Không có dữ liệu ví",
+                style: GoogleFonts.poppins(
+                  color: Colors.grey[600],
+                  fontSize: 16,
+                ),
+              ),
+            ],
           ),
-          child: Center(
-            child: isCompleted
-                ? const Icon(Icons.check, color: Colors.white, size: 16)
-                : Text(
-                    number,
-                    style: TextStyle(
-                      color: color,
-                      fontWeight: FontWeight.bold,
+        );
+      },
+    );
+  }
+
+  Widget _buildPaymentOption({
+    required String title,
+    required int balance,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Hero(
+      tag: 'wallet_$title',
+      child: Material(
+        color: Colors.transparent,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primaryColor.withAlpha(8) : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isSelected ? Colors.green : Colors.grey,
+                  width: isSelected ? 2 : 1,
+                ),
+                boxShadow: isSelected
+                    ? [
+                  BoxShadow(
+                    color: AppColors.primaryColor.withAlpha(1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+                    : null,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: !isSelected
+                          ? AppColors.primaryColor.withAlpha(1)
+                          : Colors.green.withAlpha((0.1 * 255).toInt()),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      icon,
+                      size: 24,
+                      color: isSelected ? AppColors.primaryColor : Colors.grey[700],
                     ),
                   ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isSelected ? Colors.green[700] : Colors.grey[800],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${Validation.formatCurrency(balance)} đ',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            color: isSelected ? Colors.green[600] : Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (isSelected)
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withAlpha((0.1 * 255).toInt()),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                        size: 20,
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          title,
-          style: GoogleFonts.poppins(
-            fontSize: 12,
-            color: color,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildStepConnector({required bool isCompleted}) {
-    return Container(
-      width: 40,
-      height: 2,
-      color: isCompleted ? const Color(0xFF1CAF7D) : Colors.grey[300],
-    );
-  }
+
 
   Widget _buildSection({
     required String title,
@@ -256,7 +382,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha((0.1 * 255).toInt()),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -354,6 +480,64 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     );
   }
 
+  void _showTransactionPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return BlocConsumer<TransactionBloc, TransactionState>(
+          listener: (context, state) {
+            if (state is TransactionSuccess) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Thanh toán thành công!")),
+              );
+            } else if (state is TransactionFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Thanh toán thất bại!")),
+              );
+            }
+          },
+          builder: (context, state) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "Xử lý giao dịch...",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    state is TransactionLoading
+                        ? const CircularProgressIndicator()
+                        : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text("Giao dịch thất bại. Vui lòng thử lại!"),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("Đóng"),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+
+
   Widget _buildOptionItem({
     required String title,
     required int price,
@@ -402,6 +586,23 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
         child: ElevatedButton(
           onPressed: () {
             context.read<OrderBloc>().add(CreateOrderEvent(widget.orderDetails));
+
+            BlocListener<OrderBloc, OrderState>(
+              listener: (context, state) {
+                if (state is OrderCreated) {
+                  print("Đặt hàng thành công!");
+                } else if (state is OrderError) {
+                  print("Lỗi đặt hàng: ${state}");
+                }
+              },
+              child: ElevatedButton(
+                onPressed: () {
+                  context.read<OrderBloc>().add(CreateOrderEvent(widget.orderDetails));
+                },
+                child: Text("Đặt hàng"),
+              ),
+            );
+
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF1CAF7D),

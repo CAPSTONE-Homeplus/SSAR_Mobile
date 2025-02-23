@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:home_clean/core/base_model.dart';
+import 'package:home_clean/core/base/base_model.dart';
 
+import '../../../core/base/base_usecase.dart';
 import '../../entities/room/room.dart';
 import '../../repositories/room_repository.dart';
-import '../base_usecase.dart';
-import '../failure.dart';
+import '../../../core/exception/failure.dart';
 
 class GetRoomsUseCase implements UseCase<BaseResponse<Room>, GetRoomsParams> {
   final RoomRepository roomRepository;

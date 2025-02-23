@@ -1,4 +1,5 @@
-  import 'package:home_clean/domain/repositories/authentication_repository.dart';
+  import 'package:home_clean/domain/repositories/house_repository.dart';
+import 'package:home_clean/domain/repositories/authentication_repository.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
 import 'package:home_clean/domain/repositories/order_repository.dart';
 import 'package:home_clean/domain/repositories/room_repository.dart';
@@ -11,6 +12,7 @@ import 'package:home_clean/domain/use_cases/auth/user_register_usecase.dart';
 import 'package:home_clean/domain/use_cases/building/get_buildings_usecase.dart';
 import 'package:home_clean/domain/use_cases/equipment_supply/get_equipment_supplies_usecase.dart';
 import 'package:home_clean/domain/use_cases/extra_service/get_extra_service_usecase.dart';
+import 'package:home_clean/domain/use_cases/house/get_house_by_building_use_case.dart';
 import 'package:home_clean/domain/use_cases/option/get_options_usecase.dart';
 import 'package:home_clean/domain/use_cases/order/create_orders_usecase.dart';
 import 'package:home_clean/domain/use_cases/room/get_rooms_usecase.dart';
@@ -32,7 +34,7 @@ import 'package:home_clean/domain/use_cases/wallet/get_wallet_by_user.dart';
     TransactionRepository,
     ServiceRepository,
     OrderRepository,
-
+    HouseRepository,
 
 
     /// UseCases
@@ -41,7 +43,6 @@ import 'package:home_clean/domain/use_cases/wallet/get_wallet_by_user.dart';
     UserRegisterUseCase,
     LoginUseCase,
     CreateOrderUseCase,
-    SaveTransactionUsecase,
     GetWalletByUserUseCase,
     GetEquipmentSuppliesUsecase,
     GetExtraServiceUsecase,
@@ -49,8 +50,8 @@ import 'package:home_clean/domain/use_cases/wallet/get_wallet_by_user.dart';
     GetServiceActivitiesByServiceUsecase,
     GetSubActivitiesUsecase,
     GetServiceByServiceCategoryUsecase,
-    GetServiceCategoriesUsecase
-
+    GetServiceCategoriesUsecase,
+    GetHouseByBuildingUseCase,
     /// Data
   ], customMocks: [
   ])

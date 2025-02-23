@@ -11,3 +11,9 @@ class ServerFailure extends Failure {
 class NetworkFailure extends Failure {
   NetworkFailure(String message) : super(message);
 }
+
+class ApiFailure extends Failure {
+  final String code;
+
+  ApiFailure(String message, this.code) : super(message);
+}

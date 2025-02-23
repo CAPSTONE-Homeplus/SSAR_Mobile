@@ -6,8 +6,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:home_clean/app_router.dart';
+import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
+import 'package:home_clean/domain/repositories/house_repository.dart';
 import 'package:home_clean/domain/repositories/room_repository.dart';
 import 'package:home_clean/domain/repositories/transaction_repository.dart';
 import 'package:home_clean/domain/repositories/user_repository.dart';
@@ -15,6 +16,7 @@ import 'package:home_clean/presentation/blocs/auth/auth_bloc.dart';
 import 'package:home_clean/presentation/blocs/building/building_bloc.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_bloc.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_bloc.dart';
+import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:home_clean/presentation/blocs/notification/notification_bloc.dart';
 import 'package:home_clean/presentation/blocs/option/option_bloc.dart';
 import 'package:home_clean/presentation/blocs/order/order_bloc.dart';
@@ -28,13 +30,14 @@ import 'package:home_clean/presentation/blocs/wallet/wallet_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'core/service_locator.dart';
+import 'core/dependencies_injection/service_locator.dart';
 import 'domain/repositories/authentication_repository.dart';
 import 'domain/repositories/equipment_supply_repository.dart';
 import 'domain/repositories/extra_service_repository.dart';
 import 'domain/repositories/notification_repository.dart';
 import 'domain/repositories/option_repository.dart';
 import 'domain/repositories/order_repository.dart';
+import 'domain/repositories/payment_method_repository.dart';
 import 'domain/repositories/service_activity_repository.dart';
 import 'domain/repositories/service_category_repository.dart';
 import 'domain/repositories/service_repository.dart';
@@ -54,7 +57,7 @@ late InitializeNotificationUseCase _initializeNotificationUseCase;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: "assets/.env");
+  await dotenv.load(fileName: '.env');
   await Firebase.initializeApp();
   await setupServiceLocator();
   _initializeNotificationUseCase = InitializeNotificationUseCase(sl());
@@ -101,6 +104,8 @@ class HomeClean extends StatelessWidget {
         RepositoryProvider(create: (_) => sl<RoomRepository>()),
         RepositoryProvider(create: (_) => sl<BuildingRepository>()),
         RepositoryProvider(create: (_) => sl<TransactionRepository>()),
+        RepositoryProvider(create: (_) => sl<PaymentMethodRepository>()),
+        RepositoryProvider(create: (_) => sl<HouseRepository>()),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -145,6 +150,7 @@ class HomeClean extends StatelessWidget {
           BlocProvider(create: (context) => RoomBloc(sl())),
           BlocProvider(create: (context) => BuildingBloc(buildingRepository: sl())),
           BlocProvider(create: (context) => TransactionBloc(sl())),
+          BlocProvider(create: (context) => HouseBloc(getHouseByBuildingUseCase: sl())),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {

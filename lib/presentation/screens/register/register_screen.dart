@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:home_clean/core/constant.dart';
+import 'package:home_clean/core/constant/constant.dart';
+import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/presentation/blocs/building/building_state.dart';
-import 'package:home_clean/presentation/blocs/room/room_event.dart';
-import 'package:home_clean/presentation/blocs/room/room_state.dart';
+import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
+import 'package:home_clean/presentation/blocs/house/house_event.dart';
+import 'package:home_clean/presentation/blocs/house/house_state.dart';
+
 
 import '../../../domain/entities/building/building.dart';
-import '../../../domain/entities/room/room.dart';
+import '../../../domain/entities/house/house.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/building/building_bloc.dart';
 import '../../blocs/building/building_event.dart';
-import '../../blocs/room/room_bloc.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -42,12 +44,7 @@ class RegisterView extends StatelessWidget {
           );
           Navigator.of(context).pop(); // Navigate back to login
         } else if (state is RegisterFailed) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Đăng ký thất bại, vui lòng thử lại"),
-              backgroundColor: Colors.red,
-            ),
-          );
+          AppRouter.navigateToLogin();
         }
       },
         builder: (context, state) {
@@ -108,17 +105,16 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _roomCodeController = TextEditingController();
+  final _houseCodeController = TextEditingController();
   var _buildingCodeController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  late List<Room> availableRooms = [];
+  late List<House> availableHomes = [];
   late List<Building> availableBuildings = [];
-  late RoomBloc _roomBloc;
   late BuildingBloc _buildingBloc;
   bool isLoading = true;
-  late Building selectedBuildingObj;
-  late Room selectedRoomObj;
+  late Building selectedBuildingObj = Building(id: '', code: '', name: '');
+  late House selectedHouseObj = House(id: '', code: '', buildingId: '');
 
   @override
   void dispose() {
@@ -126,7 +122,7 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
     _usernameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _roomCodeController.dispose();
+    _houseCodeController.dispose();
     _buildingCodeController.dispose();
     super.dispose();
   }
@@ -143,14 +139,10 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
         setState(() {
           isLoading = true;
         });
-        _roomBloc = context.read<RoomBloc>();
         _buildingBloc = context.read<BuildingBloc>();
-        _roomBloc.add(GetRoomsEvent(search: '', orderBy: '', page: Constant.defaultPage, size: Constant.defaultSize));
         _buildingBloc.add(GetBuildings(search: '', orderBy: '', page: Constant.defaultPage, size: Constant.defaultSize));
-        final roomComplete = _processHouse();
         final buildingComplete = _processBuildings();
         await Future.wait([
-          roomComplete,
           buildingComplete
         ]);
         setState(() {
@@ -164,19 +156,26 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
     });
   }
 
+  void _fetchHouseList(BuildContext context, String buildingName) {
+    final building = availableBuildings.firstWhere(
+          (b) => b.name == buildingName,
+      orElse: () => Building(id: "", name: ""),
+    );
 
-  Future<void> _processBuildings() async {
-    await for (final state in _roomBloc.stream) {
-      if (state is RoomLoaded && mounted) {
-        setState(() {
-          availableRooms = state.rooms.map((room) => room).toList();
-        });
-        break;
-      }
+    if (building.id != "") {
+      context.read<HouseBloc>().add(GetHouseByBuilding(
+        buildingId: building.id ?? ""
+      ));
+
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Không tìm thấy tòa nhà: $buildingName")),
+      );
     }
   }
 
-  Future<void> _processHouse() async {
+
+  Future<void> _processBuildings() async {
     await for (final state in _buildingBloc.stream) {
       if (state is BuildingLoaded && mounted) {
         setState(() {
@@ -262,11 +261,11 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
             },
           ),
           const SizedBox(height: 16),
-          _buildBuildingField(),
+          _buildBuildingField(context),
           const SizedBox(height: 16),
-          _buildRoomCodeField(),
+          _buildHouseCodeField(context),
           const SizedBox(height: 32),
-          _buildRegisterButton(),
+          _buildRegisterButton(context),
           const SizedBox(height: 24),
           _buildLoginLink(),
         ],
@@ -274,72 +273,12 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
     );
   }
 
-  Widget _buildBuildingField() {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Tên tòa nhà (S1, S2, ...)',
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Autocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return availableBuildings
-                  .where((building) => building.name != null && building.name!.toLowerCase().contains(textEditingValue.text.toLowerCase()))
-                  .map((building) => building.name!)
-                  .toList();
-            },
-            onSelected: (selectedBuildingName) {
-              _buildingCodeController.text = selectedBuildingName;
-              selectedBuildingObj = availableBuildings.firstWhere((building) => building.name == selectedBuildingName);
-            },
-            fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
-              _buildingCodeController = textEditingController;
-              return TextFormField(
-                controller: _buildingCodeController,
-                focusNode: focusNode,
-                decoration: InputDecoration(
-                  hintText: 'Nhập tên tòa nhà',
-                  hintStyle: GoogleFonts.poppins(
-                    fontSize: 15,
-                    color: Colors.grey[400],
-                  ),
-                  prefixIcon: Icon(Icons.home_outlined, color: const Color(0xFF1CAF7D)),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey[200]!),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey[200]!),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF1CAF7D)),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      );
-    }
-
-
-
-  Widget _buildRoomCodeField() {
+  Widget _buildBuildingField(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Số phòng (101, 102, ...)',
+          'Tên tòa nhà (S1, S2, ...)',
           style: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -349,26 +288,34 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
         const SizedBox(height: 8),
         Autocomplete<String>(
           optionsBuilder: (TextEditingValue textEditingValue) {
-            return availableRooms
-                .where((room) => room.code.toLowerCase().contains(textEditingValue.text.toLowerCase()))
-                .map((room) => room.code)
+            return availableBuildings
+                .where((building) => building.name != null &&
+                building.name!.toLowerCase().contains(textEditingValue.text.toLowerCase()))
+                .map((building) => building.name!)
                 .toList();
           },
-          onSelected: (selectedRoom) {
-            _roomCodeController.text = selectedRoom;
-            selectedRoomObj = availableRooms.firstWhere((room) => room.name == selectedRoom);
+          onSelected: (selectedBuildingName) {
+            setState(() {
+              _buildingCodeController.text = selectedBuildingName;
+              selectedBuildingObj = availableBuildings.firstWhere(
+                      (building) => building.name == selectedBuildingName);
+              _houseCodeController.clear(); // Clear house selection when building changes
+              selectedHouseObj = House(id: '', code: '', buildingId: '');
+            });
+            _fetchHouseList(context, selectedBuildingObj.name ?? '');
           },
           fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
+            _buildingCodeController = textEditingController;
             return TextFormField(
-              controller: textEditingController,
+              controller: _buildingCodeController,
               focusNode: focusNode,
               decoration: InputDecoration(
-                hintText: 'Nhập số phòng',
+                hintText: 'Nhập tên tòa nhà',
                 hintStyle: GoogleFonts.poppins(
                   fontSize: 15,
                   color: Colors.grey[400],
                 ),
-                prefixIcon: Icon(Icons.meeting_room, color: const Color(0xFF1CAF7D)),
+                prefixIcon: Icon(Icons.home_outlined, color: const Color(0xFF1CAF7D)),
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(
@@ -384,10 +331,109 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
                   borderSide: const BorderSide(color: Color(0xFF1CAF7D)),
                 ),
               ),
+              onEditingComplete: () {
+                if (_buildingCodeController.text.isNotEmpty) {
+                  _fetchHouseList(context, _buildingCodeController.text);
+                }
+                focusNode.unfocus();
+              },
             );
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildHouseCodeField(BuildContext context) {
+    return BlocBuilder<HouseBloc, HouseState>(
+      builder: (context, state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+            Text(
+              'Số căn hộ (101, 102, ...)',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (state is HouseLoading)
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  _buildHouseTextField(null), // Hiển thị TextField mờ khi loading
+                  const CircularProgressIndicator(color: Color(0xFF1CAF7D)),
+                ],
+              )
+            else if (state is HouseLoaded)
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (state.houses.items.isEmpty) return const [];
+                  return state.houses.items
+                      .where((house) => house.code != null &&
+                      house.code!.toLowerCase().contains(textEditingValue.text.toLowerCase()))
+                      .map((house) => house.code!)
+                      .toList();
+                },
+                onSelected: (selectedHouse) {
+                  setState(() {
+                    _houseCodeController.text = selectedHouse;
+                    selectedHouseObj = state.houses.items.firstWhere(
+                            (house) => house.code == selectedHouse);
+                  });
+                },
+                fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
+                  return _buildHouseTextField(textEditingController, focusNode);
+                },
+              )
+            else
+              _buildHouseTextField(null), // Fallback TextField
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildHouseTextField(TextEditingController? controller, [FocusNode? focusNode]) {
+    return TextFormField(
+      controller: controller,
+      focusNode: focusNode,
+      enabled: controller != null, // Disable when loading or error
+      decoration: InputDecoration(
+        hintText: 'Nhập số phòng',
+        hintStyle: GoogleFonts.poppins(
+          fontSize: 15,
+          color: Colors.grey[400],
+        ),
+        prefixIcon: Icon(
+          Icons.meeting_room,
+          color: controller != null ? const Color(0xFF1CAF7D) : Colors.grey,
+        ),
+        filled: true,
+        fillColor: controller != null ? Colors.white : Colors.grey[100],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[200]!),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[200]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1CAF7D)),
+        ),
+        // Thêm helper text khi không có data
+        helperText: controller != null && controller.text.isEmpty ?
+        'Không tìm thấy căn hộ trong tòa nhà này' : null,
+        helperStyle: GoogleFonts.poppins(
+          fontSize: 12,
+          color: Colors.grey[600],
+        ),
+      ),
     );
   }
 
@@ -454,11 +500,27 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
       ],
     );
   }
+  Widget _buildRegisterButton(BuildContext context) {
+    final state = context.watch<AuthBloc>().state;
+    String? errorMessage;
 
-  Widget _buildRegisterButton() {
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, state) {
-        return ElevatedButton(
+    if (state is RegisterFailed) {
+      errorMessage = state.error;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (errorMessage != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              errorMessage,
+              style: const TextStyle(color: Colors.red, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ElevatedButton(
           onPressed: state is AuthenticationLoading
               ? null
               : () {
@@ -469,7 +531,7 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
                   username: _usernameController.text,
                   password: _passwordController.text,
                   buildingCode: selectedBuildingObj.code ?? '',
-                  houseCode: selectedRoomObj.code,
+                  houseCode: selectedHouseObj.code ?? '',
                 ),
               );
             }
@@ -491,10 +553,11 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
               color: Colors.white,
             ),
           ),
-        );
-      },
+        ),
+      ],
     );
   }
+
 
   Widget _buildLoginLink() {
     return Row(

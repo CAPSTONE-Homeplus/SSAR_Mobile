@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:home_clean/app_router.dart';
-import 'package:home_clean/core/colors.dart';
-import 'package:home_clean/core/validation.dart';
+import 'package:home_clean/core/router/app_router.dart';
+import 'package:home_clean/core/constant/colors.dart';
+import 'package:home_clean/core/format/validation.dart';
 import 'package:home_clean/domain/entities/equipment_supply/equipment_supply.dart';
 import 'package:home_clean/domain/entities/extra_service/extra_service.dart';
 import 'package:home_clean/domain/entities/option/option.dart';

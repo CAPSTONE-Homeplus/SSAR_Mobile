@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/app_router.dart';
+import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/entities/wallet/wallet.dart';
 import 'package:home_clean/presentation/blocs/service/service_bloc.dart';
 import 'package:home_clean/presentation/blocs/wallet/wallet_bloc.dart';
@@ -8,7 +8,7 @@ import 'package:home_clean/presentation/blocs/wallet/wallet_state.dart';
 import 'package:home_clean/presentation/screens/home/components/home_screen_body.dart';
 import 'package:home_clean/presentation/screens/home/components/home_screen_loading.dart';
 
-import '../../../core/size_config.dart';
+import '../../../core/constant/size_config.dart';
 import '../../blocs/wallet/wallet_event.dart';
 
 class HomeScreen extends StatefulWidget {

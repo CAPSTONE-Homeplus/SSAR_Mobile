@@ -1,12 +1,12 @@
-import 'package:home_clean/core/api_constant.dart';
-import 'package:home_clean/core/base_model.dart';
-import 'package:home_clean/core/exception_handler.dart';
-import 'package:home_clean/core/request.dart';
+import 'package:home_clean/core/base/base_model.dart';
+import 'package:home_clean/core/exception/exception_handler.dart';
+import 'package:home_clean/core/request/request.dart';
 import 'package:home_clean/data/mappers/time_slot_mapper.dart';
 import 'package:home_clean/data/models/time_slot/time_slot_model.dart';
 import 'package:home_clean/domain/entities/time_slot/time_slot.dart';
 
 import '../../../domain/repositories/time_slot_repository.dart';
+import '../../core/constant/api_constant.dart';
 
 class TimeSlotRepositoryImpl implements TimeSlotRepository {
   @override

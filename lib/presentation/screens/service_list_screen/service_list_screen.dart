@@ -2,14 +2,14 @@ import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:home_clean/core/app_text_styles.dart';
 import 'package:home_clean/presentation/blocs/service_category/service_category_bloc.dart';
 import 'package:home_clean/presentation/blocs/service_category/service_category_event.dart';
 import 'package:home_clean/presentation/blocs/service_category/service_category_state.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../core/constant.dart';
+import '../../../core/constant/constant.dart';
+import '../../../core/constant/app_text_styles.dart';
 import '../../../domain/entities/service/service.dart';
 
 class ServiceListScreen extends StatefulWidget {

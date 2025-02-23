@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:home_clean/app_router.dart';
-import 'package:home_clean/core/app_text_styles.dart';
-import 'package:home_clean/core/validation.dart';
+import 'package:home_clean/core/router/app_router.dart';
+import 'package:home_clean/core/format/validation.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
 
-import '../../../../core/constant.dart';
-import '../../../../core/size_config.dart';
+import '../../../../core/constant/constant.dart';
+import '../../../../core/constant/app_text_styles.dart';
+import '../../../../core/constant/size_config.dart';
 import '../../../../domain/entities/wallet/wallet.dart';
-import '../../../blocs/wallet/wallet_bloc.dart';
-import '../../../blocs/wallet/wallet_event.dart';
-import '../../../blocs/wallet/wallet_state.dart';
 import '../../../widgets/address_bottom_sheet.dart';
 
 class HomeScreenBody extends StatefulWidget {
@@ -145,7 +141,7 @@ Widget _buildHomeScreen(List<Service> services, BuildContext context, List<Walle
                     ],
                   ),
                   SizedBox(height: 12 * hem),
-                  Container(
+                  SizedBox(
                     height: services.length <= 4 ? 100 * hem : 200 * hem,
                     child: GridView.builder(
                       shrinkWrap: true,

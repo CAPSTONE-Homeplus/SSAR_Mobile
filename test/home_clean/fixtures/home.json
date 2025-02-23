@@ -1,0 +1,42 @@
+[
+  {
+    "id": "123",
+    "no": "A101",
+    "name": "House A",
+    "numberOfRoom": "3",
+    "status": "available",
+    "createdAt": "2025-02-23T10:00:00Z",
+    "updatedAt": "2025-02-23T12:00:00Z",
+    "code": "H12345",
+    "bedroomCount": 2,
+    "bathroomCount": 1,
+    "hasBalcony": true,
+    "furnishingStatus": "furnished",
+    "squareMeters": "75",
+    "orientation": "north",
+    "contactTerms": "12 months lease",
+    "occupacy": "vacant",
+    "buildingId": "B001",
+    "houseTypeId": "HT02"
+  },
+  {
+    "id": "124",
+    "no": "A102",
+    "name": "House B",
+    "numberOfRoom": "4",
+    "status": "occupied",
+    "createdAt": "2025-01-15T08:30:00Z",
+    "updatedAt": "2025-02-20T14:45:00Z",
+    "code": "H12346",
+    "bedroomCount": 3,
+    "bathroomCount": 2,
+    "hasBalcony": false,
+    "furnishingStatus": "unfurnished",
+    "squareMeters": "85",
+    "orientation": "south",
+    "contactTerms": "24 months lease",
+    "occupacy": "occupied",
+    "buildingId": "B002",
+    "houseTypeId": "HT03"
+  }
+]

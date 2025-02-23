@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/core/constant.dart';
+import 'package:home_clean/core/constant/constant.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_event.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_state.dart';
 

@@ -2,14 +2,14 @@ import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:home_clean/domain/entities/transaction/transaction.dart';
 import 'package:home_clean/domain/repositories/transaction_repository.dart';
-import 'package:home_clean/domain/use_cases/failure.dart';
+import 'package:home_clean/core/exception/failure.dart';
+import '../../../core/base/base_usecase.dart';
 import '../../entities/transaction/create_transaction.dart';
-import '../base_usecase.dart';
 
-class SaveTransactionUsecase implements UseCase<Transaction, SaveTransactionParams> {
+class SaveTransactionUseCase implements UseCase<Transaction, SaveTransactionParams> {
   final TransactionRepository repository;
 
-  SaveTransactionUsecase(this.repository);
+  SaveTransactionUseCase(this.repository);
 
   @override
   Future<Either<Failure, Transaction>> call(SaveTransactionParams params) async {

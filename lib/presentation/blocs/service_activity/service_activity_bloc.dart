@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/core/constant.dart';
+import 'package:home_clean/core/constant/constant.dart';
 import 'package:home_clean/domain/use_cases/service_activity/get_service_activities_by_service_usecase.dart';
 import 'package:home_clean/presentation/blocs/service_activity/service_activity_event.dart';
 import 'package:home_clean/presentation/blocs/service_activity/service_activity_state.dart';

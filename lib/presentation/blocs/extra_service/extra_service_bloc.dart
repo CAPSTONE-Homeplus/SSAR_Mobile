@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/core/constant.dart';
+import 'package:home_clean/core/constant/constant.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_event.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_state.dart';
 

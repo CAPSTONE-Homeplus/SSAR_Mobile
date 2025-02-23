@@ -1,8 +1,6 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/domain/repositories/authentication_repository.dart';
 
-import '../../../core/exception_handler.dart';
+import '../../../core/exception/exception_handler.dart';
 import '../../../data/models/auth/auth_model.dart';
 import '../../../data/models/auth/login_model.dart';
 import '../../../domain/entities/auth/auth.dart';
@@ -34,24 +32,25 @@ class AuthBloc
       LoginAccount event, Emitter<AuthState> emit) async {
     emit(AuthenticationLoading());
     try {
-      final isSuccess = await loginUseCase.call(
+      final result = await loginUseCase.call(
         LoginModel(
           username: event.username,
           password: event.password,
         ),
       );
 
-      if (isSuccess) {
-        emit(AuthenticationSuccess());
-      } else {
-        emit(AuthenticationFailed(error: "Tên đăng nhập hoặc mật khẩu không đúng!"));
-      }
-    } catch (e) {
-      if (e is ApiException) {
-        emit(AuthenticationFailed(error: e.description ?? "Đã có lỗi xảy ra!"));
-      } else {
-        emit(AuthenticationFailed(error: "Đã có lỗi xảy ra, vui lòng thử lại."));
-      }
+      result.fold(
+            (error) => emit(AuthenticationFailed(error: error)),
+            (isSuccess) {
+          if (isSuccess) {
+            emit(AuthenticationSuccess());
+          } else {
+            emit(AuthenticationFailed(error: "Tên đăng nhập hoặc mật khẩu không đúng!"));
+          }
+        },
+      );
+    } on ApiException catch (e) {
+      emit(AuthenticationFailed(error: e.description ?? "Đã có lỗi xảy ra!"));
     }
   }
 
@@ -80,26 +79,25 @@ class AuthBloc
   Future<void> _onRegisterAccount(
       RegisterAccount event, Emitter<AuthState> emit) async {
     emit(AuthenticationLoading());
-    try {
-      final isSuccess = await userRegisterUseCase.call(
-        CreateUser(
-          fullName: event.fullName,
-          username: event.username,
-          password: event.password,
-          buildingCode: event.buildingCode,
-          houseCode: event.houseCode,
-        ),
-      );
+    final result = await userRegisterUseCase.call(
+      CreateUser(
+        fullName: event.fullName,
+        username: event.username,
+        password: event.password,
+        buildingCode: event.buildingCode,
+        houseCode: event.houseCode,
+      ),
+    );
 
-      if (isSuccess is AuthModel) {
+    result.fold(
+          (error) {
+        emit(RegisterFailed(error: error));
+      },
+          (user) {
         emit(RegisterSuccess());
-      } else {
-        emit(RegisterFailed(
-            error: 'Đã có lỗi xảy ra, vui lòng thử lại!'));
-      }
-    } catch (e) {
-      emit(RegisterFailed(
-          error: 'Đã có lỗi xảy ra, vui lòng thử lại: $e'));
-    }
+      },
+    );
   }
+
+
 }

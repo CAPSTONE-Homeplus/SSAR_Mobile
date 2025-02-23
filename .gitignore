@@ -2,7 +2,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=flutter,androidstudio,visualstudiocode,firebase
 
 ### dotenv ###
-assets/.env
+.env
 
 ### Firebase ###
 .idea

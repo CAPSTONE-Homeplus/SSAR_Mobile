@@ -1,13 +1,11 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:home_clean/core/colors.dart';
-import 'package:home_clean/core/size_config.dart';
-import 'package:home_clean/core/validation.dart';
+import 'package:home_clean/core/constant/colors.dart';
+import 'package:home_clean/core/constant/size_config.dart';
+import 'package:home_clean/core/format/validation.dart';
 import 'package:home_clean/presentation/blocs/transaction/transaction_state.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../domain/entities/transaction/create_transaction.dart';
 import '../../../domain/entities/wallet/wallet.dart';
@@ -28,7 +26,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
   late List<Wallet> _selectedWalletType = [];
   late String _selectedWalletId = '';
   late String _selectedPaymentId = '15890b1a-f5a6-42c3-8f37-541029189722';
-  String _selectedPaymentMethod = 'banking'; // banking, paypal, etc.
+  String _selectedPaymentMethod = 'banking';
   final TextEditingController _amountController = TextEditingController();
 
   // Predefined amounts
@@ -49,9 +47,9 @@ class _TopUpScreenState extends State<TopUpScreen> {
 
   void _onProcess() {
     if (_formKey.currentState!.validate()) {
-      String amountText = _amountController.text.replaceAll(RegExp(r'[^\d]'), ''); // Chỉ giữ lại số
+      String amountText = _amountController.text.replaceAll(RegExp(r'\D'), '');
 
-      int amount = int.tryParse(amountText) ?? 0; // Tránh lỗi khi parse
+      int amount = int.tryParse(amountText) ?? 0;
 
       if (amount <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -806,7 +804,6 @@ class _TopUpScreenState extends State<TopUpScreen> {
               ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  Navigator.pop(context); // Return to previous screen
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1CAF7D),

@@ -1,4 +1,4 @@
-import 'package:home_clean/core/request.dart';
+import 'package:home_clean/core/request/request.dart';
 import 'package:home_clean/data/datasource/auth_local_datasource.dart';
 import 'package:home_clean/data/datasource/user_local_datasource.dart';
 import 'package:home_clean/data/mappers/auth/auth_mapper.dart';
@@ -6,8 +6,8 @@ import 'package:home_clean/data/models/user/user_model.dart';
 import 'package:home_clean/domain/entities/user/user.dart';
 import 'package:home_clean/domain/repositories/authentication_repository.dart';
 
-import '../../../core/api_constant.dart';
-import '../../../core/exception_handler.dart';
+import '../../core/exception/exception_handler.dart';
+import '../../core/constant/api_constant.dart';
 import '../../domain/entities/auth/auth.dart';
 import '../../domain/entities/user/create_user.dart';
 import '../../domain/repositories/user_repository.dart';
@@ -94,7 +94,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       if (response.statusCode == 201 && response.data != null) {
         await userLocalDatasource.saveUser(response.data);
-        User user = UserMapper.toEntity(response.data);
+        User user = UserMapper.toEntity(UserMapper.toModel(response.data));
         return user;
       } else {
         throw ApiException(
@@ -106,6 +106,7 @@ class AuthRepositoryImpl implements AuthRepository {
         );
       }
     } catch (e) {
+      print("Lỗi exception: $e");
       throw ExceptionHandler.handleException(e);
     }
   }

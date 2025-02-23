@@ -1,4 +1,4 @@
-import 'package:home_clean/core/base_model.dart';
+import 'package:home_clean/core/base/base_model.dart';
 
 import '../entities/order/create_order.dart';
 import '../entities/order/order.dart';

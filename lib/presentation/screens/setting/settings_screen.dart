@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:home_clean/core/size_config.dart';
+import 'package:home_clean/core/constant/size_config.dart';
 import 'package:home_clean/presentation/blocs/theme/theme_bloc.dart';
 
-import '../../../app_router.dart';
+import '../../../core/router/app_router.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});

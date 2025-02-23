@@ -1,6 +1,8 @@
 import 'package:home_clean/data/mappers/option_mapper.dart';
 
 import '../../domain/entities/order/order.dart';
+import '../models/extra_service/extra_service_model.dart';
+import '../models/option/option_model.dart';
 import '../models/order/order_model.dart';
 import 'extra_service_mapper.dart';
 
@@ -41,12 +43,20 @@ class OrderMapper {
       timeSlotId: map['timeSlotId'],
       serviceId: map['serviceId'],
       userId: map['userId'],
-      extraServices: ExtraServiceMapper.toListModel(map['extraServices'] ?? []),
-      options: OptionMapper.toListModel(map['options'] ?? []),
+
+      extraServices: (map['extraServices'] as List?)
+          ?.where((e) => e != null)
+          .map((e) => ExtraServiceModel.fromJson(e as Map<String, dynamic>))
+          .toList() ?? [],
+
+      options: (map['options'] as List?)
+          ?.where((e) => e != null)
+          .map((e) => OptionModel.fromJson(e as Map<String, dynamic>))
+          .toList() ?? [],
     );
   }
 
-  
+
   static Orders toEntity(OrderModel model) {
     return Orders(
       id: model.id,

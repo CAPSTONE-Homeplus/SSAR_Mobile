@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:home_clean/app_router.dart';
+import 'package:home_clean/core/router/app_router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 

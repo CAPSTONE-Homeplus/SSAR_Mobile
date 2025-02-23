@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../../core/base/base_usecase.dart';
 import '../../entities/order/create_order.dart';
 import '../../entities/order/order.dart';
 import '../../repositories/order_repository.dart';
-import '../base_usecase.dart';
-import '../failure.dart';
+import '../../../core/exception/failure.dart';
 
 class CreateOrderUseCase implements UseCase<Orders, SaveOrderParams>{
   final OrderRepository repository;

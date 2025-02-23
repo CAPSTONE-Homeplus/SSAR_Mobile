@@ -3,48 +3,47 @@ import 'package:home_clean/data/models/house/house_model.dart';
 import '../../domain/entities/house/house.dart';
 
 class HouseMapper {
-  static House toEntity(HouseModel houseModel){
+  static House toEntity(HouseModel model) {
     return House(
-      id: houseModel.id,
-      no: houseModel.no,
-      numberOfRoom: houseModel.numberOfRoom,
-      status: houseModel.status,
-      createdAt: houseModel.createdAt,
-      updatedAt: houseModel.updatedAt,
-      code: houseModel.code,
-      bedroomCount: houseModel.bedroomCount,
-      bathroomCount: houseModel.bathroomCount,
-      hasBalcony: houseModel.hasBalcony,
-      furnishingStatus: houseModel.furnishingStatus,
-      squareMeters: houseModel.squareMeters,
-      orientation: houseModel.orientation,
-      contactTerms: houseModel.contactTerms,
-      occupacy: houseModel.occupacy,
-      buildingId: houseModel.buildingId,
-      houseTypeId: houseModel.houseTypeId
+      id: model.id,
+      no: model.no,
+      numberOfRoom: model.numberOfRoom,
+      status: model.status,
+      createdAt: model.createdAt,
+      updatedAt: model.updatedAt,
+      code: model.code,
+      bedroomCount: model.bedroomCount,
+      bathroomCount: model.bathroomCount,
+      hasBalcony: model.hasBalcony,
+      furnishingStatus: model.furnishingStatus,
+      squareMeters: model.squareMeters,
+      orientation: model.orientation,
+      contactTerms: model.contactTerms,
+      occupacy: model.occupacy,
+      buildingId: model.buildingId,
+      houseTypeId: model.houseTypeId,
     );
   }
 
-  static HouseModel toModel(House house){
+  static HouseModel toModel(House entity) {
     return HouseModel(
-      id: house.id,
-      no: house.no,
-      numberOfRoom: house.numberOfRoom,
-      status: house.status,
-      createdAt: house.createdAt,
-      updatedAt: house.updatedAt,
-      code: house.code,
-      bedroomCount: house.bedroomCount,
-      bathroomCount: house.bathroomCount,
-      hasBalcony: house.hasBalcony,
-      furnishingStatus: house.furnishingStatus,
-      squareMeters: house.squareMeters,
-      orientation: house.orientation,
-      contactTerms: house.contactTerms,
-      occupacy: house.occupacy,
-      buildingId: house.buildingId,
-      houseTypeId: house.houseTypeId
+      id: entity.id,
+      no: entity.no,
+      numberOfRoom: entity.numberOfRoom,
+      status: entity.status,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      code: entity.code,
+      bedroomCount: entity.bedroomCount,
+      bathroomCount: entity.bathroomCount,
+      hasBalcony: entity.hasBalcony,
+      furnishingStatus: entity.furnishingStatus,
+      squareMeters: entity.squareMeters,
+      orientation: entity.orientation,
+      contactTerms: entity.contactTerms,
+      occupacy: entity.occupacy,
+      buildingId: entity.buildingId,
+      houseTypeId: entity.houseTypeId,
     );
   }
 }
-

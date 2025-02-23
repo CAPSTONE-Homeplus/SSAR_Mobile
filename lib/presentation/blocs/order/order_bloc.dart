@@ -3,7 +3,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../domain/entities/order/create_order.dart';
 import '../../../domain/entities/order/order.dart';
-import '../../../domain/use_cases/failure.dart';
+import '../../../core/exception/failure.dart';
 import '../../../domain/use_cases/order/create_orders_usecase.dart';
 
 part 'order_event.dart';

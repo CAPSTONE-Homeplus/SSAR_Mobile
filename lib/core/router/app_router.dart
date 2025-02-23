@@ -8,10 +8,10 @@ import 'package:home_clean/presentation/screens/service_detail/service_detail_sc
 import 'package:home_clean/presentation/screens/start/splash_screen.dart';
 import 'package:home_clean/presentation/screens/wallet/wallet_screen.dart';
 
-import 'presentation/screens/activity/activity_screen.dart';
-import 'presentation/screens/login/login_screen.dart';
-import 'presentation/screens/service_list_screen/service_list_screen.dart';
-import 'presentation/widgets/bottom_navigation.dart';
+import '../../presentation/screens/activity/activity_screen.dart';
+import '../../presentation/screens/login/login_screen.dart';
+import '../../presentation/screens/service_list_screen/service_list_screen.dart';
+import '../../presentation/widgets/bottom_navigation.dart';
 
 class AppRouter {
   static const String routeLogin = '/login';

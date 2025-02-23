@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:home_clean/domain/entities/building/building.dart';
 
-import '../../../core/base_model.dart';
+import '../../../core/base/base_model.dart';
+import '../../../core/base/base_usecase.dart';
 import '../../entities/room/room.dart';
 import '../../repositories/building_repository.dart';
-import '../base_usecase.dart';
-import '../failure.dart';
+import '../../../core/exception/failure.dart';
 
 class GetBuildingsUsecase implements UseCase<BaseResponse<Building>, GetBuildingsParams> {
   final BuildingRepository buildingRepository;

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:home_clean/core/colors.dart';
+import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/presentation/screens/login/components/form_login.dart';
 
-import '../../../../core/size_config.dart';
+import '../../../../core/constant/size_config.dart';
 
 class Body extends StatelessWidget {
   const Body({super.key});

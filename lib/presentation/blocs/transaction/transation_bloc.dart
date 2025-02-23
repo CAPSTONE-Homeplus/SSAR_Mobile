@@ -4,12 +4,12 @@ import 'transaction_event.dart';
 import 'transaction_state.dart';
 
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
-  final SaveTransactionUsecase saveTransactionUsecase;
+  final SaveTransactionUseCase saveTransactionUseCase;
 
-  TransactionBloc(this.saveTransactionUsecase) : super(TransactionInitial()) {
+  TransactionBloc(this.saveTransactionUseCase) : super(TransactionInitial()) {
     on<SaveTransactionEvent>((event, emit) async {
       emit(TransactionLoading());
-      final result = await saveTransactionUsecase(SaveTransactionParams(transaction: event.transaction));
+      final result = await saveTransactionUseCase(SaveTransactionParams(transaction: event.transaction));
 
       result.fold(
             (failure) => emit(TransactionFailure(failure.message)),

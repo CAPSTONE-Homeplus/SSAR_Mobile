@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/core/constant.dart';
+import 'package:home_clean/core/constant/constant.dart';
 import 'package:home_clean/domain/use_cases/service_category/get_service_by_service_category_usecase.dart';
 import 'package:home_clean/domain/use_cases/service_category/get_service_categories_usecase.dart';
 import 'package:home_clean/presentation/blocs/service_category/service_category_event.dart';
