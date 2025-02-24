@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/entities/wallet/wallet.dart';
+import 'package:home_clean/presentation/blocs/auth/auth_event.dart';
 import 'package:home_clean/presentation/blocs/service/service_bloc.dart';
 import 'package:home_clean/presentation/blocs/wallet/wallet_bloc.dart';
 import 'package:home_clean/presentation/blocs/wallet/wallet_state.dart';
@@ -9,6 +10,9 @@ import 'package:home_clean/presentation/screens/home/components/home_screen_body
 import 'package:home_clean/presentation/screens/home/components/home_screen_loading.dart';
 
 import '../../../core/constant/size_config.dart';
+import '../../../domain/entities/user/user.dart';
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_state.dart';
 import '../../blocs/wallet/wallet_event.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,7 +24,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late WalletBloc _walletBloc;
-  late List<Wallet> walletUser = [];
+  late AuthBloc _authBloc;
+  List<Wallet> walletUser = [];
+  User? user;
+
   bool isLoading = true;
   @override
   void initState() {
@@ -37,24 +44,16 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           isLoading = true;
         });
-
-        // Init blocs
         _walletBloc = context.read<WalletBloc>();
-
-
-        // Fetch service events
+        _authBloc = context.read<AuthBloc>();
         _walletBloc.add(GetWallet());
-
-
-        // Process events
+        _authBloc.add(GetUserFromLocal(user: user ?? User()));
         final walletComplete = _processWallet();
-
-
-        // Wait for all events to complete
+        final userComplete = _processUser();
         await Future.wait([
           walletComplete,
+          userComplete,
         ]);
-
         setState(() {
           isLoading = false;
         });
@@ -78,16 +77,29 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _processUser() async {
+    await for (final state in _authBloc.stream) {
+      if (state is AuthenticationFromLocal && mounted) {
+        setState(() {
+          user = state.user;
+        });
+        break;
+      }
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     SizeConfig.init(context);
     return BlocBuilder<ServiceBloc, ServiceState>(
       builder: (context, state) {
-        if (state is ServiceLoadingState || isLoading) {
+        if (state is ServiceLoadingState|| isLoading) {
           return HomeScreenLoading();
         } else if (state is ServiceSuccessState) {
           final services = state.services;
-          return HomeScreenBody(servicesToFetch: services, walletUser: walletUser);
+          return HomeScreenBody(servicesToFetch: services,
+              walletUser: walletUser, user: user ?? User());
         } else {
           return Scaffold(
             body: Center(

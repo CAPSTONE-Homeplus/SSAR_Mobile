@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/enums/wallet_enums.dart';
 import 'package:home_clean/core/format/validation.dart';
+import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/entities/transaction/create_transaction.dart';
 import 'package:home_clean/presentation/widgets/address_bottom_sheet.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
@@ -488,14 +489,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
         return BlocConsumer<TransactionBloc, TransactionState>(
           listener: (context, state) {
             if (state is TransactionSuccess) {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Thanh toán thành công!")),
-              );
-            } else if (state is TransactionFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Thanh toán thất bại!")),
-              );
+              AppRouter.navigateToHome();
             }
           },
           builder: (context, state) {
@@ -513,19 +507,73 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 16),
-                    state is TransactionLoading
-                        ? const CircularProgressIndicator()
-                        : Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text("Giao dịch thất bại. Vui lòng thử lại!"),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text("Đóng"),
-                        ),
-                      ],
-                    ),
+                    if (state is TransactionLoading)
+                      const CircularProgressIndicator()
+                    else if (state is TransactionFailure)
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            color: Colors.red,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            "Số dư không đủ",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            state.error,
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    AppRouter.navigateToPayment();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                  ),
+                                  child: const Text(
+                                    "Nạp tiền",
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                  ),
+                                  child: const Text(
+                                    "Đóng",
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ),
@@ -535,8 +583,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       },
     );
   }
-
-
 
   Widget _buildOptionItem({
     required String title,

@@ -1,4 +1,4 @@
-  import 'package:home_clean/domain/repositories/house_repository.dart';
+import 'package:home_clean/domain/repositories/house_repository.dart';
 import 'package:home_clean/domain/repositories/authentication_repository.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
 import 'package:home_clean/domain/repositories/order_repository.dart';
@@ -20,10 +20,10 @@ import 'package:home_clean/domain/use_cases/service_activity/get_service_activit
 import 'package:home_clean/domain/use_cases/service_category/get_service_by_service_category_usecase.dart';
 import 'package:home_clean/domain/use_cases/service_category/get_service_categories_usecase.dart';
 import 'package:home_clean/domain/use_cases/sub_activity/get_sub_activities_usecase.dart';
-import 'package:home_clean/domain/use_cases/transaction/save_transaction_usecase.dart';
+import 'package:home_clean/domain/use_cases/transaction/get_transaction_by_user.dart';
+import 'package:home_clean/domain/use_cases/transaction/get_transaction_by_wallet_use_case.dart';
 import 'package:home_clean/domain/use_cases/wallet/get_wallet_by_user.dart';
-  import 'package:mockito/mockito.dart';
-  import 'package:mockito/annotations.dart';
+import 'package:mockito/annotations.dart';
   // flutter pub run build_runner build --delete-conflicting-outputs
   @GenerateMocks([
     AuthRepository,
@@ -52,6 +52,9 @@ import 'package:home_clean/domain/use_cases/wallet/get_wallet_by_user.dart';
     GetServiceByServiceCategoryUsecase,
     GetServiceCategoriesUsecase,
     GetHouseByBuildingUseCase,
+    GetTransactionByUserUseCase,
+    GetTransactionByWalletUseCase,
+
     /// Data
   ], customMocks: [
   ])

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:home_clean/core/base/base_model.dart';
 import 'package:home_clean/domain/entities/transaction/transaction.dart';
 
 abstract class TransactionState extends Equatable {
@@ -19,6 +20,15 @@ class TransactionSuccess extends TransactionState {
 
   @override
   List<Object> get props => [transaction];
+}
+
+class TransactionsLoaded extends TransactionState {
+  final BaseResponse<Transaction> transactions;
+
+  const TransactionsLoaded(this.transactions);
+
+  @override
+  List<Object> get props => [transactions];
 }
 
 class TransactionFailure extends TransactionState {

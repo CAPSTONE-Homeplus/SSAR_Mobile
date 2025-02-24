@@ -1,4 +1,5 @@
-part of 'auth_bloc.dart';
+
+import '../../../domain/entities/user/user.dart';
 
 abstract class AuthState {
 }
@@ -19,9 +20,9 @@ class AuthenticationFailed extends AuthState {
 }
 
 class AuthenticationFromLocal extends AuthState {
-  final Auth auth;
+  final User user;
 
-  AuthenticationFromLocal({required this.auth});
+  AuthenticationFromLocal({required this.user});
 
 }
 

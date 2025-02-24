@@ -13,7 +13,9 @@ class NetworkFailure extends Failure {
 }
 
 class ApiFailure extends Failure {
-  final String code;
+  ApiFailure(String message) : super(message);
+}
 
-  ApiFailure(String message, this.code) : super(message);
+class CacheFailure extends Failure {
+  CacheFailure(String message) : super(message);
 }

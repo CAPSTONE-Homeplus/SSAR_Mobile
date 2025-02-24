@@ -1,4 +1,5 @@
-part of 'auth_bloc.dart';
+
+import '../../../domain/entities/user/user.dart';
 
 abstract class AuthEvent {
 }
@@ -11,11 +12,11 @@ final class LoginAccount extends AuthEvent {
 }
 
 class GetUserFromLocal extends AuthEvent {
-  final Auth auth;
+  final User user;
 
-  GetUserFromLocal({required this.auth});
+  GetUserFromLocal({required this.user});
 
-  List<Object?> get props => [auth];
+  List<Object?> get props => [user];
 }
 
 class RegisterAccount extends AuthEvent {

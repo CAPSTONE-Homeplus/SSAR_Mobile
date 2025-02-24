@@ -69,6 +69,10 @@ import 'package:home_clean/domain/use_cases/service_category/get_service_categor
     as _i45;
 import 'package:home_clean/domain/use_cases/sub_activity/get_sub_activities_usecase.dart'
     as _i42;
+import 'package:home_clean/domain/use_cases/transaction/get_transaction_by_user.dart'
+    as _i48;
+import 'package:home_clean/domain/use_cases/transaction/get_transaction_by_wallet_use_case.dart'
+    as _i49;
 import 'package:home_clean/domain/use_cases/wallet/get_wallet_by_user.dart'
     as _i33;
 import 'package:mockito/mockito.dart' as _i1;
@@ -341,19 +345,63 @@ class MockTransactionRepository extends _i1.Mock
           as _i12.Future<_i5.Transaction>);
 
   @override
-  _i12.Future<_i5.Transaction> processTransactionWithOrder(
-    _i21.CreateTransaction? transaction,
+  _i12.Future<_i4.BaseResponse<_i5.Transaction>> getTransactionByUser(
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size,
   ) =>
       (super.noSuchMethod(
-            Invocation.method(#processTransactionWithOrder, [transaction]),
-            returnValue: _i12.Future<_i5.Transaction>.value(
-              _FakeTransaction_3(
+            Invocation.method(#getTransactionByUser, [
+              search,
+              orderBy,
+              page,
+              size,
+            ]),
+            returnValue: _i12.Future<_i4.BaseResponse<_i5.Transaction>>.value(
+              _FakeBaseResponse_2<_i5.Transaction>(
                 this,
-                Invocation.method(#processTransactionWithOrder, [transaction]),
+                Invocation.method(#getTransactionByUser, [
+                  search,
+                  orderBy,
+                  page,
+                  size,
+                ]),
               ),
             ),
           )
-          as _i12.Future<_i5.Transaction>);
+          as _i12.Future<_i4.BaseResponse<_i5.Transaction>>);
+
+  @override
+  _i12.Future<_i4.BaseResponse<_i5.Transaction>> getTransactionByUserWallet(
+    String? walletId,
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getTransactionByUserWallet, [
+              walletId,
+              search,
+              orderBy,
+              page,
+              size,
+            ]),
+            returnValue: _i12.Future<_i4.BaseResponse<_i5.Transaction>>.value(
+              _FakeBaseResponse_2<_i5.Transaction>(
+                this,
+                Invocation.method(#getTransactionByUserWallet, [
+                  walletId,
+                  search,
+                  orderBy,
+                  page,
+                  size,
+                ]),
+              ),
+            ),
+          )
+          as _i12.Future<_i4.BaseResponse<_i5.Transaction>>);
 }
 
 /// A class which mocks [ServiceRepository].
@@ -996,4 +1044,75 @@ class MockGetHouseByBuildingUseCase extends _i1.Mock
             ),
           )
           as _i12.Future<_i4.BaseResponse<_i26.House>>);
+}
+
+/// A class which mocks [GetTransactionByUserUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetTransactionByUserUseCase extends _i1.Mock
+    implements _i48.GetTransactionByUserUseCase {
+  MockGetTransactionByUserUseCase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i12.Future<_i8.Either<String, _i4.BaseResponse<_i5.Transaction>>> call(
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [search, orderBy, page, size]),
+            returnValue: _i12.Future<
+              _i8.Either<String, _i4.BaseResponse<_i5.Transaction>>
+            >.value(
+              _FakeEither_6<String, _i4.BaseResponse<_i5.Transaction>>(
+                this,
+                Invocation.method(#call, [search, orderBy, page, size]),
+              ),
+            ),
+          )
+          as _i12.Future<
+            _i8.Either<String, _i4.BaseResponse<_i5.Transaction>>
+          >);
+}
+
+/// A class which mocks [GetTransactionByWalletUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetTransactionByWalletUseCase extends _i1.Mock
+    implements _i49.GetTransactionByWalletUseCase {
+  MockGetTransactionByWalletUseCase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i12.Future<_i8.Either<String, _i4.BaseResponse<_i5.Transaction>>> call(
+    String? walletId,
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [walletId, search, orderBy, page, size]),
+            returnValue: _i12.Future<
+              _i8.Either<String, _i4.BaseResponse<_i5.Transaction>>
+            >.value(
+              _FakeEither_6<String, _i4.BaseResponse<_i5.Transaction>>(
+                this,
+                Invocation.method(#call, [
+                  walletId,
+                  search,
+                  orderBy,
+                  page,
+                  size,
+                ]),
+              ),
+            ),
+          )
+          as _i12.Future<
+            _i8.Either<String, _i4.BaseResponse<_i5.Transaction>>
+          >);
 }

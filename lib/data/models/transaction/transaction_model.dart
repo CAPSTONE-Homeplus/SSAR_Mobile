@@ -35,41 +35,43 @@ class TransactionModel {
     this.orderId,
   });
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['wallet_id'] = walletId;
-    data['user_id'] = userId;
-    data['payment_method_id'] = paymentMethodId;
-    data['amount'] = amount;
-    data['type'] = type;
-    data['payment_url'] = paymentUrl;
-    data['note'] = note;
-    data['transaction_date'] = transactionDate;
-    data['status'] = status;
-    data['created_at'] = createdAt;
-    data['updated_at'] = updatedAt;
-    data['code'] = code;
-    data['category_id'] = categoryId;
-    data['order_id'] = orderId;
-    return data;
+  factory TransactionModel.fromJson(Map<String, dynamic> json) {
+    return TransactionModel(
+      id: json['id'],
+      walletId: json['walletId'],
+      userId: json['userId'],
+      paymentMethodId: json['paymentMethodId'],
+      amount: json['amount'],
+      type: json['type'],
+      paymentUrl: json['paymentUrl'],
+      note: json['note'],
+      transactionDate: json['transactionDate'],
+      status: json['status'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+      code: json['code'],
+      categoryId: json['categoryId'],
+      orderId: json['orderId'],
+    );
   }
 
-  TransactionModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    walletId = json['wallet_id'];
-    userId = json['user_id'];
-    paymentMethodId = json['payment_method_id'];
-    amount = json['amount'];
-    type = json['type'];
-    paymentUrl = json['payment_url'];
-    note = json['note'];
-    transactionDate = json['transaction_date'];
-    status = json['status'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
-    code = json['code'];
-    categoryId = json['category_id'];
-    orderId = json['order_id'];
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'walletId': walletId,
+      'userId': userId,
+      'paymentMethodId': paymentMethodId,
+      'amount': amount,
+      'type': type,
+      'paymentUrl': paymentUrl,
+      'note': note,
+      'transactionDate': transactionDate,
+      'status': status,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'code': code,
+      'categoryId': categoryId,
+      'orderId': orderId,
+    };
   }
 }

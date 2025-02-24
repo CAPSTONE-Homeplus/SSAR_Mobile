@@ -7,13 +7,16 @@ import 'package:home_clean/domain/entities/service/service.dart';
 import '../../../../core/constant/constant.dart';
 import '../../../../core/constant/app_text_styles.dart';
 import '../../../../core/constant/size_config.dart';
+import '../../../../domain/entities/user/user.dart';
 import '../../../../domain/entities/wallet/wallet.dart';
 import '../../../widgets/address_bottom_sheet.dart';
 
 class HomeScreenBody extends StatefulWidget {
   List<Service> servicesToFetch;
   List<Wallet> walletUser = [];
-  HomeScreenBody({super.key, required this.servicesToFetch, required this.walletUser});
+  User user;
+  HomeScreenBody({super.key, required this.servicesToFetch,
+    required this.walletUser, required this.user});
 
   @override
   State<HomeScreenBody> createState() => _HomeScreenBodyState();
@@ -28,14 +31,14 @@ class _HomeScreenBodyState extends State<HomeScreenBody> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildHomeScreen(widget.servicesToFetch, context, widget.walletUser);
+    return _buildHomeScreen(widget.servicesToFetch, context, widget.walletUser, widget.user);
   }
 }
 
-Widget _buildHomeScreen(List<Service> services, BuildContext context, List<Wallet> walletUser) {
+Widget _buildHomeScreen(List<Service> services, BuildContext context, List<Wallet> walletUser, User user) {
   String selectedBuilding = '';
   String selectedRoom = '';
-  String defaultAddress = 'Ho Chi Minh City';
+  String defaultAddress = user.fullName ?? '';
   final fem = SizeConfig.fem;
   final hem = SizeConfig.hem;
   final ffem = SizeConfig.ffem;
@@ -105,7 +108,7 @@ Widget _buildHomeScreen(List<Service> services, BuildContext context, List<Walle
             WalletCardWidget(
               walletUserList: walletUser,
               onAddPoints: () {
-                AppRouter.navigateToPayment(walletUser);
+                AppRouter.navigateToPayment();
               },
               fem: fem,  // Your responsive scaling factor
               ffem: ffem, // Your font scaling factor
@@ -232,7 +235,7 @@ class WalletCardWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(16 * fem),
         boxShadow: [
           BoxShadow(
-            color: Color(0xFF1CAF7D).withOpacity(0.3),
+            color: const Color(0xFF1CAF7D).withValues(alpha: (0.3 * 255).toDouble()),
             blurRadius: 15,
             offset: Offset(0, 6),
           ),
@@ -512,21 +515,21 @@ Widget _buildServiceItem({
   );
 }
 
-Widget _buildPromotionCard() {
-  return Container(
-    width: 280,
-    margin: EdgeInsets.only(right: 16 * SizeConfig.fem),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(12 * SizeConfig.fem),
-      color: Colors.white,
-      image: DecorationImage(
-        image: NetworkImage(
-            'https://i.pinimg.com/736x/11/4c/60/114c609160dbcb99469d74fad218cf82.jpg'),
-        fit: BoxFit.cover,
-      ),
-    ),
-  );
-}
+// Widget _buildPromotionCard() {
+//   return Container(
+//     width: 280,
+//     margin: EdgeInsets.only(right: 16 * SizeConfig.fem),
+//     decoration: BoxDecoration(
+//       borderRadius: BorderRadius.circular(12 * SizeConfig.fem),
+//       color: Colors.white,
+//       image: DecorationImage(
+//         image: NetworkImage(
+//             'https://i.pinimg.com/736x/11/4c/60/114c609160dbcb99469d74fad218cf82.jpg'),
+//         fit: BoxFit.cover,
+//       ),
+//     ),
+//   );
+// }
 
 Widget _buildBookingCard() {
   return Container(

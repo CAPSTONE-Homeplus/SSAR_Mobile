@@ -114,7 +114,10 @@ class HomeClean extends StatelessWidget {
               create: (context) => ThemeBloc(preferences: preferences)),
           BlocProvider(
               create: (context) =>
-                  AuthBloc(loginUseCase: sl(), clearUserFromLocalUseCase: sl(), userRegisterUseCase: sl())),
+                  AuthBloc(loginUseCase: sl(),
+                      clearUserFromLocalUseCase: sl(),
+                      userRegisterUseCase: sl(),
+                      getUserFromLocalUseCase: sl())),
           BlocProvider(
               create: (context) => ServiceBloc(
                   serviceRepository: sl(),
@@ -149,7 +152,7 @@ class HomeClean extends StatelessWidget {
           BlocProvider( create: (context) => WalletBloc(getWalletByUser: sl())),
           BlocProvider(create: (context) => RoomBloc(sl())),
           BlocProvider(create: (context) => BuildingBloc(buildingRepository: sl())),
-          BlocProvider(create: (context) => TransactionBloc(sl())),
+          BlocProvider(create: (context) => TransactionBloc(sl(), sl(), sl())),
           BlocProvider(create: (context) => HouseBloc(getHouseByBuildingUseCase: sl())),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(

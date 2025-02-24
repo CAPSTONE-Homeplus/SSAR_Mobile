@@ -95,9 +95,7 @@ class AppRouter {
         ),
         GetPage(
           name: routePayment,
-          page: () => TopUpScreen(
-              walletUser: Get.arguments,
-          ),
+          page: () => TopUpScreen(),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -155,8 +153,8 @@ class AppRouter {
     Get.toNamed(routeRegister);
   }
 
-  static void navigateToPayment(dynamic arguments) {
-    Get.toNamed(routePayment, arguments: arguments);
+  static void navigateToPayment() {
+    Get.toNamed(routePayment);
   }
 
 }

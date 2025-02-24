@@ -14,6 +14,8 @@ import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../../data/datasource/service_local_data_source.dart';
+import '../../data/datasource/local_data_source.dart';
+import '../../data/datasource/transaction_local_data_source.dart';
 import '../../data/datasource/user_local_datasource.dart';
 import '../../data/repositories/authentication_repository_impl.dart';
 import '../../data/repositories/building_repository_impl.dart';
@@ -33,6 +35,7 @@ import '../../data/repositories/time_slot_repository_impl.dart';
 import '../../data/repositories/transaction_repository_impl.dart';
 import '../../data/repositories/user_repository_impl.dart';
 import '../../data/repositories/wallet_repository_impl.dart';
+import '../../domain/entities/transaction/transaction.dart';
 import '../../domain/repositories/authentication_repository.dart';
 import '../../domain/repositories/equipment_supply_repository.dart';
 import '../../domain/repositories/extra_service_repository.dart';
@@ -75,15 +78,19 @@ import '../../domain/repositories/sub_activity_repository.dart';
 import '../../domain/repositories/time_slot_repository.dart';
 import '../../domain/repositories/wallet_repository.dart';
 import '../../domain/use_cases/auth/clear_user_from_local_usecase.dart';
+import '../../domain/use_cases/auth/get_user_from_local_usecase.dart';
 import '../../domain/use_cases/auth/user_register_usecase.dart';
 import '../../domain/use_cases/house/get_house_by_building_use_case.dart';
 import '../../domain/use_cases/payment_method/get_payment_methods_use_case.dart';
+import '../../domain/use_cases/transaction/get_transaction_by_user.dart';
+import '../../domain/use_cases/transaction/get_transaction_by_wallet_use_case.dart';
 import '../../domain/use_cases/wallet/get_wallet_by_user.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/building/building_bloc.dart';
 import '../../presentation/blocs/room/room_bloc.dart';
 import '../../presentation/blocs/transaction/transation_bloc.dart';
 import '../../presentation/blocs/wallet/wallet_bloc.dart';
+import '../cache_manager/cache_manger.dart';
 
 final sl = GetIt.instance;
 
@@ -96,6 +103,7 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => sharedPreferences);
   sl.registerLazySingleton(() => storage);
 
+
   // LocalDataSources
   sl.registerLazySingleton<ServiceLocalDataSource>(
         () => ServiceLocalDataSource(),
@@ -106,6 +114,10 @@ Future<void> setupServiceLocator() async {
 
   sl.registerLazySingleton<UserLocalDatasource>(
         () => UserLocalDatasource(),
+  );
+
+  sl.registerLazySingleton<TransactionLocalDataSource>(
+        () => TransactionLocalDataSource(),
   );
 
   // Repositories (sử dụng LazySingleton vì chúng ta muốn tái sử dụng đối tượng)
@@ -135,7 +147,10 @@ Future<void> setupServiceLocator() async {
           () => WalletRepositoryImpl(authLocalDataSource: sl(), userLocalDatasource: sl()));
   sl.registerLazySingleton<RoomRepository>(() => RoomRepositoryImpl());
   sl.registerLazySingleton<BuildingRepository>(() => BuildingRepositoryImpl());
-  sl.registerLazySingleton<TransactionRepository>(() => TransactionRepositoryImpl(authLocalDataSource: sl(), userLocalDatasource: sl()));
+  sl.registerLazySingleton<TransactionRepository>(() => TransactionRepositoryImpl(
+    authLocalDataSource: sl(),
+    transactionLocalDataSource: sl(),
+  ));
   sl.registerLazySingleton<PaymentMethodRepository>(() => PaymentMethodRepositoryImpl());
   sl.registerLazySingleton<HouseRepository>(() => HouseRepositoryImpl());
 
@@ -164,10 +179,12 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => SaveTransactionUseCase(sl()));
   sl.registerLazySingleton(() => GetPaymentMethodsUseCase(sl()));
   sl.registerLazySingleton(() => GetHouseByBuildingUseCase(sl()));
+  sl.registerLazySingleton(() => GetTransactionByWalletUseCase(sl()));
+  sl.registerLazySingleton(() => GetTransactionByUserUseCase(sl()));
 
   // local Use Cases
   sl.registerLazySingleton(() => ClearUserFromLocalUseCase(sl()));
-  // sl.registerLazySingleton(() => GetUserFromLocalUseCase(sl()));
+  sl.registerLazySingleton(() => GetUserFromLocalUseCase(sl()));
   // sl.registerLazySingleton(() => SaveUserToLocalUseCase(sl()));
 
 
@@ -175,7 +192,8 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(() => AuthBloc(
       loginUseCase: sl(),
       clearUserFromLocalUseCase: sl(),
-      userRegisterUseCase: sl()));
+      userRegisterUseCase: sl(),
+      getUserFromLocalUseCase: sl()));
   sl.registerFactory(() => InternetBloc());
   sl.registerFactory(() => ThemeBloc(preferences: sl()));
   sl.registerFactory(
@@ -202,6 +220,6 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(() => WalletBloc(getWalletByUser: sl()));
   sl.registerFactory(() => RoomBloc(sl()));
   sl.registerFactory(() => BuildingBloc(buildingRepository: sl()));
-  sl.registerFactory(() => TransactionBloc(sl()));
+  sl.registerFactory(() => TransactionBloc(sl(), sl(), sl()));
   sl.registerFactory(() => HouseBloc(getHouseByBuildingUseCase: sl()));
 }

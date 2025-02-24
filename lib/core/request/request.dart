@@ -5,8 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:home_clean/core/constant/api_constant.dart';
 import 'package:home_clean/data/datasource/auth_local_datasource.dart';
 import 'package:home_clean/data/datasource/user_local_datasource.dart';
+import 'package:home_clean/domain/repositories/authentication_repository.dart';
 
 import '../../data/mappers/user/user_mapper.dart';
+import '../../domain/entities/auth/auth.dart';
 
 enum BaseUrlType {
   homeClean,
@@ -15,6 +17,7 @@ enum BaseUrlType {
 
 final AuthLocalDataSource _authLocalDataSource = AuthLocalDataSource();
 final UserLocalDatasource _userLocalDatasource = UserLocalDatasource();
+// late AuthRepository _authRepository;
 
 Map<String, dynamic> convertToQueryParams(
     [Map<String, dynamic> params = const {}]) {
@@ -176,44 +179,29 @@ class MyRequest {
 
             try {
               final refreshToken = await _authLocalDataSource.getRefreshTokenFromStorage();
-              final userId = UserMapper.toModel(await _userLocalDatasource.getUser() ?? {}).id;
 
               if (refreshToken == null || refreshToken.isEmpty) {
                 clearLocalStorageAndLogout();
                 return handler.next(e);
               }
 
-              // Gọi API để refresh token
-              final refreshResponse = await Dio().post(
-                '/auth/refresh',
-                data: {'userId' : userId,'refreshToken': refreshToken},
-              );
+              // Auth auth = await _authRepository.refreshToken();
 
-              if (refreshResponse.statusCode == 200) {
-                // Lấy token mới từ response
-                final newToken = refreshResponse.data['accessToken'];
-                final newRefreshToken = refreshResponse.data['refreshToken'];
-
-                // Lưu token mới vào storage
-                await _authLocalDataSource.saveTokensToStorage(newToken, newRefreshToken);
-
-                // Cập nhật token trong header cho tất cả các instance
-                requestObj.setToken = newToken;
-
-                // Thực hiện lại request ban đầu
-                final options = e.requestOptions;
-                options.headers["Authorization"] = "Bearer $newToken";
-
-                final response = await request.fetch(options);
-                return handler.resolve(response);
-              } else {
-                // Nếu refresh token không thành công
-                clearLocalStorageAndLogout();
-                return handler.next(e);
-              }
+              // final newToken = auth.accessToken;
+              // final newRefreshToken = auth.refreshToken;
+              //
+              // if (newToken == null || newRefreshToken == null) {
+              //   clearLocalStorageAndLogout();
+              //   return handler.next(e);
+              // }
+              // await _authLocalDataSource.saveTokensToStorage(newToken, newRefreshToken);
+              // requestObj.setToken = newToken;
+              // final options = e.requestOptions;
+              // options.headers["Authorization"] = "Bearer $newToken";
+              // final response = await request.fetch(options);
+              // return handler.resolve(response);
             } catch (refreshError) {
               print("Token refresh failed: $refreshError");
-              // Nếu có lỗi trong quá trình refresh, logout
               clearLocalStorageAndLogout();
               return handler.next(e);
             }

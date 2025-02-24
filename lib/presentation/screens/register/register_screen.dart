@@ -12,6 +12,8 @@ import 'package:home_clean/presentation/blocs/house/house_state.dart';
 import '../../../domain/entities/building/building.dart';
 import '../../../domain/entities/house/house.dart';
 import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_event.dart';
+import '../../blocs/auth/auth_state.dart';
 import '../../blocs/building/building_bloc.dart';
 import '../../blocs/building/building_event.dart';
 

@@ -6,16 +6,19 @@ import 'package:home_clean/core/constant/size_config.dart';
 import 'package:home_clean/core/format/validation.dart';
 import 'package:home_clean/presentation/blocs/transaction/transaction_state.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../domain/entities/transaction/create_transaction.dart';
 import '../../../domain/entities/wallet/wallet.dart';
 import '../../blocs/transaction/transaction_event.dart';
 import '../../blocs/transaction/transation_bloc.dart';
+import '../../blocs/wallet/wallet_bloc.dart';
+import '../../blocs/wallet/wallet_event.dart';
+import '../../blocs/wallet/wallet_state.dart';
 import '../payment_screen/payment_screen.dart';
 
 class TopUpScreen extends StatefulWidget {
-  List<Wallet> walletUser = [];
-  TopUpScreen({Key? key, required this.walletUser}) : super(key: key);
+  TopUpScreen({Key? key}) : super(key: key);
 
   @override
   State<TopUpScreen> createState() => _TopUpScreenState();
@@ -23,11 +26,14 @@ class TopUpScreen extends StatefulWidget {
 
 class _TopUpScreenState extends State<TopUpScreen> {
   final _formKey = GlobalKey<FormState>();
-  late List<Wallet> _selectedWalletType = [];
+  List<Wallet> _selectedWalletType = [];
   late String _selectedWalletId = '';
   late String _selectedPaymentId = '15890b1a-f5a6-42c3-8f37-541029189722';
   String _selectedPaymentMethod = 'banking';
   final TextEditingController _amountController = TextEditingController();
+  late WalletBloc _walletBloc;
+  List<Wallet> walletUser = [];
+  bool isLoading = true;
 
   // Predefined amounts
   final List<int> _suggestedAmounts = [50000, 100000, 200000, 500000];
@@ -41,9 +47,49 @@ class _TopUpScreenState extends State<TopUpScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedWalletType = widget.walletUser;
-    _selectedWalletId = _selectedWalletType[0].id!;
+    _init();
   }
+
+
+  void _init() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        setState(() {
+          isLoading = true;
+        });
+        _walletBloc = context.read<WalletBloc>();
+        _walletBloc.add(GetWallet());
+        final walletComplete = _processWallet();
+        await Future.wait([
+          walletComplete,
+        ]);
+        setState(() {
+          isLoading = false;
+        });
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
+  }
+
+  Future<void> _processWallet() async {
+    await for (final state in _walletBloc.stream) {
+      if (state is WalletLoaded && mounted) {
+        setState(() {
+          walletUser = state.wallets;
+          _selectedWalletType = walletUser;
+
+          if (_selectedWalletType.isNotEmpty) {
+            _selectedWalletId = _selectedWalletType[0].id!;
+          }
+        });
+        break;
+      }
+    }
+  }
+
 
   void _onProcess() {
     if (_formKey.currentState!.validate()) {
@@ -68,7 +114,61 @@ class _TopUpScreenState extends State<TopUpScreen> {
     }
   }
 
-
+  Widget _buildShimmerPlaceholder(double fem, double ffem) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            height: 80 * fem,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            height: 80 * fem,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            height: 160 * fem,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            height: 80 * fem,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            height: 80 * fem,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +198,15 @@ class _TopUpScreenState extends State<TopUpScreen> {
       body: SingleChildScrollView(
         child: Form(
           key: _formKey,
-          child: Column(
+          child: isLoading
+                  ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildShimmerPlaceholder(fem, ffem),
+            ],
+
+              )
+              :Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildWalletSummary(fem, ffem),
@@ -121,6 +229,38 @@ class _TopUpScreenState extends State<TopUpScreen> {
   }
 
   Widget _buildWalletSummary(double fem, double ffem) {
+    if (walletUser.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(20 * fem),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              offset: Offset(0, 4),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            'Không có ví nào khả dụng',
+            style: GoogleFonts.poppins(
+              fontSize: 16 * ffem,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[600],
+            ),
+          ),
+        ),
+      );
+    }
+
+    Wallet selectedWallet = walletUser.firstWhere(
+          (wallet) => wallet.id == _selectedWalletId,
+      orElse: () => walletUser[0],
+    );
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20 * fem),
@@ -163,7 +303,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
                 ),
                 SizedBox(height: 4 * fem),
                 Text(
-                  '${_selectedWalletId == widget.walletUser[0].id ? Validation.formatCurrency(widget.walletUser[0].balance!) : Validation.formatCurrency(widget.walletUser[1].balance!)} ₫',
+                  '${Validation.formatCurrency(selectedWallet.balance!)} ₫',
                   style: GoogleFonts.poppins(
                     fontSize: 20 * ffem,
                     fontWeight: FontWeight.bold,
@@ -177,6 +317,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
       ),
     );
   }
+
 
   Widget _buildWalletTypeSelection(double fem, double ffem) {
     return Container(
@@ -195,7 +336,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
           ),
           SizedBox(height: 16 * fem),
           Row(
-            children: widget.walletUser.map((wallet) {
+            children: walletUser.map((wallet) {
               return Expanded(
                 child: wallet.type == 'Shared' ? _buildWalletTypeOption(
                   Icons.people,

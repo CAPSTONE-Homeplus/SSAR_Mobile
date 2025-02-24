@@ -4,6 +4,7 @@ import 'package:home_clean/domain/entities/transaction/transaction.dart';
 import 'package:home_clean/domain/repositories/transaction_repository.dart';
 import 'package:home_clean/core/exception/failure.dart';
 import '../../../core/base/base_usecase.dart';
+import '../../../core/exception/exception_handler.dart';
 import '../../entities/transaction/create_transaction.dart';
 
 class SaveTransactionUseCase implements UseCase<Transaction, SaveTransactionParams> {
@@ -16,6 +17,8 @@ class SaveTransactionUseCase implements UseCase<Transaction, SaveTransactionPara
     try {
       final result = await repository.saveTransaction(params.transaction);
       return Right(result);
+    } on ApiException catch (e) {
+      return Left(ApiFailure(e.description ?? 'Đã có lỗi xảy ra!'));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

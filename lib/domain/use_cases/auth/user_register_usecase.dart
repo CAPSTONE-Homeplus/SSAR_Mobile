@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:home_clean/domain/repositories/authentication_repository.dart';
 
 import '../../../core/exception/exception_handler.dart';
-import '../../../core/exception/failure.dart';
 import '../../entities/user/create_user.dart';
 import '../../entities/user/user.dart';
 

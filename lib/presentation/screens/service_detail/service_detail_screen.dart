@@ -69,6 +69,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   void initState() {
     super.initState();
     _init();
+    _totalPrice = widget.service.price ?? 0;
   }
 
   @override
