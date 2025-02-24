@@ -20,6 +20,8 @@ import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:home_clean/presentation/blocs/notification/notification_bloc.dart';
 import 'package:home_clean/presentation/blocs/option/option_bloc.dart';
 import 'package:home_clean/presentation/blocs/order/order_bloc.dart';
+import 'package:home_clean/presentation/blocs/payment_method/payment_method_bloc.dart';
+import 'package:home_clean/presentation/blocs/payment_method/payment_method_event.dart';
 import 'package:home_clean/presentation/blocs/service/service_bloc.dart';
 import 'package:home_clean/presentation/blocs/service_activity/service_activity_bloc.dart';
 import 'package:home_clean/presentation/blocs/service_category/service_category_bloc.dart';
@@ -52,7 +54,7 @@ import 'presentation/blocs/theme/theme_bloc.dart';
 final sl = GetIt.instance;
 final navigatorKey = GlobalKey<NavigatorState>();
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin();
 late InitializeNotificationUseCase _initializeNotificationUseCase;
 
 void main() async {
@@ -66,7 +68,6 @@ void main() async {
   runApp(HomeClean(preferences: sl<SharedPreferences>()));
 }
 
-
 class HomeClean extends StatelessWidget {
   final SharedPreferences preferences;
 
@@ -77,10 +78,8 @@ class HomeClean extends StatelessWidget {
     // MultiRepositoryProvider để cung cấp nhiều repository cho ứng dụng
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<AuthRepository>(
-            create: (_) => sl<AuthRepository>()),
-        RepositoryProvider<UserRepository>(
-            create: (_) => sl<UserRepository>()),
+        RepositoryProvider<AuthRepository>(create: (_) => sl<AuthRepository>()),
+        RepositoryProvider<UserRepository>(create: (_) => sl<UserRepository>()),
         RepositoryProvider<ServiceRepository>(
             create: (_) => sl<ServiceRepository>()),
         RepositoryProvider<ServiceCategoryRepository>(
@@ -113,11 +112,11 @@ class HomeClean extends StatelessWidget {
           BlocProvider(
               create: (context) => ThemeBloc(preferences: preferences)),
           BlocProvider(
-              create: (context) =>
-                  AuthBloc(loginUseCase: sl(),
-                      clearUserFromLocalUseCase: sl(),
-                      userRegisterUseCase: sl(),
-                      getUserFromLocalUseCase: sl())),
+              create: (context) => AuthBloc(
+                  loginUseCase: sl(),
+                  clearUserFromLocalUseCase: sl(),
+                  userRegisterUseCase: sl(),
+                  getUserFromLocalUseCase: sl())),
           BlocProvider(
               create: (context) => ServiceBloc(
                   serviceRepository: sl(),
@@ -144,16 +143,28 @@ class HomeClean extends StatelessWidget {
                   EquipmentSupplyBloc(getEquipmentSuppliesUsecase: sl())),
           BlocProvider(
               create: (context) => TimeSlotBloc(getTimeSlotsUsecase: sl())),
-          BlocProvider(create: (context) => OrderBloc(createOrderUseCase: sl())),
+          BlocProvider(
+              create: (context) => OrderBloc(createOrderUseCase: sl())),
           BlocProvider(
               create: (context) => NotificationBloc(
                   initializeNotificationUseCase: sl(),
                   showNotificationUseCase: sl())),
-          BlocProvider( create: (context) => WalletBloc(getWalletByUser: sl())),
+          BlocProvider(create: (context) => WalletBloc(getWalletByUser: sl())),
           BlocProvider(create: (context) => RoomBloc(sl())),
-          BlocProvider(create: (context) => BuildingBloc(buildingRepository: sl())),
+          BlocProvider(
+              create: (context) => BuildingBloc(buildingRepository: sl())),
           BlocProvider(create: (context) => TransactionBloc(sl(), sl(), sl())),
-          BlocProvider(create: (context) => HouseBloc(getHouseByBuildingUseCase: sl())),
+          BlocProvider(
+              create: (context) => HouseBloc(getHouseByBuildingUseCase: sl())),
+          BlocProvider(
+            create: (context) => PaymentMethodBloc(sl())
+              ..add(GetPaymentMethodsEvent(
+                search: '',
+                orderBy: '',
+                page: 1,
+                size: 10,
+              )),
+          ),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {

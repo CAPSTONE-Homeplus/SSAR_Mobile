@@ -6,7 +6,8 @@ import 'package:home_clean/presentation/blocs/payment_method/payment_method_stat
 class PaymentMethodBloc extends Bloc<PaymentMethodEvent, PaymentMethodState> {
   final GetPaymentMethodsUseCase _getPaymentMethodsUseCase;
 
-  PaymentMethodBloc(this._getPaymentMethodsUseCase) : super(PaymentMethodInitial()) {
+  PaymentMethodBloc(this._getPaymentMethodsUseCase)
+      : super(PaymentMethodInitial()) {
     on<GetPaymentMethodsEvent>(_onGetPaymentMethods);
   }
 
@@ -22,8 +23,8 @@ class PaymentMethodBloc extends Bloc<PaymentMethodEvent, PaymentMethodState> {
     );
 
     result.fold(
-          (failure) => emit(PaymentMethodError(failure.message)),
-          (methods) => emit(PaymentMethodLoaded(methods)),
+      (failure) => emit(PaymentMethodError(failure)),
+      (methods) => emit(PaymentMethodLoaded(methods)),
     );
   }
 }

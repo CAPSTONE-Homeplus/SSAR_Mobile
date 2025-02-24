@@ -21,9 +21,6 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8
     }
 
-    kotlin {
-        jvmToolchain(21)
-    }
 
     defaultConfig {
         multiDexEnabled true

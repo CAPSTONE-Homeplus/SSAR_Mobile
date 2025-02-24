@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/constant/size_config.dart';
 import 'package:home_clean/core/format/validation.dart';
+import 'package:home_clean/presentation/blocs/payment_method/payment_method_bloc.dart';
+import 'package:home_clean/presentation/blocs/payment_method/payment_method_state.dart';
 import 'package:home_clean/presentation/blocs/transaction/transaction_state.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
@@ -50,7 +52,6 @@ class _TopUpScreenState extends State<TopUpScreen> {
     _init();
   }
 
-
   void _init() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
@@ -89,7 +90,6 @@ class _TopUpScreenState extends State<TopUpScreen> {
       }
     }
   }
-
 
   void _onProcess() {
     if (_formKey.currentState!.validate()) {
@@ -199,30 +199,29 @@ class _TopUpScreenState extends State<TopUpScreen> {
         child: Form(
           key: _formKey,
           child: isLoading
-                  ? Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildShimmerPlaceholder(fem, ffem),
-            ],
-
-              )
-              :Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildWalletSummary(fem, ffem),
-              const SizedBox(height: 4),
-              _buildWalletTypeSelection(fem, ffem),
-              _buildDivider(fem),
-              _buildPaymentMethodSelection(fem, ffem),
-              _buildDivider(fem),
-              _buildAmountSection(fem, ffem),
-              _buildDivider(fem),
-              _buildSuggestedAmounts(fem, ffem),
-              const SizedBox(height: 40),
-              _buildTopUpButton(fem, ffem),
-              const SizedBox(height: 20),
-            ],
-          ),
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildShimmerPlaceholder(fem, ffem),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildWalletSummary(fem, ffem),
+                    const SizedBox(height: 4),
+                    _buildWalletTypeSelection(fem, ffem),
+                    _buildDivider(fem),
+                    _buildPaymentMethodSelection(fem, ffem),
+                    _buildDivider(fem),
+                    _buildAmountSection(fem, ffem),
+                    _buildDivider(fem),
+                    _buildSuggestedAmounts(fem, ffem),
+                    const SizedBox(height: 40),
+                    _buildTopUpButton(fem, ffem),
+                    const SizedBox(height: 20),
+                  ],
+                ),
         ),
       ),
     );
@@ -257,7 +256,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
     }
 
     Wallet selectedWallet = walletUser.firstWhere(
-          (wallet) => wallet.id == _selectedWalletId,
+      (wallet) => wallet.id == _selectedWalletId,
       orElse: () => walletUser[0],
     );
 
@@ -318,7 +317,6 @@ class _TopUpScreenState extends State<TopUpScreen> {
     );
   }
 
-
   Widget _buildWalletTypeSelection(double fem, double ffem) {
     return Container(
       padding: EdgeInsets.all(20 * fem),
@@ -338,21 +336,23 @@ class _TopUpScreenState extends State<TopUpScreen> {
           Row(
             children: walletUser.map((wallet) {
               return Expanded(
-                child: wallet.type == 'Shared' ? _buildWalletTypeOption(
-                  Icons.people,
-                  Colors.blue,
-                  wallet.id!,
-                  wallet.type!,
-                  fem,
-                  ffem,
-                ) : _buildWalletTypeOption(
-                  Icons.account_circle,
-                  Colors.orange,
-                  wallet.id!,
-                  wallet.type!,
-                  fem,
-                  ffem,
-                ),
+                child: wallet.type == 'Shared'
+                    ? _buildWalletTypeOption(
+                        Icons.people,
+                        Colors.blue,
+                        wallet.id!,
+                        wallet.type!,
+                        fem,
+                        ffem,
+                      )
+                    : _buildWalletTypeOption(
+                        Icons.account_circle,
+                        Colors.orange,
+                        wallet.id!,
+                        wallet.type!,
+                        fem,
+                        ffem,
+                      ),
               );
             }).toList(),
           ),
@@ -361,9 +361,9 @@ class _TopUpScreenState extends State<TopUpScreen> {
     );
   }
 
-  Widget _buildWalletTypeOption(
-      IconData icon, Color color, String walletId, String title, double fem, double ffem) {
-    bool isSelected = _selectedWalletId == walletId  ;
+  Widget _buildWalletTypeOption(IconData icon, Color color, String walletId,
+      String title, double fem, double ffem) {
+    bool isSelected = _selectedWalletId == walletId;
 
     return InkWell(
       onTap: () => setState(() => _selectedWalletId = walletId),
@@ -429,7 +429,6 @@ class _TopUpScreenState extends State<TopUpScreen> {
     );
   }
 
-
   Widget _buildPaymentMethodSelection(double fem, double ffem) {
     return Container(
       padding: EdgeInsets.all(20 * fem),
@@ -446,51 +445,70 @@ class _TopUpScreenState extends State<TopUpScreen> {
             ),
           ),
           SizedBox(height: 16 * fem),
-          Column(
-            children: [
-              _buildPaymentOption(
-                'banking',
-                'Chuyển khoản ngân hàng',
-                'assets/images/bank_icon.png',
-                fem,
-                ffem,
-              ),
-              SizedBox(height: 12 * fem),
-              _buildPaymentOption(
-                'paypal',
-                'PayPal',
-                'assets/images/paypal_icon.png',
-                fem,
-                ffem,
-              ),
-              SizedBox(height: 12 * fem),
-              _buildPaymentOption(
-                'momo',
-                'Ví MoMo',
-                'assets/images/momo_icon.png',
-                fem,
-                ffem,
-              ),
-            ],
+          BlocBuilder<PaymentMethodBloc, PaymentMethodState>(
+            builder: (context, state) {
+              print("Trạng thái hiện tại của PaymentMethodBloc: $state");
+              if (state is PaymentMethodLoading) {
+                return Center(child: CircularProgressIndicator());
+              } else if (state is PaymentMethodLoaded) {
+                // Lấy danh sách payment method từ API
+                final methods = state.response.items ?? [];
+
+                return Column(
+                  children: methods.isNotEmpty
+                      ? methods.map((method) {
+                          return _buildPaymentOption(
+                            method.id ?? '',
+                            method.name ?? 'Không xác định',
+                            fem,
+                            ffem,
+                          );
+                        }).toList()
+                      : [
+                          Center(
+                            child: Text(
+                              "Không có phương thức thanh toán nào.",
+                              style: GoogleFonts.poppins(
+                                  fontSize: 14 * ffem, color: Colors.grey[600]),
+                            ),
+                          ),
+                        ],
+                );
+              } else if (state is PaymentMethodError) {
+                return Center(
+                  child: Text(
+                    "Lỗi: ${state.message}",
+                    style: GoogleFonts.poppins(
+                        fontSize: 14 * ffem, color: Colors.red),
+                  ),
+                );
+              }
+              return Center(
+                child: Text(
+                  "Không có dữ liệu",
+                  style: GoogleFonts.poppins(
+                      fontSize: 14 * ffem, color: Colors.grey[600]),
+                ),
+              );
+            },
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPaymentOption(String value, String title, String iconAsset, double fem, double ffem) {
-    final bool isSelected = _selectedPaymentMethod == value;
+  Widget _buildPaymentOption(String id, String title, double fem, double ffem) {
+    final bool isSelected = _selectedPaymentMethod == id;
 
     return InkWell(
-      onTap: () => setState(() => _selectedPaymentMethod = value),
+      onTap: () => setState(() => _selectedPaymentMethod = id),
       borderRadius: BorderRadius.circular(12 * fem),
       child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: 16 * fem,
-          vertical: 14 * fem,
-        ),
+        padding: EdgeInsets.symmetric(horizontal: 16 * fem, vertical: 14 * fem),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF1CAF7D).withOpacity(0.1) : Colors.white,
+          color: isSelected
+              ? const Color(0xFF1CAF7D).withOpacity(0.1)
+              : Colors.white,
           borderRadius: BorderRadius.circular(12 * fem),
           border: Border.all(
             color: isSelected ? const Color(0xFF1CAF7D) : Colors.grey[300]!,
@@ -499,7 +517,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
         ),
         child: Row(
           children: [
-            // For demonstration, using icon instead of asset image
+            // Hiển thị hình ảnh nếu có, nếu không hiển thị icon mặc định
             Container(
               width: 40 * fem,
               height: 40 * fem,
@@ -507,15 +525,8 @@ class _TopUpScreenState extends State<TopUpScreen> {
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(8 * fem),
               ),
-              child: Icon(
-                value == 'banking' ? Icons.account_balance :
-                value == 'paypal' ? Icons.paypal :
-                Icons.account_balance_wallet,
-                color: value == 'banking' ? Colors.blue[800] :
-                value == 'paypal' ? Colors.blue[700] :
-                Colors.pink,
-                size: 20 * fem,
-              ),
+              child: Icon(Icons.account_balance_wallet,
+                  size: 20 * fem, color: Colors.black87),
             ),
             SizedBox(width: 16 * fem),
             Expanded(
@@ -529,7 +540,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
               ),
             ),
             Radio(
-              value: value,
+              value: id,
               groupValue: _selectedPaymentMethod,
               activeColor: const Color(0xFF1CAF7D),
               onChanged: (String? newValue) {
@@ -593,7 +604,8 @@ class _TopUpScreenState extends State<TopUpScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12 * fem),
-                borderSide: BorderSide(color: const Color(0xFF1CAF7D), width: 2),
+                borderSide:
+                    BorderSide(color: const Color(0xFF1CAF7D), width: 2),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12 * fem),
@@ -608,7 +620,8 @@ class _TopUpScreenState extends State<TopUpScreen> {
               if (value == null || value.isEmpty) {
                 return 'Vui lòng nhập số tiền';
               }
-              final amount = int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), ''));
+              final amount =
+                  int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), ''));
               if (amount == null || amount < 10000) {
                 return 'Số tiền tối thiểu là 10.000₫';
               }
@@ -617,7 +630,8 @@ class _TopUpScreenState extends State<TopUpScreen> {
             onChanged: (value) {
               // Format currency as user types
               if (value.isNotEmpty) {
-                final amount = int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+                final amount =
+                    int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
                 final formattedAmount = NumberFormat.currency(
                   locale: 'vi_VN',
                   symbol: '',
@@ -628,7 +642,8 @@ class _TopUpScreenState extends State<TopUpScreen> {
                 if (value != formattedAmount) {
                   _amountController.value = TextEditingValue(
                     text: formattedAmount,
-                    selection: TextSelection.collapsed(offset: formattedAmount.length),
+                    selection:
+                        TextSelection.collapsed(offset: formattedAmount.length),
                   );
                 }
               }
@@ -666,9 +681,9 @@ class _TopUpScreenState extends State<TopUpScreen> {
           Wrap(
             spacing: 12 * fem,
             runSpacing: 12 * fem,
-            children: _suggestedAmounts.map((amount) =>
-                _buildAmountChip(amount, fem, ffem)
-            ).toList(),
+            children: _suggestedAmounts
+                .map((amount) => _buildAmountChip(amount, fem, ffem))
+                .toList(),
           ),
         ],
       ),
@@ -748,13 +763,13 @@ class _TopUpScreenState extends State<TopUpScreen> {
             child: state is TransactionLoading
                 ? CircularProgressIndicator(color: Colors.white)
                 : Text(
-              'Xác nhận nạp tiền',
-              style: GoogleFonts.poppins(
-                fontSize: 16 * ffem,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
+                    'Xác nhận nạp tiền',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16 * ffem,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
           );
         },
       ),
@@ -770,12 +785,13 @@ class _TopUpScreenState extends State<TopUpScreen> {
 
   void _showConfirmationDialog(double fem, double ffem) {
     final amount = _amountController.text;
-    final walletType = _selectedWalletType == 'personal' ? 'Ví cá nhân' : 'Ví chung';
+    final walletType =
+        _selectedWalletType == 'personal' ? 'Ví cá nhân' : 'Ví chung';
     final paymentMethod = _selectedPaymentMethod == 'banking'
         ? 'Chuyển khoản'
         : _selectedPaymentMethod == 'paypal'
-        ? 'PayPal'
-        : 'Ví MoMo';
+            ? 'PayPal'
+            : 'Ví MoMo';
 
     showDialog(
       context: context,
@@ -874,7 +890,8 @@ class _TopUpScreenState extends State<TopUpScreen> {
     );
   }
 
-  Widget _buildConfirmationDetail(String label, String value, double fem, double ffem) {
+  Widget _buildConfirmationDetail(
+      String label, String value, double fem, double ffem) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
