@@ -15,13 +15,27 @@ workflows:
           echo "SERVICE_KEY=$SERVICE_KEY" >> assets/.env
           echo "HOME_CLEAN_URL=$HOME_CLEAN_URL" >> assets/.env
           echo "VIN_WALLET_URL=$VIN_WALLET_URL" >> assets/.env
+
       - name: Run tests with coverage
         script: |
           flutter test --coverage
+
+      - name: Generate coverage report
+        script: |
+          sudo apt-get install -y lcov
           genhtml coverage/lcov.info -o coverage/html
+
+      - name: Upload coverage to Codecov
+        script: |
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          chmod +x codecov
+          ./codecov -t YOUR_CODECOV_TOKEN || echo "Codecov upload failed"
+
     artifacts:
       - coverage/html/**
+
     publishing:
       email:
         recipients:
           - "9.10nguyenhuubao@gmail.com"
+      
