@@ -3,17 +3,17 @@ import 'package:home_clean/domain/entities/building/building.dart';
 
 import '../../../core/base/base_model.dart';
 import '../../../core/base/base_usecase.dart';
+import '../../../core/exception/exception_handler.dart';
 import '../../entities/room/room.dart';
 import '../../repositories/building_repository.dart';
 import '../../../core/exception/failure.dart';
 
-class GetBuildingsUsecase implements UseCase<BaseResponse<Building>, GetBuildingsParams> {
+class GetBuildingsUseCase {
   final BuildingRepository buildingRepository;
 
-  GetBuildingsUsecase(this.buildingRepository);
+  GetBuildingsUseCase(this.buildingRepository);
 
-  @override
-  Future<Either<Failure, BaseResponse<Building>>> call(GetBuildingsParams params) async {
+  Future<Either<Failure, BaseResponse<Building>>> execute(GetBuildingsParams params) async {
     try {
       final result = await buildingRepository.getBuildings(
         params.search,
@@ -23,11 +23,12 @@ class GetBuildingsUsecase implements UseCase<BaseResponse<Building>, GetBuilding
       );
 
       return Right(result);
+    } on ApiException catch (e) {
+      return Left(ApiFailure(e.description ?? 'Lỗi API không xác định!'));
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ServerFailure('Lỗi hệ thống: ${e.toString()}'));
     }
   }
-
 }
 
 

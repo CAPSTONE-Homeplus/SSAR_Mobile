@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import '../../../domain/use_cases/transaction/get_transaction_by_user.dart';
 import '../../../domain/use_cases/transaction/get_transaction_by_wallet_use_case.dart';
-import '../../../domain/use_cases/transaction/save_transaction_usecase.dart';
+import '../../../domain/use_cases/transaction/save_transaction_use_case.dart';
 import 'transaction_event.dart';
 import 'transaction_state.dart';
 
@@ -28,7 +28,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<GetTransactionByUserEvent>((event, emit) async {
       emit(TransactionLoading());
       final result = await getTransactionByUserUseCase.call(
-          event.search, event.orderBy, event.page, event.size
+        search: event.search, orderBy: event.orderBy, page: event.page, size: event.size
       );
 
       result.fold(

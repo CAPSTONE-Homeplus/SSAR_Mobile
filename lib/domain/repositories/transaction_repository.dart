@@ -1,7 +1,6 @@
 import 'package:home_clean/domain/entities/transaction/transaction.dart';
 
 import '../../core/base/base_model.dart';
-import 'base_repository.dart';
 import '../entities/transaction/create_transaction.dart';
 
 abstract class TransactionRepository {

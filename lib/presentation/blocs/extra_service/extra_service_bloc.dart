@@ -3,12 +3,12 @@ import 'package:home_clean/core/constant/constant.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_event.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_state.dart';
 
-import '../../../domain/use_cases/extra_service/get_extra_service_usecase.dart';
+import '../../../domain/use_cases/extra_service/get_extra_service_use_case.dart';
 
 class ExtraServiceBloc extends Bloc<ExtraServiceEvent, ExtraServiceState> {
-  final GetExtraServiceUsecase getExtraServiceUsecase;
+  final GetExtraServiceUseCase getExtraServiceUseCase;
 
-  ExtraServiceBloc({required this.getExtraServiceUsecase})
+  ExtraServiceBloc({required this.getExtraServiceUseCase})
       : super(ExtraServiceInitialState()) {
     on<GetExtraServices>(_onGetServicesEvent);
   }
@@ -19,7 +19,7 @@ class ExtraServiceBloc extends Bloc<ExtraServiceEvent, ExtraServiceState> {
   ) async {
     emit(ExtraServiceLoadingState());
     try {
-      final response = await getExtraServiceUsecase.execute(
+      final response = await getExtraServiceUseCase.execute(
         event.serviceId,
         event.search ?? '',
         event.orderBy ?? '',

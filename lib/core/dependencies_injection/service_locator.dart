@@ -7,16 +7,17 @@ import 'package:home_clean/domain/repositories/room_repository.dart';
 import 'package:home_clean/domain/repositories/transaction_repository.dart';
 import 'package:home_clean/domain/repositories/user_repository.dart';
 import 'package:home_clean/domain/use_cases/auth/login_usecase.dart';
-import 'package:home_clean/domain/use_cases/building/get_buildings_usecase.dart';
+import 'package:home_clean/domain/use_cases/building/get_buildings_use_case.dart';
+import 'package:home_clean/domain/use_cases/extra_service/get_extra_service_use_case.dart';
 import 'package:home_clean/domain/use_cases/room/get_rooms_usecase.dart';
-import 'package:home_clean/domain/use_cases/transaction/save_transaction_usecase.dart';
+import 'package:home_clean/domain/use_cases/transaction/save_transaction_use_case.dart';
 import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../../data/datasource/service_local_data_source.dart';
-import '../../data/datasource/local_data_source.dart';
 import '../../data/datasource/transaction_local_data_source.dart';
 import '../../data/datasource/user_local_datasource.dart';
+import '../../data/datasource/wallet_local_data_source.dart';
 import '../../data/repositories/authentication_repository_impl.dart';
 import '../../data/repositories/building_repository_impl.dart';
 import '../../data/repositories/equipment_supply_repository_impl.dart';
@@ -35,17 +36,12 @@ import '../../data/repositories/time_slot_repository_impl.dart';
 import '../../data/repositories/transaction_repository_impl.dart';
 import '../../data/repositories/user_repository_impl.dart';
 import '../../data/repositories/wallet_repository_impl.dart';
-import '../../domain/entities/transaction/transaction.dart';
 import '../../domain/repositories/authentication_repository.dart';
 import '../../domain/repositories/equipment_supply_repository.dart';
 import '../../domain/repositories/extra_service_repository.dart';
 import '../../domain/repositories/notification_repository.dart';
-import '../../../domain/use_cases/equipment_supply/get_equipment_supplies_usecase.dart';
-import '../../../domain/use_cases/extra_service/get_extra_service_usecase.dart';
-import '../../../domain/use_cases/option/get_options_usecase.dart';
-import '../../../domain/use_cases/order/create_orders_usecase.dart';
+import '../../../domain/use_cases/equipment_supply/get_equipment_supplies_use_case.dart';
 import '../../../domain/use_cases/order/get_order_from_local.dart';
-import '../../../domain/use_cases/order/save_order_to_local.dart';
 import '../../../domain/use_cases/service/clear_selected_service_ids.dart';
 import '../../../domain/use_cases/service/get_selected_service_ids.dart';
 import '../../../domain/use_cases/service/save_selected_service_ids.dart';
@@ -77,10 +73,10 @@ import '../../domain/repositories/service_repository.dart';
 import '../../domain/repositories/sub_activity_repository.dart';
 import '../../domain/repositories/time_slot_repository.dart';
 import '../../domain/repositories/wallet_repository.dart';
-import '../../domain/use_cases/auth/clear_user_from_local_usecase.dart';
 import '../../domain/use_cases/auth/get_user_from_local_usecase.dart';
 import '../../domain/use_cases/auth/user_register_usecase.dart';
 import '../../domain/use_cases/house/get_house_by_building_use_case.dart';
+import '../../domain/use_cases/option/get_options_use_case.dart';
 import '../../domain/use_cases/payment_method/get_payment_methods_use_case.dart';
 import '../../domain/use_cases/transaction/get_transaction_by_user.dart';
 import '../../domain/use_cases/transaction/get_transaction_by_wallet_use_case.dart';
@@ -90,7 +86,6 @@ import '../../presentation/blocs/building/building_bloc.dart';
 import '../../presentation/blocs/room/room_bloc.dart';
 import '../../presentation/blocs/transaction/transation_bloc.dart';
 import '../../presentation/blocs/wallet/wallet_bloc.dart';
-import '../cache_manager/cache_manger.dart';
 
 final sl = GetIt.instance;
 
@@ -119,6 +114,9 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<TransactionLocalDataSource>(
         () => TransactionLocalDataSource(),
   );
+  sl.registerLazySingleton<WalletLocalDataSource>(
+        () => WalletLocalDataSource(),
+  );
 
   // Repositories (sử dụng LazySingleton vì chúng ta muốn tái sử dụng đối tượng)
   sl.registerLazySingleton<AuthRepository>(
@@ -144,7 +142,7 @@ Future<void> setupServiceLocator() async {
           () => NotificationRepositoryImpl(sl<FlutterLocalNotificationsPlugin>())
   );
   sl.registerLazySingleton<WalletRepository>(
-          () => WalletRepositoryImpl(authLocalDataSource: sl(), userLocalDatasource: sl()));
+          () => WalletRepositoryImpl(authLocalDataSource: sl(), userLocalDatasource: sl(), localDataSource: sl()));
   sl.registerLazySingleton<RoomRepository>(() => RoomRepositoryImpl());
   sl.registerLazySingleton<BuildingRepository>(() => BuildingRepositoryImpl());
   sl.registerLazySingleton<TransactionRepository>(() => TransactionRepositoryImpl(
@@ -158,23 +156,21 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => SaveSelectedServiceIds(sl()));
   sl.registerLazySingleton(() => GetSelectedServiceIds(sl()));
   sl.registerLazySingleton(() => ClearSelectedServiceIds(sl()));
-  sl.registerLazySingleton(() => GetEquipmentSuppliesUsecase(sl()));
-  sl.registerLazySingleton(() => GetExtraServiceUsecase(sl()));
-  sl.registerLazySingleton(() => GetOptionsUsecase(sl()));
+  sl.registerLazySingleton(() => GetEquipmentSuppliesUseCase(sl()));
+  sl.registerLazySingleton(() => GetExtraServiceUseCase(sl()));
+  sl.registerLazySingleton(() => GetOptionsUseCase(sl()));
   sl.registerLazySingleton(() => GetServiceActivitiesByServiceUsecase(sl()));
   sl.registerLazySingleton(() => GetSubActivitiesUsecase(sl()));
   sl.registerLazySingleton(() => GetTimeSlotsUsecase(sl()));
   sl.registerLazySingleton(() => GetServiceByServiceCategoryUsecase(sl()));
   sl.registerLazySingleton(() => GetServiceCategoriesUsecase(sl()));
-  sl.registerLazySingleton(() => CreateOrderUseCase(sl()));
-  sl.registerLazySingleton(() => SaveOrderToLocal (sl()));
   sl.registerLazySingleton(() => GetOrderFromLocal (sl()));
   sl.registerLazySingleton(() => InitializeNotificationUseCase (sl()));
   sl.registerLazySingleton(() => ShowNotificationUseCase (sl()));
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => GetWalletByUserUseCase(sl()));
   sl.registerLazySingleton(() => GetRoomsUseCase(sl()));
-  sl.registerLazySingleton(() => GetBuildingsUsecase(sl()));
+  sl.registerLazySingleton(() => GetBuildingsUseCase(sl()));
   sl.registerLazySingleton(() => UserRegisterUseCase(sl()));
   sl.registerLazySingleton(() => SaveTransactionUseCase(sl()));
   sl.registerLazySingleton(() => GetPaymentMethodsUseCase(sl()));
@@ -183,7 +179,6 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => GetTransactionByUserUseCase(sl()));
 
   // local Use Cases
-  sl.registerLazySingleton(() => ClearUserFromLocalUseCase(sl()));
   sl.registerLazySingleton(() => GetUserFromLocalUseCase(sl()));
   // sl.registerLazySingleton(() => SaveUserToLocalUseCase(sl()));
 
@@ -191,7 +186,6 @@ Future<void> setupServiceLocator() async {
   // Blocs (sử dụng Factory vì mỗi bloc sẽ cần một instance mới)
   sl.registerFactory(() => AuthBloc(
       loginUseCase: sl(),
-      clearUserFromLocalUseCase: sl(),
       userRegisterUseCase: sl(),
       getUserFromLocalUseCase: sl()));
   sl.registerFactory(() => InternetBloc());
@@ -208,11 +202,11 @@ Future<void> setupServiceLocator() async {
       getServiceByServiceCategory: sl(), getServiceCategories: sl()));
   sl.registerFactory(
           () => ServiceActivityBloc(getServiceActivitiesByService: sl()));
-  sl.registerFactory(() => OptionBloc(getOptionsUsecase: sl()));
+  sl.registerFactory(() => OptionBloc(getOptionsUseCase: sl()));
   sl.registerFactory(() => SubActivityBloc(getSubActivitiesUsecase: sl()));
-  sl.registerFactory(() => ExtraServiceBloc(getExtraServiceUsecase: sl()));
+  sl.registerFactory(() => ExtraServiceBloc(getExtraServiceUseCase: sl()));
   sl.registerFactory(
-          () => EquipmentSupplyBloc(getEquipmentSuppliesUsecase: sl()));
+          () => EquipmentSupplyBloc(getEquipmentSuppliesUseCase: sl()));
   sl.registerFactory(() => TimeSlotBloc(getTimeSlotsUsecase: sl()));
   sl.registerFactory(() => OrderBloc(createOrderUseCase: sl()));
   sl.registerFactory(() => NotificationBloc(

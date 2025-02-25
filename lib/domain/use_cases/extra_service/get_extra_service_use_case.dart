@@ -3,10 +3,10 @@ import 'package:home_clean/domain/entities/extra_service/extra_service.dart';
 
 import '../../repositories/extra_service_repository.dart';
 
-class GetExtraServiceUsecase {
+class GetExtraServiceUseCase {
   final ExtraServiceRepository _extraServiceRepository;
 
-  GetExtraServiceUsecase(this._extraServiceRepository);
+  GetExtraServiceUseCase(this._extraServiceRepository);
 
   Future<BaseResponse<ExtraService>> execute(
     String serviceId,

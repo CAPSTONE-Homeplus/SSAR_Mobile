@@ -10,13 +10,24 @@ class GetTransactionByUserUseCase {
 
   GetTransactionByUserUseCase(this._transactionRepository);
 
-  Future<Either<String, BaseResponse<Transaction>>> call(String? search, String? orderBy, int? page, int? size) async {
+  Future<Either<String, BaseResponse<Transaction>>> call({
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size
+  }) async {
     try {
-      final result = await _transactionRepository.getTransactionByUser(search, orderBy, page, size);
+      final result = await _transactionRepository.getTransactionByUser(
+          search,
+          orderBy,
+          page,
+          size
+      );
       return Right(result);
     } on ApiException catch (e) {
-      print('API Exception: ${e.description}');
       return Left(e.description ?? 'Đã có lỗi xảy ra!');
+    } catch (e) {
+      return const Left('Đã có lỗi xảy ra!');
     }
   }
 }

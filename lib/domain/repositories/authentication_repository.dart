@@ -7,7 +7,5 @@ abstract class AuthRepository {
   Future<bool> login(LoginModel loginModel);
   Future<User> createAccount(CreateUser createUser);
   Future<Auth> refreshToken();
-  Future<void> saveUserFromLocal(User user);
   Future<User> getUserFromLocal();
-  Future<void> clearUserFromLocal();
 }

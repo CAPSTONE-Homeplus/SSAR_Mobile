@@ -1,13 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_clean/core/constant/constant.dart';
-import 'package:home_clean/domain/use_cases/option/get_options_usecase.dart';
+import 'package:home_clean/domain/use_cases/option/get_options_use_case.dart';
 import 'package:home_clean/presentation/blocs/option/option_event.dart';
 import 'package:home_clean/presentation/blocs/option/option_state.dart';
 
 class OptionBloc extends Bloc<OptionEvent, OptionState> {
-  final GetOptionsUsecase getOptionsUsecase;
+  final GetOptionsUseCase getOptionsUseCase;
 
-  OptionBloc({required this.getOptionsUsecase}) : super(OptionInitialState()) {
+  OptionBloc({required this.getOptionsUseCase}) : super(OptionInitialState()) {
     on<GetOptionsEvent>(_onGetServicesEvent);
   }
 
@@ -17,7 +17,7 @@ class OptionBloc extends Bloc<OptionEvent, OptionState> {
   ) async {
     emit(OptionLoadingState());
     try {
-      final response = await getOptionsUsecase.execute(
+      final response = await getOptionsUseCase.execute(
         event.serviceId,
         event.search ?? '',
         event.orderBy ?? '',

@@ -204,7 +204,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     await for (final state in _equipmentSupplyBloc.stream) {
       if (state is EquipmentSupplySuccessState && mounted) {
         setState(() {
-          _supplies = state.equipmentSupplies;
+          _supplies = state.equipmentSupplies.items;
         });
         break;
       }

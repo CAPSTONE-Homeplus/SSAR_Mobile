@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../core/exception/exception_handler.dart';
+import '../../../core/exception/failure.dart';
 import '../../../data/models/auth/login_model.dart';
 import '../../repositories/authentication_repository.dart';
 
@@ -9,13 +10,14 @@ class LoginUseCase {
 
   LoginUseCase(this._authenticationRepository);
 
-  Future<Either<String, bool>> call(LoginModel loginModel) async {
+  Future<Either<Failure, bool>> call(LoginModel loginModel) async {
     try {
       final result = await _authenticationRepository.login(loginModel);
       return Right(result);
     } on ApiException catch (e) {
-      print('API Exception: ${e.description}');
-      return Left(e.description ?? 'Đã có lỗi xảy ra!');
+      return Left(ApiFailure(e.description ?? 'Lỗi API không xác định!'));
+    } catch (e) {
+      return Left(ServerFailure('Lỗi hệ thống: ${e.toString()}'));
     }
   }
 }

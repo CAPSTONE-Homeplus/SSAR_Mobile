@@ -8,45 +8,52 @@ import 'package:home_clean/domain/entities/service/service.dart';
 
 import '../../../domain/repositories/service_repository.dart';
 import '../../core/constant/api_constant.dart';
+import '../../core/helper/network_helper.dart';
 
 class ServiceRepositoryImpl implements ServiceRepository {
   final ServiceLocalDataSource localDataSource;
+  final NetworkHelper _connectivity = NetworkHelper();
   ServiceRepositoryImpl({required this.localDataSource});
+
   @override
   Future<BaseResponse<Service>> getServices(
       String? search, String? orderBy, int? page, int? size) async {
     try {
-      final response =
-          await homeCleanRequest.get(ApiConstant.services, queryParameters: {
-        'search': search,
-        'orderBy': orderBy,
-        'page': page,
-        'size': size,
-      });
+      bool isOnline = await _connectivity.checkInternetConnection();
 
-      if (response.statusCode == 200 && response.data != null) {
-        List<dynamic> data = response.data['items'] ?? [];
-        localDataSource.saveService(response.data);
-        List<Service> serviceList = data
-            .map((item) => ServiceMapper.toEntity(ServiceModel.fromJson(item)))
-            .toList();
+        if (!isOnline) {
+          return _getCachedServices();
+        }
 
-        return BaseResponse<Service>(
-          size: response.data['size'] ?? 0,
-          page: response.data['page'] ?? 0,
-          total: response.data['total'] ?? 0,
-          totalPages: response.data['totalPages'] ?? 0,
-          items: serviceList,
-        );
-      } else {
-        throw ApiException(
-          traceId: response.data['traceId'],
-          code: response.data['code'],
-          message: response.data['message'] ?? 'Lỗi từ máy chủ',
-          description: response.data['description'],
-          timestamp: response.data['timestamp'],
-        );
-      }
+        final response = await homeCleanRequest.get(ApiConstant.services, queryParameters: {
+          'search': search,
+          'orderBy': orderBy,
+          'page': page,
+          'size': size,
+        });
+
+        if (response.statusCode == 200 && response.data != null) {
+          List<dynamic> data = response.data['items'] ?? [];
+          await localDataSource.saveService(response.data);
+          List<Service> serviceList = data
+              .map((item) => ServiceMapper.toEntity(ServiceModel.fromJson(item)))
+              .toList();
+          return BaseResponse<Service>(
+            size: response.data['size'] ?? 0,
+            page: response.data['page'] ?? 0,
+            total: response.data['total'] ?? 0,
+            totalPages: response.data['totalPages'] ?? 0,
+            items: serviceList,
+          );
+        } else {
+          throw ApiException(
+            traceId: response.data?['traceId'],
+            code: response.data?['code'],
+            message: response.data?['message'] ?? 'Lỗi từ máy chủ',
+            description: response.data?['description'],
+            timestamp: response.data?['timestamp'],
+          );
+        }
     } catch (e) {
       throw ExceptionHandler.handleException(e);
     }
@@ -68,6 +75,23 @@ class ServiceRepositoryImpl implements ServiceRepository {
   Future<void> saveSelectedServiceIds(List<String> ids) {
     // TODO: implement saveSelectedServiceIds
     throw UnimplementedError();
+  }
+
+
+  Future<BaseResponse<Service>> _getCachedServices() async {
+    Map<String, dynamic>? cachedData = await localDataSource.getServices();
+    if (cachedData == null || cachedData['items'] == null) {
+      return BaseResponse<Service>(size: 0, page: 0, total: 0, totalPages: 0, items: []);
+    }
+    return BaseResponse<Service>(
+      size: cachedData['size'] ?? 0,
+      page: cachedData['page'] ?? 0,
+      total: cachedData['total'] ?? 0,
+      totalPages: cachedData['totalPages'] ?? 0,
+      items: (cachedData['items'] as List)
+          .map((item) => ServiceMapper.toEntity(ServiceModel.fromJson(item)))
+          .toList(),
+    );
   }
 
 }

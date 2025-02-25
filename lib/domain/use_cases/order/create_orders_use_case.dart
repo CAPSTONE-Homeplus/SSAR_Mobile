@@ -7,13 +7,13 @@ import '../../entities/order/order.dart';
 import '../../repositories/order_repository.dart';
 import '../../../core/exception/failure.dart';
 
-class CreateOrderUseCase implements UseCase<Orders, SaveOrderParams>{
+class CreateOrderUseCase{
   final OrderRepository repository;
 
   CreateOrderUseCase(this.repository);
 
   @override
-  Future<Either<Failure, Orders>> call(SaveOrderParams params) async {
+  Future<Either<Failure, Orders>> execute(SaveOrderParams params) async {
     try {
       final result = await repository.createOrder(params.createOrder);
       return Right(result);

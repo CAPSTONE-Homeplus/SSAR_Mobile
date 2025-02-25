@@ -3,13 +3,13 @@ import 'package:home_clean/core/constant/constant.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_event.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_state.dart';
 
-import '../../../domain/use_cases/equipment_supply/get_equipment_supplies_usecase.dart';
+import '../../../domain/use_cases/equipment_supply/get_equipment_supplies_use_case.dart';
 
 class EquipmentSupplyBloc
     extends Bloc<EquipmentSupplyEvent, EquipmentSupplyState> {
-  final GetEquipmentSuppliesUsecase getEquipmentSuppliesUsecase;
+  final GetEquipmentSuppliesUseCase getEquipmentSuppliesUseCase;
 
-  EquipmentSupplyBloc({required this.getEquipmentSuppliesUsecase})
+  EquipmentSupplyBloc({required this.getEquipmentSuppliesUseCase})
       : super(EquipmentSupplyInitialState()) {
     on<GetEquipmentSupplies>(_onGetServicesEvent);
   }
@@ -19,8 +19,7 @@ class EquipmentSupplyBloc
     Emitter<EquipmentSupplyState> emit,
   ) async {
     emit(EquipmentSupplyLoadingState());
-    try {
-      final response = await getEquipmentSuppliesUsecase.execute(
+      final response = await getEquipmentSuppliesUseCase.execute(
         event.serviceId,
         event.search ?? '',
         event.orderBy ?? '',
@@ -28,9 +27,9 @@ class EquipmentSupplyBloc
         event.size ?? Constant.defaultSize,
       );
 
-      emit(EquipmentSupplySuccessState(equipmentSupplies: response.items));
-    } catch (e) {
-      emit(EquipmentSupplyErrorState(message: e.toString()));
-    }
+    response.fold(
+            (failure) => emit(EquipmentSupplyErrorState(message: failure.message)),
+            (data) => emit(EquipmentSupplySuccessState(equipmentSupplies: data)),
+      );
   }
 }

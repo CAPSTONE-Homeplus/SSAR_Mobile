@@ -1,9 +1,11 @@
 import 'package:home_clean/core/base/base_model.dart';
+import 'package:home_clean/data/datasource/wallet_local_data_source.dart';
 import 'package:home_clean/data/mappers/auth/auth_mapper.dart';
 import 'package:home_clean/data/mappers/wallet_mapper.dart';
 import 'package:home_clean/data/models/wallet/wallet_model.dart';
 
 import '../../core/exception/exception_handler.dart';
+import '../../core/helper/network_helper.dart';
 import '../../core/request/request.dart';
 import '../../../domain/entities/wallet/wallet.dart';
 import '../../../domain/repositories/wallet_repository.dart';
@@ -15,16 +17,25 @@ import '../models/auth/auth_model.dart';
 class WalletRepositoryImpl implements WalletRepository {
   final AuthLocalDataSource authLocalDataSource;
   final UserLocalDatasource userLocalDatasource;
+  final NetworkHelper _connectivity = NetworkHelper();
+  final WalletLocalDataSource localDataSource;
 
   WalletRepositoryImpl({
     required this.authLocalDataSource,
     required this.userLocalDatasource,
+    required this.localDataSource,
   });
   @override
   Future<BaseResponse<Wallet>> getWalletByUser(
       int? page,
       int? size) async {
     try {
+      bool isOnline = await _connectivity.checkInternetConnection();
+
+      if (!isOnline) {
+        return _getCachedWallets();
+      }
+
       AuthModel? authModel = AuthMapper.toModel(await authLocalDataSource.getAuth() ?? {});
       String userId = authModel.userId ?? '';
 
@@ -39,6 +50,7 @@ class WalletRepositoryImpl implements WalletRepository {
 
       if (response.statusCode == 200 && response.data != null) {
         List<dynamic> data = response.data['items'] ?? [];
+        await localDataSource.saveWallet(response.data);
 
         List<Wallet> walletList = data
             .map((item) => WalletMapper.toEntity(
@@ -66,5 +78,20 @@ class WalletRepositoryImpl implements WalletRepository {
     }
   }
 
+  Future<BaseResponse<Wallet>> _getCachedWallets() async {
+    Map<String, dynamic>? cachedData = await localDataSource.getWallet();
+    if (cachedData == null || cachedData['items'] == null) {
+      return BaseResponse<Wallet>(size: 0, page: 0, total: 0, totalPages: 0, items: []);
+    }
+    return BaseResponse<Wallet>(
+      size: cachedData['size'] ?? 0,
+      page: cachedData['page'] ?? 0,
+      total: cachedData['total'] ?? 0,
+      totalPages: cachedData['totalPages'] ?? 0,
+      items: (cachedData['items'] as List)
+          .map((item) => WalletMapper.toEntity(WalletModel.fromJson(item)))
+          .toList(),
+    );
+  }
 
 }
