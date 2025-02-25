@@ -182,7 +182,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     await for (final state in _extraServiceBloc.stream) {
       if (state is ExtraServiceSuccessState && mounted) {
         setState(() {
-          _extraServices = state.extraServices;
+          _extraServices = state.extraServices.items;
         });
         break;
       }

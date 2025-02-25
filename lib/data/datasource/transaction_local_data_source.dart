@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../core/base/base_model.dart';
 import '../../domain/entities/transaction/transaction.dart';
@@ -7,40 +8,40 @@ import '../mappers/transaction/transaction_mapper.dart';
 import '../models/transaction/transaction_model.dart';
 
 class TransactionLocalDataSource {
-  Future<void> saveTransactions(
-      String userId, Map<String, dynamic> data, String updatedAt) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String cacheKey = 'transactions_$userId';
+  final String _transactionKey = dotenv.env['TRANSACTIONS_KEY'] ?? 'default_transaction_key';
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
-    await prefs.setString(cacheKey, json.encode(data));
-    await prefs.setString('$cacheKey-updatedAt', updatedAt);
+  String _getCacheKey(String userId) => '\${_transactionKey}_\$userId';
+
+  Future<Map<String, dynamic>?> saveTransactions(
+      String userId, Map<String, dynamic> data) async {
+    await _secureStorage.write(key: _getCacheKey(userId), value: json.encode(data));
+    return getRawTransactions(userId);
   }
 
   Future<BaseResponse<Transaction>?> getTransactions(String userId) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String cacheKey = 'transactions_$userId';
-    String? cachedData = prefs.getString(cacheKey);
+    Map<String, dynamic>? rawData = await getRawTransactions(userId);
+    if (rawData == null) return null;
 
-    if (cachedData != null) {
-      Map<String, dynamic> decodedData = json.decode(cachedData);
-      List<Transaction> transactions = (decodedData['items'] as List)
-          .map((item) =>
-          TransactionMapper.toEntity(TransactionModel.fromJson(item)))
-          .toList();
+    List<Transaction> transactions = (rawData['items'] as List)
+        .map((item) => TransactionMapper.toEntity(TransactionModel.fromJson(item)))
+        .toList();
 
-      return BaseResponse<Transaction>(
-        size: decodedData['size'] ?? 0,
-        page: decodedData['page'] ?? 0,
-        total: decodedData['total'] ?? 0,
-        totalPages: decodedData['totalPages'] ?? 0,
-        items: transactions,
-      );
-    }
-    return null;
+    return BaseResponse<Transaction>(
+      size: rawData['size'] ?? 0,
+      page: rawData['page'] ?? 0,
+      total: rawData['total'] ?? 0,
+      totalPages: rawData['totalPages'] ?? 0,
+      items: transactions,
+    );
   }
 
-  Future<String?> getUpdatedAt(String userId) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('transactions_$userId-updatedAt');
+  Future<Map<String, dynamic>?> getRawTransactions(String userId) async {
+    String? cachedData = await _secureStorage.read(key: _getCacheKey(userId));
+    return cachedData != null ? json.decode(cachedData) : null;
+  }
+
+  Future<void> clearTransactions(String userId) async {
+    await _secureStorage.delete(key: _getCacheKey(userId));
   }
 }

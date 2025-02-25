@@ -17,7 +17,7 @@ enum BaseUrlType {
 
 final AuthLocalDataSource _authLocalDataSource = AuthLocalDataSource();
 final UserLocalDatasource _userLocalDatasource = UserLocalDatasource();
-// late AuthRepository _authRepository;
+late AuthRepository _authRepository;
 
 Map<String, dynamic> convertToQueryParams(
     [Map<String, dynamic> params = const {}]) {
@@ -185,21 +185,21 @@ class MyRequest {
                 return handler.next(e);
               }
 
-              // Auth auth = await _authRepository.refreshToken();
+              Auth auth = await _authRepository.refreshToken();
 
-              // final newToken = auth.accessToken;
-              // final newRefreshToken = auth.refreshToken;
-              //
-              // if (newToken == null || newRefreshToken == null) {
-              //   clearLocalStorageAndLogout();
-              //   return handler.next(e);
-              // }
-              // await _authLocalDataSource.saveTokensToStorage(newToken, newRefreshToken);
-              // requestObj.setToken = newToken;
-              // final options = e.requestOptions;
-              // options.headers["Authorization"] = "Bearer $newToken";
-              // final response = await request.fetch(options);
-              // return handler.resolve(response);
+              final newToken = auth.accessToken;
+              final newRefreshToken = auth.refreshToken;
+
+              if (newToken == null || newRefreshToken == null) {
+                clearLocalStorageAndLogout();
+                return handler.next(e);
+              }
+              await _authLocalDataSource.saveTokensToStorage(newToken, newRefreshToken);
+              requestObj.setToken = newToken;
+              final options = e.requestOptions;
+              options.headers["Authorization"] = "Bearer $newToken";
+              final response = await request.fetch(options);
+              return handler.resolve(response);
             } catch (refreshError) {
               print("Token refresh failed: $refreshError");
               clearLocalStorageAndLogout();

@@ -1,4 +1,5 @@
 import 'package:home_clean/domain/repositories/equipment_supply_repository.dart';
+import 'package:home_clean/domain/repositories/extra_service_repository.dart';
 import 'package:home_clean/domain/repositories/house_repository.dart';
 import 'package:home_clean/domain/repositories/authentication_repository.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
@@ -37,6 +38,7 @@ import 'package:mockito/annotations.dart';
     OrderRepository,
     HouseRepository,
     EquipmentSupplyRepository,
+    ExtraServiceRepository,
 
     /// UseCases
     GetBuildingsUseCase,

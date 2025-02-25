@@ -18,18 +18,17 @@ class ExtraServiceBloc extends Bloc<ExtraServiceEvent, ExtraServiceState> {
     Emitter<ExtraServiceState> emit,
   ) async {
     emit(ExtraServiceLoadingState());
-    try {
-      final response = await getExtraServiceUseCase.execute(
+    final response = await getExtraServiceUseCase.execute(
         event.serviceId,
         event.search ?? '',
         event.orderBy ?? '',
         event.page ?? Constant.defaultPage,
         event.size ?? Constant.defaultSize,
-      );
+        );
 
-      emit(ExtraServiceSuccessState(extraServices: response.items));
-    } catch (e) {
-      emit(ExtraServiceErrorState(message: e.toString()));
-    }
+    response.fold(
+        (failure) => emit(ExtraServiceErrorState(message: failure.message)),
+        (data) => emit(ExtraServiceSuccessState(extraServices: data)),
+    );
   }
 }

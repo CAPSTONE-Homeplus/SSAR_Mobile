@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:home_clean/core/base/base_model.dart';
 
 import '../../../core/exception/exception_handler.dart';
+import '../../../core/exception/failure.dart';
 import '../../entities/transaction/transaction.dart';
 import '../../repositories/transaction_repository.dart';
 
@@ -10,7 +11,7 @@ class GetTransactionByUserUseCase {
 
   GetTransactionByUserUseCase(this._transactionRepository);
 
-  Future<Either<String, BaseResponse<Transaction>>> call({
+  Future<Either<Failure, BaseResponse<Transaction>>> call({
     String? search,
     String? orderBy,
     int? page,
@@ -25,9 +26,9 @@ class GetTransactionByUserUseCase {
       );
       return Right(result);
     } on ApiException catch (e) {
-      return Left(e.description ?? 'Đã có lỗi xảy ra!');
+      return Left(ApiFailure(e.description ?? 'Lỗi API không xác định!'));
     } catch (e) {
-      return const Left('Đã có lỗi xảy ra!');
+      return Left(ServerFailure('Lỗi hệ thống: ${e.toString()}'));
     }
   }
 }

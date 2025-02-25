@@ -15,6 +15,7 @@ import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../../data/datasource/service_local_data_source.dart';
+import '../../data/datasource/local_data_source.dart';
 import '../../data/datasource/transaction_local_data_source.dart';
 import '../../data/datasource/user_local_datasource.dart';
 import '../../data/datasource/wallet_local_data_source.dart';
@@ -83,6 +84,7 @@ import '../../domain/use_cases/transaction/get_transaction_by_wallet_use_case.da
 import '../../domain/use_cases/wallet/get_wallet_by_user.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/building/building_bloc.dart';
+import '../../presentation/blocs/payment_method/payment_method_bloc.dart';
 import '../../presentation/blocs/room/room_bloc.dart';
 import '../../presentation/blocs/transaction/transation_bloc.dart';
 import '../../presentation/blocs/wallet/wallet_bloc.dart';
@@ -117,6 +119,15 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<WalletLocalDataSource>(
         () => WalletLocalDataSource(),
   );
+  sl.registerLazySingleton<LocalDataSource>(() => LocalDataSource(
+    authLocalDataSource: sl(),
+    extraServiceLocalDataSource: sl(),
+    optionLocalDataSource: sl(),
+    serviceLocalDataSource: sl(),
+    transactionLocalDataSource: sl(),
+    userLocalDatasource: sl(),
+    walletLocalDataSource: sl(),
+  ));
 
   // Repositories (sử dụng LazySingleton vì chúng ta muốn tái sử dụng đối tượng)
   sl.registerLazySingleton<AuthRepository>(
@@ -216,4 +227,5 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(() => BuildingBloc(buildingRepository: sl()));
   sl.registerFactory(() => TransactionBloc(sl(), sl(), sl()));
   sl.registerFactory(() => HouseBloc(getHouseByBuildingUseCase: sl()));
+  sl.registerFactory(() => PaymentMethodBloc(sl()));
 }

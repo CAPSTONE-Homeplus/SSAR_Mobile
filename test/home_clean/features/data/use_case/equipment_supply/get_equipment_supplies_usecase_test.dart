@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_clean/core/base/base_model.dart';
+import 'package:home_clean/core/exception/exception_handler.dart';
 import 'package:home_clean/core/exception/failure.dart';
 import 'package:home_clean/domain/entities/equipment_supply/equipment_supply.dart';
 import 'package:home_clean/domain/use_cases/equipment_supply/get_equipment_supplies_use_case.dart';
@@ -63,7 +64,7 @@ void main() {
       const errorMessage = 'API error';
       when(mockEquipmentRepository.getEquipmentSupplies(
         serviceId, search, orderBy, page, size,
-      )).thenThrow(ApiFailure(errorMessage));
+      )).thenThrow(ApiException(description: errorMessage, code: 500, message: 'Internal Server', timestamp: '2024-02-25'));
 
       // Act
       final result = await getEquipmentSuppliesUseCase.execute(

@@ -1,4 +1,5 @@
 import 'package:home_clean/core/base/base_model.dart';
+import 'package:home_clean/core/constant/constant.dart';
 import 'package:home_clean/core/request/request.dart';
 import 'package:home_clean/data/mappers/payment_mapper.dart';
 
@@ -15,10 +16,10 @@ class PaymentMethodRepositoryImpl implements PaymentMethodRepository {
       final response = await vinWalletRequest.get(
           ApiConstant.paymentMethods,
           queryParameters: {
-            'search': search,
-            'orderBy': orderBy,
-            'page': page,
-            'size': size,
+            'search': search ?? '',
+            'orderBy': orderBy ?? '',
+            'page': page ?? Constant.defaultPage,
+            'size': size ?? Constant.defaultSize,
           });
 
       if (response.statusCode == 200 && response.data != null) {

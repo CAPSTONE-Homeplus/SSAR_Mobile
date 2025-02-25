@@ -20,6 +20,7 @@ import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:home_clean/presentation/blocs/notification/notification_bloc.dart';
 import 'package:home_clean/presentation/blocs/option/option_bloc.dart';
 import 'package:home_clean/presentation/blocs/order/order_bloc.dart';
+import 'package:home_clean/presentation/blocs/payment_method/payment_method_bloc.dart';
 import 'package:home_clean/presentation/blocs/service/service_bloc.dart';
 import 'package:home_clean/presentation/blocs/service_activity/service_activity_bloc.dart';
 import 'package:home_clean/presentation/blocs/service_category/service_category_bloc.dart';
@@ -153,6 +154,7 @@ class HomeClean extends StatelessWidget {
           BlocProvider(create: (context) => BuildingBloc(buildingRepository: sl())),
           BlocProvider(create: (context) => TransactionBloc(sl(), sl(), sl())),
           BlocProvider(create: (context) => HouseBloc(getHouseByBuildingUseCase: sl())),
+          BlocProvider(create: (context) => PaymentMethodBloc(sl())),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {

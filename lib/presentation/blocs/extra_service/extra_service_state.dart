@@ -1,3 +1,4 @@
+import 'package:home_clean/core/base/base_model.dart';
 import 'package:home_clean/domain/entities/extra_service/extra_service.dart';
 
 abstract class ExtraServiceState {}
@@ -13,7 +14,7 @@ class ExtraServiceErrorState extends ExtraServiceState {
 }
 
 class ExtraServiceSuccessState extends ExtraServiceState {
-  final List<ExtraService> extraServices;
+  final BaseResponse<ExtraService> extraServices;
 
   ExtraServiceSuccessState({required this.extraServices});
 }

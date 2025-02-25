@@ -8,6 +8,7 @@ import '../../core/base/base_model.dart';
 import '../../core/constant/api_constant.dart';
 import '../../core/constant/constant.dart';
 import '../../core/exception/exception_handler.dart';
+import '../../core/helper/network_helper.dart';
 import '../../core/request/request.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../datasource/auth_local_datasource.dart';
@@ -18,6 +19,8 @@ import '../models/transaction/transaction_model.dart';
 class TransactionRepositoryImpl implements TransactionRepository {
   final AuthLocalDataSource authLocalDataSource;
   final TransactionLocalDataSource transactionLocalDataSource;
+  final NetworkHelper _connectivity = NetworkHelper();
+
 
   TransactionRepositoryImpl({
     required this.authLocalDataSource,
@@ -51,6 +54,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
       );
 
       if (response.statusCode == 201 && response.data != null) {
+        transactionLocalDataSource.saveTransactions(userId, response.data);
         return Transaction(
           id: response.data['id'],
           walletId: response.data['walletId'],
@@ -88,37 +92,11 @@ class TransactionRepositoryImpl implements TransactionRepository {
     try {
       String userId = await _getUserId();
 
-      // Lấy dữ liệu từ cache
-      BaseResponse<Transaction>? cachedData = await transactionLocalDataSource.getTransactions(userId);
-      String? cachedUpdatedAt = (cachedData?.items.isNotEmpty == true)
-          ? cachedData!.items[0].updatedAt
-          : null;
-
-      if (cachedUpdatedAt != null) {
-        // Gọi API chỉ lấy phần tử đầu tiên để kiểm tra updatedAt
-        final apiMetaResponse = await vinWalletRequest.get(
-          '${ApiConstant.users}/$userId/transactions',
-          queryParameters: {'page': 1, 'size': 1},
-        );
-
-        List<dynamic>? apiItems = apiMetaResponse.data?['items'];
-        String apiUpdatedAt = (apiItems != null && apiItems.isNotEmpty)
-            ? apiItems[0]['updatedAt'] ?? ''
-            : '';
-
-        if (cachedUpdatedAt == apiUpdatedAt) {
-          print("📦 Dữ liệu từ cache (Không có thay đổi)");
-          return BaseResponse(
-            size: cachedData!.size,
-            page: cachedData.page,
-            total: cachedData.total,
-            totalPages: cachedData.totalPages,
-            items: cachedData.items,
-          );
-        }
+      bool isConnected = await _connectivity.checkInternetConnection();
+      if (!isConnected) {
+        return await _getCachedTransactions(userId);
       }
 
-      print("🌍 Gọi API mới vì dữ liệu đã thay đổi!");
       final response = await vinWalletRequest.get(
         '${ApiConstant.users}/$userId/transactions',
         queryParameters: {
@@ -131,38 +109,35 @@ class TransactionRepositoryImpl implements TransactionRepository {
       );
 
       if (response.statusCode == 200 && response.data != null) {
-        List<dynamic> data = response.data['items'] ?? [];
+        var rawData = response.data as Map<String, dynamic>;
+        List<dynamic> data = rawData['items'] ?? [];
+
         List<Transaction> transactions = data
             .map((item) => TransactionMapper.toEntity(TransactionModel.fromJson(item)))
             .toList();
 
-        // Lấy updatedAt từ phần tử đầu tiên (nếu có)
-        String? updatedAt = transactions.isNotEmpty ? transactions[0].updatedAt : null;
-
-        // Chỉ lưu cache nếu updatedAt không null
-        if (updatedAt != null) {
-          await transactionLocalDataSource.saveTransactions(userId, response.data, updatedAt);
-        }
+        await transactionLocalDataSource.saveTransactions(userId, rawData);
 
         return BaseResponse<Transaction>(
-          size: response.data['size'] ?? 0,
-          page: response.data['page'] ?? 0,
-          total: response.data['total'] ?? 0,
-          totalPages: response.data['totalPages'] ?? 0,
+          size: rawData['size'] ?? 0,
+          page: rawData['page'] ?? 0,
+          total: rawData['total'] ?? 0,
+          totalPages: rawData['totalPages'] ?? 0,
           items: transactions,
         );
+      } else {
+        throw ApiException(
+          code: response.statusCode ?? -1,
+          message: response.data?['message'] ?? 'Lỗi không xác định',
+          description: response.data?['description'],
+          timestamp: DateTime.now().toIso8601String(),
+        );
       }
-
-      throw ApiException(
-        code: response.statusCode ?? -1,
-        message: response.data?['message'] ?? 'Lỗi không xác định',
-        description: response.data?['description'],
-        timestamp: DateTime.now().toIso8601String(),
-      );
     } catch (e) {
       throw ExceptionHandler.handleException(e);
     }
   }
+
 
 
   @override
@@ -208,4 +183,17 @@ class TransactionRepositoryImpl implements TransactionRepository {
       throw ExceptionHandler.handleException(e);
     }
   }
+
+  Future<BaseResponse<Transaction>> _getCachedTransactions(String userId) async {
+    try {
+      BaseResponse<Transaction>? cachedData = await transactionLocalDataSource.getTransactions(userId);
+      if (cachedData == null) {
+        return BaseResponse<Transaction>(size: 0, page: 0, total: 0, totalPages: 0, items: []);
+      }
+      return cachedData;
+    } catch (e) {
+      return BaseResponse<Transaction>(size: 0, page: 0, total: 0, totalPages: 0, items: []);
+    }
+  }
+
 }

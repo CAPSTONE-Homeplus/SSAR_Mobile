@@ -32,7 +32,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       );
 
       result.fold(
-            (error) => emit(TransactionFailure(error)),
+            (failure) => emit(TransactionFailure(failure.message)),
             (user) => emit(TransactionsLoaded(user)),
       );
     });
@@ -42,7 +42,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       emit(TransactionLoading());
       final result = await getTransactionByWalletUseCase(event.walletId ?? '', event.search, event.orderBy, event.page, event.size);
       result.fold(
-            (error) => emit(TransactionFailure(error)),
+            (failure) => emit(TransactionFailure(failure.message)),
             (user) => emit(TransactionsLoaded(user)),
       );
     });
