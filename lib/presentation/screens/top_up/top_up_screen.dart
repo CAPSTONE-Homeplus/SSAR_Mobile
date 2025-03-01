@@ -5,7 +5,6 @@ import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/constant/size_config.dart';
 import 'package:home_clean/domain/entities/payment_method/payment_method.dart';
 import 'package:home_clean/presentation/blocs/payment_method/payment_method_event.dart';
-import 'package:home_clean/presentation/screens/wallet/components/wallet_place_holder.dart';
 
 import '../../../domain/entities/transaction/create_transaction.dart';
 import '../../../domain/entities/wallet/wallet.dart';
@@ -20,6 +19,7 @@ import 'components/amount_section.dart';
 import 'components/payment_method_selection.dart';
 import 'components/suggested_amounts.dart';
 import 'components/top_up_button.dart';
+import 'components/wallet_place_holder.dart';
 import 'components/wallet_summary.dart';
 import 'components/wallet_type_selection.dart';
 

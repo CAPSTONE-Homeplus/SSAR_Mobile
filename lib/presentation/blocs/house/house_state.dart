@@ -26,6 +26,15 @@ class HouseLoaded extends HouseState {
   List<Object> get props => [houses];
 }
 
+class HouseLoadedById extends HouseState {
+  final House house;
+
+  HouseLoadedById({required this.house});
+
+  @override
+  List<Object> get props => [house];
+}
+
 class HouseError extends HouseState {
   final String message;
 

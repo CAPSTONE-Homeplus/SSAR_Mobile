@@ -4,13 +4,17 @@ class CreateUserModel {
   String? password;
   String? buildingCode;
   String? houseCode;
+  String? phoneNumber;
+  String? email;
 
   CreateUserModel({
     this.fullName,
     this.username,
     this.password,
     this.buildingCode,
-    this.houseCode
+    this.houseCode,
+    this.phoneNumber,
+    this.email,
   });
 
   CreateUserModel.fromJson(Map<String, dynamic> json) {
@@ -19,6 +23,8 @@ class CreateUserModel {
     password = json['password'];
     buildingCode = json['buildingCode'];
     houseCode = json['houseCode'];
+    phoneNumber = json['phoneNumber'];
+    email = json['email'];
   }
 
   Map<String, dynamic> toJson() {
@@ -28,6 +34,8 @@ class CreateUserModel {
     data['password'] = password;
     data['buildingCode'] = buildingCode;
     data['houseCode'] = houseCode;
+    data['phoneNumber'] = phoneNumber;
+    data['email'] = email;
     return data;
   }
 }

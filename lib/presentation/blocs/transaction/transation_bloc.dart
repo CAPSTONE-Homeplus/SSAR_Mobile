@@ -40,6 +40,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
     on<GetTransactionByWalletEvent>((event, emit) async {
       emit(TransactionLoading());
+      Future.delayed(const Duration(milliseconds: 2000));
       final result = await getTransactionByWalletUseCase(event.walletId ?? '', event.search, event.orderBy, event.page, event.size);
       result.fold(
             (failure) => emit(TransactionFailure(failure.message)),

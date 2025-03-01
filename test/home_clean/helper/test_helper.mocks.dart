@@ -279,6 +279,14 @@ class MockBuildingRepository extends _i1.Mock
             ),
           )
           as _i12.Future<_i4.BaseResponse<_i17.Building>>);
+
+  @override
+  _i12.Future<_i17.Building?> getBuildingById(String? buildingId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getBuildingById, [buildingId]),
+            returnValue: _i12.Future<_i17.Building?>.value(),
+          )
+          as _i12.Future<_i17.Building?>);
 }
 
 /// A class which mocks [WalletRepository].
@@ -529,6 +537,14 @@ class MockHouseRepository extends _i1.Mock implements _i25.HouseRepository {
             ),
           )
           as _i12.Future<_i4.BaseResponse<_i26.House>>);
+
+  @override
+  _i12.Future<_i26.House?> getHouseById(String? houseId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getHouseById, [houseId]),
+            returnValue: _i12.Future<_i26.House?>.value(),
+          )
+          as _i12.Future<_i26.House?>);
 }
 
 /// A class which mocks [EquipmentSupplyRepository].
@@ -636,15 +652,15 @@ class MockGetBuildingsUseCase extends _i1.Mock
 
   @override
   _i12.Future<_i8.Either<_i32.Failure, _i4.BaseResponse<_i17.Building>>>
-  execute(_i31.GetBuildingsParams? params) =>
+  execute(String? search, String? orderBy, int? page, int? size) =>
       (super.noSuchMethod(
-            Invocation.method(#execute, [params]),
+            Invocation.method(#execute, [search, orderBy, page, size]),
             returnValue: _i12.Future<
               _i8.Either<_i32.Failure, _i4.BaseResponse<_i17.Building>>
             >.value(
               _FakeEither_6<_i32.Failure, _i4.BaseResponse<_i17.Building>>(
                 this,
-                Invocation.method(#execute, [params]),
+                Invocation.method(#execute, [search, orderBy, page, size]),
               ),
             ),
           )
@@ -1099,7 +1115,7 @@ class MockGetHouseByBuildingUseCase extends _i1.Mock
   }
 
   @override
-  _i12.Future<_i4.BaseResponse<_i26.House>> execute(
+  _i12.Future<_i8.Either<_i32.Failure, _i4.BaseResponse<_i26.House>>> execute(
     String? buildingId,
     String? search,
     String? orderBy,
@@ -1114,8 +1130,10 @@ class MockGetHouseByBuildingUseCase extends _i1.Mock
               page,
               size,
             ]),
-            returnValue: _i12.Future<_i4.BaseResponse<_i26.House>>.value(
-              _FakeBaseResponse_2<_i26.House>(
+            returnValue: _i12.Future<
+              _i8.Either<_i32.Failure, _i4.BaseResponse<_i26.House>>
+            >.value(
+              _FakeEither_6<_i32.Failure, _i4.BaseResponse<_i26.House>>(
                 this,
                 Invocation.method(#execute, [
                   buildingId,
@@ -1127,7 +1145,9 @@ class MockGetHouseByBuildingUseCase extends _i1.Mock
               ),
             ),
           )
-          as _i12.Future<_i4.BaseResponse<_i26.House>>);
+          as _i12.Future<
+            _i8.Either<_i32.Failure, _i4.BaseResponse<_i26.House>>
+          >);
 }
 
 /// A class which mocks [GetTransactionByUserUseCase].

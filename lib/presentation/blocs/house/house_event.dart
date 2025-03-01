@@ -22,3 +22,14 @@
     @override
     List<Object?> get props => [buildingId, search, orderBy, page, size];
   }
+
+  class GetHouseById extends HouseEvent {
+    final String houseId;
+
+    GetHouseById({
+      required this.houseId,
+    });
+
+    @override
+    List<Object?> get props => [houseId];
+  }

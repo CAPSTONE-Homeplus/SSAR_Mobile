@@ -1,23 +1,26 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:home_clean/core/base/base_model.dart';
 import 'package:home_clean/core/constant/constant.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
 import 'package:home_clean/domain/use_cases/service/clear_selected_service_ids.dart';
 import 'package:home_clean/domain/use_cases/service/get_selected_service_ids.dart';
+import 'package:home_clean/domain/use_cases/service/get_services_use_case.dart';
 import 'package:home_clean/domain/use_cases/service/save_selected_service_ids.dart';
 
+import '../../../core/exception/exception_handler.dart';
 import '../../../domain/repositories/service_repository.dart';
 
 part 'service_event.dart';
 part 'service_state.dart';
 
 class ServiceBloc extends Bloc<ServiceEvent, ServiceState> {
-  final ServiceRepository serviceRepository;
+  final GetServicesUseCase getServicesUseCase;
   final SaveSelectedServiceIds saveSelectedServiceIds;
   final GetSelectedServiceIds getSelectedServiceIds;
   final ClearSelectedServiceIds clearSelectedServiceIds;
 
   ServiceBloc({
-    required this.serviceRepository,
+    required this.getServicesUseCase,
     required this.saveSelectedServiceIds,
     required this.getSelectedServiceIds,
     required this.clearSelectedServiceIds,
@@ -29,22 +32,28 @@ class ServiceBloc extends Bloc<ServiceEvent, ServiceState> {
   }
 
   Future<void> _onGetServicesEvent(
-    GetServicesEvent event,
-    Emitter<ServiceState> emit,
-  ) async {
+      GetServicesEvent event,
+      Emitter<ServiceState> emit,
+      ) async {
     emit(ServiceLoadingState());
-    try {
-      final response = await serviceRepository.getServices(
-        event.search ?? '',
-        event.orderBy ?? '',
-        event.page ?? Constant.defaultPage,
-        event.size ?? Constant.defaultSize,
-      );
-      emit(ServiceSuccessState(services: response.items));
-    } catch (e) {
-      emit(ServiceErrorState(message: e.toString()));
-    }
+
+    final response = await getServicesUseCase.execute(
+      search: event.search,
+      orderBy: event.orderBy,
+      page: event.page,
+      size: event.size,
+    );
+
+    response.fold(
+          (failure) {
+        emit(ServiceErrorState(message: failure.message));
+      },
+          (services) {
+        emit(ServiceSuccessState(services: services));
+      },
+    );
   }
+
 
   void _onSaveServiceIds(
       SaveServiceIdsEvent event, Emitter<ServiceState> emit) async {

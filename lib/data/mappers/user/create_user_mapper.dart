@@ -10,6 +10,8 @@ class CreateUserMapper {
       fullName: model.fullName ?? '',
       buildingCode: model.buildingCode ?? '',
       houseCode: model.houseCode ?? '',
+        phoneNumber: model.phoneNumber ?? '',
+        email: model.email ?? '',
     );
   }
 
@@ -20,6 +22,8 @@ class CreateUserMapper {
       fullName: entity.fullName,
       buildingCode: entity.buildingCode ?? '',
       houseCode: entity.houseCode ?? '',
+      phoneNumber: entity.phoneNumber ?? '',
+      email: entity.email ?? '',
     );
   }
 }

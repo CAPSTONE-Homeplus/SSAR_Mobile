@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
-import 'package:home_clean/presentation/screens/home/components/wallet/transaction_button.dart';
 import 'package:home_clean/presentation/screens/home/components/wallet/wallet_grid.dart';
 import 'package:home_clean/presentation/screens/home/components/wallet/wallet_header.dart';
 
 import '../../../../../domain/entities/wallet/wallet.dart';
+import 'create_wallet_button.dart';
 
 class WalletContainer extends StatelessWidget {
   final List<Wallet> walletUserList;
@@ -48,8 +48,10 @@ class WalletContainer extends StatelessWidget {
           WalletHeaderWidget(onAddPoints: onAddPoints, fem: fem),
           SizedBox(height: 16 * fem),
           WalletGridWidget(walletUserList: walletUserList, fem: fem),
-          SizedBox(height: 14 * fem),
-          TransactionButtonWidget(fem: fem),
+            if (walletUserList.length < 2) ...[
+            SizedBox(height: 14 * fem),
+            CreateWalletButtonWidget(fem: fem),
+          ],
         ],
       ),
     );

@@ -59,7 +59,7 @@ class _ActivityScreenState extends State<ActivityScreen>
               color: Colors.white,
               border: Border(
                 bottom: BorderSide(
-                  color: Colors.grey[200]!,
+                  color: Colors.grey[100]!,
                   width: 1,
                 ),
               ),

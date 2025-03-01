@@ -9,4 +9,5 @@ abstract class  HouseRepository {
     int? page,
     int? size,
   );
+  Future<House?> getHouseById(String? houseId);
 }

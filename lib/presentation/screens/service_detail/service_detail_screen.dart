@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/core/constant/colors.dart';
-import 'package:home_clean/core/format/validation.dart';
 import 'package:home_clean/domain/entities/equipment_supply/equipment_supply.dart';
 import 'package:home_clean/domain/entities/extra_service/extra_service.dart';
 import 'package:home_clean/domain/entities/option/option.dart';
@@ -27,6 +26,7 @@ import 'package:home_clean/presentation/blocs/sub_activity/sub_activity_state.da
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../core/format/formater.dart';
 import '../../../domain/entities/order/create_order.dart';
 import '../../../domain/entities/time_slot/time_slot.dart';
 import '../../blocs/option/option_bloc.dart';
@@ -536,7 +536,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   ),
                 ),
                 subtitle: Text(
-                  option.price != null ? '+ ${Validation.formatCurrency(option.price!)}' : '',
+                  option.price != null ? '+ ${Formater.formatCurrency(option.price!)}' : '',
                   style: GoogleFonts.poppins(
                     color: Colors.grey,
                   ),
@@ -614,7 +614,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   ),
                 ),
                 subtitle: Text(
-                  extra.price != null ? '+ ${Validation.formatCurrency(extra.price!)}' : '',
+                  extra.price != null ? '+ ${Formater.formatCurrency(extra.price!)}' : '',
                   style: GoogleFonts.poppins(
                     color: Colors.grey,
                   ),
@@ -895,7 +895,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                '${Validation.formatCurrency(_totalPrice)} VND',
+                '${Formater.formatCurrency(_totalPrice)} VND',
                 style: GoogleFonts.poppins(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

@@ -12,11 +12,6 @@ final class LoginAccount extends AuthEvent {
 }
 
 class GetUserFromLocal extends AuthEvent {
-  final User user;
-
-  GetUserFromLocal({required this.user});
-
-  List<Object?> get props => [user];
 }
 
 class RegisterAccount extends AuthEvent {
@@ -25,6 +20,8 @@ class RegisterAccount extends AuthEvent {
   final String password;
   final String buildingCode;
   final String houseCode;
+  final String phoneNumber;
+  final String email;
 
-  RegisterAccount({required this.fullName, required this.username, required this.password, required this.buildingCode, required this.houseCode});
+  RegisterAccount({required this.fullName, required this.username, required this.password, required this.buildingCode, required this.houseCode, required this.phoneNumber, required this.email});
 }

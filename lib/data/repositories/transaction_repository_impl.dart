@@ -150,10 +150,10 @@ class TransactionRepositoryImpl implements TransactionRepository {
         queryParameters: {
           'id': userId,
           'walletId': walletId,
-          'search': search,
-          'orderBy': orderBy,
-          'page': page,
-          'size': size,
+          'search': search ?? '',
+          'orderBy': orderBy ?? '',
+          'page': page ?? Constant.defaultPage,
+          'size': size ?? Constant.defaultSize,
         },
       );
 

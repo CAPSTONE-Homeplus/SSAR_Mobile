@@ -15,6 +15,12 @@ class WalletLoaded extends WalletState {
   WalletLoaded({required this.wallets});
 }
 
+class WalletCreatedSuccess extends WalletState {
+  final Wallet wallet;
+
+  WalletCreatedSuccess({required this.wallet});
+}
+
 class WalletError extends WalletState {
   final String message;
 

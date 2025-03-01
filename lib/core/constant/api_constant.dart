@@ -40,6 +40,9 @@ class ApiConstant {
   /// Payment method
   static const String paymentMethods = "/payment-methods";
 
+  /// Houses
+  static const String houses = "/houses";
+
 
   static const String getTransactionByUser = "https://vinwallet.onrender.com/api/v1/users/{id}/transactions";
   static const String getTransactionByUserWallet = "https://vinwallet.onrender.com/api/v1/users/{id}/transactions{walletId}";

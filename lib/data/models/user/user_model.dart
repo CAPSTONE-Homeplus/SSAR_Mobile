@@ -8,6 +8,8 @@ class UserModel {
   String? updatedAt;
   String? username;
   String? role;
+  String? email;
+  String? phoneNumber;
 
   UserModel({
     this.id,
@@ -19,6 +21,8 @@ class UserModel {
     this.updatedAt,
     this.username,
     this.role,
+    this.email,
+    this.phoneNumber,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +36,8 @@ class UserModel {
       updatedAt: json['updatedAt'],
       username: json['username'],
       role: json['role'],
+      email: json['email'],
+      phoneNumber: json['phoneNumber'],
     );
   }
 
@@ -46,6 +52,8 @@ class UserModel {
       'updatedAt': updatedAt,
       'username': username,
       'role': role,
+      'email': email,
+      'phoneNumber': phoneNumber,
     };
   }
 }

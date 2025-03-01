@@ -51,4 +51,28 @@ class HouseRepositoryImpl implements HouseRepository {
       throw ExceptionHandler.handleException(e);
     }
   }
+
+  @override
+  Future<House?> getHouseById(String? houseId) async {
+    if (houseId == null) return null;
+
+    try {
+      final response = await homeCleanRequest.get('${ApiConstant.houses}/$houseId');
+
+      if (response.statusCode == 200 && response.data != null) {
+        return HouseMapper.toEntity(HouseModel.fromJson(response.data));
+      } else {
+        throw ApiException(
+          traceId: response.data?['traceId'],
+          code: response.data?['code'],
+          message: response.data?['message'] ?? 'Không tìm thấy thông tin nhà',
+          description: response.data?['description'],
+          timestamp: response.data?['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
 }

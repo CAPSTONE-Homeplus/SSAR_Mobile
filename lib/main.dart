@@ -6,6 +6,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
 import 'package:home_clean/domain/repositories/house_repository.dart';
@@ -120,7 +121,7 @@ class HomeClean extends StatelessWidget {
                       getUserFromLocalUseCase: sl())),
           BlocProvider(
               create: (context) => ServiceBloc(
-                  serviceRepository: sl(),
+                  getServicesUseCase: sl(),
                   saveSelectedServiceIds: sl(),
                   getSelectedServiceIds: sl(),
                   clearSelectedServiceIds: sl())),
@@ -149,11 +150,11 @@ class HomeClean extends StatelessWidget {
               create: (context) => NotificationBloc(
                   initializeNotificationUseCase: sl(),
                   showNotificationUseCase: sl())),
-          BlocProvider( create: (context) => WalletBloc(getWalletByUser: sl())),
+          BlocProvider( create: (context) => WalletBloc(getWalletByUser: sl(), createWalletUseCase: sl())),
           BlocProvider(create: (context) => RoomBloc(sl())),
-          BlocProvider(create: (context) => BuildingBloc(buildingRepository: sl())),
+          BlocProvider(create: (context) => BuildingBloc(getBuildingUseCase: sl(), getBuildingsUseCase: sl())),
           BlocProvider(create: (context) => TransactionBloc(sl(), sl(), sl())),
-          BlocProvider(create: (context) => HouseBloc(getHouseByBuildingUseCase: sl())),
+          BlocProvider(create: (context) => HouseBloc(getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl())),
           BlocProvider(create: (context) => PaymentMethodBloc(sl())),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
@@ -165,6 +166,7 @@ class HomeClean extends StatelessWidget {
             }
 
             return GetMaterialApp(
+              color: AppColors.primaryColor,
               navigatorKey: navigatorKey,
               debugShowCheckedModeBanner: false,
               title: 'Home Clean',

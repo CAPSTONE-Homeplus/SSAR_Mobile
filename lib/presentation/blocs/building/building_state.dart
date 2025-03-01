@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:home_clean/core/base/base_model.dart';
 
 import '../../../domain/entities/building/building.dart';
 
@@ -17,22 +18,23 @@ class BuildingLoading extends BuildingState {
 }
 
 class BuildingLoaded extends BuildingState {
-  final List<Building> buildings;
-  final int size;
-  final int page;
-  final int total;
-  final int totalPages;
+  final BaseResponse<Building> buildings;
 
   BuildingLoaded({
     required this.buildings,
-    required this.size,
-    required this.page,
-    required this.total,
-    required this.totalPages,
   });
 
   @override
-  List<Object?> get props => [buildings, size, page, total, totalPages];
+  List<Object?> get props => [buildings];
+}
+
+class OneBuildingLoaded extends BuildingState {
+  final Building building;
+
+  OneBuildingLoaded({required this.building});
+
+  @override
+  List<Object?> get props => [building];
 }
 
 class BuildingError extends BuildingState {

@@ -14,6 +14,8 @@ class UserMapper {
       updatedAt: userModel.updatedAt ?? '',
       username: userModel.username ?? '',
       role: userModel.role ?? '',
+      phoneNumber: userModel.phoneNumber ?? '',
+      email: userModel.email ?? '',
     );
   }
 
@@ -28,6 +30,8 @@ class UserMapper {
       updatedAt: json['updatedAt'],
       username: json['username'],
       role: json['role'],
+      email: json['email'],
+      phoneNumber: json['phoneNumber'],
     );
   }
 
@@ -42,6 +46,8 @@ class UserMapper {
       updatedAt: user.updatedAt,
       username: user.username,
       role: user.role,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
     );
   }
 

@@ -7,4 +7,5 @@ abstract class WalletRepository {
   Future<BaseResponse<Wallet>> getWalletByUser(
       int? page,
       int? size);
+  Future<Wallet> createSharedWallet();
 }

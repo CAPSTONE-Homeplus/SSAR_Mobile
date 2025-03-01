@@ -10,9 +10,12 @@ import '../../core/request/request.dart';
 import '../../../domain/entities/wallet/wallet.dart';
 import '../../../domain/repositories/wallet_repository.dart';
 import '../../core/constant/api_constant.dart';
+import '../../domain/entities/user/user.dart';
 import '../datasource/auth_local_datasource.dart';
 import '../datasource/user_local_datasource.dart';
+import '../mappers/user/user_mapper.dart';
 import '../models/auth/auth_model.dart';
+import '../models/user/user_model.dart';
 
 class WalletRepositoryImpl implements WalletRepository {
   final AuthLocalDataSource authLocalDataSource;
@@ -57,6 +60,9 @@ class WalletRepositoryImpl implements WalletRepository {
             WalletModel.fromJson(item)))
             .toList();
 
+        walletList.sort((a, b) => (b.type == 'Personal' ? 1 : 0) - (a.type == 'Personal' ? 1 : 0));
+
+
         return BaseResponse<Wallet>(
           size: response.data['size'] ?? 0,
           page: response.data['page'] ?? 0,
@@ -73,6 +79,48 @@ class WalletRepositoryImpl implements WalletRepository {
           timestamp: response.data['timestamp'],
         );
       }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+
+  @override
+  Future<Wallet> createSharedWallet() async {
+    try {
+      User user = await getUserFromLocal();
+      String? userId = user.id;
+
+      final response = await vinWalletRequest.post(
+        '${ApiConstant.users}/$userId/share-wallet',
+        queryParameters:
+        {
+          'id': userId,
+        },
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        Wallet wallet = WalletMapper.toEntity(WalletModel.fromJson(response.data));
+        return wallet;
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  Future<User> getUserFromLocal() async{
+    try {
+      UserModel? userModel = UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
+      User user = UserMapper.toEntity(userModel);
+      return user;
     } catch (e) {
       throw ExceptionHandler.handleException(e);
     }

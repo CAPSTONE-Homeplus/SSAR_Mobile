@@ -1,9 +1,9 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:home_clean/presentation/screens/activity/activity_screen.dart';
 import 'package:home_clean/presentation/screens/message/message_screen.dart';
 
 import '../screens/home/home_screen.dart';
+import '../screens/manage_wallet/manage_wallet_screen/manage_wallet_screen.dart';
 import '../screens/setting/settings_screen.dart';
 
 class BottomNavigation extends StatefulWidget {
@@ -20,9 +20,9 @@ class _BottomNavigationState extends State<BottomNavigation> {
 
   final List<Widget> _pages = [
     HomeScreen(),
-    ActivityScreen(),
+    ManageWalletScreen(),
     MessageScreen(),
-    SettingsScreen(),
+    SettingsScreen()
   ];
 
   void _onTabTapped(int index) {
@@ -39,7 +39,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
         children: _pages,
       ),
       bottomNavigationBar: CurvedNavigationBar(
-        backgroundColor: Colors.grey[200]!,
+        backgroundColor: Colors.grey[100]!,
         color: Colors.white,
         buttonBackgroundColor: Colors.greenAccent,
         height: 60,

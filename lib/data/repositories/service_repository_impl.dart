@@ -8,6 +8,7 @@ import 'package:home_clean/domain/entities/service/service.dart';
 
 import '../../../domain/repositories/service_repository.dart';
 import '../../core/constant/api_constant.dart';
+import '../../core/constant/constant.dart';
 import '../../core/helper/network_helper.dart';
 
 class ServiceRepositoryImpl implements ServiceRepository {
@@ -26,10 +27,10 @@ class ServiceRepositoryImpl implements ServiceRepository {
         }
 
         final response = await homeCleanRequest.get(ApiConstant.services, queryParameters: {
-          'search': search,
-          'orderBy': orderBy,
-          'page': page,
-          'size': size,
+          'search': search ?? '',
+          'orderBy': orderBy ?? '',
+          'page': page ?? Constant.defaultPage,
+          'size': size ?? Constant.defaultSize,
         });
 
         if (response.statusCode == 200 && response.data != null) {

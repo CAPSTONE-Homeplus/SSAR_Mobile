@@ -9,4 +9,6 @@ abstract class BuildingRepository {
     int? page,
     int? size,
   );
+
+  Future<Building?> getBuildingById(String? buildingId);
 }

@@ -15,17 +15,25 @@ class WalletGridWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    int indexWallet = walletUserList.length;
+    bool isSingleWallet = indexWallet == 1;
+
     return GridView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12 * fem,
-        mainAxisSpacing: 12 * fem,
-        childAspectRatio: 1.5,
+        crossAxisCount: isSingleWallet ? 1 : 2,
+        crossAxisSpacing: isSingleWallet ? 0 : 12 * fem,
+        mainAxisSpacing: isSingleWallet ? 0 : 12 * fem,
+        childAspectRatio: isSingleWallet ? 2 : 1.5,
       ),
-      itemCount: walletUserList.length,
-      itemBuilder: (context, index) => WalletCardWidget(index: index, walletUserList: walletUserList, fem: fem),
+      itemCount: indexWallet,
+      itemBuilder: (context, index) => WalletCardWidget(
+        index: index,
+        walletUserList: walletUserList,
+        fem: fem,
+      ),
     );
   }
+
 }

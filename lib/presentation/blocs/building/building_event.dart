@@ -15,3 +15,12 @@ class GetBuildings extends BuildingEvent {
   @override
   List<Object?> get props => [search, orderBy, page, size];
 }
+
+class GetBuilding extends BuildingEvent {
+  final String? buildingId;
+
+  GetBuilding({this.buildingId});
+
+  @override
+  List<Object?> get props => [buildingId];
+}

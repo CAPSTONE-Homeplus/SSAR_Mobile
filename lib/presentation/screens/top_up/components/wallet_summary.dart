@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/format/validation.dart';
+import '../../../../core/format/formater.dart';
 import '../../../../domain/entities/wallet/wallet.dart';
 
 class WalletSummary extends StatelessWidget {
@@ -61,7 +61,7 @@ class WalletSummary extends StatelessWidget {
                 ),
                 SizedBox(height: 4 * fem),
                 Text(
-                  '${Validation.formatCurrency(selectedWallet.balance!)} ₫',
+                  '${Formater.formatCurrency(selectedWallet.balance!)} ₫',
                   style: GoogleFonts.poppins(
                     fontSize: 20 * ffem,
                     fontWeight: FontWeight.bold,

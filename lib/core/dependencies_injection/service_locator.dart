@@ -9,7 +9,9 @@ import 'package:home_clean/domain/repositories/user_repository.dart';
 import 'package:home_clean/domain/use_cases/auth/login_usecase.dart';
 import 'package:home_clean/domain/use_cases/building/get_buildings_use_case.dart';
 import 'package:home_clean/domain/use_cases/extra_service/get_extra_service_use_case.dart';
+import 'package:home_clean/domain/use_cases/order/create_orders_use_case.dart';
 import 'package:home_clean/domain/use_cases/room/get_rooms_usecase.dart';
+import 'package:home_clean/domain/use_cases/service/get_services_use_case.dart';
 import 'package:home_clean/domain/use_cases/transaction/save_transaction_use_case.dart';
 import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -76,11 +78,14 @@ import '../../domain/repositories/time_slot_repository.dart';
 import '../../domain/repositories/wallet_repository.dart';
 import '../../domain/use_cases/auth/get_user_from_local_usecase.dart';
 import '../../domain/use_cases/auth/user_register_usecase.dart';
+import '../../domain/use_cases/building/get_building_use_case.dart';
 import '../../domain/use_cases/house/get_house_by_building_use_case.dart';
+import '../../domain/use_cases/house/get_house_use_case.dart';
 import '../../domain/use_cases/option/get_options_use_case.dart';
 import '../../domain/use_cases/payment_method/get_payment_methods_use_case.dart';
 import '../../domain/use_cases/transaction/get_transaction_by_user.dart';
 import '../../domain/use_cases/transaction/get_transaction_by_wallet_use_case.dart';
+import '../../domain/use_cases/wallet/create_wallet_use_case.dart';
 import '../../domain/use_cases/wallet/get_wallet_by_user.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/building/building_bloc.dart';
@@ -131,7 +136,8 @@ Future<void> setupServiceLocator() async {
 
   // Repositories (sử dụng LazySingleton vì chúng ta muốn tái sử dụng đối tượng)
   sl.registerLazySingleton<AuthRepository>(
-          () => AuthRepositoryImpl(authLocalDataSource: sl(), userLocalDatasource: sl(), userRepository: sl()));
+          () => AuthRepositoryImpl(authLocalDataSource: sl(), userLocalDatasource: sl(),
+              userRepository: sl()));
   sl.registerLazySingleton<UserRepository>(
           () => UserRepositoryImpl(userLocalDatasource: sl()));
   sl.registerLazySingleton<ServiceRepository>(
@@ -188,6 +194,11 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => GetHouseByBuildingUseCase(sl()));
   sl.registerLazySingleton(() => GetTransactionByWalletUseCase(sl()));
   sl.registerLazySingleton(() => GetTransactionByUserUseCase(sl()));
+  sl.registerLazySingleton(() => GetHouseUseCase(sl()));
+  sl.registerLazySingleton(() => GetBuildingUseCase(sl()));
+  sl.registerLazySingleton(() => CreateOrderUseCase(sl()));
+  sl.registerLazySingleton(() => GetServicesUseCase(sl()));
+  sl.registerLazySingleton(() => CreateWalletUseCase(sl()));
 
   // local Use Cases
   sl.registerLazySingleton(() => GetUserFromLocalUseCase(sl()));
@@ -203,7 +214,7 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(() => ThemeBloc(preferences: sl()));
   sl.registerFactory(
         () => ServiceBloc(
-      serviceRepository: sl(),
+      getServicesUseCase: sl(),
       saveSelectedServiceIds: sl(),
       getSelectedServiceIds: sl(),
       clearSelectedServiceIds: sl(),
@@ -222,10 +233,10 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(() => OrderBloc(createOrderUseCase: sl()));
   sl.registerFactory(() => NotificationBloc(
       initializeNotificationUseCase: sl(), showNotificationUseCase: sl()));
-  sl.registerFactory(() => WalletBloc(getWalletByUser: sl()));
+  sl.registerFactory(() => WalletBloc(getWalletByUser: sl(), createWalletUseCase: sl()));
   sl.registerFactory(() => RoomBloc(sl()));
-  sl.registerFactory(() => BuildingBloc(buildingRepository: sl()));
+  sl.registerFactory(() => BuildingBloc(getBuildingUseCase: sl(), getBuildingsUseCase: sl()));
   sl.registerFactory(() => TransactionBloc(sl(), sl(), sl()));
-  sl.registerFactory(() => HouseBloc(getHouseByBuildingUseCase: sl()));
+  sl.registerFactory(() => HouseBloc(getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl()));
   sl.registerFactory(() => PaymentMethodBloc(sl()));
 }

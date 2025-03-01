@@ -7,7 +7,7 @@ class ServiceInitialState extends ServiceState {}
 class ServiceLoadingState extends ServiceState {}
 
 class ServiceSuccessState extends ServiceState {
-  final List<Service> services;
+  final BaseResponse<Service> services;
 
   ServiceSuccessState({required this.services});
 }
@@ -36,5 +36,11 @@ class ServiceIdsState extends ServiceState {
   final List<String> serviceIds;
 
   ServiceIdsState({required this.serviceIds});
+}
+
+class ServiceExceptionState extends ServiceState {
+  final String message;
+
+  ServiceExceptionState({required this.message});
 }
 

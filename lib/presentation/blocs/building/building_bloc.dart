@@ -1,15 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/repositories/building_repository.dart';
+import '../../../domain/use_cases/building/get_building_use_case.dart';
+import '../../../domain/use_cases/building/get_buildings_use_case.dart';
 import 'building_event.dart';
 import 'building_state.dart';
 
 class BuildingBloc extends Bloc<BuildingEvent, BuildingState> {
-  final BuildingRepository _buildingRepository;
+  final GetBuildingUseCase getBuildingUseCase;
+  final GetBuildingsUseCase getBuildingsUseCase;
 
-  BuildingBloc({required BuildingRepository buildingRepository})
-      : _buildingRepository = buildingRepository,
-        super(BuildingInitial()){
+ BuildingBloc({
+    required this.getBuildingUseCase,
+    required this.getBuildingsUseCase,
+  }) : super(BuildingInitial()) {
+    on<GetBuilding>(_onGetBuilding);
     on<GetBuildings>(_onGetBuildings);
   }
 
@@ -18,24 +23,30 @@ class BuildingBloc extends Bloc<BuildingEvent, BuildingState> {
     Emitter<BuildingState> emit,
   ) async {
     emit(BuildingLoading());
-    try {
-      final response = await _buildingRepository.getBuildings(
-        event.search,
-        event.orderBy,
-        event.page,
-        event.size,
-      );
+    final response = await getBuildingsUseCase.execute(
+      event.search,
+      event.orderBy,
+      event.page,
+      event.size,
+    );
+    response.fold(
+      (failure) => emit(BuildingError(message: failure.message)),
+      (data) => emit(BuildingLoaded(
+        buildings: data,
+      )),
+    );
+  }
 
-      emit(BuildingLoaded(
-        buildings: response.items,
-        size: response.size,
-        page: response.page,
-        total: response.total,
-        totalPages: response.totalPages,
-      ));
-    } catch (e) {
-      emit(BuildingError(message: e.toString()));
-    }
+  Future<void> _onGetBuilding(
+    GetBuilding event,
+    Emitter<BuildingState> emit,
+  ) async {
+    emit(BuildingLoading());
+    final response = await getBuildingUseCase.execute(event.buildingId ?? '');
+    response.fold(
+      (failure) => emit(BuildingError(message: failure.message)),
+      (data) => emit(OneBuildingLoaded(building: data)),
+    );
   }
 
 }

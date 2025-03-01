@@ -10,3 +10,6 @@ class GetWallet extends WalletEvent {
     this.size,
   });
 }
+
+class CreateWallet extends WalletEvent {
+}

@@ -1,6 +1,6 @@
 import 'package:home_clean/data/models/building/building_model.dart';
 
-import '../../../domain/entities/building/building.dart';
+import '../../domain/entities/building/building.dart';
 
 class BuildingMapper {
   static Building toEntity (BuildingModel buildingModel){

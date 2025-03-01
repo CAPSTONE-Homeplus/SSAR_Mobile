@@ -10,6 +10,8 @@ class User extends Equatable {
   String? updatedAt;
   String? username;
   String? role;
+  String? email;
+  String? phoneNumber;
 
   User({
     this.id,
@@ -21,6 +23,8 @@ class User extends Equatable {
     this.updatedAt,
     this.username,
     this.role,
+    this.email,
+    this.phoneNumber,
   });
 
   @override
@@ -34,5 +38,7 @@ class User extends Equatable {
     updatedAt,
     username,
     role,
+    email,
+    phoneNumber,
   ];
 }

@@ -1,4 +1,4 @@
-import 'package:home_clean/data/mappers/user/building_mapper.dart';
+import 'package:home_clean/data/mappers/building_mapper.dart';
 
 import '../../core/constant/api_constant.dart';
 import '../../core/base/base_model.dart';
@@ -36,6 +36,31 @@ class BuildingRepositoryImpl implements BuildingRepository {
           totalPages: response.data['totalPages'] ?? 0,
           items: buildings,
         );
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<Building?> getBuildingById(String? buildingId) async {
+    try {
+      final response = await homeCleanRequest.get(
+          '${ApiConstant.buildings}/$buildingId',
+          queryParameters: {
+            'id ': buildingId,
+          });
+
+      if (response.statusCode == 200 && response.data != null) {
+        return BuildingMapper.toEntity(BuildingModel.fromJson(response.data));
       } else {
         throw ApiException(
           traceId: response.data['traceId'],

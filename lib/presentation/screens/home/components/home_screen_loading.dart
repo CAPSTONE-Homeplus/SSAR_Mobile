@@ -16,7 +16,7 @@ class HomeScreenLoading extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Your Location',
+              'Phòng bạn đang ở',
               style: GoogleFonts.poppins(
                 color: Colors.grey,
                 fontSize: 12,
@@ -25,7 +25,7 @@ class HomeScreenLoading extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'Ho Chi Minh City',
+                  '',
                   style: GoogleFonts.poppins(
                     color: Colors.black,
                     fontSize: 14,

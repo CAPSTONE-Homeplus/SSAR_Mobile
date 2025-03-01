@@ -6,11 +6,14 @@ import 'package:home_clean/presentation/screens/order_confirmation/order_confirm
 import 'package:home_clean/presentation/screens/register/register_screen.dart';
 import 'package:home_clean/presentation/screens/service_detail/service_detail_screen.dart';
 import 'package:home_clean/presentation/screens/start/splash_screen.dart';
-import 'package:home_clean/presentation/screens/wallet/wallet_screen.dart';
 
 import '../../presentation/screens/activity/activity_screen.dart';
 import '../../presentation/screens/login/login_screen.dart';
+import '../../presentation/screens/manage_wallet/manage_wallet_screen/manage_wallet_screen.dart';
+import '../../presentation/screens/manage_wallet/member_screen/member_screen.dart';
+import '../../presentation/screens/manage_wallet/statistics_screen/statistic_screen.dart';
 import '../../presentation/screens/service_list_screen/service_list_screen.dart';
+import '../../presentation/screens/top_up/top_up_screen.dart';
 import '../../presentation/widgets/bottom_navigation.dart';
 
 class AppRouter {
@@ -26,6 +29,10 @@ class AppRouter {
   static const String routeTimeCollection = '/time-collection';
   static const String routeOrderConfirmation = '/order-confirmation';
   static const String routePayment = '/payment';
+  static const String routeManageWallet = '/manage-wallet';
+  static const String routeMember = '/member';
+  static const String routeSpending = '/spending';
+
 
   static List<GetPage> get routes => [
         GetPage(
@@ -99,6 +106,24 @@ class AppRouter {
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
+        GetPage(
+          name: routeManageWallet,
+          page: () => ManageWalletScreen(),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+        GetPage(
+          name: routeMember,
+          page: () => MembersScreen(),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+        GetPage(
+          name: routeSpending,
+          page: () => SpendingScreen(),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
       ];
 
   static void navigateToLogin() {
@@ -157,4 +182,15 @@ class AppRouter {
     Get.toNamed(routePayment);
   }
 
+  static void navigateToManageWallet() {
+    Get.toNamed(routeManageWallet);
+  }
+
+  static void navigateToMember() {
+    Get.toNamed(routeMember);
+  }
+
+  static void navigateToSpending() {
+    Get.toNamed(routeSpending);
+  }
 }
