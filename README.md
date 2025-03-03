@@ -13,6 +13,7 @@ Modern Flutter app helps apartment residents manage services, shared wallets, pe
 📱 User-friendly UI: Intuitive and responsive interface for smooth navigation.<br>
 🌙 Dark Mode Support: Switch between light and dark themes for a comfortable user experience.<br>
 🔄 Offline Access: Access essential wallet and service details offline, with automatic synchronization when back online.<br>
+🌐 WebView Payment: Securely open URLs to VNPay for seamless top-up transactions.<br>
 🚀 Optimized for apartment residents to simplify expense management and service bookings!  
 
 ## 📱 Screenshots
