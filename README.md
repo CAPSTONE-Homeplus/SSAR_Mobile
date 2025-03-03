@@ -4,21 +4,18 @@ Modern Flutter app helps apartment residents manage services, shared wallets, pe
 
 ## ✨ Features
 
-🏢 Apartment Services: Browse and select various apartment-related services conveniently.
-✅ Service Tracking: Monitor the status of booked services from request initiation to completion, with real-time updates.
-💰 Shared Wallet Management: Manage a shared wallet for household expenses and track spending.
-👥 Shared Wallet Members: Manage members in a shared wallet with role-based access.
-💳 Personal Wallet: Maintain a separate personal wallet for individual expenses and transactions.
-🔔 Real-time Notifications: Get instant updates on wallet transactions, service bookings, and member activities.
-📱 User-friendly UI: Intuitive and responsive interface for smooth navigation.
-🌙 Dark Mode Support: Switch between light and dark themes for a comfortable user experience.
-🔄 Offline Access: Access essential wallet and service details offline, with automatic synchronization when back online.
-🚀 Optimized for apartment residents to simplify expense management and service bookings!
+🏢 Apartment Services: Browse and select various apartment-related services conveniently.<br>
+✅ Service Tracking: Monitor the status of booked services from request initiation to completion, with real-time updates.<br>
+💰 Shared Wallet Management: Manage a shared wallet for household expenses and track spending.<br>
+👥 Shared Wallet Members: Manage members in a shared wallet with role-based access.<br>
+💳 Personal Wallet: Maintain a separate personal wallet for individual expenses and transactions.<br>
+🔔 Real-time Notifications: Get instant updates on wallet transactions, service bookings, and member activities.<br>
+📱 User-friendly UI: Intuitive and responsive interface for smooth navigation.<br>
+🌙 Dark Mode Support: Switch between light and dark themes for a comfortable user experience.<br>
+🔄 Offline Access: Access essential wallet and service details offline, with automatic synchronization when back online.<br>
+🚀 Optimized for apartment residents to simplify expense management and service bookings!  
 
 ## 📱 Screenshots
-
-
-</div>
 
 ## 🚀 Getting Started
 
