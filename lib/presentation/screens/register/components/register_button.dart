@@ -12,6 +12,8 @@ class RegisterButton extends StatelessWidget {
   final TextEditingController fullNameController;
   final TextEditingController usernameController;
   final TextEditingController passwordController;
+  final TextEditingController phoneNumberController;
+  final TextEditingController emailController;
   final String buildingCode;
   final String houseCode;
 
@@ -21,6 +23,8 @@ class RegisterButton extends StatelessWidget {
     required this.fullNameController,
     required this.usernameController,
     required this.passwordController,
+    required this.phoneNumberController,
+    required this.emailController,
     required this.buildingCode,
     required this.houseCode,
   }) : super(key: key);
@@ -58,8 +62,8 @@ class RegisterButton extends StatelessWidget {
                   password: passwordController.text,
                   buildingCode: buildingCode,
                   houseCode: houseCode,
-                  phoneNumber: '',
-                  email: '',
+                  phoneNumber: phoneNumberController.text,
+                  email: emailController.text,
                 ),
               );
             }

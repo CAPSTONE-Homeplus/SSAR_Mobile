@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/presentation/blocs/building/building_state.dart';
 import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:home_clean/presentation/blocs/house/house_event.dart';
@@ -10,7 +9,6 @@ import 'package:home_clean/presentation/blocs/house/house_event.dart';
 import '../../../domain/entities/building/building.dart';
 import '../../../domain/entities/house/house.dart';
 import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
 import '../../blocs/building/building_bloc.dart';
 import '../../blocs/building/building_event.dart';
@@ -39,22 +37,8 @@ class RegisterView extends StatelessWidget {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is RegisterSuccess) {
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(
-          //     content: Text('Registration successful!'),
-          //     backgroundColor: Colors.green,
-          //   ),
-          // );
           Navigator.of(context).pop();
         }
-        // else if (state is RegisterFailed) {
-        //   ScaffoldMessenger.of(context).showSnackBar(
-        //     SnackBar(
-        //       content: Text(state.error),
-        //       backgroundColor: Colors.red,
-        //     ),
-        //   );
-        // }
       },
         builder: (context, state) {
           return SafeArea(
@@ -115,6 +99,8 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _houseCodeController = TextEditingController();
+  final _phoneNumberController = TextEditingController();
+  final _emailController = TextEditingController();
   var _buildingCodeController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -270,6 +256,39 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
             },
           ),
           const SizedBox(height: 16),
+          _buildTextField(
+            controller: _phoneNumberController,
+            label: 'Số điện thoại',
+            hint: 'Nhập số điện thoại của bạn',
+            icon: Icons.phone_outlined,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Vui lòng nhập số điện thoại';
+              }
+              // Regex chấp nhận số có đầu +84 hoặc số 9, 10, 11 chữ số
+              if (!RegExp(r'^(?:\+84\d{9,10}|\d{9,11})$').hasMatch(value)) {
+                return 'Số điện thoại không hợp lệ';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          _buildTextField(
+            controller: _emailController,
+            label: 'Email',
+            hint: 'Nhập email của bạn',
+            icon: Icons.email_outlined,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Vui lòng nhập email';
+              }
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                return 'Email không hợp lệ';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
           BuildingFieldWidget(
             availableBuildings: availableBuildings,
             onBuildingSelected: (selectedBuilding) {
@@ -299,6 +318,8 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
             fullNameController: _fullNameController,
             usernameController: _usernameController,
             passwordController: _passwordController,
+            phoneNumberController: _phoneNumberController,
+            emailController: _emailController,
             buildingCode: selectedBuildingObj.code ?? '',
             houseCode: selectedHouseObj.code ?? '',
           ),
@@ -310,7 +331,6 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
   }
 
 
-
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -320,6 +340,8 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
     bool obscureText = false,
     VoidCallback? onTogglePassword,
     String? Function(String?)? validator,
+    TextInputType? keyboardType,
+    bool? enabled,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,7 +359,12 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
           controller: controller,
           obscureText: isPassword && obscureText,
           validator: validator,
-          style: GoogleFonts.poppins(fontSize: 15),
+          enabled: enabled ?? true,
+          keyboardType: keyboardType ?? _determineKeyboardType(label),
+          style: GoogleFonts.poppins(
+            fontSize: 15,
+            color: enabled ?? true ? Colors.black87 : Colors.grey,
+          ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: GoogleFonts.poppins(
@@ -345,6 +372,19 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
               color: Colors.grey[400],
             ),
             prefixIcon: Icon(icon, color: const Color(0xFF1CAF7D)),
+            prefix: label.contains('Số điện thoại')
+                ? Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Text(
+                '+84 ',
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            )
+                : null,
             suffixIcon: isPassword
                 ? IconButton(
               icon: Icon(
@@ -355,22 +395,33 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
             )
                 : null,
             filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[200]!),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[200]!),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF1CAF7D)),
-            ),
+            fillColor: enabled ?? true ? Colors.white : Colors.grey[100],
+            border: _buildOutlinedBorder(Colors.grey[200]!),
+            enabledBorder: _buildOutlinedBorder(Colors.grey[200]!),
+            focusedBorder: _buildOutlinedBorder(const Color(0xFF1CAF7D)),
+            disabledBorder: _buildOutlinedBorder(Colors.grey[300]!),
           ),
         ),
       ],
+    );
+  }
+
+// Helper method to determine keyboard type based on label
+  TextInputType _determineKeyboardType(String label) {
+    final lowercaseLabel = label.toLowerCase();
+    if (lowercaseLabel.contains('email')) return TextInputType.emailAddress;
+    if (lowercaseLabel.contains('điện thoại') || lowercaseLabel.contains('phone')) {
+      return TextInputType.phone;
+    }
+    if (lowercaseLabel.contains('number')) return TextInputType.number;
+    return TextInputType.text;
+  }
+
+// Helper method to create consistent outlined border
+  OutlineInputBorder _buildOutlinedBorder(Color borderColor) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: borderColor),
     );
   }
 

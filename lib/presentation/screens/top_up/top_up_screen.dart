@@ -158,7 +158,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Nạp tiền vào ví',
+          'Nạp điểm',
           style: GoogleFonts.poppins(
             fontSize: 18 * ffem,
             fontWeight: FontWeight.w600,

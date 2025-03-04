@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_clean/presentation/blocs/auth/auth_event.dart';
 
-import '../../../core/exception/exception_handler.dart';
 import '../../../data/models/auth/login_model.dart';
 import '../../../domain/entities/user/create_user.dart';
 import '../../../domain/entities/user/user.dart';
@@ -78,6 +77,8 @@ class AuthBloc
         password: event.password,
         buildingCode: event.buildingCode,
         houseCode: event.houseCode,
+        phoneNumber: event.phoneNumber,
+        email: event.email,
       ),
     );
 

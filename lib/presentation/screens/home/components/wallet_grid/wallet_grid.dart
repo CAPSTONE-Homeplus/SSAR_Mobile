@@ -22,6 +22,18 @@ class WalletGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (wallets.isEmpty) {
+      return Center(
+        child: Text(
+          'Không có ví nào',
+          style: GoogleFonts.poppins(
+            fontSize: 16 * ffem,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
+    }
+
     return Padding(
       padding: EdgeInsets.all(16 * fem),
       child: Column(

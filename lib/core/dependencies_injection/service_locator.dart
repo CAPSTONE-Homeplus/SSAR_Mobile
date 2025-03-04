@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:home_clean/data/datasource/notification_remote_data_source.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
 import 'package:home_clean/domain/repositories/house_repository.dart';
 import 'package:home_clean/domain/repositories/payment_method_repository.dart';
@@ -23,6 +24,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../../data/datasource/service_local_data_source.dart';
 import '../../data/datasource/local_data_source.dart';
+import '../../data/datasource/notification_local_data_source.dart';
 import '../../data/datasource/transaction_local_data_source.dart';
 import '../../data/datasource/user_local_datasource.dart';
 import '../../data/datasource/wallet_local_data_source.dart';
@@ -58,8 +60,6 @@ import '../../../domain/use_cases/service_category/get_service_by_service_catego
 import '../../../domain/use_cases/service_category/get_service_categories_usecase.dart';
 import '../../../domain/use_cases/sub_activity/get_sub_activities_usecase.dart';
 import '../../../domain/use_cases/time_slot/get_time_slots_usecase.dart';
-import '../../../domain/use_cases/notification/initialize_notification_usecase.dart';
-import '../../../domain/use_cases/notification/show_notification_usecase.dart';
 import '../../../presentation/blocs/equipment/equipment_supply_bloc.dart';
 import '../../../presentation/blocs/extra_service/extra_service_bloc.dart';
 import '../../../presentation/blocs/internet/internet_bloc.dart';
@@ -86,6 +86,12 @@ import '../../domain/use_cases/auth/user_register_usecase.dart';
 import '../../domain/use_cases/building/get_building_use_case.dart';
 import '../../domain/use_cases/house/get_house_by_building_use_case.dart';
 import '../../domain/use_cases/house/get_house_use_case.dart';
+import '../../domain/use_cases/notification/connect_to_notification_hub_use_case.dart';
+import '../../domain/use_cases/notification/delete_notification_use_case.dart';
+import '../../domain/use_cases/notification/disconnect_from_notification_hub_use_case.dart';
+import '../../domain/use_cases/notification/get_notifications_use_case.dart';
+import '../../domain/use_cases/notification/listen_for_notifications_use_case.dart';
+import '../../domain/use_cases/notification/mark_notification_as_read_use_case.dart';
 import '../../domain/use_cases/option/get_options_use_case.dart';
 import '../../domain/use_cases/payment_method/get_payment_methods_use_case.dart';
 import '../../domain/use_cases/transaction/get_transaction_by_user.dart';
@@ -130,6 +136,15 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<WalletLocalDataSource>(
         () => WalletLocalDataSource(),
   );
+  sl.registerLazySingleton(() => NotificationLocalDataSource());
+  sl.registerLazySingleton(
+        () => NotificationRemoteDataSource(
+      authLocalDataSource: sl(),
+      localDataSource: sl(),
+    ),
+  );
+
+
   sl.registerLazySingleton<LocalDataSource>(() => LocalDataSource(
     authLocalDataSource: sl(),
     extraServiceLocalDataSource: sl(),
@@ -161,7 +176,14 @@ Future<void> setupServiceLocator() async {
           () => EquipmentSupplyRepositoryImpl());
   sl.registerLazySingleton<TimeSlotRepository>(() => TimeSlotRepositoryImpl());
   sl.registerLazySingleton<OrderRepository>(() => OrderRepositoryImpl( userLocalDatasource: sl()));
-  sl.registerSingleton<NotificationRepository>(NotificationRepositoryImpl(FlutterLocalNotificationsPlugin(), sl()));
+  sl.registerLazySingleton<NotificationRepository>(
+        () => NotificationRepositoryImpl(
+      localDataSource: sl(),
+      remoteDataSource: sl(),
+    ),
+  );
+
+
   sl.registerLazySingleton<WalletRepository>(
           () => WalletRepositoryImpl(authLocalDataSource: sl(), userLocalDatasource: sl(), localDataSource: sl()));
   sl.registerLazySingleton<RoomRepository>(() => RoomRepositoryImpl());
@@ -186,8 +208,6 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => GetServiceByServiceCategoryUsecase(sl()));
   sl.registerLazySingleton(() => GetServiceCategoriesUsecase(sl()));
   sl.registerLazySingleton(() => GetOrderFromLocal (sl()));
-  sl.registerLazySingleton(() => InitializeNotificationUseCase (sl()));
-  sl.registerLazySingleton(() => ShowNotificationUseCase (sl()));
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => GetWalletByUserUseCase(sl()));
   sl.registerLazySingleton(() => GetRoomsUseCase(sl()));
@@ -208,6 +228,12 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => DeleteUserWalletUseCase(sl()));
   sl.registerLazySingleton(() => GetUserByPhoneNumberUseCase(sl()));
   sl.registerLazySingleton(() => GetTransactionByWalletUseCase(sl()));
+  sl.registerLazySingleton(()=> GetNotificationsUseCase(sl()));
+  sl.registerLazySingleton(()=> MarkNotificationAsReadUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteNotificationUseCase(sl()));
+  sl.registerLazySingleton(() => ConnectToNotificationHubUseCase(sl()));
+  sl.registerLazySingleton(() => DisconnectFromNotificationHubUseCase(sl()));
+  sl.registerLazySingleton(() => ListenForNotificationsUseCase(sl()));
 
   // local Use Cases
   sl.registerLazySingleton(() => GetUserFromLocalUseCase(sl()));
@@ -240,8 +266,17 @@ Future<void> setupServiceLocator() async {
           () => EquipmentSupplyBloc(getEquipmentSuppliesUseCase: sl()));
   sl.registerFactory(() => TimeSlotBloc(getTimeSlotsUsecase: sl()));
   sl.registerFactory(() => OrderBloc(createOrderUseCase: sl()));
-  sl.registerFactory(() => NotificationBloc(
-      initializeNotificationUseCase: sl(), showNotificationUseCase: sl()));
+  sl.registerFactory(
+        () => NotificationBloc(
+      getNotificationsUseCase: sl(),
+      markAsReadUseCase: sl(),
+      deleteNotificationUseCase: sl(),
+      connectToHubUseCase: sl(),
+      disconnectFromHubUseCase: sl(),
+      listenForNotificationsUseCase: sl(),
+      flutterLocalNotificationsPlugin: sl(),
+    ),
+  );
   sl.registerFactory(() => WalletBloc(getWalletByUser: sl(), createWalletUseCase: sl(),
       inviteMemberUseCase: sl(), changeOwnerUseCase: sl(), deleteUserUseCase: sl()));
   sl.registerFactory(() => RoomBloc(sl()));
@@ -250,4 +285,6 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(() => HouseBloc(getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl()));
   sl.registerFactory(() => PaymentMethodBloc(sl()));
   sl.registerFactory(() => UserBloc(sl(), sl()));
+  sl.registerFactory(() => PersonalWalletBloc(getWalletByUser: sl()));
+  sl.registerFactory(() => SharedWalletBloc(getWalletByUser: sl()));
 }

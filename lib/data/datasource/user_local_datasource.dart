@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../domain/entities/user/user.dart';
+import '../models/user/user_model.dart';
+
 class UserLocalDatasource {
 
   final String _userKey = dotenv.env['USER_KEY'] ?? 'default_user_key';
@@ -9,6 +12,11 @@ class UserLocalDatasource {
 
   Future<void> saveUser(Map<String, dynamic> userData) async {
     String userJson = jsonEncode(userData);
+    await _secureStorage.write(key: _userKey, value: userJson);
+  }
+
+  Future<void> saveUserModel(UserModel userModel) async {
+    String userJson = jsonEncode(userModel.toJson());
     await _secureStorage.write(key: _userKey, value: userJson);
   }
 

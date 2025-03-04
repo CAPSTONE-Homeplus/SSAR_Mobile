@@ -23,6 +23,22 @@ class WalletLoaded extends WalletState {
   List<Object> get props => [wallets];
 }
 
+class PersonalWalletLoaded extends WalletState {
+  final List<Wallet> wallets;
+  PersonalWalletLoaded(this.wallets);
+
+  @override
+  List<Object> get props => [wallets];
+}
+
+class SharedWalletLoaded extends WalletState {
+  final List<Wallet> wallets;
+  SharedWalletLoaded(this.wallets);
+
+  @override
+  List<Object> get props => [wallets];
+}
+
 class WalletCreatedSuccess extends WalletState {
   final Wallet wallet;
 

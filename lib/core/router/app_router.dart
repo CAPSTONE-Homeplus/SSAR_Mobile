@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
 import 'package:home_clean/presentation/screens/home/home_screen.dart';
 import 'package:home_clean/presentation/screens/message/message_screen.dart';
-import 'package:home_clean/presentation/screens/notification.dart';
+import 'package:home_clean/presentation/screens/notification/notification.dart';
 import 'package:home_clean/presentation/screens/order_confirmation/order_confirmation_screen.dart';
 import 'package:home_clean/presentation/screens/register/register_screen.dart';
 import 'package:home_clean/presentation/screens/service_detail/service_detail_screen.dart';

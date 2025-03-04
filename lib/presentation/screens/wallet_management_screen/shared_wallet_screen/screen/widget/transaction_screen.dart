@@ -222,6 +222,8 @@ class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
                                       ? TextDecoration.lineThrough
                                       : null,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),

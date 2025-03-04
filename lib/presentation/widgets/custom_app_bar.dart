@@ -9,6 +9,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final VoidCallback? onCartPressed;
   final VoidCallback? onHelpPressed;
   final Future<int> Function()? getCartCount;
+  final int unreadCount; // Thêm biến unreadCount
 
   const CustomAppBar({
     Key? key,
@@ -19,6 +20,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.onCartPressed,
     this.onHelpPressed,
     this.getCartCount,
+    this.unreadCount = 0, // Mặc định là 0
   }) : super(key: key);
 
   @override
@@ -62,23 +64,52 @@ class _CustomAppBarState extends State<CustomAppBar> {
             size: 20,
           ),
         ),
-        onPressed:
-        widget.onBackPressed ?? () => Navigator.of(context).pop(),
+        onPressed: widget.onBackPressed ?? () => Navigator.of(context).pop(),
       )
           : null,
       actions: [
-        IconButton(
-          icon: const Icon(
-            Icons.notifications_none_rounded,
-            color: Colors.white,
-            size: 24,
-          ),
-          onPressed: widget.onNotificationPressed ??
-                  () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('No new notifications')),
-                );
-              },
+        // Nút thông báo với badge
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(
+                Icons.notifications_none_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+              onPressed: widget.onNotificationPressed ??
+                      () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('No new notifications')),
+                    );
+                  },
+            ),
+            if (widget.unreadCount > 0)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    widget.unreadCount.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
         ),
         if (widget.onHelpPressed != null)
           IconButton(

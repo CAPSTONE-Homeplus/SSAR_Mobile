@@ -11,29 +11,23 @@ import '../../../../widgets/custom_app_bar.dart';
 import 'widget/balance_card.dart';
 
 class PersonalWallet extends StatefulWidget {
-  final List<Wallet> walletUser;
+  final Wallet personalWallet;
 
-   PersonalWallet({super.key, required this.walletUser});
+   PersonalWallet({super.key, required this.personalWallet});
 
   @override
   _PersonalWalletState createState() => _PersonalWalletState();
 }
 
 class _PersonalWalletState extends State<PersonalWallet> with SingleTickerProviderStateMixin {
-  late Wallet personalWallet;
-
   @override
   void initState() {
     super.initState();
-    personalWallet = widget.walletUser.firstWhere(
-          (w) => w.type == 'Personal',
-      orElse: () => Wallet(id: '', type: 'Personal', balance: 0),
-    );
   }
 
   Future<void> _resetSharedWalletData() async {
     context.read<WalletBloc>().add(GetWallet());
-    context.read<TransactionBloc>().add(GetTransactionByWalletEvent(walletId: personalWallet.id));
+    context.read<TransactionBloc>().add(GetTransactionByWalletEvent(walletId: widget.personalWallet.id));
   }
 
   @override
@@ -61,7 +55,7 @@ class _PersonalWalletState extends State<PersonalWallet> with SingleTickerProvid
         physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           children: [
-            BalanceCard(wallet: personalWallet),
+            BalanceCard(wallet: widget.personalWallet),
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -74,9 +68,9 @@ class _PersonalWalletState extends State<PersonalWallet> with SingleTickerProvid
                   ),
                   const SizedBox(height: 8),
                   TransactionScreen(
-                    wallet: personalWallet,
-                    amount: '${personalWallet.balance}đ',
-                    isContribution: personalWallet.balance! > 0,
+                    wallet: widget.personalWallet,
+                    amount: '${widget.personalWallet.balance}đ',
+                    isContribution: widget.personalWallet.balance! > 0,
                     time: 'Cập nhật gần đây',
                   ),
                 ],

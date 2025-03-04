@@ -13,6 +13,10 @@ const kRedColor = Color(0xffe74c3c);
 const kbgYellow = Color(0xfffffbe6);
 const kYellow = Color(0xfffaad14);
 
+//
+const String sharedWalletString = 'Shared';
+const String personalWalletString = 'Personal';
+
 //strings
 const String baseURL = 'https://unibean-api.azurewebsites.net/api/v1/';
 

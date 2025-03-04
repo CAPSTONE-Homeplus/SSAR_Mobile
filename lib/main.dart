@@ -47,8 +47,6 @@ import 'domain/repositories/service_repository.dart';
 import 'domain/repositories/sub_activity_repository.dart';
 import 'domain/repositories/time_slot_repository.dart';
 import 'domain/repositories/wallet_repository.dart';
-import 'domain/use_cases/notification/initialize_notification_usecase.dart';
-import 'domain/use_cases/notification/show_notification_usecase.dart';
 import 'presentation/blocs/internet/internet_bloc.dart';
 import 'presentation/blocs/room/room_bloc.dart';
 import 'presentation/blocs/theme/theme_bloc.dart';
@@ -57,17 +55,12 @@ final sl = GetIt.instance;
 final navigatorKey = GlobalKey<NavigatorState>();
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
-late InitializeNotificationUseCase _initializeNotificationUseCase;
-late ShowNotificationUseCase _showNotificationUseCase;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
   await Firebase.initializeApp();
   await setupServiceLocator();
-  _initializeNotificationUseCase = InitializeNotificationUseCase(sl());
-  _showNotificationUseCase = ShowNotificationUseCase(sl());
-  await _initializeNotificationUseCase.call();
   await initializeDateFormatting('vi_VN', null);
   runApp(HomeClean(preferences: sl<SharedPreferences>()));
 }
@@ -113,6 +106,7 @@ class HomeClean extends StatelessWidget {
         RepositoryProvider(create: (_) => sl<PaymentMethodRepository>()),
         RepositoryProvider(create: (_) => sl<HouseRepository>()),
         RepositoryProvider(create: (_) => sl<UserRepository>()),
+        RepositoryProvider(create: (_) => sl<NotificationRepository>()),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -151,10 +145,6 @@ class HomeClean extends StatelessWidget {
           BlocProvider(
               create: (context) => TimeSlotBloc(getTimeSlotsUsecase: sl())),
           BlocProvider(create: (context) => OrderBloc(createOrderUseCase: sl())),
-          BlocProvider(
-              create: (context) => NotificationBloc(
-                  initializeNotificationUseCase: sl(),
-                  showNotificationUseCase: sl())),
           BlocProvider( create: (context) => WalletBloc(getWalletByUser: sl(), createWalletUseCase: sl(),
               inviteMemberUseCase: sl(), changeOwnerUseCase: sl(), deleteUserUseCase: sl())),
           BlocProvider(create: (context) => RoomBloc(sl())),
@@ -163,6 +153,9 @@ class HomeClean extends StatelessWidget {
           BlocProvider(create: (context) => HouseBloc(getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl())),
           BlocProvider(create: (context) => PaymentMethodBloc(sl())),
           BlocProvider(create: (context) => UserBloc(sl(), sl())),
+          BlocProvider(create: (context) => NotificationBloc(getNotificationsUseCase: sl(), markAsReadUseCase: sl(), deleteNotificationUseCase: sl(), connectToHubUseCase: sl(), disconnectFromHubUseCase: sl(), listenForNotificationsUseCase: sl(), flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin)),
+          BlocProvider(create: (context) => PersonalWalletBloc(getWalletByUser: sl())),
+          BlocProvider(create: (context) => SharedWalletBloc(getWalletByUser: sl()))
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {
@@ -181,7 +174,7 @@ class HomeClean extends StatelessWidget {
                 textTheme: GoogleFonts.notoSansTextTheme(themeData.textTheme),
               ),
               getPages: AppRouter.routes,
-              initialRoute: AppRouter.routeSplash,
+              initialRoute: AppRouter.routeNotification,
             );
           },
         ),

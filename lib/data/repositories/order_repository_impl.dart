@@ -23,7 +23,7 @@ class OrderRepositoryImpl implements OrderRepository {
     try {
       final user = UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
       final requestData = {
-        "address": createOrder.address.toString(),
+        "address": "55D61D07-27A4-4293-87BF-E942F17F3ADA",
         "notes": createOrder.notes.toString(),
         "emergencyRequest": createOrder.emergencyRequest,
         "timeSlotId": createOrder.timeSlot.id.toString(),

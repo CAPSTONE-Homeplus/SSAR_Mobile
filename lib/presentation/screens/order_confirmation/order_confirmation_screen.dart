@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/enums/wallet_enums.dart';
-import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/entities/transaction/create_transaction.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 
@@ -11,7 +10,6 @@ import '../../../core/format/formater.dart';
 import '../../../domain/entities/order/create_order.dart';
 import '../../blocs/order/order_bloc.dart';
 import '../../blocs/transaction/transaction_event.dart';
-import '../../blocs/transaction/transaction_state.dart';
 import '../../blocs/transaction/transation_bloc.dart';
 import '../../blocs/wallet/wallet_bloc.dart';
 import '../../blocs/wallet/wallet_state.dart';
@@ -36,6 +34,22 @@ class OrderConfirmationScreen extends StatefulWidget {
 
 class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   String? selectedWalletId;
+  bool _isOrdering = false;
+
+  void _placeOrder(BuildContext context) {
+    if (_isOrdering) return;
+    setState(() => _isOrdering = true);
+    context.read<OrderBloc>().add(CreateOrderEvent(widget.orderDetails));
+    BlocProvider.of<OrderBloc>(context).stream.listen((state) {
+      if (state is OrderCreated) {
+        print("Đặt hàng thành công!");
+        setState(() => _isOrdering = false);
+      } else if (state is OrderError) {
+        print("Lỗi đặt hàng: $state");
+        setState(() => _isOrdering = false);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -432,28 +446,9 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       ),
       child: SafeArea(
         child: ElevatedButton(
-          onPressed: () {
-            context.read<OrderBloc>().add(CreateOrderEvent(widget.orderDetails));
-
-            BlocListener<OrderBloc, OrderState>(
-              listener: (context, state) {
-                if (state is OrderCreated) {
-                  print("Đặt hàng thành công!");
-                } else if (state is OrderError) {
-                  print("Lỗi đặt hàng: ${state}");
-                }
-              },
-              child: ElevatedButton(
-                onPressed: () {
-                  context.read<OrderBloc>().add(CreateOrderEvent(widget.orderDetails));
-                },
-                child: Text("Đặt hàng"),
-              ),
-            );
-
-          },
+          onPressed: _isOrdering ? null : () => _placeOrder(context),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF1CAF7D),
+            backgroundColor: _isOrdering ? Colors.grey : const Color(0xFF1CAF7D),
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -461,7 +456,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             elevation: 0,
           ),
           child: Text(
-            'Xác nhận đặt dịch vụ',
+            _isOrdering ? 'Đang đặt hàng...' : 'Xác nhận đặt dịch vụ',
             style: GoogleFonts.poppins(
               fontSize: 16,
               color: Colors.white,

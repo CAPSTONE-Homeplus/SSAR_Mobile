@@ -22,10 +22,7 @@ class CreateWalletButtonWidget extends StatelessWidget {
     return BlocListener<WalletBloc, WalletState>(
       listener: (context, state) {
         if (state is WalletCreatedSuccess) {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Tạo ví thành công!')),
-          );
+          AppRouter.navigateToHome();
         } else if (state is WalletError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Lỗi: ${state.message}')),

@@ -1,4 +1,10 @@
+import '../entities/notification/notification.dart';
+
 abstract class NotificationRepository {
-  Future<void> showNotification({required String title, required String message});
-  Future<void> init();
+  Future<List<NotificationEntity>> getNotifications();
+  Future<void> markAsRead(String notificationId);
+  Future<void> deleteNotification(String notificationId);
+  Future<void> connectToNotificationHub();
+  Future<void> disconnectFromNotificationHub();
+  Stream<NotificationEntity> onNewNotification();
 }

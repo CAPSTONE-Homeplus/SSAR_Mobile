@@ -44,7 +44,8 @@ class AuthRepositoryImpl implements AuthRepository {
         final accessToken = await authLocalDataSource.getAccessTokenFromStorage();
         vinWalletRequest.options.headers['Authorization'] = 'Bearer $accessToken';
         homeCleanRequest.options.headers['Authorization'] = 'Bearer $accessToken';
-        userRepository.getUser(response.data['userId']);
+        final user = await userRepository.getUser(response.data['userId']);
+        await userLocalDatasource.saveUserModel(UserMapper.toModelFromEntity(user));
         return true;
       } else {
         throw ApiException(
@@ -89,13 +90,12 @@ class AuthRepositoryImpl implements AuthRepository {
           "password": createUser.password,
           "buildingCode": createUser.buildingCode,
           "houseCode": createUser.houseCode,
-          "phoneNumber": '0987654321',
-          "email": 'con@email.com',
+          "phoneNumber": "0${createUser.phoneNumber}",
+          "email": createUser.email,
         },
       );
 
       if (response.statusCode == 201 && response.data != null) {
-        await userLocalDatasource.saveUser(response.data);
         User user = UserMapper.toEntity(UserMapper.toModel(response.data));
         return user;
       } else {

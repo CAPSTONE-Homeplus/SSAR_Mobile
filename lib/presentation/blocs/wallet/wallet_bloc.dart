@@ -45,6 +45,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     }
   }
 
+
   Future<void> _onCreateWallet(
     CreateWallet event,
     Emitter<WalletState> emit,
@@ -94,4 +95,56 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     );
   }
 
+}
+
+class PersonalWalletBloc extends Bloc<WalletEvent, WalletState> {
+  final GetWalletByUserUseCase getWalletByUser;
+
+  PersonalWalletBloc({required this.getWalletByUser}) : super(WalletInitial()) {
+    on<GetPersonalWallet>(_onGetPersonalWallet);
+  }
+
+  Future<void> _onGetPersonalWallet(
+      GetPersonalWallet event,
+      Emitter<WalletState> emit,
+      ) async {
+    emit(WalletLoading());
+    try {
+      final response = await getWalletByUser.execute(
+        event.page ?? Constant.defaultPage,
+        event.size ?? Constant.defaultSize,
+      );
+
+      final privateWallets = response.items.where((w) => w.type == personalWalletString).toList();
+      emit(PersonalWalletLoaded(privateWallets));
+    } catch (e) {
+      emit(WalletError(message: 'Failed to fetch wallets: ${e.toString()}'));
+    }
+  }
+}
+
+class SharedWalletBloc extends Bloc<WalletEvent, WalletState> {
+  final GetWalletByUserUseCase getWalletByUser;
+
+  SharedWalletBloc({required this.getWalletByUser}) : super(WalletInitial()) {
+    on<GetSharedWallet>(_onGetSharedWallet);
+  }
+
+  Future<void> _onGetSharedWallet(
+      GetSharedWallet event,
+      Emitter<WalletState> emit,
+      ) async {
+    emit(WalletLoading());
+    try {
+      final response = await getWalletByUser.execute(
+        event.page ?? Constant.defaultPage,
+        event.size ?? Constant.defaultSize,
+      );
+
+      final sharedWallets = response.items.where((w) => w.type == sharedWalletString).toList();
+      emit(SharedWalletLoaded(sharedWallets));
+    } catch (e) {
+      emit(WalletError(message: 'Failed to fetch wallets: ${e.toString()}'));
+    }
+  }
 }
