@@ -8,12 +8,12 @@ class GetServiceCategoriesUsecase {
 
   GetServiceCategoriesUsecase(this._serviceCategoryRepository);
 
-  Future<BaseResponse<ServiceCategory>> execute(
-    String search,
-    String orderBy,
-    int page,
-    int size,
-  ) async {
+  Future<BaseResponse<ServiceCategory>> execute({
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size,
+}) async {
     return await _serviceCategoryRepository.getServiceCategories(
       search,
       orderBy,

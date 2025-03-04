@@ -2,6 +2,7 @@ import 'package:home_clean/data/mappers/house_mapper.dart';
 
 import '../../core/base/base_model.dart';
 import '../../core/constant/api_constant.dart';
+import '../../core/constant/constants.dart';
 import '../../core/exception/exception_handler.dart';
 import '../../core/request/request.dart';
 import '../../domain/entities/house/house.dart';
@@ -17,10 +18,10 @@ class HouseRepositoryImpl implements HouseRepository {
           '${ApiConstant.buildings}/$buildingId/house',
           queryParameters: {
             'id': buildingId,
-            'search': search,
-            'orderBy': orderBy,
-            'page': page,
-            'size': size,
+            'search': search ?? '',
+            'orderBy': orderBy ?? '',
+            'page': page ?? Constant.defaultPage,
+            'size': size ?? Constant.defaultSize
           });
 
       if (response.statusCode == 200 && response.data != null) {

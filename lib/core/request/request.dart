@@ -240,6 +240,11 @@ class MyRequest {
       }
     }
   }
+
+  // Get token
+  String? get getToken {
+    return _dioInstances[_currentUrlType]!.options.headers["Authorization"];
+  }
 }
 
 Future<void> clearLocalStorageAndLogout() async {

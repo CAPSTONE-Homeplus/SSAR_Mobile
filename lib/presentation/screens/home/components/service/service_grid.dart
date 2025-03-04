@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/presentation/screens/home/components/service/service_item.dart';
 
-import '../../../../../core/constant/constant.dart';
+import '../../../../../core/constant/constants.dart';
 import '../../../../../core/router/app_router.dart';
 import '../../../../../domain/entities/service/service.dart';
 
@@ -55,7 +55,7 @@ class ServiceGridWidget extends StatelessWidget {
           ),
           SizedBox(height: 12 * hem),
           SizedBox(
-            height: services.length <= 4 ? 100 * hem : 200 * hem,
+            height: services.length <= 4 ? 100 * hem : 150 * hem,
             child: GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),

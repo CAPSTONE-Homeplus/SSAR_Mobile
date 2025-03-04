@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:home_clean/presentation/screens/message/message_screen.dart';
 
 import '../screens/home/home_screen.dart';
-import '../screens/manage_wallet/manage_wallet_screen/manage_wallet_screen.dart';
 import '../screens/setting/settings_screen.dart';
 
 class BottomNavigation extends StatefulWidget {
@@ -20,7 +19,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
 
   final List<Widget> _pages = [
     HomeScreen(),
-    ManageWalletScreen(),
+    // ManageWalletScreen(),
     MessageScreen(),
     SettingsScreen()
   ];

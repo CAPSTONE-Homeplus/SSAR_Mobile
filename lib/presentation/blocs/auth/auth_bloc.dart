@@ -4,6 +4,7 @@ import 'package:home_clean/presentation/blocs/auth/auth_event.dart';
 import '../../../core/exception/exception_handler.dart';
 import '../../../data/models/auth/login_model.dart';
 import '../../../domain/entities/user/create_user.dart';
+import '../../../domain/entities/user/user.dart';
 import '../../../domain/use_cases/auth/get_user_from_local_usecase.dart';
 import '../../../domain/use_cases/auth/login_usecase.dart';
 import '../../../domain/use_cases/auth/user_register_usecase.dart';
@@ -15,6 +16,9 @@ class AuthBloc
   final LoginUseCase loginUseCase;
   final GetUserFromLocalUseCase getUserFromLocalUseCase;
   final UserRegisterUseCase userRegisterUseCase;
+  User? _user;
+
+  User? getUser() => _user;
 
   AuthBloc({
     required this.loginUseCase,
@@ -57,6 +61,7 @@ class AuthBloc
         emit(AuthenticationFailed(error: error.message));
       },
           (user) {
+        _user = user;
         emit(AuthenticationFromLocal(user: user));
       },
     );

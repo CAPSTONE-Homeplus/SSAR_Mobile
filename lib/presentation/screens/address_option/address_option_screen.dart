@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:home_clean/core/constant/constant.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/presentation/blocs/building/building_state.dart';
 import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
@@ -132,7 +131,7 @@ class _RegisterFormContentState extends State<RegisterFormContent> {
           isLoading = true;
         });
         _buildingBloc = context.read<BuildingBloc>();
-        _buildingBloc.add(GetBuildings(search: '', orderBy: '', page: Constant.defaultPage, size: Constant.defaultSize));
+        _buildingBloc.add(GetBuildings(search: '', orderBy: ''));
         final buildingComplete = _processBuildings();
         await Future.wait([
           buildingComplete

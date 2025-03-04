@@ -8,4 +8,7 @@ abstract class WalletRepository {
       int? page,
       int? size);
   Future<Wallet> createSharedWallet();
+  Future<bool> inviteMember(String walletId, String userId);
+  Future<Wallet> changeOwner(String walletId, String userId);
+  Future<bool> deleteUserFromWallet(String walletId, String userId);
 }

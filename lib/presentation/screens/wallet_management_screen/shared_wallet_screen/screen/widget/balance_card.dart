@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/entities/wallet/wallet.dart';
 
-import '../../../../../../core/constant/colors.dart';
-import '../../../../widgets/point_widget.dart';
+import '../../../../../../../core/constant/colors.dart';
+import '../../../../../widgets/point_widget.dart';
 
 class BalanceCard extends StatelessWidget {
   Wallet wallet;

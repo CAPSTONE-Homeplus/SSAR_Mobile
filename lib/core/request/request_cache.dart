@@ -2,7 +2,7 @@
 import 'package:home_clean/core/request/request.dart';
 
 import '../base/base_model.dart';
-import '../constant/constant.dart';
+import '../constant/constants.dart';
 import '../exception/exception_handler.dart';
 
 class CacheManager<T> {

@@ -7,6 +7,7 @@ import 'package:home_clean/domain/entities/sub_activity/sub_activity.dart';
 
 import '../../../domain/repositories/sub_activity_repository.dart';
 import '../../core/constant/api_constant.dart';
+import '../../core/constant/constants.dart';
 
 class SubActivityRepositoryImpl implements SubActivityRepository {
   @override
@@ -22,10 +23,10 @@ class SubActivityRepositoryImpl implements SubActivityRepository {
           '${ApiConstant.serviceActivities}/$activityId/service-sub-activities',
           queryParameters: {
             'id': activityId,
-            'search': search,
-            'orderBy': orderBy,
-            'page': page,
-            'size': size,
+            'search': search ?? '',
+            'orderBy': orderBy ?? '',
+            'page': page ?? Constant.defaultPage,
+            'size': size ?? Constant.defaultSize
           });
 
       if (response.statusCode == 200 && response.data != null) {

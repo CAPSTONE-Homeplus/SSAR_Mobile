@@ -6,7 +6,7 @@ import 'package:home_clean/domain/entities/transaction/create_transaction.dart';
 import 'package:home_clean/domain/entities/transaction/transaction.dart';
 import '../../core/base/base_model.dart';
 import '../../core/constant/api_constant.dart';
-import '../../core/constant/constant.dart';
+import '../../core/constant/constants.dart';
 import '../../core/exception/exception_handler.dart';
 import '../../core/helper/network_helper.dart';
 import '../../core/request/request.dart';
@@ -101,10 +101,10 @@ class TransactionRepositoryImpl implements TransactionRepository {
         '${ApiConstant.users}/$userId/transactions',
         queryParameters: {
           'id': userId,
-          'search': search,
-          'orderBy': orderBy,
+          'search': search ?? '',
+          'orderBy': orderBy ?? '',
           'page': page ?? Constant.defaultPage,
-          'size': size ?? Constant.defaultSize,
+          'size': size ?? Constant.defaultSize
         },
       );
 
@@ -179,6 +179,50 @@ class TransactionRepositoryImpl implements TransactionRepository {
         description: response.data?['description'],
         timestamp: DateTime.now().toIso8601String(),
       );
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<BaseResponse<Transaction>> getTransactionByWallet(String walletId, String? search, String? orderBy, int? page, int? size) async {
+    try {
+      final response = await vinWalletRequest.get(
+        '${ApiConstant.wallets}/$walletId/transactions',
+        queryParameters:
+        {
+          'id': walletId,
+          'search': search ?? '',
+          'orderBy': orderBy ?? '',
+          'page': page ?? Constant.defaultPage,
+          'size': size ?? Constant.defaultSize,
+        },
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        List<dynamic> data = response.data['items'] ?? [];
+
+        List<Transaction> transactions = data
+            .map((item) => TransactionMapper.toEntity(TransactionModel.fromJson(item)))
+            .toList();
+
+        return BaseResponse<Transaction>(
+          size: response.data['size'] ?? 0,
+          page: response.data['page'] ?? 0,
+          total: response.data['total'] ?? 0,
+          totalPages: response.data['totalPages'] ?? 0,
+          items: transactions,
+        );
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+
     } catch (e) {
       throw ExceptionHandler.handleException(e);
     }

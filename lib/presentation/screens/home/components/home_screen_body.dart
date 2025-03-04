@@ -4,6 +4,7 @@ import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
 import 'package:home_clean/presentation/screens/home/components/service/service_grid.dart';
 import 'package:home_clean/presentation/screens/home/components/wallet/wallet_container.dart';
+import 'package:home_clean/presentation/screens/home/components/wallet_grid/wallet_grid.dart';
 
 import '../../../../core/constant/size_config.dart';
 import '../../../../domain/entities/building/building.dart';
@@ -106,6 +107,12 @@ Widget _buildHomeScreen(List<Service> services, BuildContext context, List<Walle
           ),
           ServiceGridWidget(
             services: services,
+            fem: fem,
+            ffem: ffem,
+            hem: hem,
+          ),
+          WalletGrid(
+            wallets: walletUser,
             fem: fem,
             ffem: ffem,
             hem: hem,

@@ -7,6 +7,7 @@ import 'package:home_clean/domain/entities/time_slot/time_slot.dart';
 
 import '../../../domain/repositories/time_slot_repository.dart';
 import '../../core/constant/api_constant.dart';
+import '../../core/constant/constants.dart';
 
 class TimeSlotRepositoryImpl implements TimeSlotRepository {
   @override
@@ -19,10 +20,10 @@ class TimeSlotRepositoryImpl implements TimeSlotRepository {
     try {
       final response =
           await homeCleanRequest.get(ApiConstant.timeSlots, queryParameters: {
-        'search': search,
-        'orderBy': orderBy,
-        'page': page,
-        'size': size,
+            'search': search ?? '',
+            'orderBy': orderBy ?? '',
+            'page': page ?? Constant.defaultPage,
+            'size': size ?? Constant.defaultSize
       });
 
       if (response.statusCode == 200 && response.data != null) {

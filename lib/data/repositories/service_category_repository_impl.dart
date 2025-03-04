@@ -4,6 +4,7 @@ import 'package:home_clean/data/mappers/service_mapper.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
 
 import '../../core/base/base_model.dart';
+import '../../core/constant/constants.dart';
 import '../../core/exception/exception_handler.dart';
 import '../../../domain/entities/service_category/service_category.dart';
 import '../../../domain/repositories/service_category_repository.dart';
@@ -22,10 +23,10 @@ class ServiceCategoryRepositoryImpl implements ServiceCategoryRepository {
     try {
       final response = await homeCleanRequest
           .get(ApiConstant.serviceCategories, queryParameters: {
-        'search': search,
-        'orderBy': orderBy,
-        'page': page,
-        'size': size,
+        'search': search ?? '',
+        'orderBy': orderBy ?? '',
+        'page': page ?? Constant.defaultPage,
+        'size': size ?? Constant.defaultSize
       });
 
       if (response.statusCode == 200 && response.data != null) {
@@ -70,10 +71,10 @@ class ServiceCategoryRepositoryImpl implements ServiceCategoryRepository {
           '${ApiConstant.serviceCategories}/$serviceCategoryId/services',
           queryParameters: {
             'id': serviceCategoryId,
-            'search': search,
-            'orderBy': orderBy,
-            'page': page,
-            'size': size,
+            'search': search ?? '',
+            'orderBy': orderBy ?? '',
+            'page': page ?? Constant.defaultPage,
+            'size': size ?? Constant.defaultSize
           });
 
       if (response.statusCode == 200 && response.data != null) {

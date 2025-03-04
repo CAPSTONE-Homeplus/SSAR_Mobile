@@ -1,16 +1,20 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:home_clean/core/request/request.dart';
+import 'package:home_clean/presentation/blocs/auth/auth_state.dart';
 import 'package:signalr_netcore/hub_connection.dart';
 import 'package:signalr_netcore/hub_connection_builder.dart';
 import 'package:signalr_netcore/ihub_protocol.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 
 import '../../../domain/repositories/notification_repository.dart';
+import '../datasource/auth_local_datasource.dart';
 
 class NotificationRepositoryImpl implements NotificationRepository {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   late HubConnection hubConnection;
+  final AuthLocalDataSource  authLocalDataSource;
 
-  NotificationRepositoryImpl(this.flutterLocalNotificationsPlugin);
+  NotificationRepositoryImpl(this.flutterLocalNotificationsPlugin, this.authLocalDataSource);
 
   @override
   Future<void> init() async {
@@ -29,11 +33,11 @@ class NotificationRepositoryImpl implements NotificationRepository {
   void _initializeSignalRConnection() {
     hubConnection = HubConnectionBuilder()
         .withUrl(
-          'https://vinwallet.onrender.com/vinWalletHub',
-          options: HttpConnectionOptions(
-            headers: MessageHeaders()..setHeaderValue('houseId', '7ba29697-37eb-4062-bd43-1ee399e33868'),
-          ),
-        )
+      'https://vinwallet.onrender.com/vinWalletHub',
+      options: HttpConnectionOptions(
+        accessTokenFactory: () async => await _getAccessToken(),
+      ),
+    )
         .withAutomaticReconnect()
         .build();
 
@@ -41,16 +45,27 @@ class NotificationRepositoryImpl implements NotificationRepository {
       print('📩 Nhận sự kiện ReceiveNotificationToAll: $arguments');
       _handleSignalRNotification(arguments);
     });
+
     hubConnection.on('ReceiveNotificationToUser', (arguments) {
       print('📩 Nhận sự kiện ReceiveNotificationToUser: $arguments');
       _handleSignalRNotification(arguments);
     });
+
     hubConnection.on('ReceiveNotificationToGroup', (arguments) {
       print('📩 Nhận sự kiện ReceiveNotificationToGroup: $arguments');
       _handleSignalRNotification(arguments);
     });
+
     _startSignalRConnection();
   }
+
+  /// Hàm lấy token (giả định bạn có hàm này)
+  Future<String> _getAccessToken() async {
+    String? currentToken = await authLocalDataSource.getAccessTokenFromStorage();
+    print("Token hiện tại: $currentToken");
+    return currentToken ?? '';
+  }
+
 
   Future<void> _startSignalRConnection() async {
     try {

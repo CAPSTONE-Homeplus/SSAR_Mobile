@@ -7,6 +7,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final VoidCallback? onNotificationPressed;
   final VoidCallback? onSearchPressed;
   final VoidCallback? onCartPressed;
+  final VoidCallback? onHelpPressed;
   final Future<int> Function()? getCartCount;
 
   const CustomAppBar({
@@ -16,6 +17,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.onNotificationPressed,
     this.onSearchPressed,
     this.onCartPressed,
+    this.onHelpPressed,
     this.getCartCount,
   }) : super(key: key);
 
@@ -28,19 +30,9 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _CustomAppBarState extends State<CustomAppBar> {
   int cartCount = 0;
-  bool isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
-    return _buildAppbar();
-  }
-
-  Widget _buildAppbar() {
     return AppBar(
       backgroundColor: AppColors.primaryColor,
       elevation: 0.5,
@@ -48,7 +40,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
       automaticallyImplyLeading: false,
       title: Text(
         widget.title,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 20,
           fontWeight: FontWeight.bold,
@@ -58,61 +50,46 @@ class _CustomAppBarState extends State<CustomAppBar> {
       centerTitle: true,
       leading: widget.onBackPressed != null
           ? IconButton(
-              icon: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.all(8),
-                child: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Colors.black87,
-                  size: 20,
-                ),
-              ),
-              onPressed:
-                  widget.onBackPressed ?? () => Navigator.of(context).pop(),
-            )
+        icon: Container(
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.all(8),
+          child: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.black87,
+            size: 20,
+          ),
+        ),
+        onPressed:
+        widget.onBackPressed ?? () => Navigator.of(context).pop(),
+      )
           : null,
       actions: [
         IconButton(
-          icon: Icon(
+          icon: const Icon(
             Icons.notifications_none_rounded,
             color: Colors.white,
             size: 24,
           ),
           onPressed: widget.onNotificationPressed ??
-              () {
+                  () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('No new notifications')),
+                  const SnackBar(content: Text('No new notifications')),
                 );
               },
         ),
-        Stack(
-          children: [
-            if (cartCount > 0)
-              Positioned(
-                right: 4,
-                top: 4,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '$cartCount',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-        SizedBox(width: 8),
+        if (widget.onHelpPressed != null)
+          IconButton(
+            icon: const Icon(
+              Icons.help_outline,
+              color: Colors.white,
+              size: 24,
+            ),
+            onPressed: widget.onHelpPressed,
+          ),
+        const SizedBox(width: 8),
       ],
     );
   }

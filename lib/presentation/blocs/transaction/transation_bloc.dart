@@ -10,6 +10,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final GetTransactionByUserUseCase getTransactionByUserUseCase;
   final GetTransactionByWalletUseCase getTransactionByWalletUseCase;
 
+
   TransactionBloc(
       this.saveTransactionUseCase,
       this.getTransactionByUserUseCase,
@@ -41,7 +42,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<GetTransactionByWalletEvent>((event, emit) async {
       emit(TransactionLoading());
       Future.delayed(const Duration(milliseconds: 2000));
-      final result = await getTransactionByWalletUseCase(event.walletId ?? '', event.search, event.orderBy, event.page, event.size);
+      final result = await getTransactionByWalletUseCase.execute(event.walletId ?? '', event.search, event.orderBy, event.page, event.size);
       result.fold(
             (failure) => emit(TransactionFailure(failure.message)),
             (user) => emit(TransactionsLoaded(user)),

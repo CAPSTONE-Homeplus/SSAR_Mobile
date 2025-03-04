@@ -2,6 +2,7 @@ import 'package:home_clean/data/mappers/building_mapper.dart';
 
 import '../../core/constant/api_constant.dart';
 import '../../core/base/base_model.dart';
+import '../../core/constant/constants.dart';
 import '../../core/exception/exception_handler.dart';
 import '../../core/request/request.dart';
 import '../../domain/entities/building/building.dart';
@@ -15,10 +16,10 @@ class BuildingRepositoryImpl implements BuildingRepository {
       final response = await homeCleanRequest.get(
           ApiConstant.buildings,
           queryParameters: {
-            'search': search,
-            'orderBy': orderBy,
-            'page': page,
-            'size': size,
+            'search': search ?? '',
+            'orderBy': orderBy ?? '',
+            'page': page ?? Constant.defaultPage,
+            'size': size ?? Constant.defaultSize
           });
 
       if (response.statusCode == 200 && response.data != null) {

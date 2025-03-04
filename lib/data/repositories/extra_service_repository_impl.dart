@@ -6,6 +6,7 @@ import 'package:home_clean/data/models/extra_service/extra_service_model.dart';
 import 'package:home_clean/domain/entities/extra_service/extra_service.dart';
 
 import '../../../domain/repositories/extra_service_repository.dart';
+import '../../core/constant/constants.dart';
 
 class ExtraServiceRepositoryImpl implements ExtraServiceRepository {
   @override
@@ -21,10 +22,10 @@ class ExtraServiceRepositoryImpl implements ExtraServiceRepository {
           '${ApiConstant.services}/$serviceId/extra-services',
           queryParameters: {
             'id': serviceId,
-            'search': search,
-            'orderBy': orderBy,
-            'page': page,
-            'size': size,
+            'search': search ?? '',
+            'orderBy': orderBy ?? '',
+            'page': page ?? Constant.defaultPage,
+            'size': size ?? Constant.defaultSize
           });
 
       if (response.statusCode == 200 && response.data != null) {

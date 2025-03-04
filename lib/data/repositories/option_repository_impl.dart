@@ -6,6 +6,7 @@ import 'package:home_clean/data/models/option/option_model.dart';
 import 'package:home_clean/domain/entities/option/option.dart';
 
 import '../../../domain/repositories/option_repository.dart';
+import '../../core/constant/constants.dart';
 
 class OptionRepositoryImpl implements OptionRepository {
   @override
@@ -20,10 +21,10 @@ class OptionRepositoryImpl implements OptionRepository {
       final response = await homeCleanRequest
           .get('${ApiConstant.services}/$serviceId/options', queryParameters: {
         'id': serviceId,
-        'search': search,
-        'orderBy': orderBy,
-        'page': page,
-        'size': size,
+        'search': search ?? '',
+        'orderBy': orderBy ?? '',
+        'page': page ?? Constant.defaultPage,
+        'size': size ?? Constant.defaultSize
       });
 
       if (response.statusCode == 200 && response.data != null) {

@@ -13,7 +13,12 @@ import 'package:home_clean/domain/use_cases/order/create_orders_use_case.dart';
 import 'package:home_clean/domain/use_cases/room/get_rooms_usecase.dart';
 import 'package:home_clean/domain/use_cases/service/get_services_use_case.dart';
 import 'package:home_clean/domain/use_cases/transaction/save_transaction_use_case.dart';
+import 'package:home_clean/domain/use_cases/user/get_user_by_phone_number_use_case.dart';
+import 'package:home_clean/domain/use_cases/user/get_users_by_shared_wallet_use_case.dart';
+import 'package:home_clean/domain/use_cases/wallet/delete_user_wallet_use_case.dart';
+import 'package:home_clean/domain/use_cases/wallet/invite_member_wallet_use_case.dart';
 import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
+import 'package:home_clean/presentation/blocs/user/user_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../../data/datasource/service_local_data_source.dart';
@@ -85,6 +90,7 @@ import '../../domain/use_cases/option/get_options_use_case.dart';
 import '../../domain/use_cases/payment_method/get_payment_methods_use_case.dart';
 import '../../domain/use_cases/transaction/get_transaction_by_user.dart';
 import '../../domain/use_cases/transaction/get_transaction_by_wallet_use_case.dart';
+import '../../domain/use_cases/wallet/change_owner_use_case.dart';
 import '../../domain/use_cases/wallet/create_wallet_use_case.dart';
 import '../../domain/use_cases/wallet/get_wallet_by_user.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
@@ -155,9 +161,7 @@ Future<void> setupServiceLocator() async {
           () => EquipmentSupplyRepositoryImpl());
   sl.registerLazySingleton<TimeSlotRepository>(() => TimeSlotRepositoryImpl());
   sl.registerLazySingleton<OrderRepository>(() => OrderRepositoryImpl( userLocalDatasource: sl()));
-  sl.registerLazySingleton<NotificationRepository>(
-          () => NotificationRepositoryImpl(sl<FlutterLocalNotificationsPlugin>())
-  );
+  sl.registerSingleton<NotificationRepository>(NotificationRepositoryImpl(FlutterLocalNotificationsPlugin(), sl()));
   sl.registerLazySingleton<WalletRepository>(
           () => WalletRepositoryImpl(authLocalDataSource: sl(), userLocalDatasource: sl(), localDataSource: sl()));
   sl.registerLazySingleton<RoomRepository>(() => RoomRepositoryImpl());
@@ -192,13 +196,18 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => SaveTransactionUseCase(sl()));
   sl.registerLazySingleton(() => GetPaymentMethodsUseCase(sl()));
   sl.registerLazySingleton(() => GetHouseByBuildingUseCase(sl()));
-  sl.registerLazySingleton(() => GetTransactionByWalletUseCase(sl()));
   sl.registerLazySingleton(() => GetTransactionByUserUseCase(sl()));
   sl.registerLazySingleton(() => GetHouseUseCase(sl()));
   sl.registerLazySingleton(() => GetBuildingUseCase(sl()));
   sl.registerLazySingleton(() => CreateOrderUseCase(sl()));
   sl.registerLazySingleton(() => GetServicesUseCase(sl()));
   sl.registerLazySingleton(() => CreateWalletUseCase(sl()));
+  sl.registerLazySingleton(() => GetUsersBySharedWalletUseCase(sl()));
+  sl.registerLazySingleton(() => InviteMemberWalletUseCase(sl()));
+  sl.registerLazySingleton(() => ChangeOwnerUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteUserWalletUseCase(sl()));
+  sl.registerLazySingleton(() => GetUserByPhoneNumberUseCase(sl()));
+  sl.registerLazySingleton(() => GetTransactionByWalletUseCase(sl()));
 
   // local Use Cases
   sl.registerLazySingleton(() => GetUserFromLocalUseCase(sl()));
@@ -206,7 +215,7 @@ Future<void> setupServiceLocator() async {
 
 
   // Blocs (sử dụng Factory vì mỗi bloc sẽ cần một instance mới)
-  sl.registerFactory(() => AuthBloc(
+  sl.registerSingleton(() => AuthBloc(
       loginUseCase: sl(),
       userRegisterUseCase: sl(),
       getUserFromLocalUseCase: sl()));
@@ -233,10 +242,12 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(() => OrderBloc(createOrderUseCase: sl()));
   sl.registerFactory(() => NotificationBloc(
       initializeNotificationUseCase: sl(), showNotificationUseCase: sl()));
-  sl.registerFactory(() => WalletBloc(getWalletByUser: sl(), createWalletUseCase: sl()));
+  sl.registerFactory(() => WalletBloc(getWalletByUser: sl(), createWalletUseCase: sl(),
+      inviteMemberUseCase: sl(), changeOwnerUseCase: sl(), deleteUserUseCase: sl()));
   sl.registerFactory(() => RoomBloc(sl()));
   sl.registerFactory(() => BuildingBloc(getBuildingUseCase: sl(), getBuildingsUseCase: sl()));
   sl.registerFactory(() => TransactionBloc(sl(), sl(), sl()));
   sl.registerFactory(() => HouseBloc(getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl()));
   sl.registerFactory(() => PaymentMethodBloc(sl()));
+  sl.registerFactory(() => UserBloc(sl(), sl()));
 }

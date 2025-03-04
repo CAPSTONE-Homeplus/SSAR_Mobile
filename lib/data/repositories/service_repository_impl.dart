@@ -8,7 +8,7 @@ import 'package:home_clean/domain/entities/service/service.dart';
 
 import '../../../domain/repositories/service_repository.dart';
 import '../../core/constant/api_constant.dart';
-import '../../core/constant/constant.dart';
+import '../../core/constant/constants.dart';
 import '../../core/helper/network_helper.dart';
 
 class ServiceRepositoryImpl implements ServiceRepository {

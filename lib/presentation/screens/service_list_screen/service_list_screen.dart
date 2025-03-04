@@ -8,8 +8,8 @@ import 'package:home_clean/presentation/blocs/service_category/service_category_
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../core/constant/constant.dart';
 import '../../../core/constant/app_text_styles.dart';
+import '../../../core/constant/constants.dart';
 import '../../../domain/entities/service/service.dart';
 
 class ServiceListScreen extends StatefulWidget {

@@ -1,50 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/presentation/screens/manage_wallet/manage_wallet_screen/widget/share_wallet_transaction_screen.dart';
+import 'package:home_clean/presentation/screens/wallet_management_screen/shared_wallet_screen/screen/widget/transaction_screen.dart';
 
-import '../../../../../domain/entities/user/user.dart';
-import '../../../../../domain/entities/wallet/wallet.dart';
-import '../../../blocs/transaction/transaction_event.dart';
-import '../../../blocs/transaction/transation_bloc.dart';
-import '../../../blocs/wallet/wallet_bloc.dart';
-import '../../../blocs/wallet/wallet_event.dart';
-import '../../../widgets/custom_app_bar.dart';
+import '../../../../../../../domain/entities/wallet/wallet.dart';
+import '../../../../blocs/transaction/transaction_event.dart';
+import '../../../../blocs/transaction/transation_bloc.dart';
+import '../../../../blocs/wallet/wallet_bloc.dart';
+import '../../../../blocs/wallet/wallet_event.dart';
+import '../../../../widgets/custom_app_bar.dart';
 import 'widget/balance_card.dart';
 
-class WalletScreen extends StatefulWidget {
+class PersonalWallet extends StatefulWidget {
   final List<Wallet> walletUser;
-  final User? user;
 
-   const WalletScreen({super.key, required this.walletUser, required this.user});
+   PersonalWallet({super.key, required this.walletUser});
 
   @override
-  _WalletScreenState createState() => _WalletScreenState();
+  _PersonalWalletState createState() => _PersonalWalletState();
 }
 
-class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  late Wallet sharedWallet;
+class _PersonalWalletState extends State<PersonalWallet> with SingleTickerProviderStateMixin {
   late Wallet personalWallet;
 
   @override
   void initState() {
     super.initState();
-    sharedWallet = widget.walletUser.firstWhere(
-          (w) => w.type == 'Shared',
-      orElse: () => Wallet(id: '', type: 'Shared', balance: 0),
+    personalWallet = widget.walletUser.firstWhere(
+          (w) => w.type == 'Personal',
+      orElse: () => Wallet(id: '', type: 'Personal', balance: 0),
     );
-  }
-
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   Future<void> _resetSharedWalletData() async {
     context.read<WalletBloc>().add(GetWallet());
-    context.read<TransactionBloc>().add(GetTransactionByWalletEvent(walletId: sharedWallet.id));
+    context.read<TransactionBloc>().add(GetTransactionByWalletEvent(walletId: personalWallet.id));
   }
 
   @override
@@ -54,6 +43,9 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
       appBar: CustomAppBar(
         title: 'Ví chung',
         onNotificationPressed: () {
+        },
+        onBackPressed: () {
+          Navigator.of(context).pop();
         },
       ),
       body: _buildSharedWalletView(),
@@ -69,7 +61,7 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
         physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           children: [
-            BalanceCard(wallet: sharedWallet),
+            BalanceCard(wallet: personalWallet),
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -81,10 +73,10 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  ShareWalletTransactionScreen(
-                    wallet: sharedWallet,
-                    amount: '${sharedWallet.balance}đ',
-                    isContribution: sharedWallet.balance! > 0,
+                  TransactionScreen(
+                    wallet: personalWallet,
+                    amount: '${personalWallet.balance}đ',
+                    isContribution: personalWallet.balance! > 0,
                     time: 'Cập nhật gần đây',
                   ),
                 ],

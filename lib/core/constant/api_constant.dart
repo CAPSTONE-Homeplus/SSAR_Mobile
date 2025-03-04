@@ -43,6 +43,8 @@ class ApiConstant {
   /// Houses
   static const String houses = "/houses";
 
+  /// Wallet
+  static const String wallets = "/wallets";
 
   static const String getTransactionByUser = "https://vinwallet.onrender.com/api/v1/users/{id}/transactions";
   static const String getTransactionByUserWallet = "https://vinwallet.onrender.com/api/v1/users/{id}/transactions{walletId}";

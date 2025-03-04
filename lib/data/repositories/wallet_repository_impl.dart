@@ -4,6 +4,7 @@ import 'package:home_clean/data/mappers/auth/auth_mapper.dart';
 import 'package:home_clean/data/mappers/wallet_mapper.dart';
 import 'package:home_clean/data/models/wallet/wallet_model.dart';
 
+import '../../core/constant/constants.dart';
 import '../../core/exception/exception_handler.dart';
 import '../../core/helper/network_helper.dart';
 import '../../core/request/request.dart';
@@ -46,8 +47,8 @@ class WalletRepositoryImpl implements WalletRepository {
         '${ApiConstant.users}/$userId/wallets',
         queryParameters: {
           'id': userId,
-          'page': page,
-          'size': size,
+          'page': page ?? Constant.defaultPage,
+          'size': size ?? Constant.defaultSize
         },
       );
 
@@ -116,6 +117,33 @@ class WalletRepositoryImpl implements WalletRepository {
     }
   }
 
+
+  @override
+  Future<bool> inviteMember(String walletId, String userId) async {
+    try {
+      final response = await vinWalletRequest.post(
+        '${ApiConstant.wallets}/invite-member',
+        data: {
+          'userId': userId,
+          'walletId': walletId,
+        },
+      );
+      if (response.statusCode == 201 && response.data == true) {
+        return true;
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
   Future<User> getUserFromLocal() async{
     try {
       UserModel? userModel = UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
@@ -140,6 +168,59 @@ class WalletRepositoryImpl implements WalletRepository {
           .map((item) => WalletMapper.toEntity(WalletModel.fromJson(item)))
           .toList(),
     );
+  }
+
+  @override
+  Future<Wallet> changeOwner(String walletId, String userId) async {
+    try {
+      final response = await vinWalletRequest.patch(
+        '${ApiConstant.wallets}/$walletId/change-owner/$userId',
+        queryParameters: {
+          'id': walletId,
+          'userId': userId,
+        },
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        Wallet wallet = WalletMapper.toEntity(WalletModel.fromJson(response.data));
+        return wallet;
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<bool> deleteUserFromWallet(String walletId, String userId) async {
+    try {
+      final response = await vinWalletRequest.delete(
+        '${ApiConstant.wallets}/$walletId/$userId',
+        queryParameters: {
+          'userId': userId,
+          'id': walletId,
+        },
+      );
+      if (response.statusCode == 200 && response.data == true) {
+        return true;
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
   }
 
 }

@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/core/constant/constant.dart';
 import 'package:home_clean/domain/use_cases/service_activity/get_service_activities_by_service_usecase.dart';
 import 'package:home_clean/presentation/blocs/service_activity/service_activity_event.dart';
 import 'package:home_clean/presentation/blocs/service_activity/service_activity_state.dart';
+import '../../../core/constant/constants.dart';
 
 class ServiceActivityBloc
     extends Bloc<ServiceActivityEvent, ServiceActivityState> {
@@ -21,10 +21,10 @@ class ServiceActivityBloc
     try {
       final response = await getServiceActivitiesByService.execute(
         event.serviceId,
-        event.search ?? '',
-        event.orderBy ?? '',
-        event.page ?? Constant.defaultPage,
-        event.size ?? Constant.defaultSize,
+        event.search,
+        event.orderBy,
+        event.page ,
+        event.size,
       );
 
       emit(ServiceActivitySuccessState(serviceActivities: response.items));

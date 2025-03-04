@@ -28,6 +28,7 @@ import 'package:home_clean/presentation/blocs/service_category/service_category_
 import 'package:home_clean/presentation/blocs/sub_activity/sub_activity_bloc.dart';
 import 'package:home_clean/presentation/blocs/time_slot/time_slot_bloc.dart';
 import 'package:home_clean/presentation/blocs/transaction/transation_bloc.dart';
+import 'package:home_clean/presentation/blocs/user/user_bloc.dart';
 import 'package:home_clean/presentation/blocs/wallet/wallet_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,6 +48,7 @@ import 'domain/repositories/sub_activity_repository.dart';
 import 'domain/repositories/time_slot_repository.dart';
 import 'domain/repositories/wallet_repository.dart';
 import 'domain/use_cases/notification/initialize_notification_usecase.dart';
+import 'domain/use_cases/notification/show_notification_usecase.dart';
 import 'presentation/blocs/internet/internet_bloc.dart';
 import 'presentation/blocs/room/room_bloc.dart';
 import 'presentation/blocs/theme/theme_bloc.dart';
@@ -56,6 +58,7 @@ final navigatorKey = GlobalKey<NavigatorState>();
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
 late InitializeNotificationUseCase _initializeNotificationUseCase;
+late ShowNotificationUseCase _showNotificationUseCase;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,6 +66,7 @@ void main() async {
   await Firebase.initializeApp();
   await setupServiceLocator();
   _initializeNotificationUseCase = InitializeNotificationUseCase(sl());
+  _showNotificationUseCase = ShowNotificationUseCase(sl());
   await _initializeNotificationUseCase.call();
   await initializeDateFormatting('vi_VN', null);
   runApp(HomeClean(preferences: sl<SharedPreferences>()));
@@ -108,6 +112,7 @@ class HomeClean extends StatelessWidget {
         RepositoryProvider(create: (_) => sl<TransactionRepository>()),
         RepositoryProvider(create: (_) => sl<PaymentMethodRepository>()),
         RepositoryProvider(create: (_) => sl<HouseRepository>()),
+        RepositoryProvider(create: (_) => sl<UserRepository>()),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -150,12 +155,14 @@ class HomeClean extends StatelessWidget {
               create: (context) => NotificationBloc(
                   initializeNotificationUseCase: sl(),
                   showNotificationUseCase: sl())),
-          BlocProvider( create: (context) => WalletBloc(getWalletByUser: sl(), createWalletUseCase: sl())),
+          BlocProvider( create: (context) => WalletBloc(getWalletByUser: sl(), createWalletUseCase: sl(),
+              inviteMemberUseCase: sl(), changeOwnerUseCase: sl(), deleteUserUseCase: sl())),
           BlocProvider(create: (context) => RoomBloc(sl())),
           BlocProvider(create: (context) => BuildingBloc(getBuildingUseCase: sl(), getBuildingsUseCase: sl())),
           BlocProvider(create: (context) => TransactionBloc(sl(), sl(), sl())),
           BlocProvider(create: (context) => HouseBloc(getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl())),
           BlocProvider(create: (context) => PaymentMethodBloc(sl())),
+          BlocProvider(create: (context) => UserBloc(sl(), sl())),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {

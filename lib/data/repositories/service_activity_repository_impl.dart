@@ -7,6 +7,7 @@ import 'package:home_clean/data/models/service_activity/service_activity_model.d
 import 'package:home_clean/domain/entities/service_activity/service_activity.dart';
 
 import '../../../domain/repositories/service_activity_repository.dart';
+import '../../core/constant/constants.dart';
 
 class ServiceActivityRepositoryImpl implements ServiceActivityRepository {
   @override
@@ -22,10 +23,10 @@ class ServiceActivityRepositoryImpl implements ServiceActivityRepository {
           '${ApiConstant.services}/$serviceId/service-activities',
           queryParameters: {
             'id': serviceId,
-            'search': search,
-            'orderBy': orderBy,
-            'page': page,
-            'size': size,
+            'search': search ?? '',
+            'orderBy': orderBy ?? '',
+            'page': page ?? Constant.defaultPage,
+            'size': size ?? Constant.defaultSize
           });
 
       if (response.statusCode == 200 && response.data != null) {

@@ -8,18 +8,18 @@ import 'package:home_clean/presentation/blocs/transaction/transaction_event.dart
 import 'package:home_clean/core/constant/colors.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../../core/format/formater.dart';
-import '../../../../../domain/entities/wallet/wallet.dart';
-import '../../../../blocs/transaction/transaction_state.dart';
-import '../../../../blocs/transaction/transation_bloc.dart';
+import '../../../../../../../core/format/formater.dart';
+import '../../../../../../../domain/entities/wallet/wallet.dart';
+import '../../../../../blocs/transaction/transaction_state.dart';
+import '../../../../../blocs/transaction/transation_bloc.dart';
 
-class ShareWalletTransactionScreen extends StatefulWidget {
+class TransactionScreen extends StatefulWidget {
   final Wallet wallet;
   final String amount;
   final bool isContribution;
   final String time;
 
-  const ShareWalletTransactionScreen({
+  const TransactionScreen({
     Key? key,
     required this.wallet,
     required this.amount,
@@ -28,10 +28,10 @@ class ShareWalletTransactionScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<ShareWalletTransactionScreen> createState() => _ShareWalletTransactionScreenState();
+  State<TransactionScreen> createState() => _ShareWalletTransactionScreenState();
 }
 
-class _ShareWalletTransactionScreenState extends State<ShareWalletTransactionScreen> {
+class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
   final NumberFormat currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
 
   @override

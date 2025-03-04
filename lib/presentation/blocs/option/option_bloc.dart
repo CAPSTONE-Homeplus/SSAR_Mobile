@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/core/constant/constant.dart';
+import '../../../core/constant/constants.dart';
 import 'package:home_clean/domain/use_cases/option/get_options_use_case.dart';
 import 'package:home_clean/presentation/blocs/option/option_event.dart';
 import 'package:home_clean/presentation/blocs/option/option_state.dart';
@@ -19,10 +19,10 @@ class OptionBloc extends Bloc<OptionEvent, OptionState> {
     try {
       final response = await getOptionsUseCase.execute(
         event.serviceId,
-        event.search ?? '',
-        event.orderBy ?? '',
-        event.page ?? Constant.defaultPage,
-        event.size ?? Constant.defaultSize,
+        event.search,
+        event.orderBy,
+        event.page,
+        event.size,
       );
       emit(OptionSuccessState(options: response.items));
     } catch (e) {

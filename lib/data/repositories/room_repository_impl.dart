@@ -2,6 +2,7 @@ import 'package:home_clean/data/mappers/room_mapper.dart';
 
 import '../../core/constant/api_constant.dart';
 import '../../core/base/base_model.dart';
+import '../../core/constant/constants.dart';
 import '../../core/exception/exception_handler.dart';
 import '../../core/request/request.dart';
 import '../../domain/entities/room/room.dart';
@@ -18,10 +19,10 @@ class RoomRepositoryImpl implements RoomRepository {
       final response = await homeCleanRequest.get(
           ApiConstant.rooms,
           queryParameters: {
-            'search': search,
-            'orderby': orderBy,
-            'page': page,
-            'size': size,
+            'search': search ?? '',
+            'orderby': orderBy ?? '',
+            'page': page ?? Constant.defaultPage,
+            'size': size ?? Constant.defaultSize
           });
 
       if (response.statusCode == 200 && response.data != null) {

@@ -1,6 +1,9 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:home_clean/data/datasource/auth_local_datasource.dart';
+import 'package:signalr_netcore/http_connection_options.dart';
+import 'package:signalr_netcore/hub_connection.dart';
+import 'package:signalr_netcore/hub_connection_builder.dart';
 
 class NotificationScreen extends StatefulWidget {
   @override
@@ -8,85 +11,111 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
+  late HubConnection hubConnection;
+  List<Map<String, String>> notifications = [];
+  final AuthLocalDataSource authLocalDataSource = AuthLocalDataSource();
+
 
   @override
   void initState() {
     super.initState();
-    _getFCMToken();
-    _setupFirebaseMessaging();
-    _setupLocalNotifications();
+    _initNotifications();
   }
 
-  void _setupFirebaseMessaging() {
-    // Lấy Token để gửi thông báo đến thiết bị này
-    _firebaseMessaging.getToken().then((token) {
-      print("Firebase Token: $token");
+  Future<void> _initNotifications() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+    AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings =
+    InitializationSettings(android: initializationSettingsAndroid);
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    _initializeSignalRConnection();
+  }
+
+  void _initializeSignalRConnection() {
+    hubConnection = HubConnectionBuilder()
+        .withUrl(
+      'https://vinwallet.onrender.com/vinWalletHub',
+      options: HttpConnectionOptions(
+        accessTokenFactory: () async => await _getAccessToken(),
+      ),
+    )
+        .withAutomaticReconnect()
+        .build();
+
+    hubConnection.on('ReceiveNotificationToAll', (arguments) {
+      _handleSignalRNotification(arguments);
     });
-
-    // Đăng ký nhận thông báo khi app đang chạy
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Received a message: ${message.notification?.title}');
-      _showNotification(message);
+    hubConnection.on('ReceiveNotificationToUser', (arguments) {
+      _handleSignalRNotification(arguments);
     });
-
-    // Đăng ký nhận thông báo khi app ở chế độ nền
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print(
-          'App was opened from a notification: ${message.notification?.title}');
+    hubConnection.on('ReceiveNotificationToGroup', (arguments) {
+      _handleSignalRNotification(arguments);
     });
-
-    // Xử lý khi app bị tắt hoặc không chạy
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    _startSignalRConnection();
   }
 
-  static Future<void> _firebaseMessagingBackgroundHandler(
-      RemoteMessage message) async {
-    print('Handling a background message: ${message.notification?.title}');
-    // Xử lý thông báo ở đây nếu cần
+  Future<void> _startSignalRConnection() async {
+    try {
+      await hubConnection.start();
+      print('Kết nối SignalR thành công');
+    } catch (e) {
+      print('Lỗi kết nối SignalR: $e');
+      await Future.delayed(Duration(seconds: 5));
+      await _startSignalRConnection();
+    }
   }
 
-  void _getFCMToken() async {
-    String? token = await _firebaseMessaging.getToken();
-    print("FCM Token: $token");
+  /// Hàm lấy token (giả định bạn có hàm này)
+  Future<String> _getAccessToken() async {
+    String? currentToken = await authLocalDataSource.getAccessTokenFromStorage();
+    print("Token hiện tại: $currentToken");
+    return currentToken ?? '';
   }
 
-  void _setupLocalNotifications() {
-    var initializationSettingsAndroid =
-        AndroidInitializationSettings('app_icon');
-    var initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
+  void _handleSignalRNotification(List<Object?>? arguments) {
+    if (arguments != null && arguments.length >= 2) {
+      String title = arguments[0]?.toString() ?? 'Thông báo';
+      String message = arguments[1]?.toString() ?? 'Nội dung thông báo';
+      setState(() {
+        notifications.insert(0, {'title': title, 'message': message});
+      });
+      _showNotification(title: title, message: message);
+    }
+  }
+
+  Future<void> _showNotification({required String title, required String message}) async {
+    AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'channel_id',
+      'Thông báo',
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+      autoCancel: true,
     );
-    _flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  }
-
-  void _showNotification(RemoteMessage message) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-      'your_channel_id', // ID của kênh thông báo
-      'your_channel_name', // Tên kênh thông báo
-      importance: Importance.max, // Độ quan trọng của thông báo
-      playSound: true,
-      showWhen: true,
-    );
-
-    var notificationDetails = NotificationDetails(android: androidDetails);
-    await _flutterLocalNotificationsPlugin.show(
-      0,
-      message.notification?.title,
-      message.notification?.body,
-      notificationDetails,
+    NotificationDetails platformDetails = NotificationDetails(android: androidDetails);
+    await flutterLocalNotificationsPlugin.show(
+      DateTime.now().millisecondsSinceEpoch % 10000,
+      title,
+      message,
+      platformDetails,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Nhận thông báo tự động")),
-      body: Center(
-        child: Text("Chờ thông báo..."),
+      appBar: AppBar(title: Text('Thông báo')),
+      body: ListView.builder(
+        itemCount: notifications.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(notifications[index]['title']!),
+            subtitle: Text(notifications[index]['message']!),
+            leading: Icon(Icons.notifications, color: Colors.blue),
+          );
+        },
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:home_clean/data/models/equipment_supply/equipment_supply_model.d
 import 'package:home_clean/domain/entities/equipment_supply/equipment_supply.dart';
 
 import '../../../domain/repositories/equipment_supply_repository.dart';
+import '../../core/constant/constants.dart';
 
 class EquipmentSupplyRepositoryImpl implements EquipmentSupplyRepository {
   @override
@@ -21,10 +22,10 @@ class EquipmentSupplyRepositoryImpl implements EquipmentSupplyRepository {
           '${ApiConstant.services}/$serviceId/equipment-supplies',
           queryParameters: {
             'id': serviceId,
-            'search': search,
-            'orderBy': orderBy,
-            'page': page,
-            'size': size,
+            'search': search ?? '',
+            'orderBy': orderBy ?? '',
+            'page': page ?? Constant.defaultPage,
+            'size': size ?? Constant.defaultSize
           });
 
       if (response.statusCode == 200 && response.data != null) {

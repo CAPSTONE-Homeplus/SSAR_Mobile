@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/core/constant/constant.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_event.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_state.dart';
+import '../../../core/constant/constants.dart';
 
 import '../../../domain/use_cases/equipment_supply/get_equipment_supplies_use_case.dart';
 
@@ -21,10 +21,10 @@ class EquipmentSupplyBloc
     emit(EquipmentSupplyLoadingState());
       final response = await getEquipmentSuppliesUseCase.execute(
         event.serviceId,
-        event.search ?? '',
-        event.orderBy ?? '',
-        event.page ?? Constant.defaultPage,
-        event.size ?? Constant.defaultSize,
+        event.search,
+        event.orderBy,
+        event.page,
+        event.size,
       );
 
     response.fold(

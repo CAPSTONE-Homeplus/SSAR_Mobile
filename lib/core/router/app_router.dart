@@ -2,18 +2,20 @@ import 'package:get/get.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
 import 'package:home_clean/presentation/screens/home/home_screen.dart';
 import 'package:home_clean/presentation/screens/message/message_screen.dart';
+import 'package:home_clean/presentation/screens/notification.dart';
 import 'package:home_clean/presentation/screens/order_confirmation/order_confirmation_screen.dart';
 import 'package:home_clean/presentation/screens/register/register_screen.dart';
 import 'package:home_clean/presentation/screens/service_detail/service_detail_screen.dart';
 import 'package:home_clean/presentation/screens/start/splash_screen.dart';
+import 'package:home_clean/presentation/screens/wallet_management_screen/personal_wallet_screen/personal_wallet_screen.dart';
+import 'package:home_clean/presentation/screens/wallet_management_screen/shared_wallet_screen/shared_wallet_screen.dart';
 
 import '../../presentation/screens/activity/activity_screen.dart';
 import '../../presentation/screens/login/login_screen.dart';
-import '../../presentation/screens/manage_wallet/manage_wallet_screen/manage_wallet_screen.dart';
-import '../../presentation/screens/manage_wallet/member_screen/member_screen.dart';
-import '../../presentation/screens/manage_wallet/statistics_screen/statistic_screen.dart';
 import '../../presentation/screens/service_list_screen/service_list_screen.dart';
 import '../../presentation/screens/top_up/top_up_screen.dart';
+import '../../presentation/screens/wallet_management_screen/shared_wallet_screen/member_screen/screen/member_screen.dart';
+import '../../presentation/screens/wallet_management_screen/shared_wallet_screen/statistics_screen/statistic_screen.dart';
 import '../../presentation/widgets/bottom_navigation.dart';
 
 class AppRouter {
@@ -29,9 +31,11 @@ class AppRouter {
   static const String routeTimeCollection = '/time-collection';
   static const String routeOrderConfirmation = '/order-confirmation';
   static const String routePayment = '/payment';
-  static const String routeManageWallet = '/manage-wallet';
+  static const String routeSharedWallet = '/manage-shared-wallet';
   static const String routeMember = '/member';
   static const String routeSpending = '/spending';
+  static const String routeNotification = '/notification';
+  static const String routePersonalWallet = '/manage-personal-wallet';
 
 
   static List<GetPage> get routes => [
@@ -107,8 +111,8 @@ class AppRouter {
           transitionDuration: const Duration(milliseconds: 300),
         ),
         GetPage(
-          name: routeManageWallet,
-          page: () => ManageWalletScreen(),
+          name: routeSharedWallet,
+          page: () => SharedWalletScreen(),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -121,6 +125,18 @@ class AppRouter {
         GetPage(
           name: routeSpending,
           page: () => SpendingScreen(),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+        GetPage(
+          name: routeNotification,
+          page: () => NotificationScreen(),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+        GetPage(
+          name: routePersonalWallet,
+          page: () => PersonalWalletScreen(),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -182,15 +198,23 @@ class AppRouter {
     Get.toNamed(routePayment);
   }
 
-  static void navigateToManageWallet() {
-    Get.toNamed(routeManageWallet);
-  }
-
   static void navigateToMember() {
     Get.toNamed(routeMember);
   }
 
   static void navigateToSpending() {
     Get.toNamed(routeSpending);
+  }
+
+  static void navigateToNotification() {
+    Get.toNamed(routeNotification);
+  }
+
+  static void navigateToSharedWallet() {
+    Get.toNamed(routeSharedWallet);
+  }
+
+  static void navigateToPersonalWallet() {
+    Get.toNamed(routePersonalWallet);
   }
 }
