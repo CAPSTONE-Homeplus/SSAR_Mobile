@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:home_clean/core/constant/api_constant.dart';
-import 'package:home_clean/data/datasource/auth_local_datasource.dart';
-import 'package:home_clean/data/datasource/user_local_datasource.dart';
+import 'package:home_clean/data/datasource/local/auth_local_datasource.dart';
+import 'package:home_clean/data/datasource/local/user_local_datasource.dart';
 import 'package:home_clean/domain/repositories/authentication_repository.dart';
 
 import '../../data/mappers/user/user_mapper.dart';

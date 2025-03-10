@@ -1,12 +1,13 @@
+import 'package:home_clean/data/datasource/local/wallet_local_data_source.dart';
+import 'package:home_clean/data/datasource/signalr/wallet_remote_data_source.dart';
+
 import '../../../domain/repositories/notification_repository.dart';
 
-import '../datasource/notification_local_data_source.dart';
-import '../datasource/notification_remote_data_source.dart';
 import '../models/notification/notification_model.dart';
 
 class NotificationRepositoryImpl implements NotificationRepository {
-  final NotificationLocalDataSource localDataSource;
-  final NotificationRemoteDataSource remoteDataSource;
+  final WalletLocalDataSource localDataSource;
+  final WalletRemoteDataSource remoteDataSource;
 
   NotificationRepositoryImpl({
     required this.localDataSource,

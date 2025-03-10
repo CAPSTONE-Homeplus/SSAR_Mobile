@@ -17,7 +17,8 @@ class Formater {
   }
 
   static String formatAmount(String? amount) {
-    final NumberFormat currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
+    final NumberFormat currencyFormat = NumberFormat.currency(
+        locale: 'vi_VN', symbol: '₫');
 
     if (amount == null || amount.isEmpty) return '0₫';
     try {
@@ -41,5 +42,25 @@ class Formater {
     }
   }
 
+  static String formatInviteWalletMessage(Map<String, dynamic> data) {
+    String ownerId = data['ownerId']?.toString() ?? 'Không xác định';
+    String memberId = data['memberId']?.toString() ?? 'Không xác định';
+    String walletId = data['walletId']?.toString() ?? 'Không xác định';
+    return '$ownerId đã mời bạn tham gia ví chung $walletId.';
+  }
 
+  static String formatActivityStatusMessage(Map<String, dynamic> data) {
+    List<dynamic> activities = data['activities'] as List<dynamic>? ?? [];
+    if (activities.isEmpty) {
+      return 'Không có hoạt động nào được cập nhật.';
+    }
+
+    StringBuffer message = StringBuffer('Cập nhật trạng thái hoạt động:\n');
+    for (var activity in activities) {
+      String activityId = activity['activityId'] ?? 'Không xác định';
+      String status = activity['status'] ?? 'không rõ trạng thái';
+      message.writeln('- Hoạt động $activityId: $status');
+    }
+    return message.toString().trim();
+  }
 }

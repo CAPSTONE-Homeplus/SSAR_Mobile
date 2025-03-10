@@ -13,7 +13,8 @@ class TransactionPopup extends StatelessWidget {
     return BlocConsumer<TransactionBloc, TransactionState>(
       listener: (context, state) {
         if (state is TransactionSuccess) {
-          AppRouter.navigateToHome();
+          Navigator.pop(context);
+          AppRouter.navigateToOrderTracking();
         }
       },
       builder: (context, state) {
@@ -31,8 +32,10 @@ class TransactionPopup extends StatelessWidget {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
+
                 if (state is TransactionLoading)
                   const CircularProgressIndicator()
+
                 else if (state is TransactionFailure)
                   Column(
                     mainAxisSize: MainAxisSize.min,
@@ -97,6 +100,13 @@ class TransactionPopup extends StatelessWidget {
                         ],
                       ),
                     ],
+                  )
+
+                // Trường hợp khác (nếu không phải Loading hoặc Failure)
+                else
+                  const Text(
+                    "Đang xử lý...",
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
               ],
             ),

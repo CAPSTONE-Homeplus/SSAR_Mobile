@@ -1,6 +1,6 @@
 import 'package:home_clean/core/request/request.dart';
-import 'package:home_clean/data/datasource/auth_local_datasource.dart';
-import 'package:home_clean/data/datasource/user_local_datasource.dart';
+import 'package:home_clean/data/datasource/local/auth_local_datasource.dart';
+import 'package:home_clean/data/datasource/local/user_local_datasource.dart';
 import 'package:home_clean/data/mappers/auth/auth_mapper.dart';
 import 'package:home_clean/data/models/user/user_model.dart';
 import 'package:home_clean/domain/entities/user/user.dart';

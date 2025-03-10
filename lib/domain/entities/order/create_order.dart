@@ -11,6 +11,7 @@ class CreateOrder {
   TimeSlot timeSlot;
   Service service;
   String? userId;
+  String? houseTypeId;
   List<Option> option;
   List<ExtraService> extraService;
 
@@ -20,6 +21,7 @@ class CreateOrder {
     required this.emergencyRequest,
     required this.timeSlot,
     required this.service,
+    this.houseTypeId,
     this.userId,
     required this.option,
     required this.extraService,
@@ -32,6 +34,7 @@ class CreateOrder {
     TimeSlot? timeSlot,
     Service? service,
     String? userId,
+    String? houseTypeId,
     List<Option>? option,
     List<ExtraService>? extraService,
   }) {
@@ -42,6 +45,7 @@ class CreateOrder {
       timeSlot: timeSlot ?? this.timeSlot,
       service: service ?? this.service,
       userId: userId ?? this.userId,
+      houseTypeId: houseTypeId ?? this.houseTypeId,
       option: option ?? this.option,
       extraService: extraService ?? this.extraService,
     );

@@ -7,7 +7,7 @@ import 'package:home_clean/domain/repositories/user_repository.dart';
 
 import '../../core/constant/api_constant.dart';
 import '../../core/request/request.dart';
-import '../datasource/user_local_datasource.dart';
+import '../datasource/local/user_local_datasource.dart';
 import '../models/user/user_model.dart';
 
 class UserRepositoryImpl implements UserRepository {

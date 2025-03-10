@@ -1,7 +1,7 @@
-import 'package:home_clean/data/datasource/service_local_data_source.dart';
-import 'package:home_clean/data/datasource/transaction_local_data_source.dart';
-import 'package:home_clean/data/datasource/user_local_datasource.dart';
-import 'package:home_clean/data/datasource/wallet_local_data_source.dart';
+import 'package:home_clean/data/datasource/local/service_local_data_source.dart';
+import 'package:home_clean/data/datasource/local/transaction_local_data_source.dart';
+import 'package:home_clean/data/datasource/local/user_local_datasource.dart';
+import 'package:home_clean/data/datasource/local/wallet_local_data_source.dart';
 
 import 'auth_local_datasource.dart';
 import 'extra_service_local_data_source.dart';
@@ -36,7 +36,6 @@ class LocalDataSource {
     await optionLocalDataSource.clearSelectedOptionIds();
     await serviceLocalDataSource.clearService();
     await userLocalDatasource.clearUser();
-    await walletLocalDataSource.clearWallet();
     await transactionLocalDataSource.clearTransactions(user!);
 
   }

@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
-import '../models/notification/notification_model.dart';
+import '../../models/notification/notification_model.dart';
 
-class NotificationLocalDataSource {
-  static const String NOTIFICATIONS_KEY = 'notifications_key';
+class WalletLocalDataSource {
+  static const String NOTIFICATIONS_KEY = 'wallet_key';
 
   Future<List<NotificationModel>> getNotifications() async {
     final prefs = await SharedPreferences.getInstance();

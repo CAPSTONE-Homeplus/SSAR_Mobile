@@ -8,11 +8,14 @@ import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/router/app_router.dart';
+import 'package:home_clean/data/service/notification_service.dart';
+import 'package:home_clean/domain/repositories/activity_status_repository.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
 import 'package:home_clean/domain/repositories/house_repository.dart';
 import 'package:home_clean/domain/repositories/room_repository.dart';
 import 'package:home_clean/domain/repositories/transaction_repository.dart';
 import 'package:home_clean/domain/repositories/user_repository.dart';
+import 'package:home_clean/presentation/blocs/activity_status_bloc/activity_status_bloc.dart';
 import 'package:home_clean/presentation/blocs/auth/auth_bloc.dart';
 import 'package:home_clean/presentation/blocs/building/building_bloc.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_bloc.dart';
@@ -31,6 +34,7 @@ import 'package:home_clean/presentation/blocs/transaction/transation_bloc.dart';
 import 'package:home_clean/presentation/blocs/user/user_bloc.dart';
 import 'package:home_clean/presentation/blocs/wallet/wallet_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/dependencies_injection/service_locator.dart';
@@ -61,8 +65,16 @@ void main() async {
   await dotenv.load(fileName: '.env');
   await Firebase.initializeApp();
   await setupServiceLocator();
+  await _requestNotificationPermission();
+  await NotificationService.init();
   await initializeDateFormatting('vi_VN', null);
   runApp(HomeClean(preferences: sl<SharedPreferences>()));
+}
+
+Future<void> _requestNotificationPermission() async {
+  if (await Permission.notification.isDenied) {
+    await Permission.notification.request();
+  }
 }
 
 
@@ -107,6 +119,7 @@ class HomeClean extends StatelessWidget {
         RepositoryProvider(create: (_) => sl<HouseRepository>()),
         RepositoryProvider(create: (_) => sl<UserRepository>()),
         RepositoryProvider(create: (_) => sl<NotificationRepository>()),
+        RepositoryProvider(create: (_) => sl<ActivityStatusRepository>()),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -155,7 +168,8 @@ class HomeClean extends StatelessWidget {
           BlocProvider(create: (context) => UserBloc(sl(), sl())),
           BlocProvider(create: (context) => NotificationBloc(getNotificationsUseCase: sl(), markAsReadUseCase: sl(), deleteNotificationUseCase: sl(), connectToHubUseCase: sl(), disconnectFromHubUseCase: sl(), listenForNotificationsUseCase: sl(), flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin)),
           BlocProvider(create: (context) => PersonalWalletBloc(getWalletByUser: sl())),
-          BlocProvider(create: (context) => SharedWalletBloc(getWalletByUser: sl()))
+          BlocProvider(create: (context) => SharedWalletBloc(getWalletByUser: sl())),
+          BlocProvider(create: (context) => ActivityStatusBloc(repository: sl())),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {
@@ -174,7 +188,7 @@ class HomeClean extends StatelessWidget {
                 textTheme: GoogleFonts.notoSansTextTheme(themeData.textTheme),
               ),
               getPages: AppRouter.routes,
-              initialRoute: AppRouter.routeNotification,
+              initialRoute: AppRouter.routeSplash,
             );
           },
         ),

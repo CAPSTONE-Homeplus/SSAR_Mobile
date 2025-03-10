@@ -1,7 +1,7 @@
 import 'package:home_clean/core/base/base_model.dart';
 import 'package:home_clean/core/exception/exception_handler.dart';
 import 'package:home_clean/core/request/request.dart';
-import 'package:home_clean/data/datasource/service_local_data_source.dart';
+import 'package:home_clean/data/datasource/local/service_local_data_source.dart';
 import 'package:home_clean/data/mappers/service_mapper.dart';
 import 'package:home_clean/data/models/service/service_model.dart';
 import 'package:home_clean/domain/entities/service/service.dart';

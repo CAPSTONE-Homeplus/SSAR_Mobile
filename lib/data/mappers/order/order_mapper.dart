@@ -1,10 +1,12 @@
+import 'dart:convert';
+
 import 'package:home_clean/data/mappers/option_mapper.dart';
 
-import '../../domain/entities/order/order.dart';
-import '../models/extra_service/extra_service_model.dart';
-import '../models/option/option_model.dart';
-import '../models/order/order_model.dart';
-import 'extra_service_mapper.dart';
+import '../../../domain/entities/order/order.dart';
+import '../../models/extra_service/extra_service_model.dart';
+import '../../models/option/option_model.dart';
+import '../../models/order/order_model.dart';
+import '../extra_service_mapper.dart';
 
 class OrderMapper {
   static OrderModel fromMapToOrderModel(Map<String, dynamic> map) {
@@ -137,6 +139,49 @@ class OrderMapper {
       extraServices: ExtraServiceMapper.toListModel(entity.extraServices ?? []),
       options: OptionMapper.toListModel(entity.options ?? []),
     );
+  }
+
+
+  static Map<String, dynamic>? normalizeOrderActivityStatus(Object? arguments) {
+    if (arguments == null) return null;
+
+    try {
+      if (arguments is List && arguments.isNotEmpty) {
+        arguments = arguments.first;
+      }
+
+      Map<String, dynamic> notificationData;
+
+      if (arguments is String) {
+        notificationData = json.decode(arguments);
+      } else {
+        return null;
+      }
+
+      String? type = notificationData['Type'] as String?;
+      dynamic data = notificationData['Data'];
+
+      if (type == null || data == null || type != 'ActivityStatusInOrder') {
+        return null;
+      }
+
+      if (data is List) {
+        List<Map<String, dynamic>> activities = data.map((item) {
+          return {
+            'activityId': item['ActivityId']?.toString(),
+            'status': item['Status']?.toString(),
+          };
+        }).toList();
+
+        return {
+          'activities': activities,
+        };
+      }
+
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 
 }

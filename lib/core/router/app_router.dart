@@ -11,7 +11,9 @@ import 'package:home_clean/presentation/screens/wallet_management_screen/persona
 import 'package:home_clean/presentation/screens/wallet_management_screen/shared_wallet_screen/shared_wallet_screen.dart';
 
 import '../../presentation/screens/activity/activity_screen.dart';
+import '../../presentation/screens/activity_status_screen.dart';
 import '../../presentation/screens/login/login_screen.dart';
+import '../../presentation/screens/order_tracking/order_tracking_screen.dart';
 import '../../presentation/screens/service_list_screen/service_list_screen.dart';
 import '../../presentation/screens/top_up/top_up_screen.dart';
 import '../../presentation/screens/wallet_management_screen/shared_wallet_screen/member_screen/screen/member_screen.dart';
@@ -36,6 +38,8 @@ class AppRouter {
   static const String routeSpending = '/spending';
   static const String routeNotification = '/notification';
   static const String routePersonalWallet = '/manage-personal-wallet';
+  static const String routeOrderTracking = '/order-tracking';
+  static const String routeActivityScreen1 = '/activity-screen';
 
 
   static List<GetPage> get routes => [
@@ -140,6 +144,18 @@ class AppRouter {
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
+        GetPage(
+          name: routeOrderTracking,
+          page: () => OrderTrackingScreen(),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+        GetPage(
+          name: routeActivityScreen1,
+          page: () => ActivityStatusScreen(),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
       ];
 
   static void navigateToLogin() {
@@ -216,5 +232,9 @@ class AppRouter {
 
   static void navigateToPersonalWallet() {
     Get.toNamed(routePersonalWallet);
+  }
+
+  static void navigateToOrderTracking() {
+    Get.toNamed(routeOrderTracking);
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_clean/domain/use_cases/house/get_house_by_building_use_case.dart';
 import 'package:home_clean/presentation/blocs/house/house_event.dart';
 
+import '../../../domain/entities/house/house.dart';
 import '../../../domain/use_cases/house/get_house_use_case.dart';
 import 'house_state.dart';
 
@@ -14,6 +15,8 @@ class HouseBloc extends Bloc<HouseEvent, HouseState> {
     on<GetHouseByBuilding>(_onGetHouseByBuildingEvent);
     on<GetHouseById>(_onGetHouseByIdEvent);
   }
+
+  House? cachedHouse;
 
 
   Future<void> _onGetHouseByBuildingEvent(
@@ -36,17 +39,23 @@ class HouseBloc extends Bloc<HouseEvent, HouseState> {
   }
 
   Future<void> _onGetHouseByIdEvent(
-    GetHouseById event,
-    Emitter<HouseState> emit,
-  ) async {
+      GetHouseById event,
+      Emitter<HouseState> emit,
+      ) async {
     emit(HouseLoading());
+
+    if (cachedHouse != null && cachedHouse!.id == event.houseId) {
+      emit(HouseLoadedById(house: cachedHouse!));
+      return;
+    }
     final response = await getHouseByUseCase.execute(event.houseId);
 
     response.fold(
-      (failure) => emit(HouseError(message: failure.message)),
-      (data) => emit(HouseLoadedById(house: data)),
+          (failure) => emit(HouseError(message: failure.message)),
+          (data) {
+        cachedHouse = data; // Lưu vào biến
+        emit(HouseLoadedById(house: data));
+      },
     );
   }
-
-
 }

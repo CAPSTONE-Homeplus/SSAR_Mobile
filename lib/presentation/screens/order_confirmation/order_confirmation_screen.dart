@@ -7,7 +7,9 @@ import 'package:home_clean/domain/entities/transaction/create_transaction.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 
 import '../../../core/format/formater.dart';
+import '../../../domain/entities/house/house.dart';
 import '../../../domain/entities/order/create_order.dart';
+import '../../blocs/house/house_bloc.dart';
 import '../../blocs/order/order_bloc.dart';
 import '../../blocs/transaction/transaction_event.dart';
 import '../../blocs/transaction/transation_bloc.dart';
@@ -35,6 +37,13 @@ class OrderConfirmationScreen extends StatefulWidget {
 class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   String? selectedWalletId;
   bool _isOrdering = false;
+  House? house;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchHouse();
+  }
 
   void _placeOrder(BuildContext context) {
     if (_isOrdering) return;
@@ -51,11 +60,18 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     });
   }
 
+
+  void fetchHouse() {
+    final houseBloc = context.read<HouseBloc>();
+    house = houseBloc.cachedHouse;
+    widget.orderDetails.address = house!.id.toString();
+    widget.orderDetails.houseTypeId = house!.houseTypeId;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     String selectedBuilding = '';
-    String selectedRoom = '';
-
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Xác nhận',
@@ -104,7 +120,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.orderDetails.address,
+                          "Phòng ${house?.numberOfRoom ?? ''}",
                           style: GoogleFonts.poppins(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
@@ -446,9 +462,9 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       ),
       child: SafeArea(
         child: ElevatedButton(
-          onPressed: _isOrdering ? null : () => _placeOrder(context),
+          onPressed: (_isOrdering || selectedWalletId == null) ? null : () => _placeOrder(context),
           style: ElevatedButton.styleFrom(
-            backgroundColor: _isOrdering ? Colors.grey : const Color(0xFF1CAF7D),
+            backgroundColor: (_isOrdering || selectedWalletId == null) ? Colors.grey : const Color(0xFF1CAF7D),
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -456,7 +472,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             elevation: 0,
           ),
           child: Text(
-            _isOrdering ? 'Đang đặt hàng...' : 'Xác nhận đặt dịch vụ',
+            _isOrdering ? 'Đang đặt hàng...' : (selectedWalletId == null ? 'Vui lòng chọn ví' : 'Xác nhận đặt dịch vụ'),
             style: GoogleFonts.poppins(
               fontSize: 16,
               color: Colors.white,

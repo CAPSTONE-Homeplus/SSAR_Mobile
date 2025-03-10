@@ -28,6 +28,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../core/format/formater.dart';
 import '../../../domain/entities/order/create_order.dart';
+import '../../../domain/entities/service_activity/service_activity.dart';
 import '../../../domain/entities/time_slot/time_slot.dart';
 import '../../blocs/option/option_bloc.dart';
 import '../../blocs/time_slot/time_slot_bloc.dart';
@@ -52,24 +53,18 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   List<Option> _options = [];
   List<ExtraService> _extraServices = [];
   List<EquipmentSupply> _supplies = [];
-  late ServiceActivityBloc _serviceActivityBloc;
-  late OptionBloc _optionBloc;
-  late ExtraServiceBloc _extraServiceBloc;
-  late EquipmentSupplyBloc _equipmentSupplyBloc;
   bool isLoading = true;
   final Map<String, List<SubActivity>> _serviceActivities = {};
   int _totalPrice = 0;
-  late TimeSlotBloc _timeSlotBloc;
   List<TimeSlot> timeSlots = [];
-  late TimeSlot _selectedTimeSlot  = TimeSlot(id: '', startTime: '', endTime: '');
+  late TimeSlot _selectedTimeSlot = TimeSlot(id: '', startTime: '', endTime: '');
   final TextEditingController _notesController = TextEditingController();
-
 
   @override
   void initState() {
     super.initState();
-    _init();
     _totalPrice = widget.service.price ?? 0;
+    _init();
   }
 
   @override
@@ -79,136 +74,24 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   void _init() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        setState(() {
-          isLoading = true;
-        });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        isLoading = true;
+      });
 
-        // Init blocs
-        _serviceActivityBloc = context.read<ServiceActivityBloc>();
-        _optionBloc = context.read<OptionBloc>();
-        _extraServiceBloc = context.read<ExtraServiceBloc>();
-        _equipmentSupplyBloc = context.read<EquipmentSupplyBloc>();
-        _timeSlotBloc = context.read<TimeSlotBloc>();
-
-        // Fetch service events
-        _serviceActivityBloc.add(
-          GetServiceActivitiesByServiceIdEvent(
-              serviceId: widget.service.id ?? ''),
-        );
-        _optionBloc.add(GetOptionsEvent(serviceId: widget.service.id ?? ''));
-        _extraServiceBloc.add(
-          GetExtraServices(serviceId: widget.service.id ?? ''),
-        );
-        _equipmentSupplyBloc.add(
-          GetEquipmentSupplies(serviceId: widget.service.id ?? ''),
-        );
-        _timeSlotBloc.add(GetTimeSlotEvents());
-
-
-        // Process events
-        final serviceActivityComplete = _processServiceActivities();
-        final extraServiceComplete = _processExtraServices();
-        final optionComplete = _processOptions();
-        final supplyComplete = _processSupplies();
-        final timeSlotComplete = _processTimeSlot();
-
-
-        // Wait for all events to complete
-        await Future.wait([
-          serviceActivityComplete,
-          extraServiceComplete,
-          optionComplete,
-          supplyComplete,
-          timeSlotComplete,
-        ]);
-
-        setState(() {
-          isLoading = false;
-        });
-      } catch (e) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      // Dispatch events to fetch data
+      context.read<ServiceActivityBloc>().add(
+        GetServiceActivitiesByServiceIdEvent(serviceId: widget.service.id ?? ''),
+      );
+      context.read<OptionBloc>().add(GetOptionsEvent(serviceId: widget.service.id ?? ''));
+      context.read<ExtraServiceBloc>().add(
+        GetExtraServices(serviceId: widget.service.id ?? ''),
+      );
+      context.read<EquipmentSupplyBloc>().add(
+        GetEquipmentSupplies(serviceId: widget.service.id ?? ''),
+      );
+      context.read<TimeSlotBloc>().add(GetTimeSlotEvents());
     });
-  }
-
-
-  Future<void> _processTimeSlot() async {
-    await for (final state in _timeSlotBloc.stream) {
-      if (state is TimeSlotLoaded && mounted) {
-        setState(() {
-          timeSlots = state.timeSlots;
-        });
-        break;
-      }
-    }
-  }
-
-  Future<void> _processServiceActivities() async {
-    await for (final state in _serviceActivityBloc.stream) {
-      if (state is ServiceActivitySuccessState && mounted) {
-        Map<String, List<SubActivity>> tempSubActivities = {};
-
-        for (var activity in state.serviceActivities) {
-          final key = activity.name ?? '';
-          if (!tempSubActivities.containsKey(key)) {
-            tempSubActivities[key] = [];
-          }
-
-          final subActivityBloc = context.read<SubActivityBloc>();
-          subActivityBloc.add(GetSubActivities(activityId: activity.id ?? ''));
-
-          await subActivityBloc.stream.firstWhere((subState) {
-            if (subState is SubActivitySuccessState) {
-              tempSubActivities[key]!.addAll(subState.subActivities);
-              return true;
-            }
-            return false;
-          });
-        }
-
-        setState(() {
-          _serviceActivities.addAll(tempSubActivities);
-        });
-        break;
-      }
-    }
-  }
-
-  Future<void> _processExtraServices() async {
-    await for (final state in _extraServiceBloc.stream) {
-      if (state is ExtraServiceSuccessState && mounted) {
-        setState(() {
-          _extraServices = state.extraServices.items;
-        });
-        break;
-      }
-    }
-  }
-
-  Future<void> _processOptions() async {
-    await for (final state in _optionBloc.stream) {
-      if (state is OptionSuccessState && mounted) {
-        setState(() {
-          _options = state.options;
-        });
-        break;
-      }
-    }
-  }
-
-  Future<void> _processSupplies() async {
-    await for (final state in _equipmentSupplyBloc.stream) {
-      if (state is EquipmentSupplySuccessState && mounted) {
-        setState(() {
-          _supplies = state.equipmentSupplies.items;
-        });
-        break;
-      }
-    }
   }
 
   void _handleCreateOrder(bool isEmergency) {
@@ -217,51 +100,145 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       option: _selectedOptions,
       extraService: _selectedExtraServices,
       timeSlot: _selectedTimeSlot,
-      notes : _notesController.text,
-      emergencyRequest: isEmergency, address: '123 ABC Street',
+      notes: _notesController.text,
+      emergencyRequest: isEmergency,
+      address: '',
     );
     AppRouter.navigateToOrderDetailWithArguments(createOrder);
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade200,
-      appBar: CustomAppBar(
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ServiceActivityBloc, ServiceActivityState>(
+          listener: (context, state) {
+            if (state is ServiceActivitySuccessState) {
+              _handleServiceActivitiesLoaded(state.serviceActivities);
+            }
+          },
+        ),
+        BlocListener<OptionBloc, OptionState>(
+          listener: (context, state) {
+            if (state is OptionSuccessState) {
+              setState(() {
+                _options = state.options;
+                _checkAllDataLoaded();
+              });
+            }
+          },
+        ),
+        BlocListener<ExtraServiceBloc, ExtraServiceState>(
+          listener: (context, state) {
+            if (state is ExtraServiceSuccessState) {
+              setState(() {
+                _extraServices = state.extraServices.items;
+                _checkAllDataLoaded();
+              });
+            }
+          },
+        ),
+        BlocListener<EquipmentSupplyBloc, EquipmentSupplyState>(
+          listener: (context, state) {
+            if (state is EquipmentSupplySuccessState) {
+              setState(() {
+                _supplies = state.equipmentSupplies.items;
+                _checkAllDataLoaded();
+              });
+            }
+          },
+        ),
+        BlocListener<TimeSlotBloc, TimeSlotState>(
+          listener: (context, state) {
+            if (state is TimeSlotLoaded) {
+              setState(() {
+                timeSlots = state.timeSlots;
+                _checkAllDataLoaded();
+              });
+            }
+          },
+        ),
+      ],
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade200,
+        appBar: CustomAppBar(
           title: widget.service.name ?? '',
           onBackPressed: () {
             Navigator.pop(context);
-          }),
-      body: isLoading
-          ? _loadingPlaceholder()
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  StepIndicatorWidget(currentStep: 2),
-                  SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildServiceSupply(),
-                        SizedBox(height: 10),
-                        _buildAdditionalOptionsSection(),
-                        SizedBox(height: 10),
-                        _buildExtraService(),
-                        SizedBox(height: 10),
-                        _buildJobDetailsSection(),
-                        SizedBox(height: 10),
-                        _buildNotesField(),
-                      ],
-                    ),
-                  ),
-                ],
+          },
+        ),
+        body: isLoading
+            ? _loadingPlaceholder()
+            : SingleChildScrollView(
+          child: Column(
+            children: [
+              StepIndicatorWidget(currentStep: 2),
+              SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildServiceSupply(),
+                    SizedBox(height: 10),
+                    _buildAdditionalOptionsSection(),
+                    SizedBox(height: 10),
+                    _buildExtraService(),
+                    SizedBox(height: 10),
+                    _buildJobDetailsSection(),
+                    SizedBox(height: 10),
+                    _buildNotesField(),
+                  ],
+                ),
               ),
-            ),
-      bottomNavigationBar: _buildBottomBar(),
+            ],
+          ),
+        ),
+        bottomNavigationBar: _buildBottomBar(),
+      ),
     );
+  }
+
+  Future<void> _handleServiceActivitiesLoaded(List<ServiceActivity> activities) async {
+    Map<String, List<SubActivity>> tempSubActivities = {};
+
+    for (var activity in activities) {
+      final key = activity.name ?? '';
+      if (!tempSubActivities.containsKey(key)) {
+        tempSubActivities[key] = [];
+      }
+
+      final subActivityBloc = context.read<SubActivityBloc>();
+      subActivityBloc.add(GetSubActivities(activityId: activity.id ?? ''));
+
+      await for (final subState in subActivityBloc.stream) {
+        if (subState is SubActivitySuccessState) {
+          if (mounted) {
+            tempSubActivities[key]!.addAll(subState.subActivities);
+            break;
+          }
+        }
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _serviceActivities.addAll(tempSubActivities);
+        _checkAllDataLoaded();
+      });
+    }
+  }
+
+  void _checkAllDataLoaded() {
+    if (_serviceActivities.isNotEmpty &&
+        _options.isNotEmpty &&
+        _extraServices.isNotEmpty &&
+        _supplies.isNotEmpty &&
+        timeSlots.isNotEmpty) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   Widget _loadingPlaceholder() {

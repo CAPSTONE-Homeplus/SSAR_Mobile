@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../../domain/entities/user/user.dart';
-import '../models/user/user_model.dart';
+import '../../../domain/entities/user/user.dart';
+import '../../models/user/user_model.dart';
 
 class UserLocalDatasource {
 

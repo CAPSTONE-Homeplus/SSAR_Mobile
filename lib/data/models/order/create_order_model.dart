@@ -5,6 +5,7 @@ class CreateOrderModel {
   String? timeSlotId;
   String? serviceId;
   String? userId;
+  String? houseTypeId;
   List<String>? optionIds;
   List<String>? extraServiceIds;
 
@@ -15,6 +16,7 @@ class CreateOrderModel {
     this.timeSlotId,
     this.serviceId,
     this.userId,
+    this.houseTypeId,
     this.optionIds,
     this.extraServiceIds,
   });
@@ -26,6 +28,7 @@ class CreateOrderModel {
     timeSlotId = json['timeSlotId'];
     serviceId = json['serviceId'];
     userId = json['userId'];
+    houseTypeId = json['houseTypeId'];
     optionIds = json['optionIds'].cast<String>();
     extraServiceIds = json['extraServiceIds'].cast<String>();
   }
@@ -38,6 +41,7 @@ class CreateOrderModel {
     data['timeSlotId'] = timeSlotId;
     data['serviceId'] = serviceId;
     data['userId'] = userId;
+    data['houseTypeId'] = houseTypeId;
     data['optionIds'] = optionIds;
     data['extraServiceIds'] = extraServiceIds;
     return data;

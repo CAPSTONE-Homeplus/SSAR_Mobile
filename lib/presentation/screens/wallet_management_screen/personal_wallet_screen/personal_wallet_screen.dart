@@ -28,20 +28,27 @@ class _PersonalWalletScreenState extends State<PersonalWalletScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<PersonalWalletBloc, WalletState>(
-        builder: (context, walletState) {
-          if (walletState is WalletLoading) {
-            return PersonalWalletLoading();
-          }
-          if (walletState is PersonalWalletLoaded) {
-            return PersonalWallet(
-              personalWallet: walletState.wallets.isNotEmpty
-                  ? walletState.wallets.first
-                  : Wallet(id: '', type: personalWalletString, balance: 0),
+      body: BlocListener<PersonalWalletBloc, WalletState>(
+        listener: (context, walletState) {
+          if (walletState is WalletError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Có lỗi xảy ra!')),
             );
           }
-          return PersonalWalletError();
+        },
+        child: BlocBuilder<PersonalWalletBloc, WalletState>(
+          buildWhen: (previous, current) => current is PersonalWalletLoaded,
+          builder: (context, walletState) {
+            if (walletState is PersonalWalletLoaded) {
+              return PersonalWallet(
+                personalWallet: walletState.wallets.isNotEmpty
+                    ? walletState.wallets.first
+                    : Wallet(id: '', type: personalWalletString, balance: 0),
+              );
+            }
+            return SizedBox.shrink();
           },
+        ),
       ),
     );
   }

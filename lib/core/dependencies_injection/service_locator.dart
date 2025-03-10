@@ -1,6 +1,9 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
-import 'package:home_clean/data/datasource/notification_remote_data_source.dart';
+import 'package:home_clean/data/datasource/local/activity_status_local_data_source.dart';
+import 'package:home_clean/data/datasource/signalr/activity_status_remote_data_source.dart';
+import 'package:home_clean/data/datasource/signalr/wallet_remote_data_source.dart';
+import 'package:home_clean/domain/repositories/activity_status_repository.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
 import 'package:home_clean/domain/repositories/house_repository.dart';
 import 'package:home_clean/domain/repositories/payment_method_repository.dart';
@@ -22,12 +25,12 @@ import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:home_clean/presentation/blocs/user/user_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import '../../../data/datasource/service_local_data_source.dart';
-import '../../data/datasource/local_data_source.dart';
-import '../../data/datasource/notification_local_data_source.dart';
-import '../../data/datasource/transaction_local_data_source.dart';
-import '../../data/datasource/user_local_datasource.dart';
-import '../../data/datasource/wallet_local_data_source.dart';
+import '../../data/datasource/local/service_local_data_source.dart';
+import '../../data/datasource/local/local_data_source.dart';
+import '../../data/datasource/local/transaction_local_data_source.dart';
+import '../../data/datasource/local/user_local_datasource.dart';
+import '../../data/datasource/local/wallet_local_data_source.dart';
+import '../../data/repositories/activity_status_repository_impl.dart';
 import '../../data/repositories/authentication_repository_impl.dart';
 import '../../data/repositories/building_repository_impl.dart';
 import '../../data/repositories/equipment_supply_repository_impl.dart';
@@ -51,7 +54,6 @@ import '../../domain/repositories/equipment_supply_repository.dart';
 import '../../domain/repositories/extra_service_repository.dart';
 import '../../domain/repositories/notification_repository.dart';
 import '../../../domain/use_cases/equipment_supply/get_equipment_supplies_use_case.dart';
-import '../../../domain/use_cases/order/get_order_from_local.dart';
 import '../../../domain/use_cases/service/clear_selected_service_ids.dart';
 import '../../../domain/use_cases/service/get_selected_service_ids.dart';
 import '../../../domain/use_cases/service/save_selected_service_ids.dart';
@@ -72,7 +74,7 @@ import '../../../presentation/blocs/service_category/service_category_bloc.dart'
 import '../../../presentation/blocs/sub_activity/sub_activity_bloc.dart';
 import '../../../presentation/blocs/theme/theme_bloc.dart';
 import '../../../presentation/blocs/time_slot/time_slot_bloc.dart';
-import '../../data/datasource/auth_local_datasource.dart';
+import '../../data/datasource/local/auth_local_datasource.dart';
 import '../../domain/repositories/option_repository.dart';
 import '../../domain/repositories/order_repository.dart';
 import '../../domain/repositories/service_activity_repository.dart';
@@ -99,6 +101,7 @@ import '../../domain/use_cases/transaction/get_transaction_by_wallet_use_case.da
 import '../../domain/use_cases/wallet/change_owner_use_case.dart';
 import '../../domain/use_cases/wallet/create_wallet_use_case.dart';
 import '../../domain/use_cases/wallet/get_wallet_by_user.dart';
+import '../../presentation/blocs/activity_status_bloc/activity_status_bloc.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/building/building_bloc.dart';
 import '../../presentation/blocs/payment_method/payment_method_bloc.dart';
@@ -130,20 +133,24 @@ Future<void> setupServiceLocator() async {
         () => UserLocalDatasource(),
   );
 
+
   sl.registerLazySingleton<TransactionLocalDataSource>(
         () => TransactionLocalDataSource(),
   );
   sl.registerLazySingleton<WalletLocalDataSource>(
         () => WalletLocalDataSource(),
   );
-  sl.registerLazySingleton(() => NotificationLocalDataSource());
-  sl.registerLazySingleton(
-        () => NotificationRemoteDataSource(
-      authLocalDataSource: sl(),
-      localDataSource: sl(),
-    ),
+  sl.registerLazySingleton<ActivityStatusLocalDataSource>(
+        () => ActivityStatusLocalDataSource(),
   );
 
+  // signalr
+  sl.registerLazySingleton<ActivityStatusRemoteDataSource>(
+        () => ActivityStatusRemoteDataSource(authLocalDataSource: sl()),
+  );
+  sl.registerLazySingleton<WalletRemoteDataSource>(
+        () => WalletRemoteDataSource(authLocalDataSource: sl()),
+  );
 
   sl.registerLazySingleton<LocalDataSource>(() => LocalDataSource(
     authLocalDataSource: sl(),
@@ -176,12 +183,10 @@ Future<void> setupServiceLocator() async {
           () => EquipmentSupplyRepositoryImpl());
   sl.registerLazySingleton<TimeSlotRepository>(() => TimeSlotRepositoryImpl());
   sl.registerLazySingleton<OrderRepository>(() => OrderRepositoryImpl( userLocalDatasource: sl()));
-  sl.registerLazySingleton<NotificationRepository>(
-        () => NotificationRepositoryImpl(
-      localDataSource: sl(),
-      remoteDataSource: sl(),
-    ),
-  );
+  sl.registerLazySingleton<NotificationRepository>(() => NotificationRepositoryImpl(
+    localDataSource: sl(),
+    remoteDataSource: sl(),
+  ));
 
 
   sl.registerLazySingleton<WalletRepository>(
@@ -194,6 +199,10 @@ Future<void> setupServiceLocator() async {
   ));
   sl.registerLazySingleton<PaymentMethodRepository>(() => PaymentMethodRepositoryImpl());
   sl.registerLazySingleton<HouseRepository>(() => HouseRepositoryImpl());
+  sl.registerLazySingleton<ActivityStatusRepository>(() => ActivityStatusRepositoryImpl(
+    localDataSource: sl(),
+    remoteDataSource: sl(),
+  ));
 
   // Use Cases
   sl.registerLazySingleton(() => SaveSelectedServiceIds(sl()));
@@ -207,7 +216,6 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => GetTimeSlotsUsecase(sl()));
   sl.registerLazySingleton(() => GetServiceByServiceCategoryUsecase(sl()));
   sl.registerLazySingleton(() => GetServiceCategoriesUsecase(sl()));
-  sl.registerLazySingleton(() => GetOrderFromLocal (sl()));
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => GetWalletByUserUseCase(sl()));
   sl.registerLazySingleton(() => GetRoomsUseCase(sl()));
@@ -234,6 +242,7 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => ConnectToNotificationHubUseCase(sl()));
   sl.registerLazySingleton(() => DisconnectFromNotificationHubUseCase(sl()));
   sl.registerLazySingleton(() => ListenForNotificationsUseCase(sl()));
+
 
   // local Use Cases
   sl.registerLazySingleton(() => GetUserFromLocalUseCase(sl()));
@@ -282,9 +291,10 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(() => RoomBloc(sl()));
   sl.registerFactory(() => BuildingBloc(getBuildingUseCase: sl(), getBuildingsUseCase: sl()));
   sl.registerFactory(() => TransactionBloc(sl(), sl(), sl()));
-  sl.registerFactory(() => HouseBloc(getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl()));
+  sl.registerLazySingleton (() => HouseBloc(getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl()));
   sl.registerFactory(() => PaymentMethodBloc(sl()));
   sl.registerFactory(() => UserBloc(sl(), sl()));
   sl.registerFactory(() => PersonalWalletBloc(getWalletByUser: sl()));
   sl.registerFactory(() => SharedWalletBloc(getWalletByUser: sl()));
+  sl.registerFactory(() => ActivityStatusBloc(repository: sl()));
 }

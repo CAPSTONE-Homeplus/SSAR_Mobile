@@ -28,21 +28,29 @@ class _SharedWalletScreenState extends State<SharedWalletScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<SharedWalletBloc, WalletState>(
-        builder: (context, walletState) {
-          if (walletState is WalletLoading) {
-            return SharedWalletLoading();
-          }
-          if (walletState is SharedWalletLoaded) {
-            return SharedWallet(
-              sharedWallet: walletState.wallets.isNotEmpty
-                  ? walletState.wallets.first
-                  : Wallet(id: '', type: sharedWalletString, balance: 0),
+      body: BlocListener<SharedWalletBloc, WalletState>(
+        listener: (context, walletState) {
+          if (walletState is WalletError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Có lỗi xảy ra!')),
             );
           }
-          return SharedWalletError();
+        },
+        child: BlocBuilder<SharedWalletBloc, WalletState>(
+          buildWhen: (previous, current) => current is SharedWalletLoaded,
+          builder: (context, walletState) {
+            if (walletState is SharedWalletLoaded) {
+              return SharedWallet(
+                sharedWallet: walletState.wallets.isNotEmpty
+                    ? walletState.wallets.first
+                    : Wallet(id: '', type: sharedWalletString, balance: 0),
+              );
+            }
+            return SizedBox.shrink();
           },
-      ),
+        ),
+      )
+,
     );
   }
 }

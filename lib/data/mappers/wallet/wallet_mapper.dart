@@ -1,6 +1,6 @@
 import 'package:home_clean/data/models/wallet/wallet_model.dart';
 
-import '../../domain/entities/wallet/wallet.dart';
+import '../../../domain/entities/wallet/wallet.dart';
 
 class WalletMapper {
   static Wallet toEntity (WalletModel walletModel){

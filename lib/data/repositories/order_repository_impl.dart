@@ -1,5 +1,5 @@
 import 'package:home_clean/core/request/request.dart';
-import 'package:home_clean/data/datasource/user_local_datasource.dart';
+import 'package:home_clean/data/datasource/local/user_local_datasource.dart';
 import 'package:home_clean/domain/entities/order/create_order.dart';
 
 import 'package:home_clean/domain/entities/order/order.dart';
@@ -7,7 +7,7 @@ import 'package:home_clean/domain/entities/order/order.dart';
 import '../../../domain/repositories/order_repository.dart';
 import '../../core/constant/api_constant.dart';
 import '../../core/exception/exception_handler.dart';
-import '../mappers/order_mapper.dart';
+import '../mappers/order/order_mapper.dart';
 import '../mappers/user/user_mapper.dart';
 
 class OrderRepositoryImpl implements OrderRepository {
@@ -23,12 +23,13 @@ class OrderRepositoryImpl implements OrderRepository {
     try {
       final user = UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
       final requestData = {
-        "address": "55D61D07-27A4-4293-87BF-E942F17F3ADA",
+        "address": createOrder.address,
         "notes": createOrder.notes.toString(),
         "emergencyRequest": createOrder.emergencyRequest,
         "timeSlotId": createOrder.timeSlot.id.toString(),
         "serviceId": createOrder.service.id.toString(),
         "userId": user.id.toString(),
+        "houseTypeId": createOrder.houseTypeId.toString(),
         "optionIds": (createOrder.option).map((e) => e.id).toList(),
         "extraServiceIds": (createOrder.extraService).map((e) => e.id).toList(),
       };
@@ -54,24 +55,5 @@ class OrderRepositoryImpl implements OrderRepository {
 
       throw ExceptionHandler.handleException(e);
     }
-  }
-
-
-  @override
-  Future<void> deleteOrderFromLocal() {
-    // TODO: implement deleteOrderFromLocal
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Orders?> getOrderFromLocal() {
-    // TODO: implement getOrderFromLocal
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveOrderToLocal(CreateOrder createOrder) {
-    // TODO: implement saveOrderToLocal
-    throw UnimplementedError();
   }
 }
