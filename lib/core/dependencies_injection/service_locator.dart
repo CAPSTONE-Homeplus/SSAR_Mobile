@@ -95,6 +95,7 @@ import '../../domain/use_cases/notification/disconnect_from_notification_hub_use
 import '../../domain/use_cases/notification/get_notifications_use_case.dart';
 import '../../domain/use_cases/notification/listen_for_notifications_use_case.dart';
 import '../../domain/use_cases/option/get_options_use_case.dart';
+import '../../domain/use_cases/order/get_order_by_user_use_case.dart';
 import '../../domain/use_cases/order_tracking/connect_to_order_tracking_hub_use_case.dart';
 import '../../domain/use_cases/order_tracking/disconnect_from_order_tracking_hub_use_case.dart';
 import '../../domain/use_cases/order_tracking/get_all_order_trackings_use_case.dart';
@@ -256,7 +257,7 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
   sl.registerLazySingleton(() => DisconnectFromOrderTrackingHubUseCase(sl()));
   // local Use Cases
   sl.registerLazySingleton(() => GetUserFromLocalUseCase(sl()));
-  // sl.registerLazySingleton(() => SaveUserToLocalUseCase(sl()));
+  sl.registerLazySingleton(() => GetOrderByUserUseCase(sl()));
 
 
   // Blocs (sử dụng Factory vì mỗi bloc sẽ cần một instance mới)
@@ -284,7 +285,7 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
   sl.registerFactory(
           () => EquipmentSupplyBloc(getEquipmentSuppliesUseCase: sl()));
   sl.registerFactory(() => TimeSlotBloc(getTimeSlotsUsecase: sl()));
-  sl.registerFactory(() => OrderBloc(createOrderUseCase: sl()));
+  sl.registerFactory(() => OrderBloc(createOrderUseCase: sl(), getOrderByUserUseCase: sl()));
   sl.registerFactory(
         () => NotificationBloc(
       getNotificationsUseCase: sl(),

@@ -4,6 +4,7 @@ import 'package:home_clean/presentation/screens/message/message_screen.dart';
 
 import '../screens/home/home_screen.dart';
 import '../screens/notification/notification.dart';
+import '../screens/order_list/order_list_screen.dart';
 import '../screens/setting/settings_screen.dart';
 
 class BottomNavigation extends StatefulWidget {
@@ -20,7 +21,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
 
   final List<Widget> _pages = [
     HomeScreen(),
-    MessageScreen(),
+    OrderListScreen(),
     NotificationScreen(),
     SettingsScreen()
   ];
@@ -47,8 +48,8 @@ class _BottomNavigationState extends State<BottomNavigation> {
         animationDuration: const Duration(milliseconds: 300),
         items: const [
           Icon(Icons.home, size: 30, color: Colors.black),
-          Icon(Icons.message_outlined, size: 30, color: Colors.black),
-          Icon(Icons.notification_add, size: 30, color: Colors.black),
+          Icon(Icons.list_alt, size: 30, color: Colors.black),
+          Icon(Icons.notifications, size: 30, color: Colors.black),
           Icon(Icons.person_outline, size: 30, color: Colors.black),
         ],
         onTap: _onTabTapped,

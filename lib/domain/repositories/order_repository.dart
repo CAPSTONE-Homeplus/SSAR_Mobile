@@ -7,4 +7,5 @@ import '../../data/models/order/create_order_model.dart';
 abstract class OrderRepository {
   // API
   Future<Orders> createOrder(CreateOrder createOrder);
+  Future<BaseResponse<Orders>> getOrdersByUser(String? search, String? orderBy, int? page, int? size);
 }

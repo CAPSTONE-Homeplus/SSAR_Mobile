@@ -157,7 +157,7 @@ class HomeClean extends StatelessWidget {
                   EquipmentSupplyBloc(getEquipmentSuppliesUseCase: sl())),
           BlocProvider(
               create: (context) => TimeSlotBloc(getTimeSlotsUsecase: sl())),
-          BlocProvider(create: (context) => OrderBloc(createOrderUseCase: sl())),
+          BlocProvider(create: (context) => OrderBloc(createOrderUseCase: sl(), getOrderByUserUseCase: sl())),
           BlocProvider( create: (context) => WalletBloc(getWalletByUser: sl(), createWalletUseCase: sl(),
               inviteMemberUseCase: sl(), changeOwnerUseCase: sl(), deleteUserUseCase: sl(), getContributionStatisticUseCase: sl())),
           BlocProvider(create: (context) => RoomBloc(sl())),

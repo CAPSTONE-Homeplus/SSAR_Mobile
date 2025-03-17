@@ -8,24 +8,11 @@ class CreateOrderEvent extends OrderEvent {
   CreateOrderEvent(this.createOrder);
 }
 
-class SaveTemporaryOrderEvent extends OrderEvent {
-  final CreateOrder createOrder;
-  SaveTemporaryOrderEvent(this.createOrder);
+class GetOrdersByUserEvent extends OrderEvent {
+  final String? search;
+  final String? orderBy;
+  final int? page;
+  final int? size;
+
+  GetOrdersByUserEvent({this.search, this.orderBy, this.page, this.size});
 }
-
-class UpdateTemporaryOrderEvent extends OrderEvent {
-  final CreateOrder updatedOrder;
-
-  UpdateTemporaryOrderEvent(this.updatedOrder);
-}
-
-
-class SaveOrderToLocalEvent extends OrderEvent {
-  final CreateOrder createOrder;
-
-  SaveOrderToLocalEvent(this.createOrder);
-}
-
-class GetOrderFromLocalEvent extends OrderEvent {}
-
-class DeleteOrderFromLocalEvent extends OrderEvent {}

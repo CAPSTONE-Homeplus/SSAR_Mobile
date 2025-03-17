@@ -4,8 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 
-import '../../../core/enums/step_status.dart';
-import '../../../core/enums/sub_activity_status.dart';
 import '../../../domain/entities/order/order_tracking.dart';
 import '../../blocs/order_tracking/order_tracking_bloc.dart';
 import '../../blocs/order_tracking/order_tracking_event.dart';
@@ -29,13 +27,11 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
     context.read<OrderTrackingBloc>().add(ConnectToHubEvent());
     context.read<OrderTrackingBloc>().add(GetOrderTrackingByIdEvent(widget.orderId));
   }
-ỏ
   @override
   void dispose() {
     context.read<OrderTrackingBloc>().add(DisconnectFromHubEvent());
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -139,25 +135,28 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
     Color getStepColor() {
       switch (step.status.toLowerCase()) {
         case "inprogress":
-          return Colors.orange[700]!;
+          return Colors.blue[700]!;
         case "completed":
           return Colors.green[700]!;
         case "pending":
-          return Colors.grey[400]!;
+          return Colors.orange[400]!;
         default:
           return Colors.grey;
       }
     }
 
-
     Widget stepIcon() {
+      final iconName = step.status.toLowerCase();
+
       final iconData = {
-        StepStatus.inProgress: Icons.timer,
-        StepStatus.completed: Icons.check_circle,
-        StepStatus.pending: Icons.circle,
-      }[step.status] ?? Icons.help;
+        "inprogress": Icons.timer,
+        "completed": Icons.check_circle,
+        "pending": Icons.circle,
+      }[iconName] ?? Icons.help;
+
       return Icon(iconData, color: Colors.white, size: 20);
     }
+
 
 
     return Column(
@@ -211,10 +210,11 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
                       color: Colors.grey[600],
                     ),
                   ),
-                  if (step.title == 'Người làm đã đến' && step.subActivities != null)
+                  if (step.description == 'Người làm đã đến' && step.subActivities != null)
                     const SizedBox(height: 10),
-                  if (step.title == 'Người làm đã đến' && step.subActivities != null)
+                  if (step.description == 'Người làm đã đến' && step.subActivities != null)
                     ...step.subActivities!.map((subActivity) => _buildSubActivityItem(subActivity)),
+                  const SizedBox(height: 10),
                 ],
               ),
             ),
@@ -226,16 +226,29 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
 
 
   Widget _buildSubActivityItem(ActivityStatus subActivity) {
+    IconData getSubActivityIcon() {
+      switch (subActivity.status.toLowerCase()) {
+        case "completed":
+          return Icons.check_circle;
+        case "inprogress":
+          return Icons.timer;
+        case "pending":
+          return Icons.more_horiz;
+        default:
+          return Icons.help;
+      }
+    }
 
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Row(
         children: [
           Icon(
-            subActivity.status == SubActivityStatus.completed
-                ? Icons.check_circle
-                : Icons.more_horiz,
+            getSubActivityIcon(),
             size: 16,
+            color: subActivity.status.toLowerCase() == "completed"
+                ? Colors.green
+                : Colors.grey,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -243,11 +256,21 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  subActivity.title ?? '',
+                  subActivity.title,
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: Colors.grey[800],
-                    fontWeight: subActivity.status == SubActivityStatus.inProgress
+                    fontWeight: subActivity.status.toLowerCase() == "inprogress"
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                ),
+                Text(
+                  subActivity.status,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.grey[800],
+                    fontWeight: subActivity.status.toLowerCase() == "inprogress"
                         ? FontWeight.bold
                         : FontWeight.normal,
                   ),
@@ -266,7 +289,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
       ),
     );
   }
-
 
 
   Widget _buildServiceWorkerCard() {

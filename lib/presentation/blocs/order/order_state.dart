@@ -12,29 +12,14 @@ class OrderCreated extends OrderState {
   OrderCreated(this.order);
 }
 
-class TemporaryOrder extends OrderState {
-  final CreateOrder temporaryOrder;
-  TemporaryOrder(this.temporaryOrder);
+class OrdersByUserLoaded extends OrderState {
+  final BaseResponse<Orders> orders;
+
+  OrdersByUserLoaded(this.orders);
 }
-
-class OrderSavedToLocal extends OrderState {}
-
-class OrderLoadedFromLocal extends OrderState {
-  final Orders order;
-
-  OrderLoadedFromLocal(this.order);
-}
-
-class OrderDeletedFromLocal extends OrderState {}
 
 class OrderError extends OrderState {
   final String message;
 
   OrderError(this.message);
-}
-
-class OrderException extends OrderState {
-  final String message;
-
-  OrderException(this.message);
 }
