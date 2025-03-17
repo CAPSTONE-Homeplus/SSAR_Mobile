@@ -22,7 +22,7 @@ class CreateWalletButtonWidget extends StatelessWidget {
     return BlocListener<WalletBloc, WalletState>(
       listener: (context, state) {
         if (state is WalletCreatedSuccess) {
-          AppRouter.navigateToHome();
+          AppRouter.navigateToSharedWallet();
         } else if (state is WalletError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Lỗi: ${state.message}')),
@@ -212,7 +212,6 @@ class CreateWalletButtonWidget extends StatelessWidget {
                     context.read<WalletBloc>().add(
                       CreateWallet(),
                     );
-                    AppRouter.navigateToHome();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,

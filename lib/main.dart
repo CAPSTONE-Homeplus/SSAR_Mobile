@@ -9,13 +9,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/data/service/notification_service.dart';
-import 'package:home_clean/domain/repositories/activity_status_repository.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
 import 'package:home_clean/domain/repositories/house_repository.dart';
+import 'package:home_clean/domain/repositories/order_tracking_repository.dart';
 import 'package:home_clean/domain/repositories/room_repository.dart';
 import 'package:home_clean/domain/repositories/transaction_repository.dart';
 import 'package:home_clean/domain/repositories/user_repository.dart';
-import 'package:home_clean/presentation/blocs/activity_status_bloc/activity_status_bloc.dart';
 import 'package:home_clean/presentation/blocs/auth/auth_bloc.dart';
 import 'package:home_clean/presentation/blocs/building/building_bloc.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_bloc.dart';
@@ -24,6 +23,7 @@ import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:home_clean/presentation/blocs/notification/notification_bloc.dart';
 import 'package:home_clean/presentation/blocs/option/option_bloc.dart';
 import 'package:home_clean/presentation/blocs/order/order_bloc.dart';
+import 'package:home_clean/presentation/blocs/order_tracking/order_tracking_bloc.dart';
 import 'package:home_clean/presentation/blocs/payment_method/payment_method_bloc.dart';
 import 'package:home_clean/presentation/blocs/service/service_bloc.dart';
 import 'package:home_clean/presentation/blocs/service_activity/service_activity_bloc.dart';
@@ -119,7 +119,7 @@ class HomeClean extends StatelessWidget {
         RepositoryProvider(create: (_) => sl<HouseRepository>()),
         RepositoryProvider(create: (_) => sl<UserRepository>()),
         RepositoryProvider(create: (_) => sl<NotificationRepository>()),
-        RepositoryProvider(create: (_) => sl<ActivityStatusRepository>()),
+        RepositoryProvider(create: (_) => sl<OrderTrackingRepository>()),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -159,17 +159,21 @@ class HomeClean extends StatelessWidget {
               create: (context) => TimeSlotBloc(getTimeSlotsUsecase: sl())),
           BlocProvider(create: (context) => OrderBloc(createOrderUseCase: sl())),
           BlocProvider( create: (context) => WalletBloc(getWalletByUser: sl(), createWalletUseCase: sl(),
-              inviteMemberUseCase: sl(), changeOwnerUseCase: sl(), deleteUserUseCase: sl())),
+              inviteMemberUseCase: sl(), changeOwnerUseCase: sl(), deleteUserUseCase: sl(), getContributionStatisticUseCase: sl())),
           BlocProvider(create: (context) => RoomBloc(sl())),
           BlocProvider(create: (context) => BuildingBloc(getBuildingUseCase: sl(), getBuildingsUseCase: sl())),
           BlocProvider(create: (context) => TransactionBloc(sl(), sl(), sl())),
           BlocProvider(create: (context) => HouseBloc(getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl())),
           BlocProvider(create: (context) => PaymentMethodBloc(sl())),
-          BlocProvider(create: (context) => UserBloc(sl(), sl())),
-          BlocProvider(create: (context) => NotificationBloc(getNotificationsUseCase: sl(), markAsReadUseCase: sl(), deleteNotificationUseCase: sl(), connectToHubUseCase: sl(), disconnectFromHubUseCase: sl(), listenForNotificationsUseCase: sl(), flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin)),
+          BlocProvider(create: (context) => UserBloc(sl(), sl(), sl())),
+          BlocProvider(create: (context) => NotificationBloc(getNotificationsUseCase: sl(), connectToHubUseCase: sl(), disconnectFromHubUseCase: sl(), listenForNotificationsUseCase: sl(), flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin)),
           BlocProvider(create: (context) => PersonalWalletBloc(getWalletByUser: sl())),
           BlocProvider(create: (context) => SharedWalletBloc(getWalletByUser: sl())),
-          BlocProvider(create: (context) => ActivityStatusBloc(repository: sl())),
+          BlocProvider(create: (context) => OrderTrackingBloc(connectToHub: sl(),
+            disconnectFromHub: sl(),
+            getLocalTrackings: sl(),
+            getTrackingById: sl(),
+            streamTracking: sl(),)),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {

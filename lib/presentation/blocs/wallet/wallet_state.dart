@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../domain/entities/contribution_statistics/contribution_statistics.dart';
 import '../../../domain/entities/wallet/wallet.dart';
 
 abstract class WalletState extends Equatable {
@@ -85,6 +86,13 @@ class WalletDeleteSuccess extends WalletState {
   List<Object> get props => [result];
 }
 
+class WalletContributionStatisticsLoaded extends WalletState {
+  final ContributionStatistics contributionStatistics;
 
+  WalletContributionStatisticsLoaded({required this.contributionStatistics});
+
+  @override
+  List<Object> get props => [contributionStatistics];
+}
 
 

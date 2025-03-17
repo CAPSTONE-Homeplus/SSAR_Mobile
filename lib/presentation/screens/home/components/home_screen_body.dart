@@ -64,14 +64,7 @@ Widget _buildHomeScreen(List<Service> services, BuildContext context, List<Walle
               fontSize: 12 * ffem,
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AddressOptionScreen()),
-              );
-            },
-            child: Row(
+          Row(
               children: [
                 Text(
                   address,
@@ -81,9 +74,7 @@ Widget _buildHomeScreen(List<Service> services, BuildContext context, List<Walle
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                Icon(Icons.keyboard_arrow_down, color: Colors.grey),
               ],
-            ),
           ),
         ],
       ),

@@ -11,7 +11,6 @@ import 'package:home_clean/presentation/screens/wallet_management_screen/persona
 import 'package:home_clean/presentation/screens/wallet_management_screen/shared_wallet_screen/shared_wallet_screen.dart';
 
 import '../../presentation/screens/activity/activity_screen.dart';
-import '../../presentation/screens/activity_status_screen.dart';
 import '../../presentation/screens/login/login_screen.dart';
 import '../../presentation/screens/order_tracking/order_tracking_screen.dart';
 import '../../presentation/screens/service_list_screen/service_list_screen.dart';
@@ -51,7 +50,7 @@ class AppRouter {
         ),
         GetPage(
           name: routeRegister,
-          page: () => const RegisterScreen(),
+          page: () => RegisterScreen(),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -146,13 +145,7 @@ class AppRouter {
         ),
         GetPage(
           name: routeOrderTracking,
-          page: () => OrderTrackingScreen(),
-          transition: Transition.cupertino,
-          transitionDuration: const Duration(milliseconds: 300),
-        ),
-        GetPage(
-          name: routeActivityScreen1,
-          page: () => ActivityStatusScreen(),
+          page: () => OrderTrackingScreen(orderId: Get.arguments),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -234,7 +227,7 @@ class AppRouter {
     Get.toNamed(routePersonalWallet);
   }
 
-  static void navigateToOrderTracking() {
-    Get.toNamed(routeOrderTracking);
+  static void navigateToOrderTracking(String orderId) {
+    Get.toNamed(routeOrderTracking, arguments: orderId);
   }
 }

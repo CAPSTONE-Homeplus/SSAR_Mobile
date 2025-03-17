@@ -5,6 +5,7 @@ import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/enums/wallet_enums.dart';
 import 'package:home_clean/domain/entities/transaction/create_transaction.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
+import 'package:home_clean/presentation/widgets/show_dialog.dart';
 
 import '../../../core/format/formater.dart';
 import '../../../domain/entities/house/house.dart';
@@ -18,6 +19,7 @@ import '../../blocs/wallet/wallet_state.dart';
 import '../../widgets/detail_row_widget.dart';
 import '../../widgets/section_widget.dart';
 import '../../widgets/step_indicator_widget.dart';
+import 'components/address_selection_bottom_sheet.dart';
 import 'components/transaction_pop_up.dart';
 
 class OrderConfirmationScreen extends StatefulWidget {
@@ -38,6 +40,11 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   String? selectedWalletId;
   bool _isOrdering = false;
   House? house;
+  String? _editedRoom;
+  String? _editedBuilding;
+  final List<String> _availableBuildings = [
+    'A1', 'A2', 'B1', 'B2', 'C1', 'C2'
+  ];
 
   @override
   void initState() {
@@ -51,10 +58,8 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     context.read<OrderBloc>().add(CreateOrderEvent(widget.orderDetails));
     BlocProvider.of<OrderBloc>(context).stream.listen((state) {
       if (state is OrderCreated) {
-        print("Đặt hàng thành công!");
         setState(() => _isOrdering = false);
       } else if (state is OrderError) {
-        print("Lỗi đặt hàng: $state");
         setState(() => _isOrdering = false);
       }
     });
@@ -69,9 +74,34 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   }
 
 
+  void _showAddressBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: AddressSelectionBottomSheet(
+          currentRoom: house?.numberOfRoom,
+          currentBuilding: house?.code,
+          availableBuildings: _availableBuildings,
+          onAddressSelected: (room, building) {
+            setState(() {
+              _editedRoom = room;
+              _editedBuilding = building;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    String selectedBuilding = '';
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Xác nhận',
@@ -99,9 +129,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               builder: (context) => const TransactionPopup(),
             );
           } else if (state is OrderError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            showCustomErrorDialog(context: context, errorMessage: state.message);
           }
         },
         builder: (context, state) {
@@ -110,37 +138,59 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               children: [
                 StepIndicatorWidget(currentStep: 3),
                 const SizedBox(height: 8),
-                SectionWidget(
-                  title: 'Địa chỉ',
-                  icon: Icons.location_on_outlined,
-                  child: InkWell(
-                    onTap: () {
-                    },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            SectionWidget(
+              title: 'Địa chỉ',
+              icon: Icons.location_on_outlined,
+              child: InkWell(
+                onTap: _showAddressBottomSheet,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          "Phòng ${house?.numberOfRoom ?? ''}",
-                          style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Phòng ${_editedRoom ?? house?.numberOfRoom ?? 'Chưa chọn'}",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              if ((house?.code ?? _editedBuilding ?? '').isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Tòa: ${_editedBuilding ?? house?.code ?? 'Chưa chọn'}',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
-                        if (selectedBuilding.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            'Tòa: $selectedBuilding',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 8),
+                        Icon(
+                          Icons.edit_outlined,
+                          color: Color(0xFF1CAF7D),
+                          size: 20,
+                        ),
                       ],
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      height: 2,
+                      color: Color(0xFF1CAF7D).withOpacity(0.2),
+                    ),
+                  ],
                 ),
+              ),
+            ),
+
 
                 SectionWidget(
                   title: 'Chi tiết dịch vụ',

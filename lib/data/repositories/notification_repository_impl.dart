@@ -17,40 +17,13 @@ class NotificationRepositoryImpl implements NotificationRepository {
   @override
   Future<List<NotificationModel>> getNotifications() async {
     try {
-      // Ưu tiên lấy dữ liệu từ local trước
       final localNotifications = await localDataSource.getNotifications();
-
-      // Nếu không có kết nối mạng hoặc có lỗi, trả về dữ liệu local
       if (!await remoteDataSource.hasNetworkConnection()) {
         return localNotifications;
       }
-
-      // Lấy dữ liệu từ remote nếu có mạng
-      final remoteNotifications = await remoteDataSource.fetchNotifications();
-
-      // Lưu lại vào local để sử dụng offline
-      await localDataSource.saveNotifications(remoteNotifications);
-
-      return remoteNotifications;
+      return localNotifications;
     } catch (e) {
-      // Trong trường hợp lỗi, trả về dữ liệu local
       return await localDataSource.getNotifications();
-    }
-  }
-
-  @override
-  Future<void> markAsRead(String notificationId) async {
-    await localDataSource.markAsRead(notificationId);
-    if (await remoteDataSource.hasNetworkConnection()) {
-      await remoteDataSource.markAsRead(notificationId);
-    }
-  }
-
-  @override
-  Future<void> deleteNotification(String notificationId) async {
-    await localDataSource.deleteNotification(notificationId);
-    if (await remoteDataSource.hasNetworkConnection()) {
-      await remoteDataSource.deleteNotification(notificationId);
     }
   }
 

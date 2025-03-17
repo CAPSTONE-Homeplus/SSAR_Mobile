@@ -9,21 +9,21 @@ import 'option_local_data_source.dart';
 
 class LocalDataSource {
   final AuthLocalDataSource authLocalDataSource;
-  final ExtraServiceLocalDataSource extraServiceLocalDataSource;
-  final OptionLocalDataSource optionLocalDataSource;
+  // final ExtraServiceLocalDataSource extraServiceLocalDataSource;
+  // final OptionLocalDataSource optionLocalDataSource;
   final ServiceLocalDataSource serviceLocalDataSource;
-  final TransactionLocalDataSource transactionLocalDataSource;
+  // final TransactionLocalDataSource transactionLocalDataSource;
   final UserLocalDatasource userLocalDatasource;
-  final WalletLocalDataSource walletLocalDataSource;
+  // final WalletLocalDataSource walletLocalDataSource;
 
   LocalDataSource({
     required this.authLocalDataSource,
-    required this.extraServiceLocalDataSource,
-    required this.optionLocalDataSource,
+    // required this.extraServiceLocalDataSource,
+    // required this.optionLocalDataSource,
     required this.serviceLocalDataSource,
-    required this.transactionLocalDataSource,
+    // required this.transactionLocalDataSource,
     required this.userLocalDatasource,
-    required this.walletLocalDataSource,
+    // required this.walletLocalDataSource,
   });
 
 
@@ -32,11 +32,11 @@ class LocalDataSource {
     if (authData == null) return;
     String? user = authData['userId'];
     await authLocalDataSource.clearAuth();
-    await extraServiceLocalDataSource.clearSelectedExtraServiceIds();
-    await optionLocalDataSource.clearSelectedOptionIds();
+    // await extraServiceLocalDataSource.clearSelectedExtraServiceIds();
+    // await optionLocalDataSource.clearSelectedOptionIds();
     await serviceLocalDataSource.clearService();
     await userLocalDatasource.clearUser();
-    await transactionLocalDataSource.clearTransactions(user!);
+    // await transactionLocalDataSource.clearTransactions(user!);
 
   }
 }

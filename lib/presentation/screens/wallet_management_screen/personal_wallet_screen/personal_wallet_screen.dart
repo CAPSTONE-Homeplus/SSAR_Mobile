@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_clean/core/constant/constants.dart';
 import 'package:home_clean/presentation/screens/wallet_management_screen/personal_wallet_screen/screen/personal_wallet.dart';
-import 'package:home_clean/presentation/screens/wallet_management_screen/personal_wallet_screen/screen/personal_wallet_error.dart';
-import 'package:home_clean/presentation/screens/wallet_management_screen/personal_wallet_screen/screen/personal_wallet_loading.dart';
 
 import '../../../../domain/entities/wallet/wallet.dart';
 import '../../../blocs/wallet/wallet_bloc.dart';

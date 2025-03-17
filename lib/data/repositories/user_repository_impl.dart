@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:home_clean/core/base/base_model.dart';
 import '../../core/constant/constants.dart';
 import 'package:home_clean/core/exception/exception_handler.dart';
@@ -93,6 +95,34 @@ class UserRepositoryImpl implements UserRepository {
         await userLocalDatasource.saveUser(userResponse.data);
         UserModel userModel = UserMapper.toModel(userResponse.data);
         return UserMapper.toEntity(userModel);
+      } else {
+        throw ApiException(
+          traceId: userResponse.data['traceId'],
+          code: userResponse.data['code'],
+          message: userResponse.data['message'] ?? 'Lỗi từ máy chủ',
+          description: userResponse.data['description'],
+          timestamp: userResponse.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<bool> checkInfo(String? phoneNumber, String? email, String? username) async {
+    try {
+      final userResponse = await vinWalletRequest.get(
+        '${ApiConstant.users}/check-info',
+        queryParameters: {
+          'phoneNumber': phoneNumber,
+          'email': email,
+          'username': username,
+        },
+      );
+
+      if (userResponse.statusCode == 200 && userResponse.data != null) {
+        return true;
       } else {
         throw ApiException(
           traceId: userResponse.data['traceId'],

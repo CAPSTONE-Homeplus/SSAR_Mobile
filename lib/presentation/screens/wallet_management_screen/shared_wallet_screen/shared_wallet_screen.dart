@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_clean/presentation/screens/wallet_management_screen/shared_wallet_screen/screen/shared_wallet.dart';
-import 'package:home_clean/presentation/screens/wallet_management_screen/shared_wallet_screen/screen/shared_wallet_error.dart';
-import 'package:home_clean/presentation/screens/wallet_management_screen/shared_wallet_screen/screen/shared_wallet_loading.dart';
+import 'package:home_clean/presentation/widgets/show_dialog.dart';
 
 import '../../../../core/constant/constants.dart';
 import '../../../../domain/entities/wallet/wallet.dart';
@@ -31,9 +30,7 @@ class _SharedWalletScreenState extends State<SharedWalletScreen> {
       body: BlocListener<SharedWalletBloc, WalletState>(
         listener: (context, walletState) {
           if (walletState is WalletError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Có lỗi xảy ra!')),
-            );
+            showCustomErrorDialog(context: context, errorMessage: walletState.message);
           }
         },
         child: BlocBuilder<SharedWalletBloc, WalletState>(

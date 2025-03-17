@@ -35,7 +35,7 @@ class _PersonalWalletState extends State<PersonalWallet> with SingleTickerProvid
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: CustomAppBar(
-        title: 'Ví chung',
+        title: 'Ví riêng',
         onNotificationPressed: () {
         },
         onBackPressed: () {

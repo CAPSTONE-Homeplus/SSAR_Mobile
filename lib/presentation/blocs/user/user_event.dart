@@ -31,3 +31,14 @@ class GetUserByPhoneNumberEvent extends UserEvent {
   @override
   List<Object?> get props => [phone];
 }
+
+class CheckUserInfoEvent extends UserEvent {
+  final String? phoneNumber;
+  final String? email;
+  final String? username;
+
+  CheckUserInfoEvent({this.phoneNumber, this.email, this.username});
+
+  @override
+  List<Object?> get props => [phoneNumber, email, username];
+}

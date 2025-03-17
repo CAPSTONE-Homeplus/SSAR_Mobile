@@ -6,19 +6,15 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../../domain/entities/notification/notification.dart';
 import '../../../domain/use_cases/notification/connect_to_notification_hub_use_case.dart';
-import '../../../domain/use_cases/notification/delete_notification_use_case.dart';
 import '../../../domain/use_cases/notification/disconnect_from_notification_hub_use_case.dart';
 import '../../../domain/use_cases/notification/get_notifications_use_case.dart';
 import '../../../domain/use_cases/notification/listen_for_notifications_use_case.dart';
-import '../../../domain/use_cases/notification/mark_notification_as_read_use_case.dart';
 
 part 'notification_event.dart';
 part 'notification_state.dart';
 
 class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   final GetNotificationsUseCase getNotificationsUseCase;
-  final MarkNotificationAsReadUseCase markAsReadUseCase;
-  final DeleteNotificationUseCase deleteNotificationUseCase;
   final ConnectToNotificationHubUseCase connectToHubUseCase;
   final DisconnectFromNotificationHubUseCase disconnectFromHubUseCase;
   final ListenForNotificationsUseCase listenForNotificationsUseCase;
@@ -28,8 +24,6 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
 
   NotificationBloc({
     required this.getNotificationsUseCase,
-    required this.markAsReadUseCase,
-    required this.deleteNotificationUseCase,
     required this.connectToHubUseCase,
     required this.disconnectFromHubUseCase,
     required this.listenForNotificationsUseCase,
@@ -37,8 +31,6 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   }) : super(NotificationInitial()) {
     on<LoadNotificationsEvent>(_onLoadNotifications);
     on<RefreshNotificationsEvent>(_onRefreshNotifications);
-    on<MarkAsReadEvent>(_onMarkAsRead);
-    on<DeleteNotificationEvent>(_onDeleteNotification);
     on<NewNotificationReceivedEvent>(_onNewNotificationReceived);
     on<ConnectToHubEvent>(_onConnectToHub);
     on<DisconnectFromHubEvent>(_onDisconnectFromHub);
@@ -83,30 +75,6 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     try {
       final notifications = await getNotificationsUseCase();
       emit(NotificationLoaded(notifications));
-    } catch (e) {
-      emit(NotificationError(e.toString()));
-    }
-  }
-
-  Future<void> _onMarkAsRead(
-      MarkAsReadEvent event,
-      Emitter<NotificationState> emit,
-      ) async {
-    try {
-      await markAsReadUseCase(event.notificationId);
-      add(RefreshNotificationsEvent());
-    } catch (e) {
-      emit(NotificationError(e.toString()));
-    }
-  }
-
-  Future<void> _onDeleteNotification(
-      DeleteNotificationEvent event,
-      Emitter<NotificationState> emit,
-      ) async {
-    try {
-      await deleteNotificationUseCase(event.notificationId);
-      add(RefreshNotificationsEvent());
     } catch (e) {
       emit(NotificationError(e.toString()));
     }

@@ -17,7 +17,7 @@ class AuthBloc
   final UserRegisterUseCase userRegisterUseCase;
   User? _user;
 
-  User? getUser() => _user;
+  User? get currentUser => _user;
 
   AuthBloc({
     required this.loginUseCase,

@@ -9,24 +9,6 @@ class LoadNotificationsEvent extends NotificationEvent {}
 
 class RefreshNotificationsEvent extends NotificationEvent {}
 
-class MarkAsReadEvent extends NotificationEvent {
-  final String notificationId;
-
-  MarkAsReadEvent(this.notificationId);
-
-  @override
-  List<Object?> get props => [notificationId];
-}
-
-class DeleteNotificationEvent extends NotificationEvent {
-  final String notificationId;
-
-  DeleteNotificationEvent(this.notificationId);
-
-  @override
-  List<Object?> get props => [notificationId];
-}
-
 class NewNotificationReceivedEvent extends NotificationEvent {
   final NotificationEntity notification;
 

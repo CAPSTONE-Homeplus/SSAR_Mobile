@@ -37,7 +37,7 @@ class _SharedWalletState extends State<SharedWallet> with SingleTickerProviderSt
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: CustomAppBar(
-        title: 'Ví riêng',
+        title: 'Ví chung',
         onNotificationPressed: () {
         },
         onBackPressed: () {

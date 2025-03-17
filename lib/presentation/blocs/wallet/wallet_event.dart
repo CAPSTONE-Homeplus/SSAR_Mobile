@@ -88,3 +88,16 @@ class DeleteWallet extends WalletEvent {
 
 }
 
+class GetContributionStatistics extends WalletEvent {
+  final String walletId;
+  final int days;
+
+  GetContributionStatistics({
+    required this.walletId,
+    required this.days,
+  });
+
+  @override
+  List<Object> get props => [walletId, days];
+}
+

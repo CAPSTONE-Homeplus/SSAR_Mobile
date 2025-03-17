@@ -79,17 +79,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 itemBuilder: (context, index) {
                   return NotificationItem(
                     notification: notifications[index],
-                    onTap: () {
-                      context.read<NotificationBloc>().add(
-                        MarkAsReadEvent(notifications[index].id),
-                      );
-                      _showNotificationDetails(context, notifications[index]);
-                    },
-                    onDismiss: () {
-                      context.read<NotificationBloc>().add(
-                        DeleteNotificationEvent(notifications[index].id),
-                      );
-                    },
                   );
                 },
               ),

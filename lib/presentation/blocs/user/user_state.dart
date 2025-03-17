@@ -35,6 +35,15 @@ class UserLoadedByPhone extends UserState {
   List<Object?> get props => [user];
 }
 
+class CheckUserInfoSuccess extends UserState {
+  final bool isClear;
+
+  CheckUserInfoSuccess(this.isClear);
+
+  @override
+  List<Object?> get props => [isClear];
+}
+
 class UserError extends UserState {
   final String message;
 

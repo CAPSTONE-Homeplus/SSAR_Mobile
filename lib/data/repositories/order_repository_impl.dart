@@ -26,7 +26,8 @@ class OrderRepositoryImpl implements OrderRepository {
         "address": createOrder.address,
         "notes": createOrder.notes.toString(),
         "emergencyRequest": createOrder.emergencyRequest,
-        "timeSlotId": createOrder.timeSlot.id.toString(),
+        if (createOrder.timeSlot.id != null && createOrder.timeSlot.id.toString().isNotEmpty)
+          'timeSlotId': createOrder.timeSlot.id.toString(),
         "serviceId": createOrder.service.id.toString(),
         "userId": user.id.toString(),
         "houseTypeId": createOrder.houseTypeId.toString(),

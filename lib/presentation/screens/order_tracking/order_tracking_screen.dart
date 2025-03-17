@@ -1,94 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_clean/core/constant/colors.dart';
+import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
+
+import '../../../core/enums/step_status.dart';
+import '../../../core/enums/sub_activity_status.dart';
+import '../../../domain/entities/order/order_tracking.dart';
+import '../../blocs/order_tracking/order_tracking_bloc.dart';
+import '../../blocs/order_tracking/order_tracking_event.dart';
+import '../../blocs/order_tracking/order_tracking_state.dart';
 
 class OrderTrackingScreen extends StatefulWidget {
-  const OrderTrackingScreen({Key? key}) : super(key: key);
+  final String orderId;
+
+  OrderTrackingScreen({required this.orderId});
 
   @override
   _OrderTrackingScreenState createState() => _OrderTrackingScreenState();
 }
 
 class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTickerProviderStateMixin {
-
-  final List<OrderStep> _orderSteps = [
-    OrderStep(
-      title: 'Đặt dịch vụ',
-      description: 'Đơn hàng đã được xác nhận',
-      time: '10:30 AM',
-      status: StepStatus.completed,
-    ),
-    OrderStep(
-      title: 'Đang tìm người làm',
-      description: 'Đang ghép đôi với người làm phù hợp',
-      time: '10:35 AM',
-      status: StepStatus.completed,
-    ),
-    OrderStep(
-      title: 'Người làm đang chuẩn bị',
-      description: 'Nhân viên Nguyễn Văn A đang chuẩn bị làm việc',
-      time: '11:00 AM',
-      status: StepStatus.completed,
-    ),
-    OrderStep(
-      title: 'Người làm đã đến',
-      description: 'Nhân viên Nguyễn Văn A đang thực hiện công việc',
-      time: '11:30 AM',
-      status: StepStatus.current,
-      subActivities: [
-        SubActivity(
-          title: 'Dọn phòng khách',
-          status: SubActivityStatus.inProgress,
-          estimatedTime: '30 phút',
-        ),
-        SubActivity(
-          title: 'Dọn bếp',
-          status: SubActivityStatus.pending,
-          estimatedTime: '45 phút',
-        ),
-        SubActivity(
-          title: 'Lau sàn',
-          status: SubActivityStatus.pending,
-          estimatedTime: '20 phút',
-        ),
-      ],
-    ),
-    OrderStep(
-      title: 'Hoàn thành dịch vụ',
-      description: 'Chờ xác nhận hoàn tất',
-      time: '--:--',
-      status: StepStatus.pending,
-    ),
-  ];
+  late List<OrderStep> _orderSteps = [];
 
   @override
   void initState() {
     super.initState();
+    context.read<OrderTrackingBloc>().add(ConnectToHubEvent());
+    context.read<OrderTrackingBloc>().add(GetOrderTrackingByIdEvent(widget.orderId));
   }
-
+ỏ
   @override
   void dispose() {
+    context.read<OrderTrackingBloc>().add(DisconnectFromHubEvent());
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.green[700]),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          'Theo dõi đơn hàng',
-          style: GoogleFonts.poppins(
-            color: Colors.green[800],
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+      appBar: CustomAppBar(title: 'Theo dõi đơn hàng', onBackPressed: () {
+        Navigator.of(context).pop();
+      }),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -125,40 +80,85 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
           ),
         ),
         const SizedBox(height: 10),
-        ...List.generate(_orderSteps.length, (index) {
-          final step = _orderSteps[index];
-          return _buildTrackingStepItem(step, index < _orderSteps.length - 1);
-        }),
+        BlocConsumer<OrderTrackingBloc, OrderTrackingState>(
+          listener: (context, state) {
+            if (state is OrderTrackingLoaded || state is OrderTrackingUpdated) {
+              // Lấy OrderTracking từ state và chuyển đổi thành OrderSteps
+              OrderTracking tracking;
+              if (state is OrderTrackingLoaded) {
+                tracking = state.tracking;
+              } else {
+                tracking = (state as OrderTrackingUpdated).tracking;
+              }
+
+              setState(() {
+                // Chuyển đổi từ định dạng OrderTracking sang OrderStep
+                // Lưu ý: Bạn cần thêm hàm fromJson vào class OrderStep hoặc điều chỉnh cách chuyển đổi
+                _orderSteps = tracking.steps
+                    .map((step) => OrderStep.fromJson(step))
+                    .toList();
+              });
+            }
+          },
+          builder: (context, state) {
+            if (state is OrderTrackingLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (state is OrderTrackingError) {
+              return Center(
+                child: Text(
+                  state.message,
+                  style: GoogleFonts.poppins(color: Colors.red),
+                ),
+              );
+            }
+
+            return _orderSteps.isEmpty
+                ? Center(
+              child: Text(
+                'Không có thông tin theo dõi đơn hàng',
+                style: GoogleFonts.poppins(),
+              ),
+            )
+                : Column(
+              children: List.generate(_orderSteps.length, (index) {
+                final step = _orderSteps[index];
+                return _buildTrackingStepItem(
+                    step,
+                    index < _orderSteps.length - 1
+                );
+              }),
+            );
+          },
+        ),
       ],
     );
   }
-
   Widget _buildTrackingStepItem(OrderStep step, bool showConnector) {
     Color getStepColor() {
-      switch (step.status) {
-        case StepStatus.completed:
-          return Colors.green;
-        case StepStatus.current:
-          return Colors.orange;
-        case StepStatus.pending:
+      switch (step.status.toLowerCase()) {
+        case "inprogress":
+          return Colors.orange[700]!;
+        case "completed":
+          return Colors.green[700]!;
+        case "pending":
+          return Colors.grey[400]!;
+        default:
           return Colors.grey;
       }
     }
 
+
     Widget stepIcon() {
-      IconData iconData;
-      switch (step.status) {
-        case StepStatus.completed:
-          iconData = Icons.check_circle;
-          return Icon(iconData, color: Colors.white, size: 20);
-        case StepStatus.current:
-          iconData = Icons.directions_run;
-          return Icon(iconData, color: Colors.white, size: 20);
-        case StepStatus.pending:
-          iconData = Icons.more_horiz;
-          return Icon(iconData, color: Colors.white, size: 20);
-      }
+      final iconData = {
+        StepStatus.inProgress: Icons.timer,
+        StepStatus.completed: Icons.check_circle,
+        StepStatus.pending: Icons.circle,
+      }[step.status] ?? Icons.help;
+      return Icon(iconData, color: Colors.white, size: 20);
     }
+
 
     return Column(
       children: [
@@ -224,36 +224,17 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
     );
   }
 
-  Widget _buildSubActivityItem(SubActivity subActivity) {
-    Color getSubActivityColor() {
-      switch (subActivity.status) {
-        case SubActivityStatus.inProgress:
-          return Colors.orange;
-        case SubActivityStatus.completed:
-          return Colors.green;
-        case SubActivityStatus.pending:
-          return Colors.grey;
-      }
-    }
 
-    IconData getSubActivityIcon() {
-      switch (subActivity.status) {
-        case SubActivityStatus.inProgress:
-          return Icons.directions_run;
-        case SubActivityStatus.completed:
-          return Icons.check_circle;
-        case SubActivityStatus.pending:
-          return Icons.more_horiz;
-      }
-    }
+  Widget _buildSubActivityItem(ActivityStatus subActivity) {
 
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Row(
         children: [
           Icon(
-            getSubActivityIcon(),
-            color: getSubActivityColor(),
+            subActivity.status == SubActivityStatus.completed
+                ? Icons.check_circle
+                : Icons.more_horiz,
             size: 16,
           ),
           const SizedBox(width: 10),
@@ -262,7 +243,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  subActivity.title,
+                  subActivity.title ?? '',
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: Colors.grey[800],
@@ -307,7 +288,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
           CircleAvatar(
             backgroundColor: Colors.green[100],
             radius: 30,
-            child: Icon(Icons.person, color: Colors.green[700], size: 40),
+            child: Icon(Icons.person, color: AppColors.primaryColor, size: 40),
           ),
           const SizedBox(width: 15),
           Expanded(
@@ -434,46 +415,4 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
       ),
     );
   }
-// Giữ nguyên các phương thức khác như _buildOrderDetailsCard(), _buildServiceWorkerCard(), _buildBottomActionBar()
-// Như trong code trước đó
-}
-
-enum StepStatus {
-  completed,
-  current,
-  pending,
-}
-
-enum SubActivityStatus {
-  pending,
-  inProgress,
-  completed,
-}
-
-class OrderStep {
-  final String title;
-  final String description;
-  final String time;
-  final StepStatus status;
-  final List<SubActivity>? subActivities;
-
-  OrderStep({
-    required this.title,
-    required this.description,
-    required this.time,
-    required this.status,
-    this.subActivities,
-  });
-}
-
-class SubActivity {
-  final String title;
-  final SubActivityStatus status;
-  final String estimatedTime;
-
-  SubActivity({
-    required this.title,
-    required this.status,
-    required this.estimatedTime,
-  });
 }

@@ -14,7 +14,7 @@ class TransactionPopup extends StatelessWidget {
       listener: (context, state) {
         if (state is TransactionSuccess) {
           Navigator.pop(context);
-          AppRouter.navigateToOrderTracking();
+          AppRouter.navigateToOrderTracking(state.transaction.orderId ?? "");
         }
       },
       builder: (context, state) {

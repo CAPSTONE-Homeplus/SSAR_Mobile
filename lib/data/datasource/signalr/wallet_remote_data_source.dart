@@ -70,7 +70,7 @@ class WalletRemoteDataSource {
 
     print('📢 Nhận thông báo từ $source: $message');
     _walletNotificationController.add(notification);
-    NotificationService.showNotification("Giao dịch ví mời", message);
+    NotificationService.showNotification("Ví", message);
   }
 
 
@@ -103,19 +103,4 @@ class WalletRemoteDataSource {
     return currentToken ?? '';
   }
 
-  Future<List<NotificationModel>> fetchNotifications() async {
-    // Giả định API gọi để lấy thông báo từ server
-    await Future.delayed(Duration(seconds: 1)); // Giả lập độ trễ mạng
-    return []; // Trả về danh sách rỗng cho ví dụ này
-  }
-
-  Future<void> markAsRead(String notificationId) async {
-    // API call để đánh dấu thông báo đã đọc trên server
-    await Future.delayed(Duration(milliseconds: 300));
-  }
-
-  Future<void> deleteNotification(String notificationId) async {
-    // API call để xóa thông báo trên server
-    await Future.delayed(Duration(milliseconds: 300));
-  }
 }

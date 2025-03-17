@@ -5,8 +5,6 @@ import '../../../domain/entities/notification/notification.dart';
 
 class NotificationItem extends StatelessWidget {
   final NotificationEntity notification;
-  final VoidCallback onTap;
-  final VoidCallback onDismiss;
 
   // Định nghĩa màu chính - tương tự bTaskee
   static final Color primaryColor = const Color(0xFF1CAF7D);
@@ -14,8 +12,6 @@ class NotificationItem extends StatelessWidget {
   const NotificationItem({
     Key? key,
     required this.notification,
-    required this.onTap,
-    required this.onDismiss,
   }) : super(key: key);
 
   @override
@@ -29,7 +25,6 @@ class NotificationItem extends StatelessWidget {
         child: Icon(Icons.delete_outline, color: Colors.white),
       ),
       direction: DismissDirection.endToStart,
-      onDismissed: (_) => onDismiss(),
       child: Container(
         decoration: BoxDecoration(
           color: notification.isRead ? Colors.white : Colors.green.shade50,
@@ -41,7 +36,6 @@ class NotificationItem extends StatelessWidget {
           ),
         ),
         child: InkWell(
-          onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: Row(

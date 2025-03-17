@@ -17,7 +17,7 @@ class GetPaymentMethodsUseCase {
       final result = await _paymentMethodRepository.getPaymentMethods(
           search, orderBy, page, size);
       return Right(result);
-    }  on ApiException catch (e) {
+    } on ApiException catch (e) {
       return Left(ApiFailure(e.description ?? 'Lỗi API không xác định!'));
     } catch (e) {
       return Left(ServerFailure('Lỗi hệ thống: ${e.toString()}'));

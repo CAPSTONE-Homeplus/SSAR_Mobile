@@ -11,4 +11,5 @@ abstract class UserRepository {
       int? page,
       int? size,);
   Future<User> getUserByPhone(String phone);
+  Future<bool> checkInfo(String? phoneNumber, String? email, String? username);
 }

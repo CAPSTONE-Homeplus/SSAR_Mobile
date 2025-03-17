@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/size_config.dart';
+import 'package:home_clean/data/datasource/local/local_data_source.dart';
 import 'package:home_clean/presentation/blocs/theme/theme_bloc.dart';
+import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+import '../../../core/dependencies_injection/service_locator.dart';
 import '../../../core/router/app_router.dart';
+import '../../../domain/entities/user/user.dart';
+import '../../../domain/use_cases/local/cear_all_data_use_case.dart';
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_event.dart';
+import '../../blocs/auth/auth_state.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -14,25 +23,38 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _isDarkMode = false;
+  User currentUser = User(id: '', fullName: '', phoneNumber: '');
   bool _isNotificationsEnabled = false;
-  bool _isBiometricEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initData();
+  }
+
+  Future<void> _initData() async {
+    final authBloc = context.read<AuthBloc>();
+    authBloc.add(GetUserFromLocal());
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Settings',
-          style: GoogleFonts.poppins(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+    return BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, authState) {
+      // Handle different authentication states
+      if (authState is AuthenticationLoading) {
+        return Scaffold(
+          appBar: CustomAppBar(title: 'Cài đặt'),
+          body: Center(
+            child: CircularProgressIndicator(),
           ),
-        ),
-      ),
+        );
+      }
+
+      if (authState is AuthenticationFromLocal) {
+        final currentUser = authState.user;
+    return Scaffold(
+      appBar: CustomAppBar(title: 'Cài đặt'),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,34 +77,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           color: Color(0xFF1CAF7D),
                         ),
                       ),
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          padding: EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Color(0xFF1CAF7D),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.camera_alt,
-                            size: 20,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'John Doe',
+                    currentUser.fullName ?? 'Người dùng',
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   Text(
-                    '+84 123 456 789',
+                    '${currentUser.phoneNumber}',
                     style: GoogleFonts.poppins(
                       color: Colors.grey,
                       fontSize: 14,
@@ -92,48 +98,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             SizedBox(height: 16),
-
-            // Account Settings
-            _buildSectionHeader('Account Settings'),
+            _buildSectionHeader('Cài đặt tài khoản'),
             Container(
               color: Colors.white,
               child: Column(
                 children: [
                   _buildSettingItem(
                     icon: Icons.person_outline,
-                    title: 'Edit Profile',
-                    subtitle: 'Change your personal information',
-                    onTap: () {},
-                  ),
-                  _buildDivider(),
-                  _buildSettingItem(
-                    icon: Icons.location_on_outlined,
-                    title: 'Saved Addresses',
-                    subtitle: 'Manage your saved locations',
-                    onTap: () {},
-                  ),
-                  _buildDivider(),
-                  _buildSettingItem(
-                    icon: Icons.payment_outlined,
-                    title: 'Payment Methods',
-                    subtitle: 'Add or remove payment options',
+                    title: 'Thông tin cá nhân',
+                    subtitle: 'Cập nhật thông tin cá nhân',
                     onTap: () {},
                   ),
                 ],
               ),
             ),
             SizedBox(height: 16),
-
-            // App Settings
-            _buildSectionHeader('App Settings'),
+            _buildSectionHeader('Cài đặt ứng dụng'),
             Container(
               color: Colors.white,
               child: Column(
                 children: [
                   _buildSettingItem(
                     icon: Icons.notifications_outlined,
-                    title: 'Notifications',
-                    subtitle: 'Manage your notifications',
+                    title: 'Thông báo',
+                    subtitle: 'Cho phép thông báo',
                     showToggle: true,
                     value: _isNotificationsEnabled,
                     onChanged: (value) {
@@ -141,99 +129,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         _isNotificationsEnabled = value;
                       });
                     },
-                    onTap: () {},
-                  ),
-                  _buildDivider(),
-                  _buildSettingItem(
-                    icon: Icons.language_outlined,
-                    title: 'Language',
-                    subtitle: 'English',
-                    showArrow: true,
-                    onTap: () {},
-                  ),
-                  _buildDivider(),
-                  _buildSettingItem(
-                    icon: Icons.dark_mode_outlined,
-                    title: 'Dark Mode',
-                    subtitle: 'Change app appearance',
-                    showToggle: true,
-                    value: _isDarkMode,
-                    onChanged: (value) {
-                      setState(() {
-                        _isDarkMode = value;
-                      });
-                      context.read<ThemeBloc>().add(ToggleTheme());
-                    },
-                    onTap: () {
-                      context.read<ThemeBloc>().add(ToggleTheme());
-                    },
+                    onTap: _handleNotificationPermission,
                   ),
                 ],
               ),
             ),
             SizedBox(height: 16),
-
-            // Security
-            _buildSectionHeader('Security'),
+            _buildSectionHeader('Hỗ trợ & Thông tin'),
             Container(
               color: Colors.white,
               child: Column(
                 children: [
-                  _buildSettingItem(
-                    icon: Icons.fingerprint,
-                    title: 'Biometric Authentication',
-                    subtitle: 'Enable fingerprint login',
-                    showToggle: true,
-                    value: _isBiometricEnabled,
-                    onChanged: (value) {
-                      setState(() {
-                        _isBiometricEnabled = value;
-                      });
-                    },
-                    onTap: () {},
-                  ),
-                  _buildDivider(),
-                  _buildSettingItem(
-                    icon: Icons.lock_outline,
-                    title: 'Change Password',
-                    subtitle: 'Update your password',
-                    onTap: () {},
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 16),
-
-            // Support & About
-            _buildSectionHeader('Support & About'),
-            Container(
-              color: Colors.white,
-              child: Column(
-                children: [
-                  _buildSettingItem(
-                    icon: Icons.help_outline,
-                    title: 'Help Center',
-                    subtitle: 'Get help and support',
-                    onTap: () {},
-                  ),
-                  _buildDivider(),
                   _buildSettingItem(
                     icon: Icons.privacy_tip_outlined,
-                    title: 'Privacy Policy',
-                    subtitle: 'Read our privacy policy',
+                    title: 'Chính sách bảo mật',
+                    subtitle: 'Chính sách bảo mật của chúng tôi',
                     onTap: () {},
                   ),
                   _buildDivider(),
                   _buildSettingItem(
                     icon: Icons.description_outlined,
-                    title: 'Terms of Service',
-                    subtitle: 'Read our terms of service',
+                    title: 'Điều khoản dịch vụ',
+                    subtitle: 'Điều khoản dịch vụ của chúng tôi',
                     onTap: () {},
                   ),
                   _buildDivider(),
                   _buildSettingItem(
                     icon: Icons.info_outline,
-                    title: 'About',
+                    title: 'Phiên bản',
                     subtitle: 'Version 1.0.0',
                     onTap: () {},
                   ),
@@ -247,6 +170,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               padding: EdgeInsets.all(16),
               child: ElevatedButton(
                 onPressed: () {
+                  sl<ClearAllDataUseCase>().call();
                   AppRouter.navigateToLogin();
                 },
                 style: ElevatedButton.styleFrom(
@@ -267,6 +191,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
+      }
+      return SizedBox.shrink();
+    });
   }
 
   Widget _buildSectionHeader(String title) {
@@ -290,8 +217,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool showArrow = false,
     bool showToggle = false,
     bool value = false,
-    required VoidCallback onTap,
-    ValueChanged<bool>? onChanged,
+    Function(bool)? onChanged,
+    VoidCallback? onTap,
   }) {
     return InkWell(
       onTap: onTap,
@@ -343,6 +270,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+
   Widget _buildDivider() {
     return Divider(
       height: 1,
@@ -351,5 +279,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
       indent: 16,
       endIndent: 16,
     );
+  }
+
+
+  Future<void> _handleNotificationPermission() async {
+    // Request notification permission
+    final status = await Permission.notification.request();
+
+    if (status.isGranted) {
+      setState(() {
+        _isNotificationsEnabled = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đã cấp quyền thông báo')),
+      );
+    } else if (status.isDenied) {
+      await _showPermissionDialog();
+    } else if (status.isPermanentlyDenied) {
+      await _openAppSettings();
+    }
+  }
+
+  Future<void> _showPermissionDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Quyền thông báo'),
+          content: Text('Bạn cần cấp quyền thông báo cho ứng dụng. Bạn có muốn mở cài đặt ứng dụng không?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Không'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Có'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _openAppSettings();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _openAppSettings() async {
+    await openAppSettings();
   }
 }

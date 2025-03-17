@@ -25,3 +25,4 @@ class RegisterAccount extends AuthEvent {
 
   RegisterAccount({required this.fullName, required this.username, required this.password, required this.buildingCode, required this.houseCode, required this.phoneNumber, required this.email});
 }
+

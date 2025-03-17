@@ -3,6 +3,7 @@ import 'package:home_clean/data/datasource/local/wallet_local_data_source.dart';
 import 'package:home_clean/data/mappers/auth/auth_mapper.dart';
 import 'package:home_clean/data/mappers/wallet/wallet_mapper.dart';
 import 'package:home_clean/data/models/wallet/wallet_model.dart';
+import 'package:home_clean/domain/entities/contribution_statistics/contribution_statistics.dart';
 
 import '../../core/constant/constants.dart';
 import '../../core/exception/exception_handler.dart';
@@ -21,12 +22,10 @@ import '../models/user/user_model.dart';
 class WalletRepositoryImpl implements WalletRepository {
   final AuthLocalDataSource authLocalDataSource;
   final UserLocalDatasource userLocalDatasource;
-  final WalletLocalDataSource localDataSource;
 
   WalletRepositoryImpl({
     required this.authLocalDataSource,
     required this.userLocalDatasource,
-    required this.localDataSource,
   });
   @override
   Future<BaseResponse<Wallet>> getWalletByUser(
@@ -194,11 +193,40 @@ class WalletRepositoryImpl implements WalletRepository {
           message: response.data['message'] ?? 'Lỗi từ máy chủ',
           description: response.data['description'],
           timestamp: response.data['timestamp'],
+);
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<ContributionStatistics> getContributionStatistics(String walletId, int days) async {
+    try {
+      final response = await vinWalletRequest.get(
+        '${ApiConstant.wallets}/$walletId/contribution-statistics',
+        queryParameters: {
+          'id': walletId,
+          'days': days,
+        },
+      );
+      if (response.statusCode == 200 && response.data == true) {
+        ContributionStatistics contributionStatistics = ContributionStatistics.fromJson(response.data);
+        return contributionStatistics;
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
         );
       }
     } catch (e) {
       throw ExceptionHandler.handleException(e);
     }
   }
+
+
 
 }

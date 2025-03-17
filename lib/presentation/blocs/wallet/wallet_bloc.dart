@@ -8,6 +8,7 @@ import 'package:home_clean/presentation/blocs/wallet/wallet_event.dart';
 import 'package:home_clean/presentation/blocs/wallet/wallet_state.dart';
 
 import '../../../core/constant/constants.dart';
+import '../../../domain/use_cases/wallet/get_contribution_statistic_use_case.dart';
 
 class WalletBloc extends Bloc<WalletEvent, WalletState> {
   final GetWalletByUserUseCase getWalletByUser;
@@ -15,17 +16,20 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   final InviteMemberWalletUseCase inviteMemberUseCase;
   final ChangeOwnerUseCase changeOwnerUseCase;
   final DeleteUserWalletUseCase deleteUserUseCase;
+  final GetContributionStatisticUseCase getContributionStatisticUseCase;
 
   WalletBloc({required this.getWalletByUser,
     required this.createWalletUseCase,
     required this.inviteMemberUseCase,
     required this.changeOwnerUseCase,
-    required this.deleteUserUseCase}) : super(WalletInitial()) {
+    required this.deleteUserUseCase,
+    required this.getContributionStatisticUseCase}) : super(WalletInitial()) {
     on<GetWallet>(_onGetWallet);
     on<CreateWallet>(_onCreateWallet);
     on<InviteMember>(_onInviteMember);
     on<ChangeOwner>(_onChangeOwner);
     on<DeleteWallet>(_onDeleteWallet);
+    on<GetContributionStatistics>(_onGetContributionStatistic);
   }
 
   Future<void> _onGetWallet(
@@ -92,6 +96,18 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     response.fold(
           (failure) => emit(WalletError(message: failure.message)),
           (result) => emit(WalletDeleteSuccess(result: result)),
+    );
+  }
+
+  Future<void> _onGetContributionStatistic(
+    GetContributionStatistics event,
+    Emitter<WalletState> emit,
+  ) async {
+    emit(WalletLoading());
+    final response = await getContributionStatisticUseCase.execute(event.walletId, event.days);
+    response.fold(
+          (failure) => emit(WalletError(message: failure.message)),
+          (result) => emit(WalletContributionStatisticsLoaded(contributionStatistics: result)),
     );
   }
 
