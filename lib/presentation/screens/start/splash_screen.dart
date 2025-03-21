@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/router/app_router.dart';
+import 'package:home_clean/domain/entities/refresh_token/refresh_token_model.dart';
 import 'package:home_clean/presentation/screens/login/login_screen.dart';
 
 import '../../../core/request/request.dart';
 import '../../../data/datasource/local/auth_local_datasource.dart';
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_event.dart';
+import '../../blocs/auth/auth_state.dart';
 import '../../widgets/bottom_navigation.dart';
 import '../home/home_screen.dart';
 
@@ -62,7 +67,17 @@ class _SplashScreenState extends State<SplashScreen>
       homeCleanRequest.options.headers['Authorization'] = 'Bearer $accessToken';
       AppRouter.navigateToHome();
     } else {
-      navigateToLogin();
+      // context.read<AuthBloc>().add(RefreshTokenEvent());
+      // BlocListener<AuthBloc, AuthState>(
+      //   listener: (context, state) {
+      //     if (state is RefreshTokenSuccess) {
+      //       navigateToHome();
+      //     } else {
+      //       navigateToLogin();
+      //     }
+      //   },
+      // );
+      AppRouter.navigateToLogin();
     }
   }
 

@@ -9,12 +9,14 @@ class WalletCardWidget extends StatelessWidget {
   final int index;
   final List<Wallet> walletUserList;
   final double fem;
+  final VoidCallback? onTap;
 
   const WalletCardWidget({
     super.key,
     required this.index,
     required this.walletUserList,
     required this.fem,
+    this.onTap,
   });
 
   @override
@@ -23,31 +25,34 @@ class WalletCardWidget extends StatelessWidget {
     final isPersonal = wallet.type == 'Personal';
     final isSingleWallet = walletUserList.length == 1;
 
-    return Container(
-      width: isSingleWallet ? double.infinity : double.infinity,
-      height: isSingleWallet ? 110 * fem : null,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12 * fem),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.2),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: isSingleWallet ? double.infinity : double.infinity,
+        height: isSingleWallet ? 110 * fem : null,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(12 * fem),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.2),
+            width: 1,
           ),
-        ],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: isSingleWallet ? 18 * fem : 16 * fem,
+          vertical: isSingleWallet ? 16 * fem : 16 * fem,
+        ),
+        child: isSingleWallet
+            ? _buildSingleWalletLayout(wallet, isPersonal, context)
+            : _buildMultiWalletLayout(wallet, isPersonal),
       ),
-      padding: EdgeInsets.symmetric(
-        horizontal: isSingleWallet ? 16 * fem : 14 * fem,
-        vertical: isSingleWallet ? 14 * fem : 14 * fem,
-      ),
-      child: isSingleWallet
-          ? _buildSingleWalletLayout(wallet, isPersonal, context)
-          : _buildMultiWalletLayout(wallet, isPersonal),
     );
   }
 
@@ -60,9 +65,10 @@ class WalletCardWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: EdgeInsets.all(6 * fem),
+                  padding: EdgeInsets.all(12 * fem),
                   decoration: BoxDecoration(
                     color: isPersonal
                         ? Colors.orange.withOpacity(0.3)
@@ -84,34 +90,12 @@ class WalletCardWidget extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white,
+                  size: 8 * fem,
+                ),
               ],
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8 * fem, vertical: 4 * fem),
-              decoration: BoxDecoration(
-                color: isPersonal
-                    ? Colors.amber.withOpacity(0.2)
-                    : Colors.greenAccent.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12 * fem),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.brightness_1,
-                    color: isPersonal ? Colors.amber[300] : Colors.greenAccent[200],
-                    size: 8 * fem,
-                  ),
-                  SizedBox(width: 4 * fem),
-                  Text(
-                    isPersonal ? 'Cá nhân' : 'Chung',
-                    style: GoogleFonts.poppins(
-                      color: isPersonal ? Colors.amber[100] : Colors.greenAccent[100],
-                      fontSize: 11 * fem,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),
@@ -127,17 +111,33 @@ class WalletCardWidget extends StatelessWidget {
               ),
             ),
             SizedBox(height: 4 * fem),
-            Text(
-              Formater.formatCurrency(wallet.balance ?? 0),
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: 22 * fem,
-                fontWeight: FontWeight.bold,
-                height: 1,
-                letterSpacing: -0.5,
-              ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(right: 6 * fem),
+                  child: Icon(
+                    Icons.stars,
+                    color: Colors.amber,
+                    size: 24 * fem,
+                  ),
+                ),
+                Container(
+                  constraints: BoxConstraints(maxWidth: 150 * fem),
+                  child: Text(
+                    Formater.formatCurrency(wallet.balance ?? 0),
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 24 * fem,
+                      fontWeight: FontWeight.bold,
+                      height: 1,
+                      letterSpacing: -0.5,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -179,34 +179,38 @@ class WalletCardWidget extends StatelessWidget {
                 maxLines: 1,
               ),
             ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white.withOpacity(0.7),
+              size: 12 * fem,
+            ),
           ],
         ),
         SizedBox(height: 10 * fem),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            Padding(
+              padding: EdgeInsets.only(right: 6 * fem),
+              child: Icon(
+                Icons.stars,
+                color: Colors.amber,
+                size: 20 * fem,
+              ),
+            ),
             Container(
               constraints: BoxConstraints(maxWidth: 100 * fem),
               child: Text(
                 Formater.formatCurrency(wallet.balance ?? 0),
                 style: GoogleFonts.poppins(
                   color: Colors.white,
-                  fontSize: 18 * fem,
+                  fontSize: 14 * fem,
                   fontWeight: FontWeight.bold,
                   height: 1,
                   letterSpacing: -0.5,
                 ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
-              ),
-            ),
-            SizedBox(width: 4 * fem),
-            Padding(
-              padding: EdgeInsets.only(bottom: 2 * fem),
-              child: Icon(
-                Icons.brightness_1,
-                color: isPersonal ? Colors.amber[300] : Colors.greenAccent[200],
-                size: 8 * fem,
               ),
             ),
           ],

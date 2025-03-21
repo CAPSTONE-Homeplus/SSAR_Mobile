@@ -104,7 +104,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       emergencyRequest: isEmergency,
       address: '',
     );
-    AppRouter.navigateToOrderDetailWithArguments(createOrder);
+    AppRouter.navigateToOrderConfirmation(createOrder);
   }
 
   @override

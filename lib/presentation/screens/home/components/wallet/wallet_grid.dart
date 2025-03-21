@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:home_clean/presentation/screens/home/components/wallet/wallet_card.dart';
 
+import '../../../../../core/constant/constants.dart';
+import '../../../../../core/router/app_router.dart';
 import '../../../../../domain/entities/wallet/wallet.dart';
 
 class WalletGridWidget extends StatelessWidget {
@@ -32,8 +34,10 @@ class WalletGridWidget extends StatelessWidget {
         index: index,
         walletUserList: walletUserList,
         fem: fem,
+          onTap : () {
+            walletUserList[index].type == personalWalletString ? AppRouter.navigateToPersonalWallet() : AppRouter.navigateToSharedWallet();
+          },
       ),
     );
   }
-
 }

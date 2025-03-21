@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:home_clean/domain/use_cases/auth/refresh_token_use_case.dart';
 import 'package:home_clean/presentation/blocs/auth/auth_event.dart';
 
 import '../../../data/models/auth/login_model.dart';
@@ -15,17 +16,21 @@ class AuthBloc
   final LoginUseCase loginUseCase;
   final GetUserFromLocalUseCase getUserFromLocalUseCase;
   final UserRegisterUseCase userRegisterUseCase;
+  final RefreshTokenUseCase refreshTokenUseCase;
   User? _user;
 
   User? get currentUser => _user;
 
   AuthBloc({
     required this.loginUseCase,
-    required this.userRegisterUseCase, required this.getUserFromLocalUseCase,})
+    required this.userRegisterUseCase,
+    required this.getUserFromLocalUseCase,
+    required this.refreshTokenUseCase,})
       : super(AuthenticationInitial()) {
     on<LoginAccount>(_onLoginAccount);
     on<GetUserFromLocal>(_getUserFromLocal);
     on<RegisterAccount>(_onRegisterAccount);
+    on<RefreshTokenEvent>(_onRefreshToken);
   }
 
   Future<void> _onLoginAccount(
@@ -85,6 +90,20 @@ class AuthBloc
     result.fold(
           (failure) => emit(RegisterFailed(error: failure.message)),
           (_) => emit(RegisterSuccess()),
+    );
+  }
+
+  Future<void> _onRefreshToken(
+      RefreshTokenEvent event, Emitter<AuthState> emit) async {
+    emit(AuthenticationLoading());
+    final result = await refreshTokenUseCase.call();
+    result.fold(
+          (error) {
+        emit(AuthenticationFailed(error: error.message));
+      },
+          (_) {
+        emit(RefreshTokenSuccess());
+      },
     );
   }
 

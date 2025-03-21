@@ -34,3 +34,6 @@ class RegisterFailed extends AuthState {
 
   RegisterFailed({required this.error});
 }
+
+class RefreshTokenSuccess extends AuthState {
+}

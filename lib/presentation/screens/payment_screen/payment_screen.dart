@@ -18,6 +18,11 @@ class _PaymentWebViewState extends State<PaymentWebView> {
   double loadingProgress = 0.0;
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     controller = WebViewController()
@@ -137,7 +142,7 @@ class _PaymentWebViewState extends State<PaymentWebView> {
           elevation: 0.5,
           centerTitle: true,
           title: Text(
-            'Thanh toán an toàn',
+            'Thanh toán',
             style: GoogleFonts.poppins(
               color: Colors.black87,
               fontWeight: FontWeight.w600,
@@ -148,16 +153,6 @@ class _PaymentWebViewState extends State<PaymentWebView> {
             icon: Icon(Icons.arrow_back_ios, color: Colors.black87, size: 20),
             onPressed: () async {
               if (await controller.canGoBack()) {
-                controller.goBack();
-              } else {
-                Navigator.pop(context);
-              }
-            },
-          ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.close, color: Colors.black87),
-              onPressed: () {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
@@ -211,9 +206,12 @@ class _PaymentWebViewState extends State<PaymentWebView> {
                     ],
                   ),
                 );
-              },
-            ),
-          ],
+                controller.goBack();
+              } else {
+                Navigator.pop(context);
+              }
+            },
+          ),
         ),
         body: Stack(
           children: [

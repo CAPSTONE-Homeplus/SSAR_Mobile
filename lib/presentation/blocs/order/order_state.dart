@@ -23,3 +23,15 @@ class OrderError extends OrderState {
 
   OrderError(this.message);
 }
+
+class OrderLoaded extends OrderState {
+  final Orders order;
+
+  OrderLoaded(this.order);
+}
+
+class OrderCancelled extends OrderState {
+  final bool isCancelled;
+
+  OrderCancelled(this.isCancelled);
+}

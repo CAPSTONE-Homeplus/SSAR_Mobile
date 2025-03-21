@@ -85,6 +85,7 @@ import '../../domain/repositories/sub_activity_repository.dart';
 import '../../domain/repositories/time_slot_repository.dart';
 import '../../domain/repositories/wallet_repository.dart';
 import '../../domain/use_cases/auth/get_user_from_local_usecase.dart';
+import '../../domain/use_cases/auth/refresh_token_use_case.dart';
 import '../../domain/use_cases/auth/user_register_usecase.dart';
 import '../../domain/use_cases/building/get_building_use_case.dart';
 import '../../domain/use_cases/house/get_house_by_building_use_case.dart';
@@ -95,7 +96,9 @@ import '../../domain/use_cases/notification/disconnect_from_notification_hub_use
 import '../../domain/use_cases/notification/get_notifications_use_case.dart';
 import '../../domain/use_cases/notification/listen_for_notifications_use_case.dart';
 import '../../domain/use_cases/option/get_options_use_case.dart';
+import '../../domain/use_cases/order/cancel_order_use_case.dart';
 import '../../domain/use_cases/order/get_order_by_user_use_case.dart';
+import '../../domain/use_cases/order/get_order_use_case.dart';
 import '../../domain/use_cases/order_tracking/connect_to_order_tracking_hub_use_case.dart';
 import '../../domain/use_cases/order_tracking/disconnect_from_order_tracking_hub_use_case.dart';
 import '../../domain/use_cases/order_tracking/get_all_order_trackings_use_case.dart';
@@ -255,6 +258,9 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
   sl.registerLazySingleton(() => GetOrderTrackingByIdUseCase(sl()));
   sl.registerLazySingleton(() => GetLocalOrderTrackingsUseCase(sl()));
   sl.registerLazySingleton(() => DisconnectFromOrderTrackingHubUseCase(sl()));
+  sl.registerLazySingleton(() => RefreshTokenUseCase(sl()));
+  sl.registerLazySingleton(() => GetOrderUseCase(sl()));
+  sl.registerLazySingleton(() => CancelOrderUseCase(sl()));
   // local Use Cases
   sl.registerLazySingleton(() => GetUserFromLocalUseCase(sl()));
   sl.registerLazySingleton(() => GetOrderByUserUseCase(sl()));
@@ -264,7 +270,8 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
   sl.registerSingleton(() => AuthBloc(
       loginUseCase: sl(),
       userRegisterUseCase: sl(),
-      getUserFromLocalUseCase: sl()));
+      getUserFromLocalUseCase: sl(),
+      refreshTokenUseCase: sl()));
   sl.registerFactory(() => InternetBloc());
   sl.registerFactory(() => ThemeBloc(preferences: sl()));
   sl.registerFactory(
@@ -285,7 +292,10 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
   sl.registerFactory(
           () => EquipmentSupplyBloc(getEquipmentSuppliesUseCase: sl()));
   sl.registerFactory(() => TimeSlotBloc(getTimeSlotsUsecase: sl()));
-  sl.registerFactory(() => OrderBloc(createOrderUseCase: sl(), getOrderByUserUseCase: sl()));
+  sl.registerFactory(() => OrderBloc(createOrderUseCase: sl(),
+      getOrderByUserUseCase: sl(),
+      getOrderUseCase: sl(),
+      cancelOrderUseCase: sl()));
   sl.registerFactory(
         () => NotificationBloc(
       getNotificationsUseCase: sl(),

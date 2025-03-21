@@ -102,12 +102,12 @@ Widget _buildHomeScreen(List<Service> services, BuildContext context, List<Walle
             ffem: ffem,
             hem: hem,
           ),
-          WalletGrid(
-            wallets: walletUser,
-            fem: fem,
-            ffem: ffem,
-            hem: hem,
-          ),
+          // WalletGrid(
+          //   wallets: walletUser,
+          //   fem: fem,
+          //   ffem: ffem,
+          //   hem: hem,
+          // ),
         ],
       ),
     ),

@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:home_clean/core/base/base_model.dart';
 import 'package:home_clean/core/request/request.dart';
 import 'package:home_clean/data/datasource/local/user_local_datasource.dart';
@@ -9,6 +11,7 @@ import '../../../domain/repositories/order_repository.dart';
 import '../../core/constant/api_constant.dart';
 import '../../core/constant/constants.dart';
 import '../../core/exception/exception_handler.dart';
+import '../../domain/entities/order/cancellation_request.dart';
 import '../mappers/order/order_mapper.dart';
 import '../mappers/user/user_mapper.dart';
 import '../models/order/order_model.dart';
@@ -63,7 +66,7 @@ class OrderRepositoryImpl implements OrderRepository {
 
   @override
   Future<BaseResponse<Orders>> getOrdersByUser(String? search, String? orderBy, int? page, int? size) async {
-    try{
+    try {
       final user = UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
       final response = await homeCleanRequest.get(
         '${ApiConstant.orders}/by-user',
@@ -75,13 +78,19 @@ class OrderRepositoryImpl implements OrderRepository {
           'size': size ?? Constant.defaultSize
         },
       );
+
       if (response.statusCode == 200) {
         List<dynamic> data = response.data['items'] ?? [];
 
         List<Orders> orders = data
-            .map((item) => OrderMapper.toEntity(
-            OrderModel.fromJson(item)))
+            .map((item) => OrderMapper.toEntity(OrderModel.fromJson(item)))
             .toList();
+
+        // Sắp xếp đơn hàng
+        orders.sort((a, b) {
+          if (b.createdAt == null || a.createdAt == null) return 0;
+          return b.createdAt!.compareTo(a.createdAt!);
+        });
 
         return BaseResponse<Orders>(
           size: response.data['size'] ?? 0,
@@ -90,6 +99,65 @@ class OrderRepositoryImpl implements OrderRepository {
           totalPages: response.data['totalPages'] ?? 0,
           items: orders,
         );
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      print(e.toString());
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+
+  @override
+  Future<Orders> getOrder(String orderId) async {
+    try {
+      final response = await homeCleanRequest.get(
+        '${ApiConstant.orders}/$orderId',
+        queryParameters: {
+          'id': orderId,
+        },
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return OrderMapper.toEntity(OrderMapper.fromMapToOrderModel(response.data));
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      print(e.toString());
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<bool> cancelOrder(String orderId, CancellationRequest cancellationRequest) async {
+    try {
+      final user = UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
+      final response = await homeCleanRequest.post(
+        '${ApiConstant.orders}/$orderId/cancel',
+        queryParameters: {
+          'id': orderId,
+        },
+        data: {
+          'cancellationReason': cancellationRequest.cancellationReason,
+          'refundMethod': cancellationRequest.refundMethod,
+          'cancelledBy': user.id,
+        },
+      );
+      if (response.data == true && response.statusCode == 200) {
+        return true;
       } else {
         throw ApiException(
           traceId: response.data['traceId'],

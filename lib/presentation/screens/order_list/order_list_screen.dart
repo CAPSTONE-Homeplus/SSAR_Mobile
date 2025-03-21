@@ -107,23 +107,23 @@ class _OrderListScreenState extends State<OrderListScreen> {
           controller: _searchController,
           onChanged: _filterOrders,
           style: GoogleFonts.poppins(
-            fontSize: SizeConfig.fem * 16,
+            fontSize: SizeConfig.ffem * 12,
           ),
           decoration: InputDecoration(
             hintText: 'Tìm kiếm đơn hàng...',
             hintStyle: GoogleFonts.poppins(
               color: Colors.grey[400],
-              fontSize: SizeConfig.hem * 16,
+              fontSize: SizeConfig.hem * 12,
             ),
             prefixIcon: Icon(
               Icons.search,
               color: const Color(0xFF1CAF7D),
-              size: SizeConfig.hem * 24,
+              size: SizeConfig.hem * 18,
             ),
             border: InputBorder.none,
             contentPadding: EdgeInsets.symmetric(
-              vertical: SizeConfig.fem * 16,
-              horizontal: SizeConfig.fem * 16,
+              vertical: SizeConfig.fem * 12,
+              horizontal: SizeConfig.fem * 12,
             ),
           ),
         ),
@@ -146,7 +146,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
 
   Widget _buildOrderCard(Orders order) {
     return Container(
-      margin: EdgeInsets.only(bottom: SizeConfig.fem * 16),
+      margin: EdgeInsets.only(bottom: SizeConfig.fem * 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -164,10 +164,10 @@ class _OrderListScreenState extends State<OrderListScreen> {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
-            AppRouter.navigateToOrderTracking(order.id ?? '');
+            AppRouter.navigateToOrderDetailWithArguments(order.id ?? '');
           },
           child: Padding(
-            padding: EdgeInsets.all(SizeConfig.hem * 16),
+            padding: EdgeInsets.all(SizeConfig.hem * 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -179,7 +179,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                         order.serviceType ?? 'Dịch vụ: Không xác định',
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
-                          fontSize: SizeConfig.hem * 18,
+                          fontSize: SizeConfig.hem * 14,
                           color: Colors.black87,
                         ),
                         maxLines: 1,
@@ -192,14 +192,14 @@ class _OrderListScreenState extends State<OrderListScreen> {
                 SizedBox(height: SizeConfig.fem * 12),
                 _buildOrderInfoRow(
                   icon: Icons.calendar_today,
-                  text: order.bookingDate ?? 'Chưa đặt lịch',
+                  text: order.bookingDate ?? 'Đặt ngay',
                 ),
-                SizedBox(height: SizeConfig.fem * 8),
-                _buildOrderInfoRow(
-                  icon: Icons.location_on,
-                  text: order.address ?? 'Địa chỉ: Không xác định',
-                  maxLines: 2,
-                ),
+                // SizedBox(height: SizeConfig.fem * 8),
+                // _buildOrderInfoRow(
+                //   icon: Icons.location_on,
+                //   text: order.address ?? 'Địa chỉ: Không xác định',
+                //   maxLines: 2,
+                // ),
                 SizedBox(height: SizeConfig.fem * 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

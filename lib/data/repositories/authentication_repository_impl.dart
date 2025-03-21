@@ -141,6 +141,7 @@ class AuthRepositoryImpl implements AuthRepository {
         await authLocalDataSource.saveAuth(response.data);
         final accessToken = await authLocalDataSource.getAccessTokenFromStorage();
         vinWalletRequest.options.headers['Authorization'] = 'Bearer $accessToken';
+        homeCleanRequest.options.headers['Authorization'] = 'Bearer $accessToken';
         userRepository.getUser(response.data['userId']);
         return AuthMapper.toEntity(response.data);
       } else {

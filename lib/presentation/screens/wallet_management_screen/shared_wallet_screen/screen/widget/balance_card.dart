@@ -3,7 +3,7 @@ import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/entities/wallet/wallet.dart';
 
 import '../../../../../../../core/constant/colors.dart';
-import '../../../../../widgets/point_widget.dart';
+import '../../../../../widgets/currency_display.dart';
 
 class BalanceCard extends StatelessWidget {
   Wallet wallet;
@@ -27,7 +27,7 @@ class BalanceCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              PointsDisplay(points: wallet.balance ?? 0),
+              CurrencyDisplay(price: wallet.balance ?? 0, fontSize: 24, iconSize: 32),
             ],
           ),
           const SizedBox(height: 20),

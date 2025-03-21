@@ -30,7 +30,6 @@ extension OrderStatusExtension on OrderStatus {
     }
   }
 
-
   Color get chipColor {
     switch (this) {
       case OrderStatus.draft:
@@ -50,6 +49,26 @@ extension OrderStatusExtension on OrderStatus {
     }
   }
 
+  Color get color {
+    switch (this) {
+      case OrderStatus.draft:
+        return Colors.grey[600]!; // Xám đậm
+      case OrderStatus.pending:
+        return Colors.orange[600]!; // Cam đậm
+      case OrderStatus.accepted:
+        return Colors.blue[600]!; // Xanh dương đậm
+      case OrderStatus.inProgress:
+        return Colors.blue[800]!; // Xanh dương đậm hơn
+      case OrderStatus.completed:
+        return Colors.green[600]!; // Xanh lá đậm
+      case OrderStatus.cancelled:
+        return Colors.red[600]!; // Đỏ đậm
+      case OrderStatus.scheduled:
+        return Colors.purple[600]!; // Tím đậm
+    }
+  }
+
+
   Color get textColor {
     switch (this) {
       case OrderStatus.draft:
@@ -66,6 +85,25 @@ extension OrderStatusExtension on OrderStatus {
         return Colors.red[800]!;
       case OrderStatus.scheduled:
         return Colors.purple[800]!;
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case OrderStatus.draft:
+        return Icons.drafts_outlined;
+      case OrderStatus.pending:
+        return Icons.pending_outlined;
+      case OrderStatus.accepted:
+        return Icons.check_circle_outline;
+      case OrderStatus.inProgress:
+        return Icons.refresh;
+      case OrderStatus.completed:
+        return Icons.check_circle;
+      case OrderStatus.cancelled:
+        return Icons.cancel_outlined;
+      case OrderStatus.scheduled:
+        return Icons.schedule;
     }
   }
 }

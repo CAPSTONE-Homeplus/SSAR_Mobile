@@ -98,17 +98,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(
-            'assets/images/empty_notification.png',
-            width: 120,
-            height: 120,
-            // Thay thế bằng đường dẫn thực tế hoặc sử dụng Icon nếu không có hình
-            errorBuilder: (context, error, stackTrace) => Icon(
-              Icons.notifications_off_outlined,
-              size: 80,
-              color: Colors.grey.shade400,
-            ),
-          ),
+          // Image.asset(
+          //   '',
+          //   width: 120,
+          //   height: 120,
+          //   // Thay thế bằng đường dẫn thực tế hoặc sử dụng Icon nếu không có hình
+          //   errorBuilder: (context, error, stackTrace) => Icon(
+          //     Icons.notifications_off_outlined,
+          //     size: 80,
+          //     color: Colors.grey.shade400,
+          //   ),
+          // ),
           SizedBox(height: 24),
           Text(
             'Bạn chưa có thông báo nào',

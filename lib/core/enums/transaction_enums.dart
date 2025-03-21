@@ -9,6 +9,7 @@ enum TransactionStatus {
 enum TransactionType {
   deposit,
   spending,
+  refund,
 }
 
 extension TransactionStatusExtension on TransactionStatus {
@@ -63,18 +64,48 @@ extension TransactionTypeExtension on TransactionType {
   String get name {
     switch (this) {
       case TransactionType.deposit:
-        return 'Deposit';
+        return 'Nạp tiền';
       case TransactionType.spending:
-        return 'Spending';
+        return 'Chi tiêu';
+      case TransactionType.refund:
+        return 'Hoàn tiền';
     }
   }
 
   Color get color {
     switch (this) {
       case TransactionType.deposit:
-        return Colors.blue; // Màu xanh dương cho nạp tiền
+        return Colors.green;
       case TransactionType.spending:
-        return Colors.purple; // Màu tím cho chi tiêu
+        return Colors.orange;
+      case TransactionType.refund:
+        return Colors.blue;
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case TransactionType.deposit:
+        return Icons.attach_money;
+      case TransactionType.spending:
+        return Icons.shopping_cart;
+      case TransactionType.refund:
+        return Icons.money_off;
     }
   }
 }
+
+extension TransactionTypeParser on String {
+  TransactionType toTransactionType() {
+    switch (toLowerCase()) {
+      case 'deposit':
+        return TransactionType.deposit;
+      case 'refund':
+        return TransactionType.refund;
+      default:
+        return TransactionType.spending;
+    }
+  }
+}
+
+

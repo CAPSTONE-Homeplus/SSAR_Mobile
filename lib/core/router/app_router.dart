@@ -4,6 +4,7 @@ import 'package:home_clean/presentation/screens/home/home_screen.dart';
 import 'package:home_clean/presentation/screens/message/message_screen.dart';
 import 'package:home_clean/presentation/screens/notification/notification.dart';
 import 'package:home_clean/presentation/screens/order_confirmation/order_confirmation_screen.dart';
+import 'package:home_clean/presentation/screens/order_detail/order_detail_screen.dart';
 import 'package:home_clean/presentation/screens/register/register_screen.dart';
 import 'package:home_clean/presentation/screens/service_detail/service_detail_screen.dart';
 import 'package:home_clean/presentation/screens/start/splash_screen.dart';
@@ -12,6 +13,7 @@ import 'package:home_clean/presentation/screens/wallet_management_screen/shared_
 
 import '../../presentation/screens/activity/activity_screen.dart';
 import '../../presentation/screens/login/login_screen.dart';
+import '../../presentation/screens/order_list/order_list_screen.dart';
 import '../../presentation/screens/order_tracking/order_tracking_screen.dart';
 import '../../presentation/screens/service_list_screen/service_list_screen.dart';
 import '../../presentation/screens/top_up/top_up_screen.dart';
@@ -38,7 +40,8 @@ class AppRouter {
   static const String routeNotification = '/notification';
   static const String routePersonalWallet = '/manage-personal-wallet';
   static const String routeOrderTracking = '/order-tracking';
-  static const String routeActivityScreen1 = '/activity-screen';
+  static const String routeOrderList = '/order-list';
+  static const String routeOrderDetail = '/order-detail';
 
 
   static List<GetPage> get routes => [
@@ -149,6 +152,18 @@ class AppRouter {
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
+        GetPage(
+          name: routeOrderDetail,
+          page: () => OrdersDetailsScreen(ordersId: Get.arguments),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+        GetPage(
+            name: routeOrderList,
+            page: () => BottomNavigation(child: OrderListScreen()),
+            transition: Transition.cupertino,
+            transitionDuration: const Duration(milliseconds: 300)
+        ),
       ];
 
   static void navigateToLogin() {
@@ -191,12 +206,12 @@ class AppRouter {
     Get.toNamed(routeTimeCollection);
   }
 
-  static void navigateToOrderDetail() {
-    Get.toNamed(routeOrderConfirmation);
+  static void navigateToOrderConfirmation(dynamic arguments) {
+    Get.toNamed(routeOrderConfirmation, arguments: arguments);
   }
 
   static void navigateToOrderDetailWithArguments(dynamic arguments) {
-    Get.toNamed(routeOrderConfirmation, arguments: arguments);
+    Get.toNamed(routeOrderDetail, arguments: arguments);
   }
 
   static void navigateToRegister() {
@@ -230,4 +245,9 @@ class AppRouter {
   static void navigateToOrderTracking(String orderId) {
     Get.toNamed(routeOrderTracking, arguments: orderId);
   }
+
+  static void navigateToOrderList() {
+    Get.toNamed(routeOrderList);
+  }
+
 }
