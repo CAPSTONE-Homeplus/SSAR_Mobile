@@ -9,9 +9,11 @@ import 'package:home_clean/presentation/screens/home/components/wallet_grid/wall
 import '../../../../core/constant/size_config.dart';
 import '../../../../domain/entities/building/building.dart';
 import '../../../../domain/entities/house/house.dart';
+import '../../../../domain/entities/laundry_service_type/laundry_service_type.dart';
 import '../../../../domain/entities/user/user.dart';
 import '../../../../domain/entities/wallet/wallet.dart';
 import '../../address_option/address_option_screen.dart';
+import 'laundry_service/laundry_grid_widget.dart';
 
 class HomeScreenBody extends StatefulWidget {
   List<Service> servicesToFetch;
@@ -21,7 +23,8 @@ class HomeScreenBody extends StatefulWidget {
   Building building;
 
   HomeScreenBody({super.key, required this.servicesToFetch,
-    required this.walletUser, required this.user, required this.house, required this.building});
+    required this.walletUser, required this.user, required this.house,
+    required this.building});
 
   @override
   State<HomeScreenBody> createState() => _HomeScreenBodyState();
@@ -102,12 +105,11 @@ Widget _buildHomeScreen(List<Service> services, BuildContext context, List<Walle
             ffem: ffem,
             hem: hem,
           ),
-          // WalletGrid(
-          //   wallets: walletUser,
-          //   fem: fem,
-          //   ffem: ffem,
-          //   hem: hem,
-          // ),
+          LaundryGridWidget(
+            fem: fem,
+            ffem: ffem,
+            hem: hem,
+          ),
         ],
       ),
     ),

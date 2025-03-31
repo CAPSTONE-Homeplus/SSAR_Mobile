@@ -8,18 +8,23 @@ import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/router/app_router.dart';
+import 'package:home_clean/data/laundry_repositories/additional_service_repository.dart';
 import 'package:home_clean/data/service/notification_service.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
 import 'package:home_clean/domain/repositories/house_repository.dart';
+import 'package:home_clean/domain/repositories/laundry_service_type_repository.dart';
 import 'package:home_clean/domain/repositories/order_tracking_repository.dart';
 import 'package:home_clean/domain/repositories/room_repository.dart';
 import 'package:home_clean/domain/repositories/transaction_repository.dart';
 import 'package:home_clean/domain/repositories/user_repository.dart';
+import 'package:home_clean/presentation/blocs/additional_service/additional_service_bloc.dart';
 import 'package:home_clean/presentation/blocs/auth/auth_bloc.dart';
 import 'package:home_clean/presentation/blocs/building/building_bloc.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_bloc.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_bloc.dart';
 import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
+import 'package:home_clean/presentation/blocs/laundry_item_type/laundry_item_type_bloc.dart';
+import 'package:home_clean/presentation/blocs/laundry_service_type/laundry_service_type_bloc.dart';
 import 'package:home_clean/presentation/blocs/notification/notification_bloc.dart';
 import 'package:home_clean/presentation/blocs/option/option_bloc.dart';
 import 'package:home_clean/presentation/blocs/order/order_bloc.dart';
@@ -120,6 +125,8 @@ class HomeClean extends StatelessWidget {
         RepositoryProvider(create: (_) => sl<UserRepository>()),
         RepositoryProvider(create: (_) => sl<NotificationRepository>()),
         RepositoryProvider(create: (_) => sl<OrderTrackingRepository>()),
+        RepositoryProvider(create: (_) => sl<LaundryServiceTypeRepository>()),
+        RepositoryProvider(create: (_) => sl<AdditionalServiceRepository>()),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -175,6 +182,9 @@ class HomeClean extends StatelessWidget {
             getLocalTrackings: sl(),
             getTrackingById: sl(),
             streamTracking: sl(),)),
+          BlocProvider(create: (context) => LaundryServiceTypeBloc(sl(), sl())),
+          BlocProvider(create: (context) => LaundryItemTypeBloc(sl())),
+          BlocProvider(create: (context) => AdditionalServiceBloc(repository: sl())),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {
@@ -193,7 +203,7 @@ class HomeClean extends StatelessWidget {
                 textTheme: GoogleFonts.notoSansTextTheme(themeData.textTheme),
               ),
               getPages: AppRouter.routes,
-              initialRoute: AppRouter.routeSplash,
+              initialRoute: AppRouter.routeLaundryService,
             );
           },
         ),

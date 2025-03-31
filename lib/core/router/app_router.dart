@@ -12,6 +12,7 @@ import 'package:home_clean/presentation/screens/wallet_management_screen/persona
 import 'package:home_clean/presentation/screens/wallet_management_screen/shared_wallet_screen/shared_wallet_screen.dart';
 
 import '../../presentation/screens/activity/activity_screen.dart';
+import '../../presentation/screens/laundry_service_screen/laundry_service_screen.dart';
 import '../../presentation/screens/login/login_screen.dart';
 import '../../presentation/screens/order_list/order_list_screen.dart';
 import '../../presentation/screens/order_tracking/order_tracking_screen.dart';
@@ -42,6 +43,8 @@ class AppRouter {
   static const String routeOrderTracking = '/order-tracking';
   static const String routeOrderList = '/order-list';
   static const String routeOrderDetail = '/order-detail';
+  static const String routeLaundryService = '/laundry-service';
+  static const String routeReservationsLaundry = '/reservations-laundry';
 
 
   static List<GetPage> get routes => [
@@ -164,8 +167,13 @@ class AppRouter {
             transition: Transition.cupertino,
             transitionDuration: const Duration(milliseconds: 300)
         ),
+        GetPage(
+          name: routeLaundryService,
+          page: () => LaundryServiceScreen(),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
       ];
-
   static void navigateToLogin() {
     Get.toNamed(routeLogin);
   }
@@ -249,5 +257,15 @@ class AppRouter {
   static void navigateToOrderList() {
     Get.toNamed(routeOrderList);
   }
+
+  static void navigateToLaundryService() {
+    Get.toNamed(routeLaundryService);
+  }
+
+  static void navigateToLaundryItemList(String? serviceTypeId) {
+    Get.toNamed(routeReservationsLaundry, arguments: serviceTypeId);
+  }
+
+
 
 }

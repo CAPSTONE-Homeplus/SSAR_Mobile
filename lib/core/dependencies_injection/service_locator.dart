@@ -4,6 +4,7 @@ import 'package:home_clean/data/datasource/local/order_tracking_data_source.dart
 import 'package:home_clean/data/datasource/signalr/wallet_remote_data_source.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
 import 'package:home_clean/domain/repositories/house_repository.dart';
+import 'package:home_clean/domain/repositories/laundry_service_type_repository.dart';
 import 'package:home_clean/domain/repositories/payment_method_repository.dart';
 import 'package:home_clean/domain/repositories/room_repository.dart';
 import 'package:home_clean/domain/repositories/transaction_repository.dart';
@@ -30,11 +31,13 @@ import '../../data/datasource/local/transaction_local_data_source.dart';
 import '../../data/datasource/local/user_local_datasource.dart';
 import '../../data/datasource/local/wallet_local_data_source.dart';
 import '../../data/datasource/signalr/order_tracking_remote_data_source.dart';
+import '../../data/laundry_repositories/additional_service_repository.dart';
 import '../../data/repositories/authentication_repository_impl.dart';
 import '../../data/repositories/building_repository_impl.dart';
 import '../../data/repositories/equipment_supply_repository_impl.dart';
 import '../../data/repositories/extra_service_repository_impl.dart';
 import '../../data/repositories/house_repository_impl.dart';
+import '../../data/repositories/laundry_service_type_repository_impl.dart';
 import '../../data/repositories/notification_repository_impl.dart';
 import '../../data/repositories/option_repository_impl.dart';
 import '../../data/repositories/order_repository_impl.dart';
@@ -90,6 +93,8 @@ import '../../domain/use_cases/auth/user_register_usecase.dart';
 import '../../domain/use_cases/building/get_building_use_case.dart';
 import '../../domain/use_cases/house/get_house_by_building_use_case.dart';
 import '../../domain/use_cases/house/get_house_use_case.dart';
+import '../../domain/use_cases/laundry_service_type/get_laundry_item_type_by_service.dart';
+import '../../domain/use_cases/laundry_service_type/get_laundry_service_types_use_case.dart';
 import '../../domain/use_cases/local/cear_all_data_use_case.dart';
 import '../../domain/use_cases/notification/connect_to_notification_hub_use_case.dart';
 import '../../domain/use_cases/notification/disconnect_from_notification_hub_use_case.dart';
@@ -112,8 +117,10 @@ import '../../domain/use_cases/wallet/change_owner_use_case.dart';
 import '../../domain/use_cases/wallet/create_wallet_use_case.dart';
 import '../../domain/use_cases/wallet/get_contribution_statistic_use_case.dart';
 import '../../domain/use_cases/wallet/get_wallet_by_user.dart';
+import '../../presentation/blocs/additional_service/additional_service_bloc.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/building/building_bloc.dart';
+import '../../presentation/blocs/laundry_item_type/laundry_item_type_bloc.dart';
 import '../../presentation/blocs/order_tracking/order_tracking_bloc.dart';
 import '../../presentation/blocs/payment_method/payment_method_bloc.dart';
 import '../../presentation/blocs/room/room_bloc.dart';
@@ -213,6 +220,9 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
     remoteDataSource: sl(),
     localDataSource: sl(),
   ));
+  sl.registerLazySingleton<LaundryServiceTypeRepository>(() => LaundryServiceTypeRepositoryImpl());
+  sl.registerLazySingleton<AdditionalServiceRepository>(() => AdditionalServiceRepository());
+
 
   // Use Cases
   sl.registerLazySingleton(() => SaveSelectedServiceIds(sl()));
@@ -261,6 +271,8 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
   sl.registerLazySingleton(() => RefreshTokenUseCase(sl()));
   sl.registerLazySingleton(() => GetOrderUseCase(sl()));
   sl.registerLazySingleton(() => CancelOrderUseCase(sl()));
+  sl.registerLazySingleton(() => GetLaundryServiceTypesUseCase(sl()));
+  sl.registerLazySingleton(() => GetLaundryItemTypeByServiceUseCase(sl()));
   // local Use Cases
   sl.registerLazySingleton(() => GetUserFromLocalUseCase(sl()));
   sl.registerLazySingleton(() => GetOrderByUserUseCase(sl()));
@@ -322,4 +334,6 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
       getTrackingById: sl(),
       streamTracking: sl(),
   ));
+  sl.registerLazySingleton(() => LaundryItemTypeBloc(sl()));
+  sl.registerLazySingleton(() => AdditionalServiceBloc(repository: sl()));
 }

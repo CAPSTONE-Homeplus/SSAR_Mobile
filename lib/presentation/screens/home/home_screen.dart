@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_clean/core/router/app_router.dart';
+import 'package:home_clean/domain/entities/laundry_service_type/laundry_service_type.dart';
 import 'package:home_clean/domain/entities/wallet/wallet.dart';
 import 'package:home_clean/presentation/blocs/auth/auth_event.dart';
 import 'package:home_clean/presentation/blocs/building/building_event.dart';
@@ -21,6 +22,9 @@ import '../../blocs/auth/auth_state.dart';
 import '../../blocs/building/building_bloc.dart';
 import '../../blocs/building/building_state.dart';
 import '../../blocs/house/house_bloc.dart';
+import '../../blocs/laundry_service_type/laundry_service_type_bloc.dart';
+import '../../blocs/laundry_service_type/laundry_service_type_event.dart';
+import '../../blocs/laundry_service_type/laundry_service_type_state.dart';
 import '../../blocs/wallet/wallet_event.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -56,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _houseBloc = context.read<HouseBloc>();
       _buildingBloc = context.read<BuildingBloc>();
       context.read<ServiceBloc>().add(GetServicesEvent());
-
       _walletBloc.add(GetWallet());
       _authBloc.add(GetUserFromLocal());
 
@@ -141,6 +144,8 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {

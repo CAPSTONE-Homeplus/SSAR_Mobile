@@ -6,12 +6,14 @@ class CurrencyDisplay extends StatelessWidget {
   final dynamic price;
   final double fontSize;
   final double iconSize;
+  final String unit; // Đơn vị (ví dụ: "/ cái", "/ kg")
 
   const CurrencyDisplay({
     Key? key,
     required this.price,
     this.fontSize = 14, // Mặc định 14
     this.iconSize = 24, // Mặc định 24
+    this.unit = "", // Mặc định không có đơn vị
   }) : super(key: key);
 
   @override
@@ -23,7 +25,7 @@ class CurrencyDisplay extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          formattedPrice,
+          "$formattedPrice$unit", // Thêm đơn vị sau giá
           style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
         ),
         const SizedBox(width: 4),

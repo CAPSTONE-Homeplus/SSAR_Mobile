@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class ApiConstant {
   static final String homeCleanUrl = dotenv.env['HOME_CLEAN_URL'] ?? 'https://default-homeclean.com/api/v1';
   static final String vinWalletUrl = dotenv.env['VIN_WALLET_URL'] ?? 'https://default-vinwallet.com/api/v1';
+  static final String vinLaundryUrl = dotenv.env['VIN_LAUNDRY_URL'] ?? 'https://default-vinlaundry.com/api/v1';
 
   /// Authed
   static const String auth = "/auth";
@@ -45,6 +46,12 @@ class ApiConstant {
 
   /// Wallet
   static const String wallets = "/wallets";
+
+  /// Laundry service type
+  static const String laundryServiceTypes = "/service-types";
+
+  /// Additional service
+  static const String additionalServices = "/additional-services";
 
   static const String getTransactionByUser = "https://vinwallet.onrender.com/api/v1/users/{id}/transactions";
   static const String getTransactionByUserWallet = "https://vinwallet.onrender.com/api/v1/users/{id}/transactions{walletId}";

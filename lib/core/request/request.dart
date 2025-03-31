@@ -13,6 +13,7 @@ import '../../domain/entities/auth/auth.dart';
 enum BaseUrlType {
   homeClean,
   vinWallet,
+  vinLaundry
 }
 
 final AuthLocalDataSource _authLocalDataSource = AuthLocalDataSource();
@@ -145,6 +146,7 @@ class MyRequest {
   static final Map<BaseUrlType, String> baseUrls = {
     BaseUrlType.homeClean: ApiConstant.homeCleanUrl,
     BaseUrlType.vinWallet: ApiConstant.vinWalletUrl ,
+  BaseUrlType.vinLaundry: ApiConstant.vinLaundryUrl
   };
 
   static BaseOptions getOptions(BaseUrlType urlType) => BaseOptions(
@@ -184,12 +186,9 @@ class MyRequest {
                 clearLocalStorageAndLogout();
                 return handler.next(e);
               }
-
               Auth auth = await _authRepository.refreshToken();
-
               final newToken = auth.accessToken;
               final newRefreshToken = auth.refreshToken;
-
               if (newToken == null || newRefreshToken == null) {
                 clearLocalStorageAndLogout();
                 return handler.next(e);
@@ -258,6 +257,7 @@ Future<void> clearLocalStorageAndLogout() async {
 final requestObj = MyRequest();
 final homeCleanRequest = requestObj.request;
 final vinWalletRequest = requestObj.getRequestForUrl(BaseUrlType.vinWallet);
+final vinLaundryRequest = requestObj.getRequestForUrl(BaseUrlType.vinLaundry);
 
 class MyHttpOverrides extends HttpOverrides {
   @override
