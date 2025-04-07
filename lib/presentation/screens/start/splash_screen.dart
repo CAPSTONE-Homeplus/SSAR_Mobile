@@ -5,8 +5,10 @@ import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/entities/refresh_token/refresh_token_model.dart';
 import 'package:home_clean/presentation/screens/login/login_screen.dart';
 
+import '../../../core/dependencies_injection/service_locator.dart';
 import '../../../core/request/request.dart';
 import '../../../data/datasource/local/auth_local_datasource.dart';
+import '../../../domain/use_cases/local/cear_all_data_use_case.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
@@ -65,18 +67,11 @@ class _SplashScreenState extends State<SplashScreen>
     if (accessToken != null && refreshToken != null) {
       vinWalletRequest.options.headers['Authorization'] = 'Bearer $accessToken';
       homeCleanRequest.options.headers['Authorization'] = 'Bearer $accessToken';
+      vinLaundryRequest.options.headers['Authorization'] = 'Bearer $accessToken';
+
       AppRouter.navigateToHome();
     } else {
-      // context.read<AuthBloc>().add(RefreshTokenEvent());
-      // BlocListener<AuthBloc, AuthState>(
-      //   listener: (context, state) {
-      //     if (state is RefreshTokenSuccess) {
-      //       navigateToHome();
-      //     } else {
-      //       navigateToLogin();
-      //     }
-      //   },
-      // );
+      sl<ClearAllDataUseCase>().call();
       AppRouter.navigateToLogin();
     }
   }

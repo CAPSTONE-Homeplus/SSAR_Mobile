@@ -44,9 +44,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               _emailController.text,
             );
           } else if (state is UserError) {
-            showCustomErrorDialog(
+            showCustomDialog(
               context: context,
-              errorMessage: state.message,
+              message: state.message,
+              type: DialogType.error,
             );
           }
         },

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,7 +7,6 @@ import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/enums/wallet_enums.dart';
 import 'package:home_clean/domain/entities/transaction/create_transaction.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
-import 'package:home_clean/presentation/widgets/show_dialog.dart';
 
 import '../../../core/format/formater.dart';
 import '../../../domain/entities/house/house.dart';
@@ -18,6 +19,7 @@ import '../../blocs/wallet/wallet_bloc.dart';
 import '../../blocs/wallet/wallet_state.dart';
 import '../../widgets/detail_row_widget.dart';
 import '../../widgets/section_widget.dart';
+import '../../widgets/show_dialog.dart';
 import '../../widgets/step_indicator_widget.dart';
 import 'components/address_selection_bottom_sheet.dart';
 import 'components/transaction_pop_up.dart';
@@ -35,16 +37,14 @@ class OrderConfirmationScreen extends StatefulWidget {
       _OrderConfirmationScreenState();
 }
 
-
 class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   String? selectedWalletId;
   bool _isOrdering = false;
   House? house;
   String? _editedRoom;
   String? _editedBuilding;
-  final List<String> _availableBuildings = [
-    'A1', 'A2', 'B1', 'B2', 'C1', 'C2'
-  ];
+  final List<String> _availableBuildings = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+  late StreamSubscription<OrderState> _stateSubscription;
 
   @override
   void initState() {
@@ -56,15 +56,33 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     if (_isOrdering) return;
     setState(() => _isOrdering = true);
     context.read<OrderBloc>().add(CreateOrderEvent(widget.orderDetails));
-    BlocProvider.of<OrderBloc>(context).stream.listen((state) {
+    _stateSubscription =
+        BlocProvider.of<OrderBloc>(context).stream.listen((state) {
+      if (!mounted) {
+        _stateSubscription.cancel();
+        return;
+      }
+
       if (state is OrderCreated) {
         setState(() => _isOrdering = false);
+        _stateSubscription.cancel();
       } else if (state is OrderError) {
         setState(() => _isOrdering = false);
+        _stateSubscription.cancel();
       }
+    }, onError: (error) {
+      // Kiểm tra mounted trước khi gọi setState
+      if (!mounted) return;
+
+      setState(() => _isOrdering = false);
     });
   }
 
+  @override
+  void dispose() {
+    _stateSubscription.cancel();
+    super.dispose();
+  }
 
   void fetchHouse() {
     final houseBloc = context.read<HouseBloc>();
@@ -72,7 +90,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     widget.orderDetails.address = house!.id.toString();
     widget.orderDetails.houseTypeId = house!.houseTypeId;
   }
-
 
   void _showAddressBottomSheet() {
     showModalBottomSheet(
@@ -113,23 +130,28 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
         listener: (context, state) {
           if (state is OrderCreated) {
             context.read<TransactionBloc>().add(
-              SaveTransactionEvent(
-                CreateTransaction(
-                  walletId: selectedWalletId,
-                  paymentMethodId: '15890b1a-f5a6-42c3-8f37-541029189722',
-                  amount: '0',
-                  note: 'Thanh toán dịch vụ',
-                  orderId: state.order.id,
-                ),
-              ),
-            );
+                  SaveTransactionEvent(
+                    CreateTransaction(
+                      walletId: selectedWalletId,
+                      paymentMethodId: '15890b1a-f5a6-42c3-8f37-541029189722',
+                      amount: '0',
+                      note: 'Thanh toán dịch vụ',
+                      orderId: state.order.id,
+                      serviceType: 0,
+                    ),
+                  ),
+                );
             showDialog(
               context: context,
               barrierDismissible: false,
               builder: (context) => const TransactionPopup(),
             );
           } else if (state is OrderError) {
-            showCustomErrorDialog(context: context, errorMessage: state.message);
+            showCustomDialog(
+              context: context,
+              message: state.message,
+              type: DialogType.error,
+            );
           }
         },
         builder: (context, state) {
@@ -138,60 +160,59 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               children: [
                 StepIndicatorWidget(currentStep: 3),
                 const SizedBox(height: 8),
-            SectionWidget(
-              title: 'Địa chỉ',
-              icon: Icons.location_on_outlined,
-              child: InkWell(
-                onTap: _showAddressBottomSheet,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                SectionWidget(
+                  title: 'Địa chỉ',
+                  icon: Icons.location_on_outlined,
+                  child: InkWell(
+                    onTap: _showAddressBottomSheet,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Phòng ${_editedRoom ?? house?.numberOfRoom ?? 'Chưa chọn'}",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              if ((house?.code ?? _editedBuilding ?? '').isNotEmpty) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Tòa: ${_editedBuilding ?? house?.code ?? 'Chưa chọn'}',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    color: Colors.grey[600],
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Phòng ${_editedRoom ?? house?.numberOfRoom ?? 'Chưa chọn'}",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ],
-                          ),
+                                  if ((house?.code ?? _editedBuilding ?? '')
+                                      .isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Tòa: ${_editedBuilding ?? house?.code ?? 'Chưa chọn'}',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 13,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            Icon(
+                              Icons.edit_outlined,
+                              color: Color(0xFF1CAF7D),
+                              size: 20,
+                            ),
+                          ],
                         ),
-                        Icon(
-                          Icons.edit_outlined,
-                          color: Color(0xFF1CAF7D),
-                          size: 20,
+                        const SizedBox(height: 8),
+                        Container(
+                          width: double.infinity,
+                          height: 2,
+                          color: Color(0xFF1CAF7D).withOpacity(0.2),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: double.infinity,
-                      height: 2,
-                      color: Color(0xFF1CAF7D).withOpacity(0.2),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-
-
                 SectionWidget(
                   title: 'Chi tiết dịch vụ',
                   icon: Icons.cleaning_services_outlined,
@@ -200,21 +221,22 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                     children: [
                       DetailRowWidget(
                         title: 'Dịch vụ',
-                        value: widget.orderDetails.service.name ?? 'Dọn dẹp căn hộ',
+                        value: widget.orderDetails.service.name ??
+                            'Dọn dẹp căn hộ',
                         icon: Icons.home_work_outlined,
                       ),
-                      if (widget.orderDetails.emergencyRequest) _buildEmergencyBadge(),
+                      if (widget.orderDetails.emergencyRequest)
+                        _buildEmergencyBadge(),
                       const SizedBox(height: 12),
                       DetailRowWidget(
                         title: 'Thời gian',
                         value:
-                        '${widget.orderDetails.timeSlot.startTime} - ${widget.orderDetails.timeSlot.endTime}',
+                            '${widget.orderDetails.timeSlot.startTime} - ${widget.orderDetails.timeSlot.endTime}',
                         icon: Icons.access_time,
                       ),
                     ],
                   ),
                 ),
-
                 if (widget.orderDetails.option.isNotEmpty)
                   SectionWidget(
                     title: 'Tùy chọn đã chọn',
@@ -223,14 +245,13 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                       children: widget.orderDetails.option
                           .map(
                             (option) => _buildOptionItem(
-                          title: option.name ?? '',
-                          price: option.price ?? 0,
-                        ),
-                      )
+                              title: option.name ?? '',
+                              price: option.price ?? 0,
+                            ),
+                          )
                           .toList(),
                     ),
                   ),
-
                 if (widget.orderDetails.extraService.isNotEmpty)
                   SectionWidget(
                     title: 'Dịch vụ thêm',
@@ -239,14 +260,14 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                       children: widget.orderDetails.extraService
                           .map(
                             (service) => _buildOptionItem(
-                          title: service.name ?? '',
-                          price: service.price ?? 0,
-                        ),
-                      )
+                              title: service.name ?? '',
+                              price: service.price ?? 0,
+                            ),
+                          )
                           .toList(),
                     ),
                   ),
-                _buildWallet( context),
+                _buildWallet(context),
                 const SizedBox(height: 100),
               ],
             ),
@@ -255,7 +276,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       ),
       bottomNavigationBar: _buildBottomBar(context),
     );
-}
+  }
 
   Widget _buildWallet(BuildContext context) {
     return BlocBuilder<WalletBloc, WalletState>(
@@ -277,7 +298,8 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: state.wallets.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final wallet = state.wallets[index];
                   final isSelected = wallet.id == selectedWalletId;
@@ -359,7 +381,9 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primaryColor.withAlpha(8) : Colors.white,
+                color: isSelected
+                    ? AppColors.primaryColor.withAlpha(8)
+                    : Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: isSelected ? Colors.green : Colors.grey,
@@ -367,12 +391,12 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                 ),
                 boxShadow: isSelected
                     ? [
-                  BoxShadow(
-                    color: AppColors.primaryColor.withAlpha(1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  )
-                ]
+                        BoxShadow(
+                          color: AppColors.primaryColor.withAlpha(1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        )
+                      ]
                     : null,
               ),
               child: Row(
@@ -388,7 +412,9 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                     child: Icon(
                       icon,
                       size: 24,
-                      color: isSelected ? AppColors.primaryColor : Colors.grey[700],
+                      color: isSelected
+                          ? AppColors.primaryColor
+                          : Colors.grey[700],
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -401,7 +427,9 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
-                            color: isSelected ? Colors.green[700] : Colors.grey[800],
+                            color: isSelected
+                                ? Colors.green[700]
+                                : Colors.grey[800],
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -409,8 +437,11 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                           '${Formater.formatCurrency(balance)} đ',
                           style: GoogleFonts.poppins(
                             fontSize: 14,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                            color: isSelected ? Colors.green[600] : Colors.grey[600],
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.w500,
+                            color: isSelected
+                                ? Colors.green[600]
+                                : Colors.grey[600],
                           ),
                         ),
                       ],
@@ -465,7 +496,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     );
   }
 
-
   Widget _buildOptionItem({
     required String title,
     required int price,
@@ -512,9 +542,13 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       ),
       child: SafeArea(
         child: ElevatedButton(
-          onPressed: (_isOrdering || selectedWalletId == null) ? null : () => _placeOrder(context),
+          onPressed: (_isOrdering || selectedWalletId == null)
+              ? null
+              : () => _placeOrder(context),
           style: ElevatedButton.styleFrom(
-            backgroundColor: (_isOrdering || selectedWalletId == null) ? Colors.grey : const Color(0xFF1CAF7D),
+            backgroundColor: (_isOrdering || selectedWalletId == null)
+                ? Colors.grey
+                : const Color(0xFF1CAF7D),
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -522,7 +556,11 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             elevation: 0,
           ),
           child: Text(
-            _isOrdering ? 'Đang đặt hàng...' : (selectedWalletId == null ? 'Vui lòng chọn ví' : 'Xác nhận đặt dịch vụ'),
+            _isOrdering
+                ? 'Đang đặt hàng...'
+                : (selectedWalletId == null
+                    ? 'Vui lòng chọn ví'
+                    : 'Xác nhận đặt dịch vụ'),
             style: GoogleFonts.poppins(
               fontSize: 16,
               color: Colors.white,

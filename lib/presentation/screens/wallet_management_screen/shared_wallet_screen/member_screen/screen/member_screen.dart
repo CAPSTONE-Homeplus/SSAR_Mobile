@@ -60,7 +60,7 @@ class _MembersScreenState extends State<MembersScreen> {
 
     if (wallet.isNotEmpty) {
       sharedWallet = wallet.firstWhere(
-            (w) => w.type == 'Shared',
+        (w) => w.type == 'Shared',
         orElse: () => Wallet(id: '', type: 'Shared', balance: 0),
       );
     }
@@ -77,13 +77,11 @@ class _MembersScreenState extends State<MembersScreen> {
     }
 
     if (sharedWallet.id != null && sharedWallet.id!.isNotEmpty) {
-      context.read<UserBloc>().add(
-          GetUsersBySharedWalletEvent(walletId: sharedWallet.id ?? '')
-      );
+      context
+          .read<UserBloc>()
+          .add(GetUsersBySharedWalletEvent(walletId: sharedWallet.id ?? ''));
     }
   }
-
-
 
   void _showHelpDialog(BuildContext context) {
     showDialog(
@@ -92,27 +90,31 @@ class _MembersScreenState extends State<MembersScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: CustomAppBar(
         title: 'Thành viên',
-        onHelpPressed: () => _showHelpDialog(context),
         onBackPressed: () => AppRouter.navigateToSharedWallet(),
       ),
       body: MultiBlocListener(
         listeners: [
           BlocListener<WalletBloc, WalletState>(
             listener: (context, state) {
-              if (state is WalletChangeOwnerSuccess || state is WalletDeleteSuccess) {
+              if (state is WalletChangeOwnerSuccess ||
+                  state is WalletDeleteSuccess) {
                 if (sharedWallet.id != null && sharedWallet.id!.isNotEmpty) {
-                  context.read<UserBloc>().add(GetUsersBySharedWalletEvent(walletId: sharedWallet.id ?? ''));
+                  context.read<UserBloc>().add(GetUsersBySharedWalletEvent(
+                      walletId: sharedWallet.id ?? ''));
                 }
-              AppRouter.navigateToSharedWallet();
+                AppRouter.navigateToSharedWallet();
               } else if (state is WalletError) {
-                showCustomErrorDialog(context: context, errorMessage: state.message);
+                showCustomDialog(
+                  context: context,
+                  message: state.message,
+                  type: DialogType.error,
+                );
               }
             },
           ),
@@ -141,447 +143,459 @@ class _MembersScreenState extends State<MembersScreen> {
     );
   }
 
-
   Widget _buildAdminView() {
     return SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           // Enhanced Summary Card
           Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.primaryColor.withOpacity(0.9),
-                AppColors.primaryColor.withOpacity(1)
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.primaryColor.withOpacity(0.9),
+                  AppColors.primaryColor.withOpacity(1)
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryColor.withOpacity(0.4),
+                  blurRadius: 20,
+                  spreadRadius: 3,
+                  offset: const Offset(0, 7),
+                ),
               ],
             ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primaryColor.withOpacity(0.4),
-                blurRadius: 20,
-                spreadRadius: 3,
-                offset: const Offset(0, 7),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.group_rounded, color: Colors.white, size: 32),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Quản lý thành viên',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.7,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    '${sortedMembers.length}',
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.3),
-                          offset: const Offset(0, 3),
-                          blurRadius: 6,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'thành viên',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Container(
-                height: 5,
-                width: 80,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-
-        // Members Header with Invite Button
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              'Thành viên hiện tại',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: Colors.grey[800],
-              ),
-            ),
-            ElevatedButton.icon(
-              onPressed: () => _showInviteMemberModal(context),
-              icon: Icon(
-                Icons.person_add,
-                color: Colors.white,
-                size: 20,
-              ),
-              label: Text(
-                'Mời thêm',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 3,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-
-        // Enhanced Members List
-        ...sortedMembers.map((member) {
-      return AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          border: Border.all(
-            color: currentUser.id == member.id
-                ? Colors.blue[100]!
-                : sharedWallet.ownerId == member.id
-                ? Colors.orange[100]!
-                : Colors.transparent,
-            width: 1.5,
-          ),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(15),
-            onTap: () {
-              // Optional: Add member details view
-            },
-            child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                // Circular Avatar with Role Indicator
-                Stack(
-                children: [
-                CircleAvatar(
-                radius: 30,
-                  backgroundColor: currentUser.id == member.id
-                      ? Colors.blue[50]
-                      : sharedWallet.ownerId == member.id
-                      ? Colors.orange[50]
-                      : Colors.grey[200],
-                  child: Text(
-                    member.fullName![0].toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: currentUser.id == member.id
-                          ? Colors.blue[800]
-                          : sharedWallet.ownerId == member.id
-                          ? Colors.orange[800]
-                          : Colors.grey[700],
-                    ),
-                  ),
-                ),
-                // Role Badge
-                if (sharedWallet.ownerId == member.id || currentUser.id == member.id)
-            Positioned(
-            bottom: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: sharedWallet.ownerId == member.id
-                    ? Colors.orange
-                    : Colors.blue,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                sharedWallet.ownerId == member.id
-                    ? Icons.admin_panel_settings
-                    : Icons.person,
-                color: Colors.white,
-                size: 12,
-              ),
-            ),
-          ),
-          ],
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    member.fullName!,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: currentUser.id == member.id
-                          ? Colors.blue[800]
-                          : sharedWallet.ownerId == member.id
-                          ? Colors.orange[800]
-                          : Colors.black87,
-                    ),
-                  ),
-                  if (sharedWallet.ownerId == member.id)
-                    Container(
-                      margin: const EdgeInsets.only(left: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.orange[300]!,
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        'Quản trị viên',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.orange[900],
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  if (currentUser.id == member.id)
-                    Container(
-                      margin: const EdgeInsets.only(left: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.blue[300]!,
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        'Bạn',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.blue[900],
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                member.phoneNumber ?? 'Số điện thoại chưa cập nhật',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Admin Actions Popup Menu
-        PopupMenuButton<String>(
-            icon: Icon(
-              Icons.more_vert,
-              color: Colors.grey[700],
-              size: 24,
-            ),
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            onSelected: (value) {
-              final walletBloc = context.read<WalletBloc>();
-
-              // Confirmation Dialog
-              showDialog(
-                context: context,
-                builder: (BuildContext dialogContext) {
-                  return AlertDialog(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    title: Row(
-                      children: [
-                        Icon(
-                          value == 'make_admin'
-                              ? Icons.admin_panel_settings
-                              : Icons.person_remove,
-                          color: value == 'make_admin'
-                              ? AppColors.primaryColor
-                              : Colors.red,
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          value == 'make_admin'
-                              ? 'Đặt làm Quản trị viên'
-                              : 'Xóa thành viên',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: value == 'make_admin'
-                                ? AppColors.primaryColor
-                                : Colors.red[800],
-                          ),
-                        ),
-                      ],
-                    ),
-                    content: Text(
-                      value == 'make_admin'
-                          ? 'Bạn có chắc chắn muốn đặt ${member.fullName} làm quản trị viên của ví chung không?\n\nThao tác này sẽ chuyển toàn bộ quyền quản lý cho thành viên này.'
-                          : 'Bạn có chắc chắn muốn xóa ${member.fullName} khỏi ví chung không?\n\nThành viên này sẽ không còn quyền truy cập vào ví và các giao dịch.',
-                      style: TextStyle(
-                        color: Colors.black87,
-                      ),
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        child: Text(
-                          'Hủy',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(dialogContext).pop();
-                        },
-                      ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: value == 'make_admin'
-                              ? AppColors.primaryColor
-                              : Colors.red[700],
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: Text(
-                          value == 'make_admin'
-                              ? 'Đặt làm Admin'
-                              : 'Xóa thành viên',
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                        onPressed: () {
-                          // Đóng dialog
-                          Navigator.of(dialogContext).pop();
-
-                          // Thực hiện hành động
-                          if (value == 'make_admin') {
-                            walletBloc.add(ChangeOwner(
-                              walletId: sharedWallet.id ?? '',
-                              userId: member.id ?? '',
-                            ));
-                          } else if (value == 'remove') {
-                            walletBloc.add(DeleteWallet(
-                              walletId: sharedWallet.id ?? '',
-                              userId: member.id ?? '',
-                            ));
-                          }
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            itemBuilder: (context) => [
-            // Only show 'make admin' if the member is not already an admin
-            if (sharedWallet.ownerId != member.id)
-              PopupMenuItem(
-              value: 'make_admin',
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.admin_panel_settings,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Đặt làm Admin',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-            if (currentUser.id != member.id)
-              PopupMenuItem(
-              value: 'remove',
-              child: Row(
+            child: Column(
               children: [
-                    const Icon(
-                    Icons.person_remove,
-                    color: Colors.red,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.group_rounded,
+                        color: Colors.white, size: 32),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Quản lý thành viên',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.7,
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      '${sortedMembers.length}',
+                      style:
+                          Theme.of(context).textTheme.displayMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.3),
+                            offset: const Offset(0, 3),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(width: 8),
-                    const Text(
-                    'Xóa thành viên',
-                    style: TextStyle(fontSize: 14),
+                    Text(
+                      'thành viên',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w500,
+                          ),
                     ),
-                    ],
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  height: 5,
+                  width: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Members Header with Invite Button
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'Thành viên hiện tại',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: Colors.grey[800],
                     ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => _showInviteMemberModal(context),
+                icon: Icon(
+                  Icons.person_add,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                label: Text(
+                  'Mời thêm',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 3,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Enhanced Members List
+          ...sortedMembers.map((member) {
+            return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
-                    ],
+                  ],
+                  border: Border.all(
+                    color: currentUser.id == member.id
+                        ? Colors.blue[100]!
+                        : sharedWallet.ownerId == member.id
+                            ? Colors.orange[100]!
+                            : Colors.transparent,
+                    width: 1.5,
+                  ),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(15),
+                    onTap: () {
+                      // Optional: Add member details view
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          // Circular Avatar with Role Indicator
+                          Stack(
+                            children: [
+                              CircleAvatar(
+                                radius: 30,
+                                backgroundColor: currentUser.id == member.id
+                                    ? Colors.blue[50]
+                                    : sharedWallet.ownerId == member.id
+                                        ? Colors.orange[50]
+                                        : Colors.grey[200],
+                                child: Text(
+                                  member.fullName![0].toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: currentUser.id == member.id
+                                        ? Colors.blue[800]
+                                        : sharedWallet.ownerId == member.id
+                                            ? Colors.orange[800]
+                                            : Colors.grey[700],
+                                  ),
+                                ),
+                              ),
+                              // Role Badge
+                              if (sharedWallet.ownerId == member.id ||
+                                  currentUser.id == member.id)
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: sharedWallet.ownerId == member.id
+                                          ? Colors.orange
+                                          : Colors.blue,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      sharedWallet.ownerId == member.id
+                                          ? Icons.admin_panel_settings
+                                          : Icons.person,
+                                      color: Colors.white,
+                                      size: 12,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      member.fullName!,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            color: currentUser.id == member.id
+                                                ? Colors.blue[800]
+                                                : sharedWallet.ownerId ==
+                                                        member.id
+                                                    ? Colors.orange[800]
+                                                    : Colors.black87,
+                                          ),
+                                    ),
+                                    if (sharedWallet.ownerId == member.id)
+                                      Container(
+                                        margin: const EdgeInsets.only(left: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.orange.withOpacity(0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: Colors.orange[300]!,
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Quản trị viên',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.orange[900],
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    if (currentUser.id == member.id)
+                                      Container(
+                                        margin: const EdgeInsets.only(left: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue.withOpacity(0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: Colors.blue[300]!,
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Bạn',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.blue[900],
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  member.phoneNumber ??
+                                      'Số điện thoại chưa cập nhật',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Admin Actions Popup Menu
+                          PopupMenuButton<String>(
+                            icon: Icon(
+                              Icons.more_vert,
+                              color: Colors.grey[700],
+                              size: 24,
+                            ),
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            onSelected: (value) {
+                              final walletBloc = context.read<WalletBloc>();
+
+                              // Confirmation Dialog
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext dialogContext) {
+                                  return AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    title: Row(
+                                      children: [
+                                        Icon(
+                                          value == 'make_admin'
+                                              ? Icons.admin_panel_settings
+                                              : Icons.person_remove,
+                                          color: value == 'make_admin'
+                                              ? AppColors.primaryColor
+                                              : Colors.red,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          value == 'make_admin'
+                                              ? 'Đặt làm Quản trị viên'
+                                              : 'Xóa thành viên',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: value == 'make_admin'
+                                                ? AppColors.primaryColor
+                                                : Colors.red[800],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    content: Text(
+                                      value == 'make_admin'
+                                          ? 'Bạn có chắc chắn muốn đặt ${member.fullName} làm quản trị viên của ví chung không?\n\nThao tác này sẽ chuyển toàn bộ quyền quản lý cho thành viên này.'
+                                          : 'Bạn có chắc chắn muốn xóa ${member.fullName} khỏi ví chung không?\n\nThành viên này sẽ không còn quyền truy cập vào ví và các giao dịch.',
+                                      style: TextStyle(
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: Text(
+                                          'Hủy',
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(dialogContext).pop();
+                                        },
+                                      ),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: value == 'make_admin'
+                                              ? AppColors.primaryColor
+                                              : Colors.red[700],
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          value == 'make_admin'
+                                              ? 'Đặt làm Admin'
+                                              : 'Xóa thành viên',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          // Đóng dialog
+                                          Navigator.of(dialogContext).pop();
+
+                                          // Thực hiện hành động
+                                          if (value == 'make_admin') {
+                                            walletBloc.add(ChangeOwner(
+                                              walletId: sharedWallet.id ?? '',
+                                              userId: member.id ?? '',
+                                            ));
+                                          } else if (value == 'remove') {
+                                            walletBloc.add(DeleteWallet(
+                                              walletId: sharedWallet.id ?? '',
+                                              userId: member.id ?? '',
+                                            ));
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            itemBuilder: (context) => [
+                              // Only show 'make admin' if the member is not already an admin
+                              if (sharedWallet.ownerId != member.id)
+                                PopupMenuItem(
+                                  value: 'make_admin',
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.admin_panel_settings,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const Text(
+                                        'Đặt làm Admin',
+                                        style: TextStyle(fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              if (currentUser.id != member.id)
+                                PopupMenuItem(
+                                  value: 'remove',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.person_remove,
+                                        color: Colors.red,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const Text(
+                                        'Xóa thành viên',
+                                        style: TextStyle(fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    ],
-                    ),
-                    ),
-                    ),
-                    ));
-        }),
-          ],
-        ),
+                  ),
+                ));
+          }),
+        ],
+      ),
     );
   }
-
 
   Widget _buildMemberView() {
     return SingleChildScrollView(
@@ -626,10 +640,10 @@ class _MembersScreenState extends State<MembersScreen> {
                     Text(
                       'Thành viên ví chung',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.7,
-                      ),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.7,
+                          ),
                     ),
                   ],
                 ),
@@ -641,7 +655,8 @@ class _MembersScreenState extends State<MembersScreen> {
                   children: [
                     Text(
                       '${sortedMembers.length}',
-                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                      style:
+                          Theme.of(context).textTheme.displayMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         shadows: [
@@ -657,9 +672,9 @@ class _MembersScreenState extends State<MembersScreen> {
                     Text(
                       'thành viên',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w500,
-                      ),
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w500,
+                          ),
                     ),
                   ],
                 ),
@@ -682,10 +697,7 @@ class _MembersScreenState extends State<MembersScreen> {
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Colors.grey[200]!,
-                  Colors.grey[100]!
-                ],
+                colors: [Colors.grey[200]!, Colors.grey[100]!],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
@@ -697,16 +709,16 @@ class _MembersScreenState extends State<MembersScreen> {
                 Text(
                   'Danh sách thành viên',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.grey[800],
-                  ),
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey[800],
+                      ),
                 ),
                 Text(
                   'Tổng: ${sortedMembers.length}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ],
             ),
@@ -733,8 +745,8 @@ class _MembersScreenState extends State<MembersScreen> {
                   color: currentUser.id == member.id
                       ? Colors.blue[100]!
                       : sharedWallet.ownerId == member.id
-                      ? Colors.orange[100]!
-                      : Colors.transparent,
+                          ? Colors.orange[100]!
+                          : Colors.transparent,
                   width: 1.5,
                 ),
               ),
@@ -757,8 +769,8 @@ class _MembersScreenState extends State<MembersScreen> {
                               backgroundColor: currentUser.id == member.id
                                   ? Colors.blue[50]
                                   : sharedWallet.ownerId == member.id
-                                  ? Colors.orange[50]
-                                  : Colors.grey[200],
+                                      ? Colors.orange[50]
+                                      : Colors.grey[200],
                               child: Text(
                                 member.fullName![0].toUpperCase(),
                                 style: TextStyle(
@@ -767,13 +779,14 @@ class _MembersScreenState extends State<MembersScreen> {
                                   color: currentUser.id == member.id
                                       ? Colors.blue[800]
                                       : sharedWallet.ownerId == member.id
-                                      ? Colors.orange[800]
-                                      : Colors.grey[700],
+                                          ? Colors.orange[800]
+                                          : Colors.grey[700],
                                 ),
                               ),
                             ),
                             // Role Badge
-                            if (sharedWallet.ownerId == member.id || currentUser.id == member.id)
+                            if (sharedWallet.ownerId == member.id ||
+                                currentUser.id == member.id)
                               Positioned(
                                 bottom: 0,
                                 right: 0,
@@ -805,19 +818,24 @@ class _MembersScreenState extends State<MembersScreen> {
                                 children: [
                                   Text(
                                     member.fullName!,
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: currentUser.id == member.id
-                                          ? Colors.blue[800]
-                                          : sharedWallet.ownerId == member.id
-                                          ? Colors.orange[800]
-                                          : Colors.black87,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: currentUser.id == member.id
+                                              ? Colors.blue[800]
+                                              : sharedWallet.ownerId ==
+                                                      member.id
+                                                  ? Colors.orange[800]
+                                                  : Colors.black87,
+                                        ),
                                   ),
                                   if (sharedWallet.ownerId == member.id)
                                     Container(
                                       margin: const EdgeInsets.only(left: 8),
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
                                       decoration: BoxDecoration(
                                         color: Colors.orange.withOpacity(0.2),
                                         borderRadius: BorderRadius.circular(12),
@@ -838,7 +856,8 @@ class _MembersScreenState extends State<MembersScreen> {
                                   if (currentUser.id == member.id)
                                     Container(
                                       margin: const EdgeInsets.only(left: 8),
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
                                       decoration: BoxDecoration(
                                         color: Colors.blue.withOpacity(0.2),
                                         borderRadius: BorderRadius.circular(12),
@@ -860,7 +879,8 @@ class _MembersScreenState extends State<MembersScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                member.phoneNumber ?? 'Số điện thoại chưa cập nhật',
+                                member.phoneNumber ??
+                                    'Số điện thoại chưa cập nhật',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -880,7 +900,6 @@ class _MembersScreenState extends State<MembersScreen> {
       ),
     );
   }
-
 
   void _showInviteMemberModal(BuildContext context) {
     final TextEditingController phoneController = TextEditingController();
@@ -909,11 +928,8 @@ class _MembersScreenState extends State<MembersScreen> {
                     if (state is WalletInviteMemberSuccess) {
                       Navigator.pop(context);
                     } else if (state is UserError) {
-                      _showErrorDialog(
-                          context,
-                          'Lỗi tìm kiếm người dùng',
-                          'Không thể tìm thấy người dùng với số điện thoại này. Chi tiết lỗi: ${state.message}'
-                      );
+                      _showErrorDialog(context, 'Lỗi tìm kiếm người dùng',
+                          'Không thể tìm thấy người dùng với số điện thoại này. Chi tiết lỗi: ${state.message}');
                     } else if (state is UserLoadedByPhone) {
                       userId = state.user.id; // Lưu userId để gọi sự kiện sau
                       showDialog(
@@ -929,10 +945,12 @@ class _MembersScreenState extends State<MembersScreen> {
                               Row(
                                 children: [
                                   CircleAvatar(
-                                    backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                                    backgroundColor:
+                                        AppColors.primaryColor.withOpacity(0.1),
                                     child: Text(
                                       state.user.fullName?.isNotEmpty == true
-                                          ? state.user.fullName![0].toUpperCase()
+                                          ? state.user.fullName![0]
+                                              .toUpperCase()
                                           : '?',
                                       style: TextStyle(
                                         color: AppColors.primaryColor,
@@ -943,7 +961,8 @@ class _MembersScreenState extends State<MembersScreen> {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           state.user.fullName ?? 'Không có tên',
@@ -975,12 +994,12 @@ class _MembersScreenState extends State<MembersScreen> {
                                 Navigator.pop(context); // Đóng pop-up xác nhận
                                 if (userId != null) {
                                   setState(() {
-                                    isLoading = true; // Bắt đầu loading khi gửi lời mời
+                                    isLoading =
+                                        true; // Bắt đầu loading khi gửi lời mời
                                   });
                                   context.read<WalletBloc>().add(InviteMember(
                                       walletId: sharedWallet.id ?? '',
-                                      userId: userId!
-                                  ));
+                                      userId: userId!));
                                 }
                               },
                               style: ElevatedButton.styleFrom(
@@ -1006,15 +1025,10 @@ class _MembersScreenState extends State<MembersScreen> {
                     });
 
                     if (state is WalletInviteMemberSuccess) {
-                      showSuccessDialog(context,
-                          'Thành công',
-                          'Đã gửi lời mời thành công');
+                      AppRouter.navigateToMember();
                     } else if (state is WalletError) {
-                      _showErrorDialog(
-                          context,
-                          'Lỗi khi thêm thành viên',
-                          'Không thể thêm thành viên. ${state.message}'
-                      );
+                      _showErrorDialog(context, 'Lỗi khi thêm thành viên',
+                          'Không thể thêm thành viên. ${state.message}');
                     } else if (state is WalletLoading) {
                       setState(() {
                         isLoading = true;
@@ -1039,9 +1053,10 @@ class _MembersScreenState extends State<MembersScreen> {
                       children: [
                         Text(
                           'Mời thành viên mới',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.close),
@@ -1062,18 +1077,19 @@ class _MembersScreenState extends State<MembersScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                          borderSide:
+                              BorderSide(color: Theme.of(context).primaryColor),
                         ),
                         suffixIcon: phoneController.text.isNotEmpty
                             ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              phoneController.clear();
-                              phoneError = null;
-                            });
-                          },
-                        )
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  setState(() {
+                                    phoneController.clear();
+                                    phoneError = null;
+                                  });
+                                },
+                              )
                             : null,
                         errorText: phoneError,
                       ),
@@ -1088,27 +1104,29 @@ class _MembersScreenState extends State<MembersScreen> {
                       onPressed: isLoading
                           ? null
                           : () {
-                        if (phoneController.text.isNotEmpty) {
-                          final phoneNumber = phoneController.text.trim();
-                          final validPhoneRegex = RegExp(r'^0\d{8,9}$');
-                          if (!validPhoneRegex.hasMatch(phoneNumber)) {
-                            setState(() {
-                              phoneError = 'Số điện thoại không hợp lệ, vui lòng nhập 9 hoặc 10 số';
-                            });
-                            return;
-                          }
+                              if (phoneController.text.isNotEmpty) {
+                                final phoneNumber = phoneController.text.trim();
+                                final validPhoneRegex = RegExp(r'^0\d{8,9}$');
+                                if (!validPhoneRegex.hasMatch(phoneNumber)) {
+                                  setState(() {
+                                    phoneError =
+                                        'Số điện thoại không hợp lệ, vui lòng nhập 9 hoặc 10 số';
+                                  });
+                                  return;
+                                }
 
-                          setState(() {
-                            phoneError = null; // Xóa lỗi nếu hợp lệ
-                          });
+                                setState(() {
+                                  phoneError = null; // Xóa lỗi nếu hợp lệ
+                                });
 
-                          context.read<UserBloc>().add(GetUserByPhoneNumberEvent(phoneNumber));
-                        } else {
-                          setState(() {
-                            phoneError = 'Vui lòng nhập số điện thoại';
-                          });
-                        }
-                      },
+                                context.read<UserBloc>().add(
+                                    GetUserByPhoneNumberEvent(phoneNumber));
+                              } else {
+                                setState(() {
+                                  phoneError = 'Vui lòng nhập số điện thoại';
+                                });
+                              }
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
                         foregroundColor: Colors.white,
@@ -1118,13 +1136,13 @@ class _MembersScreenState extends State<MembersScreen> {
                         ),
                         disabledBackgroundColor: Colors.grey,
                       ),
-                      child:
-                      Text(
+                      child: Text(
                         'Kiểm tra',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -1196,6 +1214,4 @@ class _MembersScreenState extends State<MembersScreen> {
       ),
     );
   }
-
-
 }

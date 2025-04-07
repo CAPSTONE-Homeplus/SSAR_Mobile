@@ -5,6 +5,7 @@ class CreateTransactionModel {
   String? amount;
   String? note;
   String? orderId;
+  int? serviceType;
 
   CreateTransactionModel({
     this.walletId,
@@ -13,6 +14,7 @@ class CreateTransactionModel {
     this.amount,
     this.note,
     this.orderId,
+    this.serviceType,
   });
 
   factory CreateTransactionModel.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class CreateTransactionModel {
       amount: json['amount'],
       note: json['note'],
       orderId: json['orderId'],
+      serviceType: json['serviceType'],
     );
   }
 
@@ -34,6 +37,7 @@ class CreateTransactionModel {
       'amount': amount,
       'note': note,
       'orderId': orderId,
+      'serviceType': serviceType,
     };
   }
 }

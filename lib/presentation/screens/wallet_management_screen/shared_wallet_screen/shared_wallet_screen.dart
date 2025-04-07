@@ -30,7 +30,14 @@ class _SharedWalletScreenState extends State<SharedWalletScreen> {
       body: BlocListener<SharedWalletBloc, WalletState>(
         listener: (context, walletState) {
           if (walletState is WalletError) {
-            showCustomErrorDialog(context: context, errorMessage: walletState.message);
+            showCustomDialog(
+              context: context,
+              message: walletState.message,
+              type: DialogType.error,
+              onConfirm: () {
+                Navigator.pop(context);
+              },
+            );
           }
         },
         child: BlocBuilder<SharedWalletBloc, WalletState>(

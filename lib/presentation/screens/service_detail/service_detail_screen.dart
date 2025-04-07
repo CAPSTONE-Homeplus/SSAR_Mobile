@@ -26,6 +26,7 @@ import 'package:home_clean/presentation/blocs/sub_activity/sub_activity_state.da
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../core/constant/size_config.dart';
 import '../../../core/format/formater.dart';
 import '../../../domain/entities/order/create_order.dart';
 import '../../../domain/entities/service_activity/service_activity.dart';
@@ -99,7 +100,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       service: widget.service,
       option: _selectedOptions,
       extraService: _selectedExtraServices,
-      timeSlot: _selectedTimeSlot,
+      timeSlot: isEmergency ? TimeSlot(startTime: "", endTime: "") : _selectedTimeSlot,
       notes: _notesController.text,
       emergencyRequest: isEmergency,
       address: '',
@@ -179,8 +180,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildServiceSupply(),
-                    SizedBox(height: 10),
+                    // _buildServiceSupply(),
+                    // SizedBox(height: 10),
                     _buildAdditionalOptionsSection(),
                     SizedBox(height: 10),
                     _buildExtraService(),
@@ -188,6 +189,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     _buildJobDetailsSection(),
                     SizedBox(height: 10),
                     _buildNotesField(),
+                    SizedBox(height: 10),
+                    _buid(),
+                    SizedBox(height: 10),
                   ],
                 ),
               ),
@@ -836,88 +840,96 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     );
   }
 
+
+  Widget _buid() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Section "Tổng cộng"
+            Text(
+              'Tổng cộng',
+              style: GoogleFonts.poppins(
+                fontSize: 14 * SizeConfig.ffem, // Giảm kích thước font
+                color: Colors.grey[600],
+                letterSpacing: 0.3,
+              ),
+            ),
+            SizedBox(height: 4 * SizeConfig.hem), // Giảm khoảng cách
+            Text(
+              '${Formater.formatCurrency(_totalPrice)} VND',
+              style: GoogleFonts.poppins(
+                fontSize: 20 * SizeConfig.ffem, // Giảm kích thước font
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF1CAF7D),
+                letterSpacing: 0.5,
+              ),
+            ),
+            SizedBox(height: 12 * SizeConfig.hem), // Giảm khoảng cách
+            Divider(color: Colors.grey[200], height: 1),
+            SizedBox(height: 12 * SizeConfig.hem), // Giảm khoảng cách
+
+            // TimeDropdown section
+            Row(
+              children: [
+                Expanded(
+                  child: TimeDropdown(
+                    value: _selectedTimeSlot,
+                    items: timeSlots,
+                    onChanged: (newValue) {
+                      setState(() {
+                        _selectedTimeSlot = newValue!;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12 * SizeConfig.hem), // Giảm khoảng cách
+          ],
+        ),
+      ),
+    );
+  }
+
+
   Widget _buildBottomBar() {
-    return isLoading ? _buildShimmerLoading() : Container(
-      height: MediaQuery.of(context).size.height * 0.27,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+    return isLoading
+        ? _buildShimmerLoading()
+        : Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12), // Giảm padding
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(28),
-          topRight: Radius.circular(28),
+          topLeft: Radius.circular(20), // Giảm độ bo góc
+          topRight: Radius.circular(20), // Giảm độ bo góc
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.06),
             offset: const Offset(0, -3),
-            blurRadius: 20,
+            blurRadius: 15, // Giảm độ mờ của bóng
             spreadRadius: 1,
           ),
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Price section with divider
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Tổng cộng',
-                style: GoogleFonts.poppins(
-                  fontSize: 15,
-                  color: Colors.grey[600],
-                  letterSpacing: 0.3,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${Formater.formatCurrency(_totalPrice)} VND',
-                style: GoogleFonts.poppins(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1CAF7D),
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Divider(color: Colors.grey[200], height: 1),
-          const SizedBox(height: 16),
-
-          // Dropdowns row
-          Row(
-            children: [
-              // Expanded(
-              //   child: _buildDropdown(
-              //     value: _selectedPaymentMethod,
-              //     items: ['Tiền mặt', 'Ví điện tử'],
-              //     getIcon: (value) => value == 'Tiền mặt'
-              //         ? Icons.payments_outlined
-              //         : Icons.account_balance_wallet_outlined,
-              //     onChanged: (newValue) {
-              //       setState(() => _selectedPaymentMethod = newValue!);
-              //     },
-              //   ),
-              // ),
-              // const SizedBox(width: 12),
-              Expanded(
-                child: TimeDropdown(
-                  value: _selectedTimeSlot,
-                  items: timeSlots,
-                  onChanged: (newValue) {
-                    setState(() {
-                      _selectedTimeSlot = newValue!;
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Action buttons
           Row(
             children: [
               Expanded(
@@ -930,7 +942,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   },
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 8 * SizeConfig.hem), // Giảm khoảng cách
               Expanded(
                 child: _buildActionButton(
                   title: 'Đặt theo giờ',
@@ -945,13 +957,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   },
                 ),
               ),
-
             ],
           ),
         ],
       ),
     );
   }
+
 
   void _showErrorDialog(BuildContext context, String message) {
     showDialog(
@@ -970,54 +982,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           ],
         );
       },
-    );
-  }
-
-
-// Helper method for consistent dropdown styling
-  Widget _buildDropdown({
-    required String value,
-    required List<String> items,
-    required IconData Function(String) getIcon,
-    required Function(String?) onChanged,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-        color: Colors.grey.shade50,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          isExpanded: true,
-          icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey[600], size: 22),
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: Colors.black87,
-            fontWeight: FontWeight.w500,
-          ),
-          items: items.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    getIcon(value),
-                    size: 18,
-                    color: Colors.grey[700],
-                  ),
-                  const SizedBox(width: 8),
-                  Text(value),
-                ],
-              ),
-            );
-          }).toList(),
-          onChanged: onChanged,
-        ),
-      ),
     );
   }
 

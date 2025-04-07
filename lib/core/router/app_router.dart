@@ -11,8 +11,10 @@ import 'package:home_clean/presentation/screens/start/splash_screen.dart';
 import 'package:home_clean/presentation/screens/wallet_management_screen/personal_wallet_screen/personal_wallet_screen.dart';
 import 'package:home_clean/presentation/screens/wallet_management_screen/shared_wallet_screen/shared_wallet_screen.dart';
 
+import '../../data/laundry_repositories/laundry_order_repo.dart';
+import '../../presentation/laundry_screens/laundry_order_detail_screen/laundry_order_detail_screen.dart';
+import '../../presentation/laundry_screens/laundry_service_screen/laundry_service_screen.dart';
 import '../../presentation/screens/activity/activity_screen.dart';
-import '../../presentation/screens/laundry_service_screen/laundry_service_screen.dart';
 import '../../presentation/screens/login/login_screen.dart';
 import '../../presentation/screens/order_list/order_list_screen.dart';
 import '../../presentation/screens/order_tracking/order_tracking_screen.dart';
@@ -45,6 +47,7 @@ class AppRouter {
   static const String routeOrderDetail = '/order-detail';
   static const String routeLaundryService = '/laundry-service';
   static const String routeReservationsLaundry = '/reservations-laundry';
+  static const String routeLaundryOrderDetail = '/laundry-order-detail';
 
 
   static List<GetPage> get routes => [
@@ -173,7 +176,14 @@ class AppRouter {
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
+        GetPage(
+        name: routeLaundryOrderDetail,
+        page: () => LaundryOrderDetailScreen(orderId: Get.arguments ?? ""),
+        transition: Transition.cupertino,
+        transitionDuration: const Duration(milliseconds: 300),
+        ),
       ];
+
   static void navigateToLogin() {
     Get.toNamed(routeLogin);
   }
@@ -219,7 +229,7 @@ class AppRouter {
   }
 
   static void navigateToOrderDetailWithArguments(dynamic arguments) {
-    Get.toNamed(routeOrderDetail, arguments: arguments);
+    Get.offAndToNamed(routeOrderDetail, arguments: arguments);
   }
 
   static void navigateToRegister() {
@@ -266,6 +276,9 @@ class AppRouter {
     Get.toNamed(routeReservationsLaundry, arguments: serviceTypeId);
   }
 
+  static void navigateToLaundryOrderDetail(String? orderId) {
+    Get.offNamed(routeLaundryOrderDetail, arguments: orderId);
+  }
 
 
 }

@@ -10,6 +10,7 @@ class CreateTransactionMapper {
         amount: model.amount,
         note: model.note,
         orderId: model.orderId,
+        serviceType: model.serviceType,
     );
   }
 
@@ -21,6 +22,7 @@ class CreateTransactionMapper {
         amount: entity.amount,
         note: entity.note,
         orderId: entity.orderId,
+        serviceType: entity.serviceType,
     );
   }
 }

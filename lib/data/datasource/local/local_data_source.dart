@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:home_clean/data/datasource/local/service_local_data_source.dart';
 import 'package:home_clean/data/datasource/local/transaction_local_data_source.dart';
 import 'package:home_clean/data/datasource/local/user_local_datasource.dart';
@@ -30,14 +31,14 @@ class LocalDataSource {
   Future<void> clearAllData() async {
     Map<String, dynamic>? authData = await authLocalDataSource.getAuth();
     if (authData == null) return;
-    String? user = authData['userId'];
     await authLocalDataSource.clearAuth();
     // await extraServiceLocalDataSource.clearSelectedExtraServiceIds();
     // await optionLocalDataSource.clearSelectedOptionIds();
     await serviceLocalDataSource.clearService();
     await userLocalDatasource.clearUser();
     // await transactionLocalDataSource.clearTransactions(user!);
-
+    debugPrint('Cleared all data');
+    // await walletLocalDataSource.clearWallets(user);
   }
 }
 

@@ -38,8 +38,6 @@ class _SharedWalletState extends State<SharedWallet> with SingleTickerProviderSt
       backgroundColor: Colors.grey[100],
       appBar: CustomAppBar(
         title: 'Ví chung',
-        onNotificationPressed: () {
-        },
         onBackPressed: () {
           AppRouter.navigateToHome();
         },
@@ -50,37 +48,40 @@ class _SharedWalletState extends State<SharedWallet> with SingleTickerProviderSt
 
   /// Hiển thị thông tin Ví Chung với lịch sử hoạt động
   Widget _buildSharedWalletView() {
-
     return RefreshIndicator(
       onRefresh: _resetSharedWalletData,
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           children: [
             BalanceCard(wallet: widget.sharedWallet),
             const SizedBox(height: 16),
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Hoạt động gần đây',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  TransactionScreen(
-                    wallet: widget.sharedWallet,
-                    amount: '${widget.sharedWallet.balance}đ',
-                    isContribution: widget.sharedWallet.balance! > 0,
-                    time: 'Cập nhật gần đây',
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Hoạt động gần đây',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
+            Expanded(
+              child: TransactionScreen(
+                wallet: widget.sharedWallet,
+                amount: '${widget.sharedWallet.balance}đ',
+                isContribution: widget.sharedWallet.balance! > 0,
+                time: 'Cập nhật gần đây',
+              ),
+            ),
           ],
-        ),
-      ),
+        )
+
     );
   }
 

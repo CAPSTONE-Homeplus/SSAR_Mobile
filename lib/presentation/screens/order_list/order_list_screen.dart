@@ -400,11 +400,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(
-            'assets/images/empty_order.png',
-            width: SizeConfig.hem * 200,
-            height: SizeConfig.hem * 200,
-          ),
           SizedBox(height: SizeConfig.fem * 24),
           Text(
             'Chưa có đơn hàng nào',
@@ -422,32 +417,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
               fontSize: SizeConfig.hem * 16,
             ),
             textAlign: TextAlign.center,
-          ),
-          SizedBox(height: SizeConfig.fem * 24),
-          ElevatedButton(
-            onPressed: () {
-              // Thêm logic xử lý khi nhấn nút
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1CAF7D), // Đổi từ `primary` thành `backgroundColor`
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: SizeConfig.hem * 12,
-                horizontal: SizeConfig.fem * 24,
-              ),
-              child: Text(
-                'Đặt dịch vụ ngay',
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: SizeConfig.hem * 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
           ),
         ],
       ),

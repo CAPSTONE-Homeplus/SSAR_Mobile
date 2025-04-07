@@ -18,13 +18,9 @@ import '../models/transaction/transaction_model.dart';
 
 class TransactionRepositoryImpl implements TransactionRepository {
   final AuthLocalDataSource authLocalDataSource;
-  final TransactionLocalDataSource transactionLocalDataSource;
-  final NetworkHelper _connectivity = NetworkHelper();
-
 
   TransactionRepositoryImpl({
     required this.authLocalDataSource,
-    required this.transactionLocalDataSource,
   });
 
   Future<String> _getUserId() async {
@@ -54,7 +50,6 @@ class TransactionRepositoryImpl implements TransactionRepository {
       );
 
       if (response.statusCode == 201 && response.data != null) {
-        transactionLocalDataSource.saveTransactions(userId, response.data);
         return Transaction(
           id: response.data['id'],
           walletId: response.data['walletId'],
@@ -91,12 +86,6 @@ class TransactionRepositoryImpl implements TransactionRepository {
       String? search, String? orderBy, int? page, int? size) async {
     try {
       String userId = await _getUserId();
-
-      bool isConnected = await _connectivity.checkInternetConnection();
-      if (!isConnected) {
-        return await _getCachedTransactions(userId);
-      }
-
       final response = await vinWalletRequest.get(
         '${ApiConstant.users}/$userId/transactions',
         queryParameters: {
@@ -115,8 +104,6 @@ class TransactionRepositoryImpl implements TransactionRepository {
         List<Transaction> transactions = data
             .map((item) => TransactionMapper.toEntity(TransactionModel.fromJson(item)))
             .toList();
-
-        await transactionLocalDataSource.saveTransactions(userId, rawData);
 
         return BaseResponse<Transaction>(
           size: rawData['size'] ?? 0,
@@ -225,18 +212,6 @@ class TransactionRepositoryImpl implements TransactionRepository {
 
     } catch (e) {
       throw ExceptionHandler.handleException(e);
-    }
-  }
-
-  Future<BaseResponse<Transaction>> _getCachedTransactions(String userId) async {
-    try {
-      BaseResponse<Transaction>? cachedData = await transactionLocalDataSource.getTransactions(userId);
-      if (cachedData == null) {
-        return BaseResponse<Transaction>(size: 0, page: 0, total: 0, totalPages: 0, items: []);
-      }
-      return cachedData;
-    } catch (e) {
-      return BaseResponse<Transaction>(size: 0, page: 0, total: 0, totalPages: 0, items: []);
     }
   }
 

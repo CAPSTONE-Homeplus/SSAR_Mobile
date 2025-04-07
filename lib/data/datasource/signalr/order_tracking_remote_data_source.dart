@@ -41,7 +41,7 @@ class OrderTrackingRemoteDataSource {
   Future<void> _initOrderTrackingHub() async {
     _orderTrackingHubConnection = HubConnectionBuilder()
         .withUrl(
-      'https://homeclean.onrender.com/homeCleanHub',
+      'https://homeclean-2z89.onrender.com/homeCleanHub',
       options: HttpConnectionOptions(
         accessTokenFactory: () async => await _getAccessToken(),
       ),

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <base-config cleartextTraffic="true">
+    <base-config cleartextTrafficPermitted="true">
         <trust-anchors>
             <certificates src="system" />
             <certificates src="user" />
         </trust-anchors>
     </base-config>
-    <domain-config cleartextTraffic="true">
+
+    <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">sandbox.vnpayment.vn</domain>
         <domain includeSubdomains="true">vnpayment.vn</domain>
     </domain-config>

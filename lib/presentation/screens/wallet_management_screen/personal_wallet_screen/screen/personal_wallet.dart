@@ -35,9 +35,7 @@ class _PersonalWalletState extends State<PersonalWallet> with SingleTickerProvid
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: CustomAppBar(
-        title: 'Ví riêng',
-        onNotificationPressed: () {
-        },
+        title: 'Ví Cá Nhân',
         onBackPressed: () {
           Navigator.of(context).pop();
         },
@@ -51,33 +49,38 @@ class _PersonalWalletState extends State<PersonalWallet> with SingleTickerProvid
 
     return RefreshIndicator(
       onRefresh: _resetSharedWalletData,
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Column(
-          children: [
-            BalanceCard(wallet: widget.personalWallet),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
+      child: Column(
+        children: [
+          BalanceCard(wallet: widget.personalWallet),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
                     'Hoạt động gần đây',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  TransactionScreen(
-                    wallet: widget.personalWallet,
-                    amount: '${widget.personalWallet.balance}đ',
-                    isContribution: widget.personalWallet.balance! > 0,
-                    time: 'Cập nhật gần đây',
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+
+          const SizedBox(height: 8),
+          Expanded(
+            child: TransactionScreen(
+              wallet: widget.personalWallet,
+              amount: '${widget.personalWallet.balance}đ',
+              isContribution: widget.personalWallet.balance! > 0,
+              time: 'Cập nhật gần đây',
+            ),
+          ),
+        ],
       ),
     );
   }

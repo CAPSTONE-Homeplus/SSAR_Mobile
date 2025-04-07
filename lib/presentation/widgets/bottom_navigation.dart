@@ -1,6 +1,7 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/constant/size_config.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/notification/notification.dart';
 import '../screens/order_list/order_list_screen.dart';
@@ -44,6 +45,10 @@ class _BottomNavigationState extends State<BottomNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final fem = SizeConfig.fem;
+    final hem = SizeConfig.hem;
+    final ffem = SizeConfig.ffem;
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
@@ -53,14 +58,14 @@ class _BottomNavigationState extends State<BottomNavigation> {
         backgroundColor: Colors.grey[100]!,
         color: Colors.white,
         buttonBackgroundColor: Colors.greenAccent,
-        height: 60,
+        height: 60 * hem,
         index: _currentIndex,
         animationDuration: const Duration(milliseconds: 300),
-        items: const [
-          Icon(Icons.home, size: 30, color: Colors.black),
-          Icon(Icons.list_alt, size: 30, color: Colors.black),
-          Icon(Icons.notifications, size: 30, color: Colors.black),
-          Icon(Icons.person_outline, size: 30, color: Colors.black),
+        items: [
+          Icon(Icons.home, size: 30 * fem, color: Colors.black),
+           Icon(Icons.list_alt, size: 30 * fem, color: Colors.black),
+           Icon(Icons.notifications, size: 30 * fem, color: Colors.black),
+           Icon(Icons.person_outline, size: 30 * fem, color: Colors.black),
         ],
         onTap: _onTabTapped,
       ),

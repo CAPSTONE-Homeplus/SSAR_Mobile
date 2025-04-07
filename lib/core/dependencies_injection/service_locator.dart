@@ -32,6 +32,7 @@ import '../../data/datasource/local/user_local_datasource.dart';
 import '../../data/datasource/local/wallet_local_data_source.dart';
 import '../../data/datasource/signalr/order_tracking_remote_data_source.dart';
 import '../../data/laundry_repositories/additional_service_repository.dart';
+import '../../data/laundry_repositories/laundry_order_repo.dart';
 import '../../data/repositories/authentication_repository_impl.dart';
 import '../../data/repositories/building_repository_impl.dart';
 import '../../data/repositories/equipment_supply_repository_impl.dart';
@@ -126,6 +127,7 @@ import '../../presentation/blocs/payment_method/payment_method_bloc.dart';
 import '../../presentation/blocs/room/room_bloc.dart';
 import '../../presentation/blocs/transaction/transation_bloc.dart';
 import '../../presentation/blocs/wallet/wallet_bloc.dart';
+import '../../presentation/laundry_blocs/order/laundry_order_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -212,7 +214,6 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
   sl.registerLazySingleton<BuildingRepository>(() => BuildingRepositoryImpl());
   sl.registerLazySingleton<TransactionRepository>(() => TransactionRepositoryImpl(
     authLocalDataSource: sl(),
-    transactionLocalDataSource: sl(),
   ));
   sl.registerLazySingleton<PaymentMethodRepository>(() => PaymentMethodRepositoryImpl());
   sl.registerLazySingleton<HouseRepository>(() => HouseRepositoryImpl());
@@ -222,6 +223,7 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
   ));
   sl.registerLazySingleton<LaundryServiceTypeRepository>(() => LaundryServiceTypeRepositoryImpl());
   sl.registerLazySingleton<AdditionalServiceRepository>(() => AdditionalServiceRepository());
+  sl.registerLazySingleton<LaundryOrderRepository>(() => LaundryOrderRepository(authLocalDataSource: sl(), userLocalDatasource: sl()));
 
 
   // Use Cases
@@ -336,4 +338,5 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
   ));
   sl.registerLazySingleton(() => LaundryItemTypeBloc(sl()));
   sl.registerLazySingleton(() => AdditionalServiceBloc(repository: sl()));
+  sl.registerLazySingleton(()=> LaundryOrderBloc(sl()));
 }

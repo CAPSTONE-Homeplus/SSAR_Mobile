@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:home_clean/presentation/laundry_screens/laundry_service_screen/components/price_input.dart';
 import 'package:intl/intl.dart';
-
+import '../../../../data/laundry_repositories/laundry_order_repo.dart';
 import '../../../widgets/currency_display.dart';
 
 class LaundryItemQuantityRow extends StatefulWidget {
   final dynamic item;
   final Color primaryColor;
   final Function(int) onQuantityChanged;
+  final Function(double)? onTotalPriceChanged;
+
 
   const LaundryItemQuantityRow({
     Key? key,
     required this.item,
     required this.primaryColor,
     required this.onQuantityChanged,
+    this.onTotalPriceChanged,
   }) : super(key: key);
 
   @override
@@ -22,17 +26,20 @@ class LaundryItemQuantityRow extends StatefulWidget {
 
 class _LaundryItemQuantityRowState extends State<LaundryItemQuantityRow> {
   late TextEditingController _quantityController;
+  late TextEditingController _weightController;
   int _quantity = 0;
 
   @override
   void initState() {
     super.initState();
     _quantityController = TextEditingController(text: '0');
+    _weightController = TextEditingController(text: '0');
   }
 
   @override
   void dispose() {
     _quantityController.dispose();
+    _weightController.dispose();
     super.dispose();
   }
 
@@ -51,9 +58,8 @@ class _LaundryItemQuantityRowState extends State<LaundryItemQuantityRow> {
         // Minus button
         IconButton(
           icon: Icon(Icons.remove_circle_outline, color: widget.primaryColor),
-          onPressed: _quantity > 0
-              ? () => _updateQuantity(_quantity - 1)
-              : null,
+          onPressed:
+              _quantity > 0 ? () => _updateQuantity(_quantity - 1) : null,
         ),
 
         // Quantity input
@@ -95,18 +101,18 @@ class _LaundryItemQuantityRowState extends State<LaundryItemQuantityRow> {
     );
   }
 }
-
-// Example of how to use in the main screen
 class LaundryServiceItemRow extends StatefulWidget {
   final dynamic item;
   final Color primaryColor;
   final String? serviceType;
+  final Function(OrderDetailsRequest) onAddItem;
 
   const LaundryServiceItemRow({
     Key? key,
     required this.item,
     required this.primaryColor,
     this.serviceType,
+    required this.onAddItem,
   }) : super(key: key);
 
   @override
@@ -123,11 +129,94 @@ class _LaundryServiceItemRowState extends State<LaundryServiceItemRow> {
     _totalPrice = 0;
   }
 
-  void _updateTotalPrice(int quantity) {
+  // Hàm xử lý khi có giá theo item
+  void _updateTotalPriceByItem(int quantity) {
     setState(() {
       _itemQuantity = quantity;
       _totalPrice = (widget.item.pricePerItem ?? 0) * quantity;
     });
+
+    OrderDetailsRequest orderDetailsRequest = OrderDetailsRequest(
+      itemTypeId: widget.item.id,
+      quantity: _itemQuantity,
+    );
+    widget.onAddItem(orderDetailsRequest);
+  }
+
+  // Hàm xử lý khi tính giá theo kg
+  void _updateTotalPriceByWeight(double weight, double totalPrice) {
+    setState(() {
+      _totalPrice = totalPrice;
+    });
+
+    OrderDetailsRequest orderDetailsRequest = OrderDetailsRequest(
+      itemTypeId: widget.item.id,
+      weight: weight,
+    );
+    widget.onAddItem(orderDetailsRequest);
+  }
+
+
+  // Layout khi có giá theo item
+  Widget _buildItemPriceLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Số lượng: ',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+              ),
+            ),
+            LaundryItemQuantityRow(
+              item: widget.item,
+              primaryColor: widget.primaryColor,
+              onQuantityChanged: _updateTotalPriceByItem,
+            ),
+          ],
+        ),
+        SizedBox(height: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            CurrencyDisplay(
+              price: widget.item.pricePerItem,
+              unit: " / cái",
+              fontSize: 16,
+            ),
+            SizedBox(height: 4),
+            Text(
+              'Tổng: ${NumberFormat('#,###', 'vi_VN').format(_totalPrice)} ₫',
+              style: TextStyle(
+                color: widget.primaryColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Layout khi tính giá theo kg
+  Widget _buildWeightPriceLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        PriceInputComponent(
+          primaryColor: widget.primaryColor,
+          pricePerKg: widget.item.pricePerKg ?? 0,
+          initialWeight: 0,
+          onTotalPriceChanged: (kg, total) {
+            _updateTotalPriceByWeight(kg, total);
+          },
+        ),
+      ],
+    );
   }
 
   @override
@@ -167,55 +256,11 @@ class _LaundryServiceItemRowState extends State<LaundryServiceItemRow> {
           SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Price display
               widget.item.pricePerItem != null
-                  ? Row(
-                children: [
-                  Text(
-                    'Số lượng: ',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
-                  ),
-                  LaundryItemQuantityRow(
-                    item: widget.item,
-                    primaryColor: widget.primaryColor,
-                    onQuantityChanged: _updateTotalPrice,
-                  ),
-                ],
-              )
-                  : SizedBox.shrink(),
-
-              // Price and quantity information
-              widget.item.pricePerItem != null
-                  ? Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  CurrencyDisplay(
-                    price: widget.item.pricePerItem,
-                    unit: " / cái",
-                    fontSize: 16,
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Tổng: ${NumberFormat('#,###', 'vi_VN').format(_totalPrice)} ₫',
-                    style: TextStyle(
-                      color: widget.primaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              )
-                  : Text(
-                'Giá: Liên hệ',
-                style: TextStyle(
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey[600],
-                ),
-              ),
+                  ? _buildItemPriceLayout()
+                  : _buildWeightPriceLayout(),
             ],
           ),
         ],

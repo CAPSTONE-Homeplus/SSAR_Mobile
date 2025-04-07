@@ -103,9 +103,10 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                   _isCheckingUser = false;
                 });
 
-                showCustomErrorDialog(
+                showCustomDialog(
                   context: context,
-                  errorMessage: state.message,
+                  message: state.message,
+                  type: DialogType.error,
                 );
               }
             },
@@ -123,9 +124,10 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                   _isRegistering = false;
                 });
 
-                showCustomErrorDialog(
+                showCustomDialog(
                   context: context,
-                  errorMessage: state.error,
+                  message: state.error,
+                  type: DialogType.error,
                 );
               }
             },

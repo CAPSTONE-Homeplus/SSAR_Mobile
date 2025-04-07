@@ -17,9 +17,6 @@ class AuthBloc
   final GetUserFromLocalUseCase getUserFromLocalUseCase;
   final UserRegisterUseCase userRegisterUseCase;
   final RefreshTokenUseCase refreshTokenUseCase;
-  User? _user;
-
-  User? get currentUser => _user;
 
   AuthBloc({
     required this.loginUseCase,
@@ -65,7 +62,6 @@ class AuthBloc
         emit(AuthenticationFailed(error: error.message));
       },
           (user) {
-        _user = user;
         emit(AuthenticationFromLocal(user: user));
       },
     );

@@ -9,7 +9,6 @@ import '../../../core/constant/size_config.dart';
 import '../../../core/enums/order_status.dart';
 import '../../../domain/entities/order/cancellation_request.dart';
 import '../../../domain/entities/order/order.dart';
-import '../../../domain/entities/service/service.dart';
 import '../../blocs/order/order_bloc.dart';
 import '../../widgets/bottom_navigation.dart';
 import '../../widgets/currency_display.dart';
@@ -620,7 +619,7 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                   Icon(Icons.support_agent),
                   SizedBox(width: 8 * SizeConfig.fem),
                   Text(
-                    'Liên hệ hỗ trợ',
+                    'Đánh giá hỗ trợ',
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w600,
                       fontSize: 16 * SizeConfig.ffem,

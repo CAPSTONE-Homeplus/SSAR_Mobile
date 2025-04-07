@@ -7,6 +7,7 @@ class CreateTransaction extends Equatable {
   String? amount;
   String? note;
   String? orderId;
+  int? serviceType;
 
   CreateTransaction({
     this.walletId,
@@ -15,6 +16,7 @@ class CreateTransaction extends Equatable {
     this.amount,
     this.note,
     this.orderId,
+    this.serviceType,
   });
 
   List<Object?> get props => [
@@ -24,6 +26,7 @@ class CreateTransaction extends Equatable {
     amount,
     note,
     orderId,
+    serviceType,
   ];
 
 }

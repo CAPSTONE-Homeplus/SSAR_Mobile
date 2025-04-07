@@ -44,6 +44,7 @@ class AuthRepositoryImpl implements AuthRepository {
         final accessToken = await authLocalDataSource.getAccessTokenFromStorage();
         vinWalletRequest.options.headers['Authorization'] = 'Bearer $accessToken';
         homeCleanRequest.options.headers['Authorization'] = 'Bearer $accessToken';
+        vinLaundryRequest.options.headers['Authorization'] = 'Bearer $accessToken';
         final user = await userRepository.getUser(response.data['userId']);
         await userLocalDatasource.saveUserModel(UserMapper.toModelFromEntity(user));
         return true;
@@ -59,24 +60,6 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e) {
       throw ExceptionHandler.handleException(e);
     }
-  }
-
-
-  @override
-  Future<void> clearUserFromLocal() async {
-    try {
-      await authLocalDataSource.clearAuth();
-      await userLocalDatasource.clearUser();
-    } catch (e) {
-      throw ExceptionHandler.handleException(e);
-    }
-  }
-
-
-  @override
-  Future<void> saveUserFromLocal(User user) async {
-    // UserModel userModel = UserMapper.toModel(user);
-    // await userLocalDatasource.saveUser(userModel);
   }
 
   @override

@@ -102,8 +102,10 @@ extension TransactionTypeParser on String {
         return TransactionType.deposit;
       case 'refund':
         return TransactionType.refund;
-      default:
+      case 'spending':
         return TransactionType.spending;
+      default:
+       return TransactionType.spending; // Default case
     }
   }
 }
