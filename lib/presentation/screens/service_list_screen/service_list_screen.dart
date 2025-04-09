@@ -38,8 +38,8 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
     categoryBloc.add(GetServiceCategoriesEvent(
       search: _searchController.text,
       orderBy: '',
-      page: 1,
-      size: 5,
+      page: Constant.defaultPage,
+      size: Constant.defaultSize,
     ));
 
     final categoryState = await categoryBloc.stream.firstWhere(
@@ -57,8 +57,8 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
           serviceCategoryId: category.id ?? '',
           search: _searchController.text,
           orderBy: '',
-          page: 1,
-          size: 5,
+          page: Constant.defaultPage,
+          size: Constant.defaultSize,
         ));
 
         final serviceState = await serviceBloc.stream.firstWhere(
@@ -105,7 +105,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: CustomAppBar(
-        title: 'Services',
+        title: 'Tất cả dịch vụ',
         onBackPressed: () => Navigator.of(context).pop(),
       ),
       body: Column(
@@ -138,7 +138,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         controller: _searchController,
         style: GoogleFonts.poppins(),
         decoration: InputDecoration(
-          hintText: 'Search services...',
+          hintText: 'Tìm kiếm dịch vụ',
           hintStyle: GoogleFonts.poppins(color: Colors.grey[400]),
           prefixIcon: Icon(Icons.search, color: Colors.grey[400], size: 22),
           filled: true,

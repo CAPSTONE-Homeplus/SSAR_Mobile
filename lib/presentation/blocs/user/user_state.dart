@@ -53,3 +53,37 @@ class UserError extends UserState {
   List<Object?> get props => [message];
 }
 
+class UserErrorByPhone extends UserState {
+  final String message;
+
+  UserErrorByPhone(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+
+// Get User Wallet State
+class UserWalletLoading extends UserState {
+  @override
+  List<Object?> get props => [];
+}
+
+class UserWalletLoaded extends UserState {
+  final BaseResponse<User> users;
+
+  UserWalletLoaded(this.users);
+
+  @override
+  List<Object?> get props => [users];
+}
+
+class UserWalletError extends UserState {
+  final String message;
+
+  UserWalletError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+

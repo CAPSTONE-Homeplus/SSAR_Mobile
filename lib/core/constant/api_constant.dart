@@ -47,11 +47,20 @@ class ApiConstant {
   /// Wallet
   static const String wallets = "/wallets";
 
+  /// Staff
+  static const String staff = "/staffs";
+
   /// Laundry service type
   static const String laundryServiceTypes = "/service-types";
 
   /// Additional service
   static const String additionalServices = "/additional-services";
+
+  /// Feedback
+  static const String feedbacks = "/feedbacks";
+
+  /// Service House Type
+  static const String serviceHouseTypes = "/service-in-house-types";
 
   static const String getTransactionByUser = "https://vinwallet.onrender.com/api/v1/users/{id}/transactions";
   static const String getTransactionByUserWallet = "https://vinwallet.onrender.com/api/v1/users/{id}/transactions{walletId}";

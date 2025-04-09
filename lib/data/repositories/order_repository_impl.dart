@@ -12,6 +12,9 @@ import '../../core/constant/api_constant.dart';
 import '../../core/constant/constants.dart';
 import '../../core/exception/exception_handler.dart';
 import '../../domain/entities/order/cancellation_request.dart';
+import '../../domain/entities/rating_request/rating_request.dart';
+import '../../domain/entities/service_in_house_type/house_type.dart';
+import '../../domain/entities/staff/staff.dart';
 import '../mappers/order/order_mapper.dart';
 import '../mappers/user/user_mapper.dart';
 import '../models/order/order_model.dart';
@@ -172,4 +175,83 @@ class OrderRepositoryImpl implements OrderRepository {
       throw ExceptionHandler.handleException(e);
     }
   }
+
+
+  @override
+  Future<Staff> getStaffById(String staffId) async {
+    try {
+      final response = await homeCleanRequest.get(
+        '${ApiConstant.staff}/$staffId',
+      );
+
+      if (response.statusCode == 200) {
+        return Staff.fromJson(response.data);
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      print(e.toString());
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<bool> ratingOrder(RatingRequest rating) async {
+    try {
+      final response = await homeCleanRequest.post(
+        ApiConstant.feedbacks,
+        data: rating.toJson(),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      print(e.toString());
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<ServiceInHouseType> getPriceByHouseType(String houseId, String serviceId) async {
+    try {
+      final response = await homeCleanRequest.get(
+        '${ApiConstant.serviceHouseTypes}/by-house-and-service',
+        queryParameters: {
+          'houseId': houseId,
+          'serviceId': serviceId,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return ServiceInHouseType.fromJson(response.data);
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      print(e.toString());
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
 }

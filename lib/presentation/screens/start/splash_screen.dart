@@ -62,13 +62,11 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(Duration(seconds: 3)); // Chờ animation
 
     String? accessToken = await AuthLocalDataSource().getAccessTokenFromStorage();
-    String? refreshToken = await AuthLocalDataSource().getRefreshTokenFromStorage();
 
-    if (accessToken != null && refreshToken != null) {
+    if (accessToken != null) {
       vinWalletRequest.options.headers['Authorization'] = 'Bearer $accessToken';
       homeCleanRequest.options.headers['Authorization'] = 'Bearer $accessToken';
       vinLaundryRequest.options.headers['Authorization'] = 'Bearer $accessToken';
-
       AppRouter.navigateToHome();
     } else {
       sl<ClearAllDataUseCase>().call();

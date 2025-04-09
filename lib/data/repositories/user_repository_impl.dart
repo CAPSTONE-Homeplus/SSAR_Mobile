@@ -46,11 +46,12 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<BaseResponse<User>> getUsersBySharedWallet(String walletId, String? search, String? orderBy, int? page, int? size) async {
+  Future<BaseResponse<User>> getUsersBySharedWallet(String walletId, int? page, int? size) async {
     try {
       final userResponse = await vinWalletRequest.get(
         '${ApiConstant.wallets}/$walletId/users-in-sharewallet',
         queryParameters: {
+          'id': walletId,
           'page': page ?? Constant.defaultPage,
           'size': size ?? Constant.defaultSize,
         },
@@ -92,8 +93,7 @@ class UserRepositoryImpl implements UserRepository {
       );
 
       if (userResponse.statusCode == 200 && userResponse.data != null) {
-        await userLocalDatasource.saveUser(userResponse.data);
-        UserModel userModel = UserMapper.toModel(userResponse.data);
+         UserModel userModel = UserMapper.toModel(userResponse.data);
         return UserMapper.toEntity(userModel);
       } else {
         throw ApiException(
@@ -116,8 +116,8 @@ class UserRepositoryImpl implements UserRepository {
         '${ApiConstant.users}/check-info',
         queryParameters: {
           'phoneNumber': phoneNumber,
-          'email': email,
-          'username': username,
+          'email': email ?? '',
+          'username': username ?? '',
         },
       );
 

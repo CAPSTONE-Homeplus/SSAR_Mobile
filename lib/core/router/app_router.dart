@@ -11,13 +11,14 @@ import 'package:home_clean/presentation/screens/start/splash_screen.dart';
 import 'package:home_clean/presentation/screens/wallet_management_screen/personal_wallet_screen/personal_wallet_screen.dart';
 import 'package:home_clean/presentation/screens/wallet_management_screen/shared_wallet_screen/shared_wallet_screen.dart';
 
-import '../../data/laundry_repositories/laundry_order_repo.dart';
+import '../../domain/entities/order/order.dart';
 import '../../presentation/laundry_screens/laundry_order_detail_screen/laundry_order_detail_screen.dart';
 import '../../presentation/laundry_screens/laundry_service_screen/laundry_service_screen.dart';
 import '../../presentation/screens/activity/activity_screen.dart';
 import '../../presentation/screens/login/login_screen.dart';
 import '../../presentation/screens/order_list/order_list_screen.dart';
 import '../../presentation/screens/order_tracking/order_tracking_screen.dart';
+import '../../presentation/screens/rating/rating_screen.dart';
 import '../../presentation/screens/service_list_screen/service_list_screen.dart';
 import '../../presentation/screens/top_up/top_up_screen.dart';
 import '../../presentation/screens/wallet_management_screen/shared_wallet_screen/member_screen/screen/member_screen.dart';
@@ -48,6 +49,7 @@ class AppRouter {
   static const String routeLaundryService = '/laundry-service';
   static const String routeReservationsLaundry = '/reservations-laundry';
   static const String routeLaundryOrderDetail = '/laundry-order-detail';
+  static const String routeRating = '/rating-screen';
 
 
   static List<GetPage> get routes => [
@@ -154,7 +156,7 @@ class AppRouter {
         ),
         GetPage(
           name: routeOrderTracking,
-          page: () => OrderTrackingScreen(orderId: Get.arguments),
+          page: () => OrderTrackingScreen(orders: Get.arguments),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -181,6 +183,12 @@ class AppRouter {
         page: () => LaundryOrderDetailScreen(orderId: Get.arguments ?? ""),
         transition: Transition.cupertino,
         transitionDuration: const Duration(milliseconds: 300),
+        ),
+        GetPage(
+          name: routeRating,
+          page: () => RatingReviewPage(orderId: Get.arguments),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
         ),
       ];
 
@@ -260,8 +268,8 @@ class AppRouter {
     Get.toNamed(routePersonalWallet);
   }
 
-  static void navigateToOrderTracking(String orderId) {
-    Get.toNamed(routeOrderTracking, arguments: orderId);
+  static void navigateToOrderTracking(Orders orders) {
+    Get.toNamed(routeOrderTracking, arguments: orders);
   }
 
   static void navigateToOrderList() {
@@ -279,6 +287,8 @@ class AppRouter {
   static void navigateToLaundryOrderDetail(String? orderId) {
     Get.offNamed(routeLaundryOrderDetail, arguments: orderId);
   }
-
+  static void navigateToRatingScreen(String? orderId) {
+    Get.offNamed(routeRating, arguments: orderId);
+  }
 
 }

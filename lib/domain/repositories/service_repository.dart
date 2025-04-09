@@ -8,8 +8,4 @@ abstract class ServiceRepository {
     int? page,
     int? size,
   );
-
-  Future<void> saveSelectedServiceIds(List<String> ids);
-  Future<List<String>?> getSelectedServiceIds();
-  Future<void> clearSelectedServiceIds();
 }

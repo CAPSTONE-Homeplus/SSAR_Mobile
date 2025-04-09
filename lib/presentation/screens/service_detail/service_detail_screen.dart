@@ -35,6 +35,7 @@ import '../../blocs/option/option_bloc.dart';
 import '../../blocs/time_slot/time_slot_bloc.dart';
 import '../../blocs/time_slot/time_slot_event.dart';
 import '../../blocs/time_slot/time_slot_state.dart';
+import '../../widgets/currency_display.dart';
 import '../../widgets/step_indicator_widget.dart';
 import '../../widgets/time_drop_down.dart';
 
@@ -190,8 +191,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     SizedBox(height: 10),
                     _buildNotesField(),
                     SizedBox(height: 10),
-                    _buid(),
-                    SizedBox(height: 10),
+                    _build(),
                   ],
                 ),
               ),
@@ -516,11 +516,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     color: Colors.black87,
                   ),
                 ),
-                subtitle: Text(
-                  option.price != null ? '+ ${Formater.formatCurrency(option.price!)}' : '',
-                  style: GoogleFonts.poppins(
-                    color: Colors.grey,
-                  ),
+                subtitle: CurrencyDisplay(
+                  price: option.price,
+                  fontSize: 14,
+                  iconSize: 16,
+                  unit: '',
                 ),
                 value: _selectedOptions.contains(option),
                 activeColor: AppColors.primaryColor,
@@ -594,11 +594,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     color: Colors.black87,
                   ),
                 ),
-                subtitle: Text(
-                  extra.price != null ? '+ ${Formater.formatCurrency(extra.price!)}' : '',
-                  style: GoogleFonts.poppins(
-                    color: Colors.grey,
-                  ),
+                subtitle: CurrencyDisplay(
+                  price: extra.price,
+                  fontSize: 14,
+                  iconSize: 16,
+                  unit: '',
                 ),
                 value: _selectedExtraServices.contains(extra),
                 activeColor: AppColors.primaryColor,
@@ -841,66 +841,92 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
 
-  Widget _buid() {
+  Widget _build() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section "Tổng cộng"
-            Text(
-              'Tổng cộng',
-              style: GoogleFonts.poppins(
-                fontSize: 14 * SizeConfig.ffem, // Giảm kích thước font
-                color: Colors.grey[600],
-                letterSpacing: 0.3,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title section
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
               ),
             ),
-            SizedBox(height: 4 * SizeConfig.hem), // Giảm khoảng cách
-            Text(
-              '${Formater.formatCurrency(_totalPrice)} VND',
-              style: GoogleFonts.poppins(
-                fontSize: 20 * SizeConfig.ffem, // Giảm kích thước font
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF1CAF7D),
-                letterSpacing: 0.5,
-              ),
-            ),
-            SizedBox(height: 12 * SizeConfig.hem), // Giảm khoảng cách
-            Divider(color: Colors.grey[200], height: 1),
-            SizedBox(height: 12 * SizeConfig.hem), // Giảm khoảng cách
-
-            // TimeDropdown section
-            Row(
+            child: Row(
               children: [
-                Expanded(
-                  child: TimeDropdown(
-                    value: _selectedTimeSlot,
-                    items: timeSlots,
-                    onChanged: (newValue) {
-                      setState(() {
-                        _selectedTimeSlot = newValue!;
-                      });
-                    },
+                Text(
+                  'Chọn thời gian',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18 * SizeConfig.ffem,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 12 * SizeConfig.hem), // Giảm khoảng cách
-          ],
-        ),
+          ),
+
+          // Divider for visual separation
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: Colors.grey[200],
+          ),
+
+          // Time dropdown section
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: TimeDropdown(
+              value: _selectedTimeSlot,
+              items: timeSlots,
+              onChanged: (newValue) {
+                setState(() {
+                  _selectedTimeSlot = newValue!;
+                });
+              },
+            ),
+          ),
+
+          // Note section at the bottom
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 14,
+                  color: Colors.grey[600],
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Nếu bạn muốn đặt khung giờ khác, vui lòng chọn từ danh sách trên.',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12 * SizeConfig.ffem,
+                      color: Colors.grey[600],
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -910,19 +936,19 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     return isLoading
         ? _buildShimmerLoading()
         : Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12), // Giảm padding
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20), // Giảm độ bo góc
-          topRight: Radius.circular(20), // Giảm độ bo góc
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            offset: const Offset(0, -3),
-            blurRadius: 15, // Giảm độ mờ của bóng
-            spreadRadius: 1,
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, -2),
+            blurRadius: 10,
+            spreadRadius: 0,
           ),
         ],
       ),
@@ -930,6 +956,58 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: const Color(0xFFF7FFFC),
+              border: Border.all(color: const Color(0xFFE0F5EF)),
+            ),
+            child: Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tổng cộng',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13 * SizeConfig.ffem,
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    CurrencyDisplay(
+                      price: _totalPrice,
+                      fontSize: 18,
+                      iconSize: 16,
+                      unit: '',
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1CAF7D).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'Đã bao gồm VAT',
+                    style: TextStyle(
+                      fontSize: 11 * SizeConfig.ffem,
+                      color: const Color(0xFF1CAF7D),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          // Action buttons with improved styling
           Row(
             children: [
               Expanded(
@@ -942,7 +1020,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   },
                 ),
               ),
-              SizedBox(width: 8 * SizeConfig.hem), // Giảm khoảng cách
+              SizedBox(width: 10 * SizeConfig.hem),
               Expanded(
                 child: _buildActionButton(
                   title: 'Đặt theo giờ',
@@ -960,6 +1038,65 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+// Improved action button with gradient and animation
+  Widget _buildActionButton({
+    required String title,
+    required IconData icon,
+    required bool isEmergency,
+    required VoidCallback onPressed,
+  }) {
+    return Material(
+      borderRadius: BorderRadius.circular(10),
+      elevation: 0,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: onPressed,
+        child: Ink(
+          height: 48,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            gradient: LinearGradient(
+              colors: isEmergency
+                  ? [const Color(0xFF1CAF7D), const Color(0xFF0D9268)]
+                  : [Colors.white, Colors.white],
+            ),
+            border: isEmergency
+                ? null
+                : Border.all(color: const Color(0xFF1CAF7D)),
+            boxShadow: isEmergency
+                ? [
+              BoxShadow(
+                color: const Color(0xFF1CAF7D).withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              )
+            ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: isEmergency ? Colors.white : const Color(0xFF1CAF7D),
+                size: 18,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                title,
+                style: GoogleFonts.poppins(
+                  color: isEmergency ? Colors.white : const Color(0xFF1CAF7D),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14 * SizeConfig.ffem,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -984,43 +1121,4 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       },
     );
   }
-
-// Helper method for consistent button styling
-  Widget _buildActionButton({
-    required String title,
-    required IconData icon,
-    required bool isEmergency,
-    required VoidCallback onPressed,
-  }) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isEmergency ? Colors.grey[100] : const Color(0xFF1CAF7D),
-        foregroundColor: isEmergency ? Colors.black87 : Colors.white,
-        elevation: 0,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: isEmergency
-              ? BorderSide(color: Colors.grey.shade300)
-              : BorderSide.none,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 8),
-          Text(
-            title,
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.3,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
 }

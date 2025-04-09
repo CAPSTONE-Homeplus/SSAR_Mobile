@@ -68,6 +68,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(
           'Thông tin tài khoản',
@@ -77,137 +78,154 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
         foregroundColor: Colors.white,
         leading: BackButton(onPressed: widget.onBack),
       ),
-      body: MultiBlocListener(
-        listeners: [
-          BlocListener<UserBloc, UserState>(
-            listener: (context, state) {
-              if (state is CheckUserInfoSuccess) {
-                setState(() {
-                  _isCheckingUser = false;
-                  _isRegistering = true;
-                });
-
-                context.read<AuthBloc>().add(
-                  RegisterAccount(
-                    fullName: widget.fullName,
-                    username: _usernameController.text,
-                    password: _passwordController.text,
-                    buildingCode: widget.buildingCode,
-                    houseCode: widget.houseCode,
-                    phoneNumber: widget.phoneNumber,
-                    email: widget.email,
-                  ),
-                );
-              } else if (state is UserError) {
-                setState(() {
-                  _isCheckingUser = false;
-                });
-
-                showCustomDialog(
-                  context: context,
-                  message: state.message,
-                  type: DialogType.error,
-                );
-              }
-            },
-          ),
-          BlocListener<AuthBloc, AuthState>(
-            listener: (context, state) {
-              if (state is RegisterSuccess) {
-                setState(() {
-                  _isRegistering = false;
-                });
-
-                AppRouter.navigateToLogin();
-              } else if (state is RegisterFailed) {
-                setState(() {
-                  _isRegistering = false;
-                });
-
-                showCustomDialog(
-                  context: context,
-                  message: state.error,
-                  type: DialogType.error,
-                );
-              }
-            },
-          ),
-        ],
-        child: Padding(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Bước 3/3: Tạo tài khoản',
-                  style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 24),
-                _buildTextField(
-                  controller: _usernameController,
-                  label: 'Tên đăng nhập',
-                  hint: 'Nhập tên đăng nhập',
-                  icon: Icons.account_circle_outlined,
-                  validator: (value) {
-                    if (value?.isEmpty ?? true) return 'Vui lòng nhập tên đăng nhập';
-                    if ((value?.length ?? 0) < 4) return 'Tên đăng nhập phải có ít nhất 4 ký tự';
-                    return null;
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height -
+                  (AppBar().preferredSize.height +
+                      MediaQuery.of(context).padding.top +
+                      MediaQuery.of(context).viewInsets.bottom),
+            ),
+            child: MultiBlocListener(
+              listeners: [
+                BlocListener<UserBloc, UserState>(
+                  listener: (context, state) {
+                    if (state is CheckUserInfoSuccess) {
+                      setState(() {
+                        _isCheckingUser = false;
+                        _isRegistering = true;
+                      });
+
+                      context.read<AuthBloc>().add(
+                        RegisterAccount(
+                          fullName: widget.fullName,
+                          username: _usernameController.text,
+                          password: _passwordController.text,
+                          buildingCode: widget.buildingCode,
+                          houseCode: widget.houseCode,
+                          phoneNumber: widget.phoneNumber,
+                          email: widget.email,
+                        ),
+                      );
+                    } else if (state is UserError) {
+                      setState(() {
+                        _isCheckingUser = false;
+                      });
+
+                      showCustomDialog(
+                        context: context,
+                        message: state.message,
+                        type: DialogType.error,
+                      );
+                    }
                   },
                 ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _passwordController,
-                  label: 'Mật khẩu',
-                  hint: 'Nhập mật khẩu của bạn',
-                  icon: Icons.lock_outline,
-                  isPassword: true,
-                  obscureText: _obscurePassword,
-                  onTogglePassword: () => setState(() => _obscurePassword = !_obscurePassword),
-                  validator: (value) {
-                    if (value?.isEmpty ?? true) return 'Vui lòng nhập mật khẩu';
-                    if ((value?.length ?? 0) < 6) return 'Mật khẩu phải có ít nhất 6 ký tự';
-                    return null;
+                BlocListener<AuthBloc, AuthState>(
+                  listener: (context, state) {
+                    if (state is RegisterSuccess) {
+                      setState(() {
+                        _isRegistering = false;
+                      });
+
+                      AppRouter.navigateToLogin();
+                    } else if (state is RegisterFailed) {
+                      setState(() {
+                        _isRegistering = false;
+                      });
+
+                      showCustomDialog(
+                        context: context,
+                        message: state.error,
+                        type: DialogType.error,
+                      );
+                    }
                   },
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _confirmPasswordController,
-                  label: 'Xác nhận mật khẩu',
-                  hint: 'Nhập lại mật khẩu của bạn',
-                  icon: Icons.lock_outline,
-                  isPassword: true,
-                  obscureText: _obscureConfirmPassword,
-                  onTogglePassword: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
-                  validator: (value) {
-                    if (value != _passwordController.text) return 'Mật khẩu không khớp';
-                    return null;
-                  },
-                ),
-                const Spacer(),
-                ElevatedButton(
-                  onPressed: _isCheckingUser || _isRegistering ? null : _onRegister,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryColor,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: _isCheckingUser || _isRegistering
-                      ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      strokeWidth: 2,
-                    ),
-                  )
-                      : Text(
-                    'Đăng ký',
-                    style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
-                  ),
                 ),
               ],
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Bước 3/3: Tạo tài khoản',
+                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 24),
+                        _buildTextField(
+                          controller: _usernameController,
+                          label: 'Tên đăng nhập',
+                          hint: 'Nhập tên đăng nhập',
+                          icon: Icons.account_circle_outlined,
+                          validator: (value) {
+                            if (value?.isEmpty ?? true) return 'Vui lòng nhập tên đăng nhập';
+                            if ((value?.length ?? 0) < 4) return 'Tên đăng nhập phải có ít nhất 4 ký tự';
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTextField(
+                          controller: _passwordController,
+                          label: 'Mật khẩu',
+                          hint: 'Nhập mật khẩu của bạn',
+                          icon: Icons.lock_outline,
+                          isPassword: true,
+                          obscureText: _obscurePassword,
+                          onTogglePassword: () => setState(() => _obscurePassword = !_obscurePassword),
+                          validator: (value) {
+                            if (value?.isEmpty ?? true) return 'Vui lòng nhập mật khẩu';
+                            if ((value?.length ?? 0) < 6) return 'Mật khẩu phải có ít nhất 6 ký tự';
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTextField(
+                          controller: _confirmPasswordController,
+                          label: 'Xác nhận mật khẩu',
+                          hint: 'Nhập lại mật khẩu của bạn',
+                          icon: Icons.lock_outline,
+                          isPassword: true,
+                          obscureText: _obscureConfirmPassword,
+                          onTogglePassword: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                          validator: (value) {
+                            if (value != _passwordController.text) return 'Mật khẩu không khớp';
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: _isCheckingUser || _isRegistering ? null : _onRegister,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _primaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: _isCheckingUser || _isRegistering
+                          ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 2,
+                        ),
+                      )
+                          : Text(
+                        'Đăng ký',
+                        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

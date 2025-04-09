@@ -5,6 +5,16 @@ abstract class WalletEvent  extends Equatable {
   List<Object> get props => [];
 }
 
+abstract class ChangeOwnerEvent  extends Equatable {
+  @override
+  List<Object> get props => [];
+}
+
+abstract class DissolutionWalletEvent  extends Equatable {
+  @override
+  List<Object> get props => [];
+}
+
 class GetPersonalWallet extends WalletEvent {
   final int? page;
   final int? size;
@@ -61,7 +71,7 @@ class InviteMember extends WalletEvent {
   List<Object> get props => [walletId, userId];
 }
 
-class ChangeOwner extends WalletEvent {
+class ChangeOwner extends ChangeOwnerEvent{
   final String walletId;
   final String userId;
 
@@ -69,9 +79,6 @@ class ChangeOwner extends WalletEvent {
     required this.walletId,
     required this.userId,
   });
-
-  @override
-  List<Object> get props => [walletId, userId];
 }
 
 class DeleteWallet extends WalletEvent {
@@ -99,5 +106,16 @@ class GetContributionStatistics extends WalletEvent {
 
   @override
   List<Object> get props => [walletId, days];
+}
+
+class DissolutionWallet extends DissolutionWalletEvent{
+  final String walletId;
+
+  DissolutionWallet({
+    required this.walletId,
+  });
+
+  @override
+  List<Object> get props => [walletId];
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dartz/dartz.dart';
 import 'package:home_clean/core/base/base_model.dart';
+import 'package:home_clean/domain/repositories/order_repository.dart';
 import 'package:home_clean/domain/use_cases/order/get_order_by_user_use_case.dart';
 import 'package:home_clean/domain/use_cases/order/get_order_use_case.dart';
 
@@ -8,6 +9,7 @@ import '../../../domain/entities/order/cancellation_request.dart';
 import '../../../domain/entities/order/create_order.dart';
 import '../../../domain/entities/order/order.dart';
 import '../../../core/exception/failure.dart';
+import '../../../domain/entities/staff/staff.dart';
 import '../../../domain/use_cases/order/cancel_order_use_case.dart';
 import '../../../domain/use_cases/order/create_orders_use_case.dart';
 
@@ -19,9 +21,10 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   final GetOrderByUserUseCase getOrderByUserUseCase;
   final GetOrderUseCase getOrderUseCase;
   final CancelOrderUseCase cancelOrderUseCase;
+  final OrderRepository orderRepository;
 
   OrderBloc({required this.createOrderUseCase, required this.getOrderByUserUseCase,
-    required this.getOrderUseCase, required this.cancelOrderUseCase}) : super(OrderInitial()) {
+    required this.getOrderUseCase, required this.cancelOrderUseCase, required this.orderRepository}) : super(OrderInitial()) {
     on<CreateOrderEvent>(_onCreateOrder);
     on<GetOrdersByUserEvent>(_onGetOrdersByUser);
     on<GetOrderEvent>(_onGetOrder);
@@ -71,4 +74,8 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
           (isCanceled) => emit(OrderCancelled(isCanceled)),
     );
   }
+
 }
+
+
+

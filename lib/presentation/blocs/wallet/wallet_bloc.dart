@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:home_clean/domain/repositories/wallet_repository.dart';
 import 'package:home_clean/domain/use_cases/wallet/change_owner_use_case.dart';
 import 'package:home_clean/domain/use_cases/wallet/create_wallet_use_case.dart';
 import 'package:home_clean/domain/use_cases/wallet/delete_user_wallet_use_case.dart';
@@ -8,26 +9,26 @@ import 'package:home_clean/presentation/blocs/wallet/wallet_event.dart';
 import 'package:home_clean/presentation/blocs/wallet/wallet_state.dart';
 
 import '../../../core/constant/constants.dart';
+import '../../../core/exception/exception_handler.dart';
 import '../../../domain/use_cases/wallet/get_contribution_statistic_use_case.dart';
 
 class WalletBloc extends Bloc<WalletEvent, WalletState> {
   final GetWalletByUserUseCase getWalletByUser;
   final CreateWalletUseCase createWalletUseCase;
-  final InviteMemberWalletUseCase inviteMemberUseCase;
+  final WalletRepository walletRepository;
   final ChangeOwnerUseCase changeOwnerUseCase;
   final DeleteUserWalletUseCase deleteUserUseCase;
   final GetContributionStatisticUseCase getContributionStatisticUseCase;
 
   WalletBloc({required this.getWalletByUser,
     required this.createWalletUseCase,
-    required this.inviteMemberUseCase,
+    required this.walletRepository,
     required this.changeOwnerUseCase,
     required this.deleteUserUseCase,
     required this.getContributionStatisticUseCase}) : super(WalletInitial()) {
     on<GetWallet>(_onGetWallet);
     on<CreateWallet>(_onCreateWallet);
     on<InviteMember>(_onInviteMember);
-    on<ChangeOwner>(_onChangeOwner);
     on<DeleteWallet>(_onDeleteWallet);
     on<GetContributionStatistics>(_onGetContributionStatistic);
   }
@@ -64,27 +65,17 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
 
   Future<void> _onInviteMember(
-    InviteMember event,
-    Emitter<WalletState> emit,
-  ) async {
-    emit(WalletLoading());
-    final response = await inviteMemberUseCase.execute(event.walletId, event.userId);
-    response.fold(
-          (failure) => emit(WalletError(message: failure.message)),
-          (result) => emit(WalletInviteMemberSuccess(result: result)),
-    );
-  }
-
-  Future<void> _onChangeOwner(
-    ChangeOwner event,
-    Emitter<WalletState> emit,
-  ) async {
-    emit(WalletLoading());
-    final response = await changeOwnerUseCase.execute(event.walletId, event.userId);
-    response.fold(
-          (failure) => emit(WalletError(message: failure.message)),
-          (result) => emit(WalletChangeOwnerSuccess(wallet: result)),
-    );
+      InviteMember event,
+      Emitter<WalletState> emit,
+      ) async {
+    try {
+      emit(WalletLoading());
+      final response = await walletRepository.inviteMember(
+          event.walletId, event.userId);
+      emit(WalletInviteMemberSuccess(result: response));
+    } on ApiException catch (e) {
+      emit(WalletError(message: e.toString()));
+    }
   }
 
   Future<void> _onDeleteWallet(
@@ -161,6 +152,53 @@ class SharedWalletBloc extends Bloc<WalletEvent, WalletState> {
       emit(SharedWalletLoaded(sharedWallets));
     } catch (e) {
       emit(WalletError(message: 'Failed to fetch wallets: ${e.toString()}'));
+    }
+  }
+}
+
+
+
+/// Change Owner
+class ChangeOwnerBloc extends Bloc<ChangeOwnerEvent, WalletState> {
+  final WalletRepository walletRepository;
+
+  ChangeOwnerBloc({required this.walletRepository}) : super(WalletInitial()) {
+    on<ChangeOwner>(_onChangeOwner);
+  }
+
+  Future<void> _onChangeOwner(
+      ChangeOwner event,
+      Emitter<WalletState> emit,
+      ) async {
+    try {
+      emit(WalletChangeOwnerLoading());
+      final response = await walletRepository.changeOwner(event.walletId, event.userId);
+      emit(WalletChangeOwnerSuccess(wallet: response));
+    } on ApiException catch (e) {
+      emit(WalletChangeOwnerError(message: e.toString()));
+    }
+  }
+}
+
+
+/// Disoluition
+class DissolutionBloc extends Bloc<DissolutionWalletEvent, WalletState> {
+  final WalletRepository walletRepository;
+
+  DissolutionBloc({required this.walletRepository}) : super(WalletInitial()) {
+    on<DissolutionWallet>(_onDisoluition);
+  }
+
+  Future<void> _onDisoluition(
+      DissolutionWallet event,
+      Emitter<WalletState> emit,
+      ) async {
+    try {
+      emit(WalletDissolutionLoading());
+      final response = await walletRepository.deleteSharedWalletByAdmin(event.walletId);
+      emit(WalletDissolutionSuccess(result: response));
+    } on ApiException catch (e) {
+      emit(WalletDissolutionError(message: e.toString()));
     }
   }
 }

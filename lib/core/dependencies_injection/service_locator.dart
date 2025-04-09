@@ -121,10 +121,13 @@ import '../../domain/use_cases/wallet/get_wallet_by_user.dart';
 import '../../presentation/blocs/additional_service/additional_service_bloc.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/building/building_bloc.dart';
+import '../../presentation/blocs/feedbacks/rating_order_bloc.dart';
 import '../../presentation/blocs/laundry_item_type/laundry_item_type_bloc.dart';
 import '../../presentation/blocs/order_tracking/order_tracking_bloc.dart';
 import '../../presentation/blocs/payment_method/payment_method_bloc.dart';
 import '../../presentation/blocs/room/room_bloc.dart';
+import '../../presentation/blocs/service_in_house_type/service_price_bloc.dart';
+import '../../presentation/blocs/staff/staff_bloc.dart';
 import '../../presentation/blocs/transaction/transation_bloc.dart';
 import '../../presentation/blocs/wallet/wallet_bloc.dart';
 import '../../presentation/laundry_blocs/order/laundry_order_bloc.dart';
@@ -142,9 +145,9 @@ Future<void> setupServiceLocator() async {
 
 
   // LocalDataSources
-  sl.registerLazySingleton<ServiceLocalDataSource>(
-        () => ServiceLocalDataSource(),
-  );
+  // sl.registerLazySingleton<ServiceLocalDataSource>(
+  //       () => ServiceLocalDataSource(),
+  // );
   sl.registerLazySingleton<AuthLocalDataSource>(
         () => AuthLocalDataSource(),
   );
@@ -153,18 +156,18 @@ Future<void> setupServiceLocator() async {
         () => UserLocalDatasource(),
   );
 
-  sl.registerLazySingleton<TransactionLocalDataSource>(
-        () => TransactionLocalDataSource(),
-  );
+  // sl.registerLazySingleton<TransactionLocalDataSource>(
+  //       () => TransactionLocalDataSource(),
+  // );
   sl.registerLazySingleton<WalletLocalDataSource>(
         () => WalletLocalDataSource(),
   );
   sl.registerLazySingleton<OrderTrackingLocalDataSource>(
         () => OrderTrackingLocalDataSource(),
   );
-sl.registerLazySingleton<ExtraServiceLocalDataSource>(
-        () => ExtraServiceLocalDataSource(sharedPreferences: sl()),
-  );
+// sl.registerLazySingleton<ExtraServiceLocalDataSource>(
+//         () => ExtraServiceLocalDataSource(sharedPreferences: sl()),
+//   );
   // signalr
   sl.registerLazySingleton<WalletRemoteDataSource>(
         () => WalletRemoteDataSource(authLocalDataSource: sl()),
@@ -179,7 +182,7 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
 
   sl.registerLazySingleton<LocalDataSource>(() => LocalDataSource(
     authLocalDataSource: sl(),
-    serviceLocalDataSource: sl(),
+    // serviceLocalDataSource: sl(),
     userLocalDatasource: sl(),
   ));
 
@@ -190,7 +193,7 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
   sl.registerLazySingleton<UserRepository>(
           () => UserRepositoryImpl(userLocalDatasource: sl()));
   sl.registerLazySingleton<ServiceRepository>(
-          () => ServiceRepositoryImpl(localDataSource: sl()));
+          () => ServiceRepositoryImpl());
   sl.registerLazySingleton<ServiceCategoryRepository>(
           () => ServiceCategoryRepositoryImpl());
   sl.registerLazySingleton<ServiceActivityRepository>(
@@ -227,9 +230,9 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
 
 
   // Use Cases
-  sl.registerLazySingleton(() => SaveSelectedServiceIds(sl()));
-  sl.registerLazySingleton(() => GetSelectedServiceIds(sl()));
-  sl.registerLazySingleton(() => ClearSelectedServiceIds(sl()));
+  // sl.registerLazySingleton(() => SaveSelectedServiceIds(sl()));
+  // sl.registerLazySingleton(() => GetSelectedServiceIds(sl()));
+  // sl.registerLazySingleton(() => ClearSelectedServiceIds(sl()));
   sl.registerLazySingleton(() => GetEquipmentSuppliesUseCase(sl()));
   sl.registerLazySingleton(() => GetExtraServiceUseCase(sl()));
   sl.registerLazySingleton(() => GetOptionsUseCase(sl()));
@@ -291,9 +294,9 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
   sl.registerFactory(
         () => ServiceBloc(
       getServicesUseCase: sl(),
-      saveSelectedServiceIds: sl(),
-      getSelectedServiceIds: sl(),
-      clearSelectedServiceIds: sl(),
+      // saveSelectedServiceIds: sl(),
+      // getSelectedServiceIds: sl(),
+      // clearSelectedServiceIds: sl(),
     ),
   );
   sl.registerFactory(() => ServiceCategoryBloc(
@@ -309,7 +312,8 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
   sl.registerFactory(() => OrderBloc(createOrderUseCase: sl(),
       getOrderByUserUseCase: sl(),
       getOrderUseCase: sl(),
-      cancelOrderUseCase: sl()));
+      cancelOrderUseCase: sl(),
+      orderRepository: sl()));
   sl.registerFactory(
         () => NotificationBloc(
       getNotificationsUseCase: sl(),
@@ -320,13 +324,13 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
     ),
   );
   sl.registerFactory(() => WalletBloc(getWalletByUser: sl(), createWalletUseCase: sl(),
-      inviteMemberUseCase: sl(), changeOwnerUseCase: sl(), deleteUserUseCase: sl(), getContributionStatisticUseCase: sl()));
+      walletRepository: sl(), changeOwnerUseCase: sl(), deleteUserUseCase: sl(), getContributionStatisticUseCase: sl()));
   sl.registerFactory(() => RoomBloc(sl()));
   sl.registerFactory(() => BuildingBloc(getBuildingUseCase: sl(), getBuildingsUseCase: sl()));
   sl.registerFactory(() => TransactionBloc(sl(), sl(), sl()));
   sl.registerLazySingleton (() => HouseBloc(getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl()));
   sl.registerFactory(() => PaymentMethodBloc(sl()));
-  sl.registerFactory(() => UserBloc(sl(), sl(), sl()));
+  sl.registerFactory(() => UserBloc(sl(), sl(), sl(), sl()));
   sl.registerFactory(() => PersonalWalletBloc(getWalletByUser: sl()));
   sl.registerFactory(() => SharedWalletBloc(getWalletByUser: sl()));
   sl.registerFactory(() => OrderTrackingBloc(
@@ -339,4 +343,9 @@ sl.registerLazySingleton<ExtraServiceLocalDataSource>(
   sl.registerLazySingleton(() => LaundryItemTypeBloc(sl()));
   sl.registerLazySingleton(() => AdditionalServiceBloc(repository: sl()));
   sl.registerLazySingleton(()=> LaundryOrderBloc(sl()));
+  sl.registerLazySingleton(() => ChangeOwnerBloc(walletRepository: sl()));
+  sl.registerLazySingleton(() => DissolutionBloc(walletRepository: sl()));
+  sl.registerLazySingleton(() => StaffBloc(orderRepository: sl()));
+  sl.registerLazySingleton(() => RatingOrderBloc(orderRepository: sl()));
+  sl.registerLazySingleton(() => ServicePriceBloc(serviceRepository: sl()));
 }

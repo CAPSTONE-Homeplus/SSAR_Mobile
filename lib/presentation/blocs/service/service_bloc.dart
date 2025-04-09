@@ -12,20 +12,20 @@ part 'service_state.dart';
 
 class ServiceBloc extends Bloc<ServiceEvent, ServiceState> {
   final GetServicesUseCase getServicesUseCase;
-  final SaveSelectedServiceIds saveSelectedServiceIds;
-  final GetSelectedServiceIds getSelectedServiceIds;
-  final ClearSelectedServiceIds clearSelectedServiceIds;
+  // final SaveSelectedServiceIds saveSelectedServiceIds;
+  // final GetSelectedServiceIds getSelectedServiceIds;
+  // final ClearSelectedServiceIds clearSelectedServiceIds;
 
   ServiceBloc({
     required this.getServicesUseCase,
-    required this.saveSelectedServiceIds,
-    required this.getSelectedServiceIds,
-    required this.clearSelectedServiceIds,
+    // required this.saveSelectedServiceIds,
+    // required this.getSelectedServiceIds,
+    // required this.clearSelectedServiceIds,
   }) : super(ServiceInitialState()) {
     on<GetServicesEvent>(_onGetServicesEvent);
-    on<SaveServiceIdsEvent>(_onSaveServiceIds);
-    on<GetServiceIdsEvent>(_onGetServiceIds);
-    on<ClearServiceIdsEvent>(_onClearServiceIds);
+    // on<SaveServiceIdsEvent>(_onSaveServiceIds);
+    // on<GetServiceIdsEvent>(_onGetServiceIds);
+    // on<ClearServiceIdsEvent>(_onClearServiceIds);
   }
 
   Future<void> _onGetServicesEvent(
@@ -52,21 +52,21 @@ class ServiceBloc extends Bloc<ServiceEvent, ServiceState> {
   }
 
 
-  void _onSaveServiceIds(
-      SaveServiceIdsEvent event, Emitter<ServiceState> emit) async {
-    await saveSelectedServiceIds(event.ids);
-    emit(ServiceIdsSavedState());
-  }
-
-  void _onGetServiceIds(
-      GetServiceIdsEvent event, Emitter<ServiceState> emit) async {
-    final ids = await getSelectedServiceIds();
-    emit(ServiceIdsLoadedState(ids: ids ?? []));
-  }
-
-  void _onClearServiceIds(
-      ClearServiceIdsEvent event, Emitter<ServiceState> emit) async {
-    await clearSelectedServiceIds();
-    emit(ServiceIdsClearedState());
-  }
+  // void _onSaveServiceIds(
+  //     SaveServiceIdsEvent event, Emitter<ServiceState> emit) async {
+  //   await saveSelectedServiceIds(event.ids);
+  //   emit(ServiceIdsSavedState());
+  // }
+  //
+  // void _onGetServiceIds(
+  //     GetServiceIdsEvent event, Emitter<ServiceState> emit) async {
+  //   final ids = await getSelectedServiceIds();
+  //   emit(ServiceIdsLoadedState(ids: ids ?? []));
+  // }
+  //
+  // void _onClearServiceIds(
+  //     ClearServiceIdsEvent event, Emitter<ServiceState> emit) async {
+  //   await clearSelectedServiceIds();
+  //   emit(ServiceIdsClearedState());
+  // }
 }

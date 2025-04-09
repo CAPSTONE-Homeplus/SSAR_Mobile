@@ -23,6 +23,7 @@ import 'package:home_clean/presentation/blocs/auth/auth_bloc.dart';
 import 'package:home_clean/presentation/blocs/building/building_bloc.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_bloc.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_bloc.dart';
+import 'package:home_clean/presentation/blocs/feedbacks/rating_order_bloc.dart';
 import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:home_clean/presentation/blocs/laundry_item_type/laundry_item_type_bloc.dart';
 import 'package:home_clean/presentation/blocs/laundry_service_type/laundry_service_type_bloc.dart';
@@ -34,6 +35,8 @@ import 'package:home_clean/presentation/blocs/payment_method/payment_method_bloc
 import 'package:home_clean/presentation/blocs/service/service_bloc.dart';
 import 'package:home_clean/presentation/blocs/service_activity/service_activity_bloc.dart';
 import 'package:home_clean/presentation/blocs/service_category/service_category_bloc.dart';
+import 'package:home_clean/presentation/blocs/service_in_house_type/service_price_bloc.dart';
+import 'package:home_clean/presentation/blocs/staff/staff_bloc.dart';
 import 'package:home_clean/presentation/blocs/sub_activity/sub_activity_bloc.dart';
 import 'package:home_clean/presentation/blocs/time_slot/time_slot_bloc.dart';
 import 'package:home_clean/presentation/blocs/transaction/transation_bloc.dart';
@@ -148,9 +151,11 @@ class HomeClean extends StatelessWidget {
           BlocProvider(
               create: (context) => ServiceBloc(
                   getServicesUseCase: sl(),
-                  saveSelectedServiceIds: sl(),
-                  getSelectedServiceIds: sl(),
-                  clearSelectedServiceIds: sl())),
+                  // saveSelectedServiceIds: sl(),
+                  // getSelectedServiceIds: sl(),
+                  // clearSelectedServiceIds: sl()
+              )
+          ),
           BlocProvider(
               create: (context) => ServiceCategoryBloc(
                   getServiceByServiceCategory: sl(),
@@ -171,15 +176,15 @@ class HomeClean extends StatelessWidget {
                   EquipmentSupplyBloc(getEquipmentSuppliesUseCase: sl())),
           BlocProvider(
               create: (context) => TimeSlotBloc(getTimeSlotsUsecase: sl())),
-          BlocProvider(create: (context) => OrderBloc(createOrderUseCase: sl(), getOrderByUserUseCase: sl(), getOrderUseCase: sl(), cancelOrderUseCase: sl())),
+          BlocProvider(create: (context) => OrderBloc(createOrderUseCase: sl(), getOrderByUserUseCase: sl(), getOrderUseCase: sl(), cancelOrderUseCase: sl(), orderRepository: sl())),
           BlocProvider( create: (context) => WalletBloc(getWalletByUser: sl(), createWalletUseCase: sl(),
-              inviteMemberUseCase: sl(), changeOwnerUseCase: sl(), deleteUserUseCase: sl(), getContributionStatisticUseCase: sl())),
+              walletRepository: sl(), changeOwnerUseCase: sl(), deleteUserUseCase: sl(), getContributionStatisticUseCase: sl())),
           BlocProvider(create: (context) => RoomBloc(sl())),
           BlocProvider(create: (context) => BuildingBloc(getBuildingUseCase: sl(), getBuildingsUseCase: sl())),
           BlocProvider(create: (context) => TransactionBloc(sl(), sl(), sl())),
           BlocProvider(create: (context) => HouseBloc(getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl())),
           BlocProvider(create: (context) => PaymentMethodBloc(sl())),
-          BlocProvider(create: (context) => UserBloc(sl(), sl(), sl())),
+          BlocProvider(create: (context) => UserBloc(sl(), sl(), sl(), sl())),
           BlocProvider(create: (context) => NotificationBloc(getNotificationsUseCase: sl(), connectToHubUseCase: sl(), disconnectFromHubUseCase: sl(), listenForNotificationsUseCase: sl(), flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin)),
           BlocProvider(create: (context) => PersonalWalletBloc(getWalletByUser: sl())),
           BlocProvider(create: (context) => SharedWalletBloc(getWalletByUser: sl())),
@@ -192,6 +197,11 @@ class HomeClean extends StatelessWidget {
           BlocProvider(create: (context) => LaundryItemTypeBloc(sl())),
           BlocProvider(create: (context) => AdditionalServiceBloc(repository: sl())),
           BlocProvider(create: (context) => LaundryOrderBloc(sl())),
+          BlocProvider(create: (context) => ChangeOwnerBloc(walletRepository: sl())),
+          BlocProvider(create: (context) => DissolutionBloc(walletRepository: sl())),
+          BlocProvider(create: (context) => StaffBloc(orderRepository: sl())),
+          BlocProvider(create: (context) => RatingOrderBloc(orderRepository: sl())),
+          BlocProvider(create: (context) => ServicePriceBloc(serviceRepository: sl())),
 
     ],
         child: BlocBuilder<ThemeBloc, ThemeState>(

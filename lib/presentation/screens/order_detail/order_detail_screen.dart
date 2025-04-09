@@ -16,7 +16,8 @@ import '../../widgets/currency_display.dart';
 class OrdersDetailsScreen extends StatefulWidget {
   final String ordersId;
 
-  const OrdersDetailsScreen({Key? key, required this.ordersId}) : super(key: key);
+  const OrdersDetailsScreen({Key? key, required this.ordersId})
+      : super(key: key);
 
   @override
   State<OrdersDetailsScreen> createState() => _OrdersDetailsScreenState();
@@ -49,7 +50,6 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
       return dateTimeString;
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -90,8 +90,9 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                   SizedBox(height: 24 * SizeConfig.hem),
                   ElevatedButton(
                     onPressed: () {
-                      context.read<OrderBloc>().add(
-                          GetOrderEvent(widget.ordersId));
+                      context
+                          .read<OrderBloc>()
+                          .add(GetOrderEvent(widget.ordersId));
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
@@ -127,17 +128,19 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return CustomAppBar(title: 'Chi tiết đơn hàng', onBackPressed: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => BottomNavigation(
-            child: Container(),
-            initialIndex: 1,
-          ),
-        ),
-      );
-    });
+    return CustomAppBar(
+        title: 'Chi tiết đơn hàng',
+        onBackPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BottomNavigation(
+                child: Container(),
+                initialIndex: 1,
+              ),
+            ),
+          );
+        });
   }
 
   Widget _buildOrdersDetails(BuildContext context, Orders orders) {
@@ -263,7 +266,7 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Thời gian đặt hàng',
+                        'Thời gian đặt dịch vụ',
                         style: GoogleFonts.poppins(
                           color: Colors.black54,
                           fontSize: 14 * SizeConfig.ffem,
@@ -272,6 +275,41 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                       SizedBox(height: 4 * SizeConfig.hem),
                       Text(
                         formatDateTime(orders.createdAt),
+                        style: GoogleFonts.poppins(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15 * SizeConfig.ffem,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16 * SizeConfig.hem),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.timelapse,
+                  color: primaryColor,
+                  size: 20 * SizeConfig.ffem,
+                ),
+                SizedBox(width: 12 * SizeConfig.fem),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Thời gian dự kiến hoàn thành',
+                        style: GoogleFonts.poppins(
+                          color: Colors.black54,
+                          fontSize: 14 * SizeConfig.ffem,
+                        ),
+                      ),
+                      SizedBox(height: 4 * SizeConfig.hem),
+                      Text(
+                        '${orders.estimatedDuration} giờ',
                         style: GoogleFonts.poppins(
                           color: Colors.black87,
                           fontWeight: FontWeight.w600,
@@ -307,11 +345,6 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.cleaning_services,
-                  color: primaryColor,
-                  size: 20 * SizeConfig.ffem,
-                ),
                 SizedBox(width: 8 * SizeConfig.fem),
                 Text(
                   'Chi tiết dịch vụ',
@@ -348,7 +381,7 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        orders.serviceType ?? 'Dịch vụ không xác định',
+                        orders.serviceType ?? 'Dọn dẹp',
                         style: GoogleFonts.poppins(
                           color: Colors.black87,
                           fontWeight: FontWeight.w600,
@@ -367,6 +400,130 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                   ),
                 ),
               ],
+            ),
+            SizedBox(height: 16 * SizeConfig.hem),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 48 * SizeConfig.fem,
+                  height: 48 * SizeConfig.hem,
+                  decoration: BoxDecoration(
+                    color: primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12 * SizeConfig.fem),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.access_time_filled,
+                      color: primaryColor,
+                      size: 24 * SizeConfig.ffem,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 16 * SizeConfig.fem),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Giờ bắt đầu",
+                        style: GoogleFonts.poppins(
+                          color: Colors.grey[600],
+                          fontSize: 13 * SizeConfig.ffem,
+                        ),
+                      ),
+                      Text(
+                        formatDateTime(orders.jobStartTime),
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15 * SizeConfig.ffem,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: 6 * SizeConfig.hem),
+                      Text(
+                        "Giờ kết thúc",
+                        style: GoogleFonts.poppins(
+                          color: Colors.grey[600],
+                          fontSize: 13 * SizeConfig.ffem,
+                        ),
+                      ),
+                      Text(
+                        formatDateTime(orders.jobEndTime),
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15 * SizeConfig.ffem,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16 * SizeConfig.hem),
+            Container(
+              padding: EdgeInsets.symmetric(
+                vertical: 12 * SizeConfig.hem,
+                horizontal: 16 * SizeConfig.fem,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12 * SizeConfig.fem),
+                border: Border.all(
+                  color: Colors.orange.withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 48 * SizeConfig.fem,
+                    height: 48 * SizeConfig.hem,
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.calendar_month_rounded,
+                        color: Colors.orange,
+                        size: 24 * SizeConfig.ffem,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16 * SizeConfig.fem),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          orders.emergencyRequest == true
+                              ? 'Đơn dặt ngay'
+                              : 'Yêu cầu dịch vụ',
+                          style: GoogleFonts.poppins(
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16 * SizeConfig.ffem,
+                          ),
+                        ),
+                        SizedBox(height: 4 * SizeConfig.hem),
+                        Text(
+                          orders.emergencyRequest == true
+                              ? 'Nhân viên sẽ được phân công ngay lập tức'
+                              : 'Yêu cầu được đặt lịch theo thời gian bạn chọn',
+                          style: GoogleFonts.poppins(
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 14 * SizeConfig.ffem,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -562,8 +719,8 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, Orders orders,
-      OrderStatus status) {
+  Widget _buildActionButtons(
+      BuildContext context, Orders orders, OrderStatus status) {
     return Container(
       margin: EdgeInsets.all(16 * SizeConfig.fem),
       child: Column(
@@ -572,7 +729,7 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
               status == OrderStatus.inProgress)
             ElevatedButton(
               onPressed: () {
-                AppRouter.navigateToOrderTracking(orders.id ?? '');
+                AppRouter.navigateToOrderTracking(orders);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
@@ -586,7 +743,8 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.delivery_dining), // Đổi biểu tượng thành theo dõi đơn hàng
+                  Icon(Icons.delivery_dining),
+                  // Đổi biểu tượng thành theo dõi đơn hàng
                   SizedBox(width: 8 * SizeConfig.fem),
                   Text(
                     'Theo dõi đơn hàng',
@@ -600,34 +758,8 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
             ),
           if (status == OrderStatus.completed ||
               status == OrderStatus.completed)
-            ElevatedButton(
-              onPressed: () {
-                _launchSupportContact(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                foregroundColor: Colors.white,
-                minimumSize: Size(double.infinity, 52 * SizeConfig.hem),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10 * SizeConfig.fem),
-                ),
-                elevation: 0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.support_agent),
-                  SizedBox(width: 8 * SizeConfig.fem),
-                  Text(
-                    'Đánh giá hỗ trợ',
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16 * SizeConfig.ffem,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+
+            _buildRatingSupportButton(orders),
           if (status == OrderStatus.pending || status == OrderStatus.draft) ...[
             ElevatedButton(
               onPressed: () {
@@ -658,6 +790,67 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRatingSupportButton(Orders orders) {
+    if (orders.employeeRating != null) {
+      return Container(
+        width: double.infinity,
+        height: 52 * SizeConfig.hem,
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(10 * SizeConfig.fem),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.check_circle_outline,
+              color: Colors.green,
+            ),
+            SizedBox(width: 8 * SizeConfig.fem),
+            Text(
+              'Đã đánh giá hỗ trợ',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                fontSize: 16 * SizeConfig.ffem,
+                color: Colors.black54,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // If no existing rating, show the normal button
+    return ElevatedButton(
+      onPressed: () {
+        AppRouter.navigateToRatingScreen(orders.id);
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        minimumSize: Size(double.infinity, 52 * SizeConfig.hem),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10 * SizeConfig.fem),
+        ),
+        elevation: 0,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.support_agent),
+          SizedBox(width: 8 * SizeConfig.fem),
+          Text(
+            'Đánh giá hỗ trợ',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: 16 * SizeConfig.ffem,
+            ),
+          ),
         ],
       ),
     );
@@ -730,7 +923,8 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                       value: selectedReason,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8 * SizeConfig.fem),
+                          borderRadius:
+                              BorderRadius.circular(8 * SizeConfig.fem),
                           borderSide: BorderSide(color: Colors.grey.shade400),
                         ),
                         contentPadding: EdgeInsets.symmetric(
@@ -746,7 +940,9 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                       ].map((String reason) {
                         return DropdownMenuItem<String>(
                           value: reason,
-                          child: Text(reason, style: GoogleFonts.poppins(fontSize: 14 * SizeConfig.ffem)),
+                          child: Text(reason,
+                              style: GoogleFonts.poppins(
+                                  fontSize: 14 * SizeConfig.ffem)),
                         );
                       }).toList(),
                       onChanged: (value) {
@@ -774,12 +970,14 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                   ElevatedButton(
                     onPressed: () {
                       context.read<OrderBloc>().add(
-                        CancelOrder(widget.ordersId, CancellationRequest(
-                          cancellationReason: selectedReason,
-                          refundMethod: 'Hoàn tiền vào ví điện tử',
-                          cancelledBy: 'customer',
-                        )),
-                      );
+                            CancelOrder(
+                                widget.ordersId,
+                                CancellationRequest(
+                                  cancellationReason: selectedReason,
+                                  refundMethod: 'Hoàn tiền vào ví điện tử',
+                                  cancelledBy: 'customer',
+                                )),
+                          );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: errorColor,
@@ -806,112 +1004,6 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
           ),
         );
       },
-    );
-  }
-
-
-  void _launchSupportContact(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) =>
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(20 * SizeConfig.fem),
-              ),
-            ),
-            padding: EdgeInsets.symmetric(
-              horizontal: 20 * SizeConfig.fem,
-              vertical: 24 * SizeConfig.hem,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Handle bar
-                Container(
-                  width: 40 * SizeConfig.fem,
-                  height: 4 * SizeConfig.hem,
-                  margin: EdgeInsets.only(bottom: 20 * SizeConfig.hem),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2 * SizeConfig.fem),
-                  ),
-                ),
-                Text(
-                  'Liên hệ hỗ trợ',
-                  style: GoogleFonts.poppins(
-                    fontSize: 20 * SizeConfig.ffem,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-                SizedBox(height: 8 * SizeConfig.hem),
-                Text(
-                  'Chọn phương thức liên hệ để được hỗ trợ',
-                  style: GoogleFonts.poppins(
-                    fontSize: 14 * SizeConfig.ffem,
-                    color: Colors.black54,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 24 * SizeConfig.hem),
-                _buildContactMethod(
-                  icon: Icons.phone,
-                  title: 'Gọi điện thoại',
-                  subtitle: '1900 xxxx',
-                  onTap: () {
-                    // Xử lý gọi điện
-                    Navigator.pop(context);
-                  },
-                ),
-                Divider(height: 1, thickness: 1, color: Colors.grey[200]),
-                _buildContactMethod(
-                  icon: Icons.message,
-                  title: 'Nhắn tin hỗ trợ',
-                  subtitle: 'Trả lời trong vòng 5 phút',
-                  onTap: () {
-                    // Xử lý mở chat hỗ trợ
-                    Navigator.pop(context);
-                  },
-                ),
-                Divider(height: 1, thickness: 1, color: Colors.grey[200]),
-                _buildContactMethod(
-                  icon: Icons.email,
-                  title: 'Gửi email',
-                  subtitle: 'support@homeclean.vn',
-                  onTap: () {
-                    // Xử lý gửi email
-                    Navigator.pop(context);
-                  },
-                ),
-                SizedBox(height: 24 * SizeConfig.hem),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[200],
-                    foregroundColor: secondaryColor,
-                    minimumSize: Size(double.infinity, 52 * SizeConfig.hem),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10 * SizeConfig.fem),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Đóng',
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16 * SizeConfig.ffem,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
     );
   }
 

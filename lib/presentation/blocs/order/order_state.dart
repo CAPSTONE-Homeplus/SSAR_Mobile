@@ -35,3 +35,4 @@ class OrderCancelled extends OrderState {
 
   OrderCancelled(this.isCancelled);
 }
+

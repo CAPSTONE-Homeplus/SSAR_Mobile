@@ -107,6 +107,20 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+
+  Future<String> _getUserId() async {
+    final authModel = AuthMapper.toModel(
+      await authLocalDataSource.getAuth() ?? {},
+    );
+    final userId = authModel.userId;
+
+    if (userId == null || userId.isEmpty) {
+      throw Exception('User ID is empty');
+    }
+
+    return userId;
+  }
+
   @override
   Future<Auth> refreshToken() async{
     try {

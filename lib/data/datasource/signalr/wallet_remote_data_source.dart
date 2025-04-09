@@ -36,7 +36,7 @@ class WalletRemoteDataSource {
   Future<void> _initVinWalletHub() async {
     vinWalletHubConnection = HubConnectionBuilder()
         .withUrl(
-      'https://vinwallet-cuc8.onrender.com/vinWalletHub',
+      'https://vinwallet.vinhomesresident.com/vinWalletHub',
       options: HttpConnectionOptions(
         accessTokenFactory: () async => await _getAccessToken(),
       ),

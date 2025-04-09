@@ -13,16 +13,12 @@ class GetUsersBySharedWalletUseCase {
 
   Future<Either<Failure, BaseResponse<User>>> execute(
     String walletId,
-    String? search,
-    String? orderBy,
     int? page,
     int? size,
   ) async {
     try {
       final response = await _userRepository.getUsersBySharedWallet(
         walletId,
-        search,
-        orderBy,
         page,
         size,
       );

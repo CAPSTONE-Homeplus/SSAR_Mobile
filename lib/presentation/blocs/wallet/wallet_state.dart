@@ -68,6 +68,8 @@ class WalletError extends WalletState {
   List<Object> get props => [message];
 }
 
+// Change Onwer
+
 class WalletChangeOwnerSuccess extends WalletState {
   final Wallet wallet;
 
@@ -76,6 +78,25 @@ class WalletChangeOwnerSuccess extends WalletState {
   @override
   List<Object> get props => [wallet];
 }
+
+class WalletChangeOwnerError extends WalletState {
+  final String message;
+
+  WalletChangeOwnerError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+class WalletChangeOwnerLoading extends WalletState {
+  @override
+  List<Object> get props => [];
+}
+
+
+///
+
+
 
 class WalletDeleteSuccess extends WalletState {
   final bool result;
@@ -94,5 +115,30 @@ class WalletContributionStatisticsLoaded extends WalletState {
   @override
   List<Object> get props => [contributionStatistics];
 }
+
+
+class WalletDissolutionLoading extends WalletState {
+  @override
+  List<Object> get props => [];
+}
+
+class WalletDissolutionSuccess extends WalletState {
+  final bool result;
+
+  WalletDissolutionSuccess({required this.result});
+
+  @override
+  List<Object> get props => [result];
+}
+
+class WalletDissolutionError extends WalletState {
+  final String message;
+
+  WalletDissolutionError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
 
 

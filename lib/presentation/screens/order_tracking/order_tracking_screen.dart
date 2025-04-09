@@ -3,16 +3,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
+import 'package:intl/intl.dart';
 
+import '../../../domain/entities/order/order.dart';
 import '../../../domain/entities/order/order_tracking.dart';
+import '../../blocs/order/order_bloc.dart';
 import '../../blocs/order_tracking/order_tracking_bloc.dart';
 import '../../blocs/order_tracking/order_tracking_event.dart';
 import '../../blocs/order_tracking/order_tracking_state.dart';
+import '../../blocs/staff/staff_bloc.dart';
 
 class OrderTrackingScreen extends StatefulWidget {
-  final String orderId;
+  final Orders orders;
 
-  OrderTrackingScreen({required this.orderId});
+  OrderTrackingScreen({required this.orders});
 
   @override
   _OrderTrackingScreenState createState() => _OrderTrackingScreenState();
@@ -25,7 +29,8 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
   void initState() {
     super.initState();
     context.read<OrderTrackingBloc>().add(ConnectToHubEvent());
-    context.read<OrderTrackingBloc>().add(GetOrderTrackingByIdEvent(widget.orderId));
+    context.read<OrderTrackingBloc>().add(GetOrderTrackingByIdEvent(widget.orders.id ?? ''));
+    context.read<StaffBloc>().add(GetStaffById(widget.orders.employeeId ?? ''));
   }
   @override
   void dispose() {
@@ -59,7 +64,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomActionBar(),
     );
   }
 
@@ -72,7 +76,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.green[800],
+            color: AppColors.primaryColor,
           ),
         ),
         const SizedBox(height: 10),
@@ -247,7 +251,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
             getSubActivityIcon(),
             size: 16,
             color: subActivity.status.toLowerCase() == "completed"
-                ? Colors.green
+                ? AppColors.primaryColor
                 : Colors.grey,
           ),
           const SizedBox(width: 10),
@@ -292,108 +296,141 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
 
 
   Widget _buildServiceWorkerCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.green[50],
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: Colors.green[100],
-            radius: 30,
-            child: Icon(Icons.person, color: AppColors.primaryColor, size: 40),
-          ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Nguyễn Văn A',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green[800],
-                  ),
+    return BlocBuilder<StaffBloc, StaffState>(
+      builder: (context, state) {
+        if (state is StaffLoading) {
+          return Container(
+          );
+        } else if (state is StaffLoaded) {
+          final staff = state.staff;
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.green[50],
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
-                Text(
-                  'Nhân viên dọn dẹp',
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: Colors.grey[700],
+              ],
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Nhân viên: ${staff.fullName}",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                      Text(
+                        "Giới tính: ${staff.gender == 'male' ? 'Nam' : 'Nữ'}",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      Text(
+                        "Số điện thoại: ${staff.phoneNumber}",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
+          );
+        } else if (state is StaffError) {
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.green[50],
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: Text(
+                'Không thể tải thông tin nhân viên: ${state.message}',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.red,
+                ),
+              ),
+            ),
+          );
+        }
+
+        // Initial state or any other state
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.green[50],
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.green.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          IconButton(
-            icon: Icon(Icons.phone, color: Colors.green[700]),
-            onPressed: () {
-              // Implement phone call functionality
-            },
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.green[100],
+                radius: 30,
+                child: Icon(Icons.person, color: AppColors.primaryColor, size: 40),
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Đang tải thông tin...',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                    Text(
+                      'Nhân viên dọn dẹp',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.phone, color: Colors.grey),
+                onPressed: null,
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
-
-  Widget _buildBottomActionBar() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          ElevatedButton.icon(
-            onPressed: () {
-              // Support action
-            },
-            icon: Icon(Icons.support_agent, color: Colors.white),
-            label: Text(
-              'Hỗ trợ',
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green[700],
-            ),
-          ),
-          ElevatedButton.icon(
-            onPressed: () {
-              // Cancel order action
-            },
-            icon: Icon(Icons.cancel, color: Colors.white),
-            label: Text(
-              'Hủy đơn',
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red[400],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-
   Widget _buildOrderDetailsCard() {
     return Container(
       decoration: BoxDecoration(
@@ -402,7 +439,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
         boxShadow: [
           BoxShadow(
             color: Colors.green.withOpacity(0.1),
-            blurRadius: 10,
+            blurRadius: 5,
             offset: const Offset(0, 4),
           ),
         ],
@@ -412,23 +449,41 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Mã đơn: #BT2024051201',
+            'Mã đơn: ${widget.orders.code}',
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.green[800],
+              color: AppColors.primaryColor,
             ),
           ),
           const SizedBox(height: 10),
           Row(
             children: [
-              Icon(Icons.cleaning_services, color: Colors.green[700]),
+              Icon(Icons.calendar_month, color: AppColors.primaryColor),
               const SizedBox(width: 10),
-              Text(
-                'Dọn dẹp nhà',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  color: Colors.green[800],
+              Expanded(
+                child: Text(
+                  'Ngày đặt: ${DateFormat('dd/MM/yyyy HH:mm').format(widget.orders.createdAt.toString() == null ? DateTime.now() : DateTime.parse(widget.orders.createdAt.toString()))}',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Icon(Icons.timelapse, color: AppColors.primaryColor),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Thời gian dự kiến: ${widget.orders.estimatedDuration} giờ',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.grey[700],
+                  ),
                 ),
               ),
             ],

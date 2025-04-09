@@ -6,21 +6,17 @@ abstract class UserEvent extends Equatable {
 
 class GetUsersBySharedWalletEvent extends UserEvent {
   final String walletId;
-  final String? search;
-  final String? orderBy;
   final int? page;
   final int? size;
 
   GetUsersBySharedWalletEvent({
     required this.walletId,
-    this.search,
-    this.orderBy,
     this.page,
     this.size,
   });
 
   @override
-  List<Object?> get props => [walletId, search, orderBy, page, size];
+  List<Object?> get props => [walletId, page, size];
 }
 
 class GetUserByPhoneNumberEvent extends UserEvent {

@@ -16,6 +16,8 @@ class BuildingInfoScreen extends StatefulWidget {
   final String email;
   final Function(String fullName, String phoneNumber, String email, String buildingCode, String houseCode) onNext;
   final Function() onBack;
+  final String initialBuildingCode;
+  final String initialHouseCode;
 
   const BuildingInfoScreen({
     super.key,
@@ -24,6 +26,8 @@ class BuildingInfoScreen extends StatefulWidget {
     required this.email,
     required this.onNext,
     required this.onBack,
+    required this.initialBuildingCode,
+    required this.initialHouseCode,
   });
 
   @override
@@ -31,9 +35,12 @@ class BuildingInfoScreen extends StatefulWidget {
 }
 
 class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
+  late  TextEditingController _buildingController;
+  late  TextEditingController _houseController;
+
+
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _buildingController = TextEditingController();
-  final TextEditingController _houseController = TextEditingController();
+
   final Color _primaryColor = const Color(0xFF1CAF7D);
 
   List<Building> availableBuildings = [];
@@ -46,122 +53,141 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   @override
   void initState() {
     super.initState();
+    _buildingController = TextEditingController(text: widget.initialBuildingCode ?? '');
+    _houseController = TextEditingController(text: widget.initialHouseCode ?? '');
     context.read<BuildingBloc>().add(GetBuildings());
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Thông tin tòa nhà',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(), // Dismiss keyboard
+      child: Scaffold(
+        resizeToAvoidBottomInset: true, // Allow keyboard to push content up
+        appBar: AppBar(
+          title: Text(
+            'Thông tin tòa nhà',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          ),
+          backgroundColor: _primaryColor,
+          foregroundColor: Colors.white,
+          leading: BackButton(onPressed: widget.onBack),
         ),
-        backgroundColor: _primaryColor,
-        foregroundColor: Colors.white,
-        leading: BackButton(onPressed: widget.onBack),
-      ),
-      body: BlocConsumer<BuildingBloc, BuildingState>(
-        listener: (context, state) {
-          if (state is BuildingLoaded) {
-            setState(() {
-              availableBuildings = state.buildings.items;
-            });
-          } else if (state is BuildingError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is BuildingLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+        body: BlocConsumer<BuildingBloc, BuildingState>(
+          listener: (context, state) {
+            if (state is BuildingLoaded) {
+              setState(() {
+                availableBuildings = state.buildings.items;
+              });
+            } else if (state is BuildingError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.message)),
+              );
+            }
+          },
+          builder: (context, state) {
+            if (state is BuildingLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          return Padding(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Bước 2/3: Thông tin tòa nhà',
-                    style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildBuildingAutocomplete(),
-                  const SizedBox(height: 16),
-                  BlocConsumer<HouseBloc, HouseState>(
-                    listener: (context, state) {
-                      if (state is HouseLoaded) {
-                        setState(() {
-                          availableHouses = state.houses.items;
-                          isHouseLoading = false;
-                          // Reset selected house when loading new houses
-                          selectedHouse = null;
-                          _houseController.clear();
-                        });
-                      } else if (state is HouseError) {
-                        setState(() {
-                          isHouseLoading = false;
-                        });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(state.message)),
-                        );
-                      } else if (state is HouseLoading) {
-                        setState(() {
-                          isHouseLoading = true;
-                        });
-                      }
-                    },
-                    builder: (context, state) {
-                      return isHouseLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : _buildHouseAutocomplete();
-                    },
-                  ),
-                  const Spacer(),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        if (selectedBuilding == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Vui lòng chọn tòa nhà')),
-                          );
-                          return;
-                        }
-                        if (selectedHouse == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Vui lòng chọn căn hộ')),
-                          );
-                          return;
-                        }
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height -
+                      (AppBar().preferredSize.height + MediaQuery.of(context).padding.top + 100),
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Bước 2/3: Thông tin tòa nhà',
+                            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(height: 24),
+                          _buildBuildingAutocomplete(),
+                          const SizedBox(height: 16),
+                          BlocConsumer<HouseBloc, HouseState>(
+                            listener: (context, state) {
+                              if (state is HouseLoaded) {
+                                setState(() {
+                                  availableHouses = state.houses.items;
+                                  isHouseLoading = false;
+                                  // Reset selected house when loading new houses
+                                  selectedHouse = null;
+                                  _houseController.clear();
+                                });
+                              } else if (state is HouseError) {
+                                setState(() {
+                                  isHouseLoading = false;
+                                });
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(state.message)),
+                                );
+                              } else if (state is HouseLoading) {
+                                setState(() {
+                                  isHouseLoading = true;
+                                });
+                              }
+                            },
+                            builder: (context, state) {
+                              return isHouseLoading
+                                  ? const Center(child: CircularProgressIndicator())
+                                  : _buildHouseAutocomplete();
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () {
+                          FocusScope.of(context).unfocus(); // Dismiss keyboard
+                          if (_formKey.currentState!.validate()) {
+                            if (selectedBuilding == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Vui lòng chọn tòa nhà')),
+                              );
+                              return;
+                            }
+                            if (selectedHouse == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Vui lòng chọn căn hộ')),
+                              );
+                              return;
+                            }
 
-                        widget.onNext(
-                          widget.fullName,
-                          widget.phoneNumber,
-                          widget.email,
-                          selectedBuilding!.code ?? '',
-                          selectedHouse!.code ?? '',
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _primaryColor,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text(
-                      'Tiếp tục',
-                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
-                    ),
+                            widget.onNext(
+                              widget.fullName,
+                              widget.phoneNumber,
+                              widget.email,
+                              selectedBuilding!.code ?? '',
+                              selectedHouse!.code ?? '',
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(
+                          'Tiếp tục',
+                          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

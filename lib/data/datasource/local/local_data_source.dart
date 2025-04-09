@@ -12,7 +12,6 @@ class LocalDataSource {
   final AuthLocalDataSource authLocalDataSource;
   // final ExtraServiceLocalDataSource extraServiceLocalDataSource;
   // final OptionLocalDataSource optionLocalDataSource;
-  final ServiceLocalDataSource serviceLocalDataSource;
   // final TransactionLocalDataSource transactionLocalDataSource;
   final UserLocalDatasource userLocalDatasource;
   // final WalletLocalDataSource walletLocalDataSource;
@@ -21,7 +20,6 @@ class LocalDataSource {
     required this.authLocalDataSource,
     // required this.extraServiceLocalDataSource,
     // required this.optionLocalDataSource,
-    required this.serviceLocalDataSource,
     // required this.transactionLocalDataSource,
     required this.userLocalDatasource,
     // required this.walletLocalDataSource,
@@ -34,7 +32,6 @@ class LocalDataSource {
     await authLocalDataSource.clearAuth();
     // await extraServiceLocalDataSource.clearSelectedExtraServiceIds();
     // await optionLocalDataSource.clearSelectedOptionIds();
-    await serviceLocalDataSource.clearService();
     await userLocalDatasource.clearUser();
     // await transactionLocalDataSource.clearTransactions(user!);
     debugPrint('Cleared all data');

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/router/app_router.dart';
+import 'package:home_clean/presentation/widgets/currency_display.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 import 'package:intl/intl.dart';
 
@@ -80,7 +81,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
           },
         ),
       ),
-      floatingActionButton: _buildFloatingActionButton(),
     );
   }
 
@@ -176,7 +176,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        order.serviceType ?? 'Dịch vụ: Không xác định',
+                        order.serviceType ?? 'Dịch vụ dọn dẹp',
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
                           fontSize: SizeConfig.hem * 14,
@@ -190,16 +190,27 @@ class _OrderListScreenState extends State<OrderListScreen> {
                   ],
                 ),
                 SizedBox(height: SizeConfig.fem * 12),
-                _buildOrderInfoRow(
-                  icon: Icons.calendar_today,
-                  text: order.bookingDate ?? 'Đặt ngay',
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        order.emergencyRequest == true
+                            ? Icons.bolt
+                            : Icons.schedule,
+                        size: 16,
+                        color: order.emergencyRequest == true
+                            ? Colors.red[700]
+                            : Colors.green[700],
+                      ),
+                    ],
+                  ),
                 ),
-                // SizedBox(height: SizeConfig.fem * 8),
-                // _buildOrderInfoRow(
-                //   icon: Icons.location_on,
-                //   text: order.address ?? 'Địa chỉ: Không xác định',
-                //   maxLines: 2,
-                // ),
+
                 SizedBox(height: SizeConfig.fem * 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -242,20 +253,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          NumberFormat('#,###', 'vi_VN').format(order.totalAmount ?? 0), // Định dạng số
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF1CAF7D),
-                            fontSize: SizeConfig.hem * 16,
-                          ),
-                        ),
-                        SizedBox(width: 6),
-                        const Icon(
-                          Icons.stars,
-                          color: Colors.amber,
-                          size: 28,
-                        ),
+                        CurrencyDisplay(price: order.totalAmount ?? 0),
                       ],
                     )
                   ],
@@ -318,19 +316,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
     );
   }
 
-  Widget _buildFloatingActionButton() {
-    return FloatingActionButton(
-      onPressed: () {
-        // TODO: Chuyển đến màn hình đặt dịch vụ
-      },
-      backgroundColor: const Color(0xFF1CAF7D),
-      child: Icon(
-        Icons.add,
-        size: SizeConfig.hem * 32,
-        color: Colors.white,
-      ),
-    );
-  }
 
   Widget _buildLoadingState() {
     return Center(

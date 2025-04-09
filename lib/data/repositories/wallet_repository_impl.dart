@@ -27,15 +27,11 @@ class WalletRepositoryImpl implements WalletRepository {
     required this.authLocalDataSource,
     required this.userLocalDatasource,
   });
+
   @override
-  Future<BaseResponse<Wallet>> getWalletByUser(
-      int? page,
-      int? size) async {
+  Future<BaseResponse<Wallet>> getWalletByUser(int? page, int? size) async {
     try {
-
-      AuthModel? authModel = AuthMapper.toModel(await authLocalDataSource.getAuth() ?? {});
-      String userId = authModel.userId ?? '';
-
+      String userId = await _getUserId();
       final response = await vinWalletRequest.get(
         '${ApiConstant.users}/$userId/wallets',
         queryParameters: {
@@ -49,12 +45,11 @@ class WalletRepositoryImpl implements WalletRepository {
         List<dynamic> data = response.data['items'] ?? [];
 
         List<Wallet> walletList = data
-            .map((item) => WalletMapper.toEntity(
-            WalletModel.fromJson(item)))
+            .map((item) => WalletMapper.toEntity(WalletModel.fromJson(item)))
             .toList();
 
-        walletList.sort((a, b) => (b.type == 'Personal' ? 1 : 0) - (a.type == 'Personal' ? 1 : 0));
-
+        walletList.sort((a, b) =>
+            (b.type == 'Personal' ? 1 : 0) - (a.type == 'Personal' ? 1 : 0));
 
         return BaseResponse<Wallet>(
           size: response.data['size'] ?? 0,
@@ -77,23 +72,22 @@ class WalletRepositoryImpl implements WalletRepository {
     }
   }
 
-
   @override
   Future<Wallet> createSharedWallet() async {
     try {
-      User user = await getUserFromLocal();
+      final user =
+          UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
       String? userId = user.id;
-
       final response = await vinWalletRequest.post(
         '${ApiConstant.users}/$userId/share-wallet',
-        queryParameters:
-        {
+        queryParameters: {
           'id': userId,
         },
       );
 
       if (response.statusCode == 200 && response.data != null) {
-        Wallet wallet = WalletMapper.toEntity(WalletModel.fromJson(response.data));
+        Wallet wallet =
+            WalletMapper.toEntity(WalletModel.fromJson(response.data));
         return wallet;
       } else {
         throw ApiException(
@@ -108,7 +102,6 @@ class WalletRepositoryImpl implements WalletRepository {
       throw ExceptionHandler.handleException(e);
     }
   }
-
 
   @override
   Future<bool> inviteMember(String walletId, String userId) async {
@@ -136,17 +129,6 @@ class WalletRepositoryImpl implements WalletRepository {
     }
   }
 
-  Future<User> getUserFromLocal() async{
-    try {
-      UserModel? userModel = UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
-      User user = UserMapper.toEntity(userModel);
-      return user;
-    } catch (e) {
-      throw ExceptionHandler.handleException(e);
-    }
-  }
-
-
   @override
   Future<Wallet> changeOwner(String walletId, String userId) async {
     try {
@@ -158,7 +140,8 @@ class WalletRepositoryImpl implements WalletRepository {
         },
       );
       if (response.statusCode == 200 && response.data != null) {
-        Wallet wallet = WalletMapper.toEntity(WalletModel.fromJson(response.data));
+        Wallet wallet =
+            WalletMapper.toEntity(WalletModel.fromJson(response.data));
         return wallet;
       } else {
         throw ApiException(
@@ -193,7 +176,7 @@ class WalletRepositoryImpl implements WalletRepository {
           message: response.data['message'] ?? 'Lỗi từ máy chủ',
           description: response.data['description'],
           timestamp: response.data['timestamp'],
-);
+        );
       }
     } catch (e) {
       throw ExceptionHandler.handleException(e);
@@ -201,18 +184,16 @@ class WalletRepositoryImpl implements WalletRepository {
   }
 
   @override
-  Future<ContributionStatistics> getContributionStatistics(String walletId, int days) async {
+  Future<bool> deleteSharedWalletByAdmin(String walletId) async {
     try {
-      final response = await vinWalletRequest.get(
-        '${ApiConstant.wallets}/$walletId/contribution-statistics',
+      final response = await vinWalletRequest.put(
+        '${ApiConstant.wallets}/$walletId/dissolution',
         queryParameters: {
           'id': walletId,
-          'days': days,
         },
       );
       if (response.statusCode == 200 && response.data == true) {
-        ContributionStatistics contributionStatistics = ContributionStatistics.fromJson(response.data);
-        return contributionStatistics;
+        return true;
       } else {
         throw ApiException(
           traceId: response.data['traceId'],
@@ -228,5 +209,45 @@ class WalletRepositoryImpl implements WalletRepository {
   }
 
 
+  @override
+  Future<ContributionStatistics> getContributionStatistics(
+      String walletId, int days) async {
+    try {
+      final response = await vinWalletRequest.get(
+        '${ApiConstant.wallets}/$walletId/contribution-statistics',
+        queryParameters: {
+          'id': walletId,
+          'days': days,
+        },
+      );
+      if (response.statusCode == 200 && response.data == true) {
+        ContributionStatistics contributionStatistics =
+            ContributionStatistics.fromJson(response.data);
+        return contributionStatistics;
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
 
+  Future<String> _getUserId() async {
+    final authModel = AuthMapper.toModel(
+      await authLocalDataSource.getAuth() ?? {},
+    );
+    final userId = authModel.userId;
+
+    if (userId == null || userId.isEmpty) {
+      throw Exception('User ID is empty');
+    }
+
+    return userId;
+  }
 }
