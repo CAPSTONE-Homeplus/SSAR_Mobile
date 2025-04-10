@@ -22,7 +22,6 @@ class AmountSectionWidget extends StatefulWidget {
 class _AmountSectionWidgetState extends State<AmountSectionWidget> {
   int _points = 0;
 
-
   @override
   void initState() {
     super.initState();
@@ -36,8 +35,21 @@ class _AmountSectionWidgetState extends State<AmountSectionWidget> {
   }
 
   void _updatePoints() {
-    String cleanValue = widget.controller.text.replaceAll(RegExp(r'[^0-9]'), '');
+    String cleanValue =
+        widget.controller.text.replaceAll(RegExp(r'[^0-9]'), '');
     int amount = int.tryParse(cleanValue) ?? 0;
+
+    if (amount > 50000000) {
+      amount = 50000000;
+      // Set lại controller với giá trị đã format
+      widget.controller.text =
+          NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0)
+              .format(amount);
+      widget.controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: widget.controller.text.length),
+      );
+    }
+
     setState(() {
       _points = amount;
     });
@@ -57,6 +69,10 @@ class _AmountSectionWidgetState extends State<AmountSectionWidget> {
 
     if (amount < 10000) {
       return 'Số tiền tối thiểu là 10.000₫';
+    }
+
+    if (amount > 50000000) {
+      return 'Số tiền tối đa là 50.000.000₫';
     }
 
     return null;
@@ -112,7 +128,8 @@ class _AmountSectionWidgetState extends State<AmountSectionWidget> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12 * widget.fem),
-                borderSide: BorderSide(color: const Color(0xFF1CAF7D), width: 2),
+                borderSide:
+                    BorderSide(color: const Color(0xFF1CAF7D), width: 2),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12 * widget.fem),
@@ -135,7 +152,7 @@ class _AmountSectionWidgetState extends State<AmountSectionWidget> {
           ),
           SizedBox(height: 8 * widget.fem),
           Text(
-            'Số tiền tối thiểu: 10.000₫',
+            'Số tiền tối đa: 50.000.000₫',
             style: GoogleFonts.poppins(
               fontSize: 12 * widget.ffem,
               color: Colors.grey[600],
@@ -189,9 +206,9 @@ class MoneyInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) {
       if (onValueChanged != null) {
         onValueChanged!(0);
@@ -219,8 +236,7 @@ class MoneyInputFormatter extends TextInputFormatter {
     if (newValue.text.length > oldValue.text.length) {
       int diff = formattedValue.length - oldTextLength;
       newCursorPosition = cursorPosition + diff;
-    }
-    else {
+    } else {
       int lengthDiff = oldTextLength - newValue.text.length;
       int actualDiff = oldTextLength - formattedValue.length;
       newCursorPosition = cursorPosition - (lengthDiff - actualDiff);

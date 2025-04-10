@@ -1,23 +1,18 @@
 import 'package:home_clean/core/base/base_model.dart';
-import 'package:home_clean/data/datasource/local/wallet_local_data_source.dart';
 import 'package:home_clean/data/mappers/auth/auth_mapper.dart';
 import 'package:home_clean/data/mappers/wallet/wallet_mapper.dart';
 import 'package:home_clean/data/models/wallet/wallet_model.dart';
 import 'package:home_clean/domain/entities/contribution_statistics/contribution_statistics.dart';
 
-import '../../core/constant/constants.dart';
-import '../../core/exception/exception_handler.dart';
-import '../../core/helper/network_helper.dart';
-import '../../core/request/request.dart';
 import '../../../domain/entities/wallet/wallet.dart';
 import '../../../domain/repositories/wallet_repository.dart';
 import '../../core/constant/api_constant.dart';
-import '../../domain/entities/user/user.dart';
+import '../../core/constant/constants.dart';
+import '../../core/exception/exception_handler.dart';
+import '../../core/request/request.dart';
 import '../datasource/local/auth_local_datasource.dart';
 import '../datasource/local/user_local_datasource.dart';
 import '../mappers/user/user_mapper.dart';
-import '../models/auth/auth_model.dart';
-import '../models/user/user_model.dart';
 
 class WalletRepositoryImpl implements WalletRepository {
   final AuthLocalDataSource authLocalDataSource;
@@ -208,7 +203,6 @@ class WalletRepositoryImpl implements WalletRepository {
     }
   }
 
-
   @override
   Future<ContributionStatistics> getContributionStatistics(
       String walletId, int days) async {
@@ -220,7 +214,7 @@ class WalletRepositoryImpl implements WalletRepository {
           'days': days,
         },
       );
-      if (response.statusCode == 200 && response.data == true) {
+      if (response.statusCode == 200 && response.data != null) {
         ContributionStatistics contributionStatistics =
             ContributionStatistics.fromJson(response.data);
         return contributionStatistics;
@@ -237,7 +231,6 @@ class WalletRepositoryImpl implements WalletRepository {
       throw ExceptionHandler.handleException(e);
     }
   }
-
 
   @override
   Future<bool> transferToSharedWallet(

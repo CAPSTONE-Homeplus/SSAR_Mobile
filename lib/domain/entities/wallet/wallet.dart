@@ -1,10 +1,10 @@
-import '../../../data/models/wallet/wallet_model.dart';
+import 'package:home_clean/data/models/wallet/wallet_model.dart';
 
 class Wallet extends WalletModel {
   Wallet({
     String? id,
     String? name,
-    int? balance,
+    double? balance,
     String? currency,
     String? type,
     String? extraField,
@@ -13,15 +13,15 @@ class Wallet extends WalletModel {
     String? status,
     String? ownerId,
   }) : super(
-    id: id,
-    name: name,
-    balance: balance,
-    currency: currency,
-    type: type,
-    extraField: extraField,
-    updatedAt: updatedAt,
-    createdAt: createdAt,
-    status: status,
-    ownerId: ownerId,
-  );
+          id: id,
+          name: name,
+          balance: balance,
+          currency: currency,
+          type: type,
+          extraField: extraField,
+          updatedAt: updatedAt,
+          createdAt: createdAt,
+          status: status,
+          ownerId: ownerId,
+        );
 }
