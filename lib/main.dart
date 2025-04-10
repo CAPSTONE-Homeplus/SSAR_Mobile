@@ -42,6 +42,7 @@ import 'package:home_clean/presentation/blocs/time_slot/time_slot_bloc.dart';
 import 'package:home_clean/presentation/blocs/transaction/transation_bloc.dart';
 import 'package:home_clean/presentation/blocs/user/user_bloc.dart';
 import 'package:home_clean/presentation/blocs/wallet/wallet_bloc.dart';
+import 'package:home_clean/presentation/laundry_blocs/order/aundry_order_bloc_v2.dart';
 import 'package:home_clean/presentation/laundry_blocs/order/laundry_order_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -69,7 +70,7 @@ import 'presentation/blocs/theme/theme_bloc.dart';
 final sl = GetIt.instance;
 final navigatorKey = GlobalKey<NavigatorState>();
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -88,7 +89,6 @@ Future<void> _requestNotificationPermission() async {
   }
 }
 
-
 class HomeClean extends StatelessWidget {
   final SharedPreferences preferences;
 
@@ -101,10 +101,8 @@ class HomeClean extends StatelessWidget {
     // MultiRepositoryProvider để cung cấp nhiều repository cho ứng dụng
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<AuthRepository>(
-            create: (_) => sl<AuthRepository>()),
-        RepositoryProvider<UserRepository>(
-            create: (_) => sl<UserRepository>()),
+        RepositoryProvider<AuthRepository>(create: (_) => sl<AuthRepository>()),
+        RepositoryProvider<UserRepository>(create: (_) => sl<UserRepository>()),
         RepositoryProvider<ServiceRepository>(
             create: (_) => sl<ServiceRepository>()),
         RepositoryProvider<ServiceCategoryRepository>(
@@ -143,19 +141,18 @@ class HomeClean extends StatelessWidget {
           BlocProvider(
               create: (context) => ThemeBloc(preferences: preferences)),
           BlocProvider(
-              create: (context) =>
-                  AuthBloc(loginUseCase: sl(),
-                      userRegisterUseCase: sl(),
-                      getUserFromLocalUseCase: sl(),
-                      refreshTokenUseCase: sl())),
+              create: (context) => AuthBloc(
+                  loginUseCase: sl(),
+                  userRegisterUseCase: sl(),
+                  getUserFromLocalUseCase: sl(),
+                  refreshTokenUseCase: sl())),
           BlocProvider(
               create: (context) => ServiceBloc(
-                  getServicesUseCase: sl(),
-                  // saveSelectedServiceIds: sl(),
-                  // getSelectedServiceIds: sl(),
-                  // clearSelectedServiceIds: sl()
-              )
-          ),
+                    getServicesUseCase: sl(),
+                    // saveSelectedServiceIds: sl(),
+                    // getSelectedServiceIds: sl(),
+                    // clearSelectedServiceIds: sl()
+                  )),
           BlocProvider(
               create: (context) => ServiceCategoryBloc(
                   getServiceByServiceCategory: sl(),
@@ -176,35 +173,71 @@ class HomeClean extends StatelessWidget {
                   EquipmentSupplyBloc(getEquipmentSuppliesUseCase: sl())),
           BlocProvider(
               create: (context) => TimeSlotBloc(getTimeSlotsUsecase: sl())),
-          BlocProvider(create: (context) => OrderBloc(createOrderUseCase: sl(), getOrderByUserUseCase: sl(), getOrderUseCase: sl(), cancelOrderUseCase: sl(), orderRepository: sl())),
-          BlocProvider( create: (context) => WalletBloc(getWalletByUser: sl(), createWalletUseCase: sl(),
-              walletRepository: sl(), changeOwnerUseCase: sl(), deleteUserUseCase: sl(), getContributionStatisticUseCase: sl())),
+          BlocProvider(
+              create: (context) => OrderBloc(
+                  createOrderUseCase: sl(),
+                  getOrderByUserUseCase: sl(),
+                  getOrderUseCase: sl(),
+                  cancelOrderUseCase: sl(),
+                  orderRepository: sl())),
+          BlocProvider(
+              create: (context) => WalletBloc(
+                  getWalletByUser: sl(),
+                  createWalletUseCase: sl(),
+                  walletRepository: sl(),
+                  changeOwnerUseCase: sl(),
+                  deleteUserUseCase: sl(),
+                  getContributionStatisticUseCase: sl())),
           BlocProvider(create: (context) => RoomBloc(sl())),
-          BlocProvider(create: (context) => BuildingBloc(getBuildingUseCase: sl(), getBuildingsUseCase: sl())),
+          BlocProvider(
+              create: (context) => BuildingBloc(
+                  getBuildingUseCase: sl(), getBuildingsUseCase: sl())),
           BlocProvider(create: (context) => TransactionBloc(sl(), sl(), sl())),
-          BlocProvider(create: (context) => HouseBloc(getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl())),
+          BlocProvider(
+              create: (context) => HouseBloc(
+                  getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl())),
           BlocProvider(create: (context) => PaymentMethodBloc(sl())),
           BlocProvider(create: (context) => UserBloc(sl(), sl(), sl(), sl())),
-          BlocProvider(create: (context) => NotificationBloc(getNotificationsUseCase: sl(), connectToHubUseCase: sl(), disconnectFromHubUseCase: sl(), listenForNotificationsUseCase: sl(), flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin)),
-          BlocProvider(create: (context) => PersonalWalletBloc(getWalletByUser: sl())),
-          BlocProvider(create: (context) => SharedWalletBloc(getWalletByUser: sl())),
-          BlocProvider(create: (context) => OrderTrackingBloc(connectToHub: sl(),
-            disconnectFromHub: sl(),
-            getLocalTrackings: sl(),
-            getTrackingById: sl(),
-            streamTracking: sl(),)),
+          BlocProvider(
+              create: (context) => NotificationBloc(
+                  getNotificationsUseCase: sl(),
+                  connectToHubUseCase: sl(),
+                  disconnectFromHubUseCase: sl(),
+                  listenForNotificationsUseCase: sl(),
+                  flutterLocalNotificationsPlugin:
+                      flutterLocalNotificationsPlugin)),
+          BlocProvider(
+              create: (context) => PersonalWalletBloc(getWalletByUser: sl())),
+          BlocProvider(
+              create: (context) => SharedWalletBloc(getWalletByUser: sl())),
+          BlocProvider(
+              create: (context) => OrderTrackingBloc(
+                    connectToHub: sl(),
+                    disconnectFromHub: sl(),
+                    getLocalTrackings: sl(),
+                    getTrackingById: sl(),
+                    streamTracking: sl(),
+                  )),
           BlocProvider(create: (context) => LaundryServiceTypeBloc(sl(), sl())),
+          BlocProvider(
+              create: (context) => LaundryOrderBlocV2(orderRepository: sl())),
           BlocProvider(create: (context) => LaundryItemTypeBloc(sl())),
-          BlocProvider(create: (context) => AdditionalServiceBloc(repository: sl())),
+          BlocProvider(
+              create: (context) => AdditionalServiceBloc(repository: sl())),
           BlocProvider(create: (context) => LaundryOrderBloc(sl())),
-          BlocProvider(create: (context) => ChangeOwnerBloc(walletRepository: sl())),
-          BlocProvider(create: (context) => DissolutionBloc(walletRepository: sl())),
+          BlocProvider(
+              create: (context) => ChangeOwnerBloc(walletRepository: sl())),
+          BlocProvider(
+              create: (context) => DissolutionBloc(walletRepository: sl())),
           BlocProvider(create: (context) => StaffBloc(orderRepository: sl())),
-          BlocProvider(create: (context) => RatingOrderBloc(orderRepository: sl())),
-          BlocProvider(create: (context) => ServicePriceBloc(serviceRepository: sl())),
-          BlocProvider(create: (context) => TransferBloc(walletRepository: sl())),
-
-    ],
+          BlocProvider(
+              create: (context) => RatingOrderBloc(orderRepository: sl())),
+          BlocProvider(
+              create: (context) => ServicePriceBloc(serviceRepository: sl())),
+          BlocProvider(
+              create: (context) => TransferBloc(
+                  walletRepository: sl(),)),
+        ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {
             ThemeData themeData = ThemeData.light();
