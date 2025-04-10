@@ -54,7 +54,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    SizeConfig.init(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -67,57 +66,57 @@ class _OrderListScreenState extends State<OrderListScreen> {
             Expanded(
               child: _selectedCategory == 'clean'
                   ? BlocBuilder<OrderBloc, OrderState>(
-                      builder: (context, state) {
-                        if (state is OrderLoading) return _buildLoadingState();
+                builder: (context, state) {
+                  if (state is OrderLoading) return _buildLoadingState();
 
-                        if (state is OrderError) {
-                          return _buildErrorState(() {
-                            context
-                                .read<OrderBloc>()
-                                .add(GetOrdersByUserEvent());
-                          });
-                        }
+                  if (state is OrderError) {
+                    return _buildErrorState(() {
+                      context
+                          .read<OrderBloc>()
+                          .add(GetOrdersByUserEvent());
+                    });
+                  }
 
-                        if (state is OrdersByUserLoaded) {
-                          _allCleanOrders = state.orders.items ?? [];
+                  if (state is OrdersByUserLoaded) {
+                    _allCleanOrders = state.orders.items ?? [];
 
-                          // 👉 Gọi filter sau build tránh lỗi setState trong build
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            _applyCleanFilters();
-                          });
+                    // 👉 Gọi filter sau build tránh lỗi setState trong build
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _applyCleanFilters();
+                    });
 
-                          return _filteredCleanOrders.isEmpty
-                              ? _buildEmptyState()
-                              : _buildCleanOrderList();
-                        }
+                    return _filteredCleanOrders.isEmpty
+                        ? _buildEmptyState()
+                        : _buildCleanOrderList();
+                  }
 
-                        return const SizedBox.shrink();
-                      },
-                    )
+                  return const SizedBox.shrink();
+                },
+              )
                   : BlocBuilder<LaundryOrderBlocV2, LaundryOrderStateV2>(
-                      builder: (context, state) {
-                        if (state is LaundryOrderLoadingV2)
-                          return _buildLoadingState();
+                builder: (context, state) {
+                  if (state is LaundryOrderLoadingV2)
+                    return _buildLoadingState();
 
-                        if (state is LaundryOrderFailureV2) {
-                          return _buildErrorState(() {
-                            context.read<LaundryOrderBlocV2>().add(
-                                GetLaundryOrdersV2(
-                                    'laundry-user-id-goes-here'));
-                          });
-                        }
+                  if (state is LaundryOrderFailureV2) {
+                    return _buildErrorState(() {
+                      context.read<LaundryOrderBlocV2>().add(
+                          GetLaundryOrdersV2(
+                              'laundry-user-id-goes-here'));
+                    });
+                  }
 
-                        if (state is LaundryOrderLoadedV2) {
-                          _laundryOrders = state.orders;
+                  if (state is LaundryOrderLoadedV2) {
+                    _laundryOrders = state.orders;
 
-                          return _laundryOrders.isEmpty
-                              ? _buildEmptyState()
-                              : _buildLaundryOrderList();
-                        }
+                    return _laundryOrders.isEmpty
+                        ? _buildEmptyState()
+                        : _buildLaundryOrderList();
+                  }
 
-                        return const SizedBox.shrink();
-                      },
-                    ),
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
           ],
         ),
@@ -218,117 +217,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: const Color(0xFF1CAF7D)),
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            AppRouter.navigateToOrderDetailWithArguments(order.id ?? '');
-          },
-          child: Padding(
-            padding: EdgeInsets.all(SizeConfig.hem * 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        order.serviceType ?? 'Dịch vụ dọn dẹp',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          fontSize: SizeConfig.hem * 14,
-                          color: Colors.black87,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    _buildStatusChip(order.status!.toOrderStatus()),
-                  ],
-                ),
-                SizedBox(height: SizeConfig.fem * 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        order.emergencyRequest == true
-                            ? Icons.bolt
-                            : Icons.schedule,
-                        size: 16,
-                        color: order.emergencyRequest == true
-                            ? Colors.red[700]
-                            : Colors.green[700],
-                      ),
-                      SizedBox(width: SizeConfig.hem * 6),
-                      Text(order.timeSlotDetail ?? '',
-                        style: GoogleFonts.poppins(
-                          fontSize: SizeConfig.hem * 12,
-                          color: order.emergencyRequest == true
-                              ? Colors.red[700]
-                              : Colors.green[700],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                SizedBox(height: SizeConfig.fem * 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Mã đơn:',
-                      style: GoogleFonts.poppins(
-                        color: Colors.grey[600],
-                        fontSize: SizeConfig.hem * 14,
-                      ),
-                    ),
-                    Container(
-                      constraints: BoxConstraints(
-                        maxWidth: SizeConfig.screenWidth * 0.6,
-                      ),
-                      child: Text(
-                        order.code ?? 'Không xác định',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          fontSize: SizeConfig.hem * 14,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: SizeConfig.fem * 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Tổng cộng:',
-                      style: GoogleFonts.poppins(
-                        color: Colors.grey[600],
-                        fontSize: SizeConfig.hem * 14,
-                      ),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CurrencyDisplay(price: order.totalAmount ?? 0),
-                      ],
-                    )
-                  ],
-                ),
-              ],
           child: Center(
             child: Text(
               label,
