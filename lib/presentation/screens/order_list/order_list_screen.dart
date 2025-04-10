@@ -2,26 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/router/app_router.dart';
+import 'package:home_clean/presentation/laundry_blocs/order/aundry_order_bloc_v2.dart';
+import 'package:home_clean/presentation/laundry_blocs/order/laundry_order_event_v2.dart';
+import 'package:home_clean/presentation/laundry_blocs/order/laundry_order_state_v2.dart';
 import 'package:home_clean/presentation/widgets/currency_display.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/constant/size_config.dart';
-import '../../../core/enums/order_status.dart';
 import '../../../domain/entities/order/order.dart';
+import '../../../domain/entities/order/order_laundry.dart';
 import '../../blocs/order/order_bloc.dart';
 
 class OrderListScreen extends StatefulWidget {
   const OrderListScreen({Key? key}) : super(key: key);
 
   @override
-  _OrderListScreenState createState() => _OrderListScreenState();
+  State<OrderListScreen> createState() => _OrderListScreenState();
 }
 
 class _OrderListScreenState extends State<OrderListScreen> {
   final _searchController = TextEditingController();
-  List<Orders> _filteredOrders = [];
-  List<Orders> _allOrders = [];
+  List<Orders> _filteredCleanOrders = [];
+  List<Orders> _allCleanOrders = [];
+  List<OrderLaundry> _laundryOrders = [];
+  String _selectedCategory = 'clean';
 
   @override
   void initState() {
@@ -29,17 +33,22 @@ class _OrderListScreenState extends State<OrderListScreen> {
     context.read<OrderBloc>().add(GetOrdersByUserEvent());
   }
 
-  void _filterOrders(String query) {
+  void _applyCleanFilters() {
+    final query = _searchController.text.toLowerCase();
+
+    final filtered = _allCleanOrders.where((order) {
+      final code = order.code?.toLowerCase() ?? '';
+      final service = order.serviceType?.toLowerCase() ?? '';
+      final status = order.status?.toLowerCase() ?? '';
+
+      return query.isEmpty ||
+          code.contains(query) ||
+          service.contains(query) ||
+          status.contains(query);
+    }).toList();
+
     setState(() {
-      if (query.isEmpty) {
-        _filteredOrders = _allOrders;
-      } else {
-        _filteredOrders = _allOrders.where((order) {
-          return (order.code?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
-              (order.serviceType?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
-              (order.status?.toLowerCase().contains(query.toLowerCase()) ?? false);
-        }).toList();
-      }
+      _filteredCleanOrders = filtered;
     });
   }
 
@@ -51,34 +60,66 @@ class _OrderListScreenState extends State<OrderListScreen> {
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: CustomAppBar(title: 'Đơn hàng của bạn'),
       body: SafeArea(
-        child: BlocBuilder<OrderBloc, OrderState>(
-          builder: (context, state) {
-            if (state is OrderLoading) {
-              return _buildLoadingState();
-            }
+        child: Column(
+          children: [
+            _buildSearchBar(),
+            _buildFilterTabs(),
+            Expanded(
+              child: _selectedCategory == 'clean'
+                  ? BlocBuilder<OrderBloc, OrderState>(
+                      builder: (context, state) {
+                        if (state is OrderLoading) return _buildLoadingState();
 
-            if (state is OrderError) {
-              return _buildErrorState(context);
-            }
+                        if (state is OrderError) {
+                          return _buildErrorState(() {
+                            context
+                                .read<OrderBloc>()
+                                .add(GetOrdersByUserEvent());
+                          });
+                        }
 
-            if (state is OrdersByUserLoaded) {
-              _allOrders = state.orders.items ?? [];
-              _filteredOrders = _allOrders;
+                        if (state is OrdersByUserLoaded) {
+                          _allCleanOrders = state.orders.items ?? [];
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSearchBar(),
-                  Expanded(
-                    child: _filteredOrders.isEmpty
-                        ? _buildEmptyState()
-                        : _buildOrderList(),
-                  ),
-                ],
-              );
-            }
-            return const SizedBox.shrink();
-          },
+                          // 👉 Gọi filter sau build tránh lỗi setState trong build
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            _applyCleanFilters();
+                          });
+
+                          return _filteredCleanOrders.isEmpty
+                              ? _buildEmptyState()
+                              : _buildCleanOrderList();
+                        }
+
+                        return const SizedBox.shrink();
+                      },
+                    )
+                  : BlocBuilder<LaundryOrderBlocV2, LaundryOrderStateV2>(
+                      builder: (context, state) {
+                        if (state is LaundryOrderLoadingV2)
+                          return _buildLoadingState();
+
+                        if (state is LaundryOrderFailureV2) {
+                          return _buildErrorState(() {
+                            context.read<LaundryOrderBlocV2>().add(
+                                GetLaundryOrdersV2(
+                                    'laundry-user-id-goes-here'));
+                          });
+                        }
+
+                        if (state is LaundryOrderLoadedV2) {
+                          _laundryOrders = state.orders;
+
+                          return _laundryOrders.isEmpty
+                              ? _buildEmptyState()
+                              : _buildLaundryOrderList();
+                        }
+
+                        return const SizedBox.shrink();
+                      },
+                    ),
+            ),
+          ],
         ),
       ),
     );
@@ -105,7 +146,11 @@ class _OrderListScreenState extends State<OrderListScreen> {
         ),
         child: TextField(
           controller: _searchController,
-          onChanged: _filterOrders,
+          onChanged: (_) {
+            if (_selectedCategory == 'clean') {
+              _applyCleanFilters();
+            }
+          },
           style: GoogleFonts.poppins(
             fontSize: SizeConfig.ffem * 12,
           ),
@@ -131,31 +176,47 @@ class _OrderListScreenState extends State<OrderListScreen> {
     );
   }
 
-  Widget _buildOrderList() {
-    return ListView.builder(
+  Widget _buildFilterTabs() {
+    return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: SizeConfig.hem * 20,
+        vertical: SizeConfig.fem * 8,
       ),
-      itemCount: _filteredOrders.length,
-      itemBuilder: (context, index) {
-        final order = _filteredOrders[index];
-        return _buildOrderCard(order);
-      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildFilterButton('clean', 'Dọn dẹp'),
+          _buildFilterButton('laundry', 'Giặt ủi'),
+        ],
+      ),
     );
   }
 
-  Widget _buildOrderCard(Orders order) {
-    return Container(
-      margin: EdgeInsets.only(bottom: SizeConfig.fem * 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 2),
+  Widget _buildFilterButton(String value, String label) {
+    final isSelected = _selectedCategory == value;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedCategory = value;
+          });
+
+          if (value == 'clean') {
+            context.read<OrderBloc>().add(GetOrdersByUserEvent());
+          } else {
+            context
+                .read<LaundryOrderBlocV2>()
+                .add(GetLaundryOrdersV2('laundry-user-id-goes-here'));
+          }
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: SizeConfig.fem * 10),
+          margin: EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF1CAF7D) : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFF1CAF7D)),
           ),
         ],
       ),
@@ -268,6 +329,14 @@ class _OrderListScreenState extends State<OrderListScreen> {
                   ],
                 ),
               ],
+          child: Center(
+            child: Text(
+              label,
+              style: GoogleFonts.poppins(
+                color: isSelected ? Colors.white : const Color(0xFF1CAF7D),
+                fontWeight: FontWeight.w600,
+                fontSize: SizeConfig.hem * 12,
+              ),
             ),
           ),
         ),
@@ -275,114 +344,80 @@ class _OrderListScreenState extends State<OrderListScreen> {
     );
   }
 
-  Widget _buildOrderInfoRow({
-    required IconData icon,
-    required String text,
-    int maxLines = 1,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(
-          icon,
-          color: const Color(0xFF1CAF7D),
-          size: SizeConfig.hem * 18,
-        ),
-        SizedBox(width: SizeConfig.hem * 10),
-        Expanded(
-          child: Text(
-            text,
-            style: GoogleFonts.poppins(
-              fontSize: SizeConfig.hem * 14,
-              color: Colors.grey[800],
-            ),
-            maxLines: maxLines,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
+  Widget _buildCleanOrderList() {
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: SizeConfig.hem * 20),
+      itemCount: _filteredCleanOrders.length,
+      itemBuilder: (context, index) {
+        final order = _filteredCleanOrders[index];
+        return _buildCleanOrderCard(order);
+      },
     );
   }
 
-  Widget _buildStatusChip(OrderStatus status) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: SizeConfig.hem * 10,
-        vertical: SizeConfig.fem * 4,
-      ),
-      decoration: BoxDecoration(
-        color: status.chipColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        status.displayName,
-        style: GoogleFonts.poppins(
-          color: status.textColor,
-          fontSize: SizeConfig.hem * 12,
-          fontWeight: FontWeight.w600,
-        ),
+  Widget _buildLaundryOrderList() {
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: SizeConfig.hem * 20),
+      itemCount: _laundryOrders.length,
+      itemBuilder: (context, index) {
+        final order = _laundryOrders[index];
+        return _buildLaundryOrderCard(order);
+      },
+    );
+  }
+
+  Widget _buildCleanOrderCard(Orders order) {
+    return Card(
+      margin: EdgeInsets.only(bottom: SizeConfig.fem * 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ListTile(
+        onTap: () {
+          AppRouter.navigateToOrderDetailWithArguments(order.id ?? '');
+        },
+        title: Text(order.serviceType ?? 'Dịch vụ dọn dẹp',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+        subtitle: Text('Mã đơn: ${order.code ?? 'Không xác định'}'),
+        trailing: CurrencyDisplay(price: order.totalAmount ?? 0),
       ),
     );
   }
 
+  Widget _buildLaundryOrderCard(OrderLaundry order) {
+    return Card(
+      margin: EdgeInsets.only(bottom: SizeConfig.fem * 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ListTile(
+        onTap: () {
+          AppRouter.navigateToLaundryOrderDetailWithArguments(order.id ?? '');
+        },
+        title: Text(order.name,
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+        subtitle: Text('Mã đơn: ${order.orderCode}'),
+        trailing: CurrencyDisplay(price: order.totalAmount ?? 0),
+      ),
+    );
+  }
 
   Widget _buildLoadingState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFF1CAF7D)),
-          ),
-          SizedBox(height: SizeConfig.fem * 16),
-          Text(
-            'Đang tải đơn hàng...',
-            style: GoogleFonts.poppins(
-              color: Colors.grey[700],
-              fontSize: SizeConfig.fem * 16,
-            ),
-          ),
-        ],
-      ),
-    );
+    return const Center(child: CircularProgressIndicator());
   }
 
-  Widget _buildErrorState(BuildContext context) {
+  Widget _buildErrorState(VoidCallback onRetry) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            color: Colors.red,
-            size: SizeConfig.hem * 80,
-          ),
-          SizedBox(height: SizeConfig.fem * 16),
-          Text(
-            'Lỗi: Không thể tải đơn hàng',
-            style: GoogleFonts.poppins(
-              color: Colors.red,
-              fontSize: SizeConfig.fem * 18,
-            ),
-          ),
-          SizedBox(height: SizeConfig.fem * 16),
+          const Icon(Icons.error_outline, color: Colors.red, size: 64),
+          const SizedBox(height: 16),
+          Text('Đã xảy ra lỗi khi tải dữ liệu',
+              style: GoogleFonts.poppins(fontSize: 16, color: Colors.red)),
+          const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () {
-              context.read<OrderBloc>().add(GetOrdersByUserEvent());
-            },
+            onPressed: onRetry,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1CAF7D),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(
-              'Thử lại',
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: SizeConfig.fem * 16,
-              ),
-            ),
+                backgroundColor: const Color(0xFF1CAF7D)),
+            child: Text('Thử lại',
+                style: GoogleFonts.poppins(color: Colors.white)),
           ),
         ],
       ),
@@ -394,24 +429,15 @@ class _OrderListScreenState extends State<OrderListScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(height: SizeConfig.fem * 24),
-          Text(
-            'Chưa có đơn hàng nào',
-            style: GoogleFonts.poppins(
-              color: Colors.grey[700],
-              fontSize: SizeConfig.hem * 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          SizedBox(height: SizeConfig.fem * 16),
-          Text(
-            'Hãy đặt dịch vụ đầu tiên của bạn ngay!',
-            style: GoogleFonts.poppins(
-              color: Colors.grey[500],
-              fontSize: SizeConfig.hem * 16,
-            ),
-            textAlign: TextAlign.center,
-          ),
+          const SizedBox(height: 24),
+          Text('Chưa có đơn hàng nào',
+              style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[700])),
+          const SizedBox(height: 16),
+          Text('Hãy bắt đầu sử dụng dịch vụ ngay!',
+              style: GoogleFonts.poppins(color: Colors.grey[500])),
         ],
       ),
     );
