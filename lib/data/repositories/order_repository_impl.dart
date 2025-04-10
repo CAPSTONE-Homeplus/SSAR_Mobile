@@ -1,11 +1,12 @@
-import 'dart:ffi';
-
 import 'package:home_clean/core/base/base_model.dart';
 import 'package:home_clean/core/request/request.dart';
 import 'package:home_clean/data/datasource/local/user_local_datasource.dart';
+import 'package:home_clean/data/models/order/order_laundry_detail_model.dart';
+import 'package:home_clean/data/models/order/order_laundry_model.dart';
 import 'package:home_clean/domain/entities/order/create_order.dart';
-
 import 'package:home_clean/domain/entities/order/order.dart';
+import 'package:home_clean/domain/entities/order/order_laundry.dart';
+import 'package:home_clean/domain/entities/order/order_laundry_detail.dart';
 
 import '../../../domain/repositories/order_repository.dart';
 import '../../core/constant/api_constant.dart';
@@ -20,7 +21,6 @@ import '../mappers/user/user_mapper.dart';
 import '../models/order/order_model.dart';
 
 class OrderRepositoryImpl implements OrderRepository {
-
   final UserLocalDatasource userLocalDatasource;
 
   OrderRepositoryImpl({
@@ -30,12 +30,14 @@ class OrderRepositoryImpl implements OrderRepository {
   @override
   Future<Orders> createOrder(CreateOrder createOrder) async {
     try {
-      final user = UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
+      final user =
+          UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
       final requestData = {
         "address": createOrder.address,
         "notes": createOrder.notes.toString(),
         "emergencyRequest": createOrder.emergencyRequest,
-        if (createOrder.timeSlot.id != null && createOrder.timeSlot.id.toString().isNotEmpty)
+        if (createOrder.timeSlot.id != null &&
+            createOrder.timeSlot.id.toString().isNotEmpty)
           'timeSlotId': createOrder.timeSlot.id.toString(),
         "serviceId": createOrder.service.id.toString(),
         "userId": user.id.toString(),
@@ -50,7 +52,8 @@ class OrderRepositoryImpl implements OrderRepository {
       );
 
       if (response.statusCode == 201 && response.data is Map<String, dynamic>) {
-        return OrderMapper.toEntity(OrderMapper.fromMapToOrderModel(response.data));
+        return OrderMapper.toEntity(
+            OrderMapper.fromMapToOrderModel(response.data));
       } else {
         throw ApiException(
           traceId: response.data['traceId'],
@@ -68,9 +71,11 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
-  Future<BaseResponse<Orders>> getOrdersByUser(String? search, String? orderBy, int? page, int? size) async {
+  Future<BaseResponse<Orders>> getOrdersByUser(
+      String? search, String? orderBy, int? page, int? size) async {
     try {
-      final user = UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
+      final user =
+          UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
       final response = await homeCleanRequest.get(
         '${ApiConstant.orders}/by-user',
         queryParameters: {
@@ -117,6 +122,70 @@ class OrderRepositoryImpl implements OrderRepository {
     }
   }
 
+  @override
+  Future<BaseResponse<OrderLaundry>> getOrdersByLaundryUser(
+    String? search,
+    String? orderBy,
+    int? page,
+    int? size,
+  ) async {
+    try {
+      final user =
+          UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
+      final response = await vinLaundryRequest.get(
+        '/users/${user.id}/orders',
+        queryParameters: {
+          'search': search ?? '',
+          'orderBy': orderBy ?? '',
+          'page': page ?? Constant.defaultPage,
+          'size': size ?? Constant.defaultSize,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['items'] ?? [];
+
+        final orders =
+            data.map((e) => OrderLaundryModel.fromJson(e).toEntity()).toList();
+
+        return BaseResponse<OrderLaundry>(
+          size: response.data['size'] ?? 0,
+          page: response.data['page'] ?? 0,
+          total: response.data['total'] ?? 0,
+          totalPages: response.data['totalPages'] ?? 0,
+          items: orders,
+        );
+      } else {
+        throw Exception("API lỗi: ${response.data['message']}");
+      }
+    } catch (e) {
+      print(e.toString());
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<OrderLaundryDetail> getLaundryOrderDetail(String orderId) async {
+    try {
+      final response = await homeCleanRequest.get('/api/v1/orders/$orderId');
+
+      if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
+        final model = OrderLaundryDetailModel.fromJson(response.data);
+        return model.toEntity();
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      print('Lỗi khi lấy chi tiết đơn giặt: $e');
+      throw ExceptionHandler.handleException(e);
+    }
+  }
 
   @override
   Future<Orders> getOrder(String orderId) async {
@@ -128,7 +197,8 @@ class OrderRepositoryImpl implements OrderRepository {
         },
       );
       if (response.statusCode == 200 && response.data != null) {
-        return OrderMapper.toEntity(OrderMapper.fromMapToOrderModel(response.data));
+        return OrderMapper.toEntity(
+            OrderMapper.fromMapToOrderModel(response.data));
       } else {
         throw ApiException(
           traceId: response.data['traceId'],
@@ -145,9 +215,11 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
-  Future<bool> cancelOrder(String orderId, CancellationRequest cancellationRequest) async {
+  Future<bool> cancelOrder(
+      String orderId, CancellationRequest cancellationRequest) async {
     try {
-      final user = UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
+      final user =
+          UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
       final response = await homeCleanRequest.post(
         '${ApiConstant.orders}/$orderId/cancel',
         queryParameters: {
@@ -175,7 +247,6 @@ class OrderRepositoryImpl implements OrderRepository {
       throw ExceptionHandler.handleException(e);
     }
   }
-
 
   @override
   Future<Staff> getStaffById(String staffId) async {
@@ -227,7 +298,8 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
-  Future<ServiceInHouseType> getPriceByHouseType(String houseId, String serviceId) async {
+  Future<ServiceInHouseType> getPriceByHouseType(
+      String houseId, String serviceId) async {
     try {
       final response = await homeCleanRequest.get(
         '${ApiConstant.serviceHouseTypes}/by-house-and-service',
@@ -253,5 +325,4 @@ class OrderRepositoryImpl implements OrderRepository {
       throw ExceptionHandler.handleException(e);
     }
   }
-
 }
