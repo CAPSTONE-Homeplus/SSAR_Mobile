@@ -202,3 +202,24 @@ class DissolutionBloc extends Bloc<DissolutionWalletEvent, WalletState> {
     }
   }
 }
+
+class TransferBloc extends Bloc<TransferPointToSharedWallet, TransferPointToSharedWalletState> {
+  final WalletRepository walletRepository;
+
+  TransferBloc({required this.walletRepository}) : super(TransferPointToSharedWalletInitial()) {
+    on<TransferToSharedWallet>(_onTransferToSharedWallet);
+  }
+
+  Future<void> _onTransferToSharedWallet(
+      TransferToSharedWallet event,
+      Emitter<TransferPointToSharedWalletState> emit,
+      ) async {
+    try {
+      emit(TransferPointToSharedWalletLoading());
+      final response = await walletRepository.transferToSharedWallet(event.sharedWalletId, event.personalWalletId, event.amount);
+      emit(TransferPointToSharedWalletSuccess(result: response));
+    } on ApiException catch (e) {
+      emit(TransferPointToSharedWalletError(message: e.toString()));
+    }
+  }
+}

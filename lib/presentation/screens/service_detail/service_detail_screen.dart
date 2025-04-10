@@ -28,10 +28,15 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../core/constant/size_config.dart';
 import '../../../core/format/formater.dart';
+import '../../../domain/entities/house/house.dart';
 import '../../../domain/entities/order/create_order.dart';
 import '../../../domain/entities/service_activity/service_activity.dart';
 import '../../../domain/entities/time_slot/time_slot.dart';
+import '../../blocs/house/house_bloc.dart';
 import '../../blocs/option/option_bloc.dart';
+import '../../blocs/service_in_house_type/service_price_bloc.dart';
+import '../../blocs/service_in_house_type/service_price_event.dart';
+import '../../blocs/service_in_house_type/service_price_state.dart';
 import '../../blocs/time_slot/time_slot_bloc.dart';
 import '../../blocs/time_slot/time_slot_event.dart';
 import '../../blocs/time_slot/time_slot_state.dart';
@@ -50,6 +55,7 @@ class ServiceDetailScreen extends StatefulWidget {
 }
 
 class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
+  House? house;
   final List<Option> _selectedOptions = [];
   final List<ExtraService> _selectedExtraServices = [];
   List<Option> _options = [];
@@ -65,7 +71,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _totalPrice = widget.service.price ?? 0;
     _init();
   }
 
@@ -81,6 +86,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         isLoading = true;
       });
 
+      fetchHouse();
+
+      context.read<ServicePriceBloc>().add(
+        GetServicePrice(
+          houseId: house?.id ?? '',
+          serviceId: widget.service.id ?? '',
+        ),
+      );
+
       // Dispatch events to fetch data
       context.read<ServiceActivityBloc>().add(
         GetServiceActivitiesByServiceIdEvent(serviceId: widget.service.id ?? ''),
@@ -94,6 +108,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       );
       context.read<TimeSlotBloc>().add(GetTimeSlotEvents());
     });
+  }
+
+  void fetchHouse() {
+    final houseBloc = context.read<HouseBloc>();
+    house = houseBloc.cachedHouse;
   }
 
   void _handleCreateOrder(bool isEmergency) {
@@ -156,6 +175,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               setState(() {
                 timeSlots = state.timeSlots;
                 _checkAllDataLoaded();
+              });
+            }
+          },
+        ),
+        BlocListener<ServicePriceBloc, ServicePriceState>(
+          listener: (context, state) {
+            if (state is ServicePriceLoaded) {
+              setState(() {
+                _totalPrice = state.servicePrice.price!;
               });
             }
           },

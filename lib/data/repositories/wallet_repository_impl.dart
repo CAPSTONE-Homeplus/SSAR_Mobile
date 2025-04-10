@@ -238,6 +238,35 @@ class WalletRepositoryImpl implements WalletRepository {
     }
   }
 
+
+  @override
+  Future<bool> transferToSharedWallet(
+      String sharedWalletId, String personalWalletId, int amount) async {
+    try {
+      final response = await vinWalletRequest.put(
+        '${ApiConstant.wallets}/transfer-personal-to-shared',
+        data: {
+          'sharedWalletId': sharedWalletId,
+          'personalWalletId': personalWalletId,
+          'amount': amount,
+        },
+      );
+      if (response.statusCode == 200 && response.data == true) {
+        return true;
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
   Future<String> _getUserId() async {
     final authModel = AuthMapper.toModel(
       await authLocalDataSource.getAuth() ?? {},

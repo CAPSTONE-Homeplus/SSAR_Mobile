@@ -321,6 +321,43 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                 ),
               ],
             ),
+            SizedBox(height: 16 * SizeConfig.hem),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.timelapse,
+                  color: primaryColor,
+                  size: 20 * SizeConfig.ffem,
+                ),
+                SizedBox(width: 12 * SizeConfig.fem),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Đã lên lịch',
+                        style: GoogleFonts.poppins(
+                          color: Colors.black54,
+                          fontSize: 14 * SizeConfig.ffem,
+                        ),
+                      ),
+                      SizedBox(height: 4 * SizeConfig.hem),
+                      Text(
+                        orders.timeSlotDetail != null
+                            ? formatDateTime(orders.timeSlotDetail)
+                            : 'Yêu cầu ngay',
+                        style: GoogleFonts.poppins(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15 * SizeConfig.ffem,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

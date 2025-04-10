@@ -207,6 +207,15 @@ class _OrderListScreenState extends State<OrderListScreen> {
                             ? Colors.red[700]
                             : Colors.green[700],
                       ),
+                      SizedBox(width: SizeConfig.hem * 6),
+                      Text(order.timeSlotDetail ?? '',
+                        style: GoogleFonts.poppins(
+                          fontSize: SizeConfig.hem * 12,
+                          color: order.emergencyRequest == true
+                              ? Colors.red[700]
+                              : Colors.green[700],
+                        ),
+                      ),
                     ],
                   ),
                 ),

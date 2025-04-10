@@ -36,6 +36,7 @@ class Orders {
   String? timeSlotId;
   String? serviceId;
   String? userId;
+  String? timeSlotDetail;
   List<ExtraService>? extraServices;
   List<Option>? options;
 
@@ -74,6 +75,7 @@ class Orders {
     this.timeSlotId,
     this.serviceId,
     this.userId,
+    this.timeSlotDetail,
     this.extraServices,
     this.options,
   });

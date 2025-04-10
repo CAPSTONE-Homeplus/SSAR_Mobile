@@ -27,7 +27,7 @@ class TimeDropdown extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[400]!),
+        border: Border.all(color: Colors.grey[400]!)
       ),
       child: DropdownButton<TimeSlot?>(
         value: _validateValue(value, items),
@@ -45,6 +45,27 @@ class TimeDropdown extends StatelessWidget {
   }
 
   List<DropdownMenuItem<TimeSlot?>> _buildDropdownItems() {
+    final now = DateTime.now();
+
+    // Lọc những slot bắt đầu sau 1 tiếng nữa
+    final validItems = items.where((slot) {
+      final start = _parseTime(slot.startTime);
+      return start != null && start.isAfter(now.add(Duration(hours: 1)));
+    }).toList();
+
+    if (validItems.isEmpty) {
+      // Nếu không có slot hợp lệ
+      return [
+        const DropdownMenuItem<TimeSlot?>(
+          value: null,
+          child: Text(
+            'Không khả dụng',
+            style: TextStyle(fontSize: 16, color: Colors.redAccent),
+          ),
+        )
+      ];
+    }
+
     return [
       const DropdownMenuItem<TimeSlot?>(
         value: null,
@@ -53,7 +74,7 @@ class TimeDropdown extends StatelessWidget {
           style: TextStyle(fontSize: 16, color: Colors.black54),
         ),
       ),
-      ...items.map((TimeSlot timeSlot) {
+      ...validItems.map((TimeSlot timeSlot) {
         return DropdownMenuItem<TimeSlot>(
           value: timeSlot,
           child: Text(
@@ -64,9 +85,23 @@ class TimeDropdown extends StatelessWidget {
             ),
           ),
         );
-      }).toList()
+      }).toList(),
     ];
   }
+
+
+  DateTime? _parseTime(String? timeStr) {
+    if (timeStr == null) return null;
+    try {
+      final parts = timeStr.split(':');
+      final now = DateTime.now();
+      return DateTime(now.year, now.month, now.day,
+          int.parse(parts[0]), int.parse(parts[1]));
+    } catch (_) {
+      return null;
+    }
+  }
+
 
   TimeSlot? _validateValue(TimeSlot? currentValue, List<TimeSlot> availableItems) {
     return availableItems.contains(currentValue) ? currentValue : null;

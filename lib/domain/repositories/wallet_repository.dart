@@ -15,4 +15,6 @@ abstract class WalletRepository {
   Future<Wallet> changeOwner(String walletId, String userId);
   Future<bool> deleteUserFromWallet(String walletId, String userId);
   Future<ContributionStatistics> getContributionStatistics(String walletId, int days);
+  Future<bool> transferToSharedWallet(
+      String sharedWalletId, String personalWalletId, int amount);
 }

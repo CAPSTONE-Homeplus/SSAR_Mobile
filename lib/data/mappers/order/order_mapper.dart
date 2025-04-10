@@ -45,7 +45,7 @@ class OrderMapper {
       timeSlotId: map['timeSlotId'],
       serviceId: map['serviceId'],
       userId: map['userId'],
-
+        timeSlotDetail: map['timeSlotDetail'],
       extraServices: (map['extraServices'] as List?)
           ?.where((e) => e != null)
           .map((e) => ExtraServiceModel.fromJson(e as Map<String, dynamic>))
@@ -95,6 +95,7 @@ class OrderMapper {
       timeSlotId: model.timeSlotId,
       serviceId: model.serviceId,
       userId: model.userId,
+      timeSlotDetail: model.timeSlotDetail,
       extraServices: ExtraServiceMapper.toListEntity(model.extraServices ?? []),
       options: OptionMapper.toListEntity(model.options ?? []),
     );
@@ -136,6 +137,7 @@ class OrderMapper {
       timeSlotId: entity.timeSlotId,
       serviceId: entity.serviceId,
       userId: entity.userId,
+      timeSlotDetail: entity.timeSlotDetail,
       extraServices: ExtraServiceMapper.toListModel(entity.extraServices ?? []),
       options: OptionMapper.toListModel(entity.options ?? []),
     );

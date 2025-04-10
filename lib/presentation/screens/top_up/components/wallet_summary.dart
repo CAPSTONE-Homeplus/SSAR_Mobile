@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_clean/presentation/widgets/currency_display.dart';
 
 import '../../../../core/format/formater.dart';
 import '../../../../domain/entities/wallet/wallet.dart';
@@ -60,14 +61,7 @@ class WalletSummary extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 4 * fem),
-                Text(
-                  '${Formater.formatCurrency(selectedWallet.balance!)} ₫',
-                  style: GoogleFonts.poppins(
-                    fontSize: 20 * ffem,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
+                CurrencyDisplay(price: selectedWallet.balance),
               ],
             ),
           ),

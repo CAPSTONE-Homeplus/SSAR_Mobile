@@ -37,6 +37,7 @@ class OrderModel {
   String? timeSlotId;
   String? serviceId;
   String? userId;
+  String? timeSlotDetail;
   List<ExtraServiceModel>? extraServices;
   List<OptionModel>? options;
 
@@ -75,6 +76,7 @@ class OrderModel {
     this.timeSlotId,
     this.serviceId,
     this.userId,
+    this.timeSlotDetail,
     this.extraServices,
     this.options,
   });
@@ -114,6 +116,7 @@ class OrderModel {
     timeSlotId = json['timeSlotId'];
     serviceId = json['serviceId'];
     userId = json['userId'];
+    timeSlotDetail = json['timeSlotDetail'];
     if (json['extraServices'] != null) {
       extraServices = <ExtraServiceModel>[];
       json['extraServices'].forEach((v) {
@@ -164,6 +167,7 @@ class OrderModel {
     data['timeSlotId'] = timeSlotId;
     data['serviceId'] = serviceId;
     data['userId'] = userId;
+    data['timeSlotDetail'] = timeSlotDetail;
     if (extraServices != null) {
       data['extraServices'] = extraServices!.map((v) => v.toJson()).toList();
     }

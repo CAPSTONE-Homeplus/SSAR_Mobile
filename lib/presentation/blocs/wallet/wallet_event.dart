@@ -15,6 +15,11 @@ abstract class DissolutionWalletEvent  extends Equatable {
   List<Object> get props => [];
 }
 
+abstract class TransferPointToSharedWallet  extends Equatable {
+  @override
+  List<Object> get props => [];
+}
+
 class GetPersonalWallet extends WalletEvent {
   final int? page;
   final int? size;
@@ -117,5 +122,20 @@ class DissolutionWallet extends DissolutionWalletEvent{
 
   @override
   List<Object> get props => [walletId];
+}
+
+class TransferToSharedWallet extends TransferPointToSharedWallet{
+  final String sharedWalletId;
+  final String personalWalletId;
+  final int amount;
+
+  TransferToSharedWallet({
+    required this.sharedWalletId,
+    required this.personalWalletId,
+    required this.amount,
+  });
+
+  @override
+  List<Object> get props => [sharedWalletId, personalWalletId, amount];
 }
 

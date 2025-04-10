@@ -10,6 +10,7 @@ enum TransactionType {
   deposit,
   spending,
   refund,
+  withdraw
 }
 
 extension TransactionStatusExtension on TransactionStatus {
@@ -69,6 +70,8 @@ extension TransactionTypeExtension on TransactionType {
         return 'Chi tiêu';
       case TransactionType.refund:
         return 'Hoàn tiền';
+      case TransactionType.withdraw:
+        return 'Rút tiền';
     }
   }
 
@@ -80,6 +83,8 @@ extension TransactionTypeExtension on TransactionType {
         return Colors.orange;
       case TransactionType.refund:
         return Colors.blue;
+      case TransactionType.withdraw:
+        return Colors.red;
     }
   }
 
@@ -91,6 +96,8 @@ extension TransactionTypeExtension on TransactionType {
         return Icons.shopping_cart;
       case TransactionType.refund:
         return Icons.money_off;
+      case TransactionType.withdraw:
+        return Icons.money;
     }
   }
 }
@@ -104,8 +111,10 @@ extension TransactionTypeParser on String {
         return TransactionType.refund;
       case 'spending':
         return TransactionType.spending;
+      case 'withdraw':
+        return TransactionType.withdraw;
       default:
-       return TransactionType.spending; // Default case
+        throw ArgumentError('Invalid transaction type: $this');
     }
   }
 }

@@ -21,7 +21,7 @@ class _SharedWalletScreenState extends State<SharedWalletScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<SharedWalletBloc>().add(GetSharedWallet());
+    context.read<WalletBloc>().add(GetWallet());
   }
 
   @override
@@ -40,14 +40,19 @@ class _SharedWalletScreenState extends State<SharedWalletScreen> {
             );
           }
         },
-        child: BlocBuilder<SharedWalletBloc, WalletState>(
-          buildWhen: (previous, current) => current is SharedWalletLoaded,
+        child: BlocBuilder<WalletBloc, WalletState>(
+          buildWhen: (previous, current) => current is WalletLoaded,
           builder: (context, walletState) {
-            if (walletState is SharedWalletLoaded) {
+            if (walletState is WalletLoaded) {
               return SharedWallet(
-                sharedWallet: walletState.wallets.isNotEmpty
-                    ? walletState.wallets.first
-                    : Wallet(id: '', type: sharedWalletString, balance: 0),
+                sharedWallet: walletState.wallets.firstWhere(
+                        (e) => e.type == 'Shared',
+                    orElse: () => throw Exception('No shared wallet found')
+                ),
+                personalWallet: walletState.wallets.firstWhere(
+                        (e) => e.type == 'Personal',
+                    orElse: () => throw Exception('No personal wallet found')
+                ),
               );
             }
             return SizedBox.shrink();
