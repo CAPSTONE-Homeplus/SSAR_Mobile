@@ -31,7 +31,7 @@ class ContributionStatisticsModel {
 class MembersModel {
   String? name;
   int? contribution;
-  int? percentage;
+  double? percentage;
 
   MembersModel({this.name, this.contribution, this.percentage});
 

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -56,7 +55,8 @@ class WalletCardWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildSingleWalletLayout(Wallet wallet, bool isPersonal, BuildContext context) {
+  Widget _buildSingleWalletLayout(
+      Wallet wallet, bool isPersonal, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -125,7 +125,8 @@ class WalletCardWidget extends StatelessWidget {
                 Container(
                   constraints: BoxConstraints(maxWidth: 150 * fem),
                   child: Text(
-                    Formater.formatCurrency(wallet.balance ?? 0),
+                    Formater.formatCurrency(
+                        wallet.balance != null ? wallet.balance!.round() : 0),
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontSize: 24 * fem,
@@ -201,7 +202,8 @@ class WalletCardWidget extends StatelessWidget {
             Container(
               constraints: BoxConstraints(maxWidth: 100 * fem),
               child: Text(
-                Formater.formatCurrency(wallet.balance ?? 0),
+                Formater.formatCurrency(
+                    wallet.balance != null ? wallet.balance!.round() : 0),
                 style: GoogleFonts.poppins(
                   color: Colors.white,
                   fontSize: 14 * fem,

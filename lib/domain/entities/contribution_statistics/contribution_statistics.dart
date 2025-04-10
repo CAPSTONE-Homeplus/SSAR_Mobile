@@ -1,51 +1,53 @@
 class ContributionStatistics {
-  int? totalContribution;
-  String? timeFrame;
-  List<Members>? members;
+  final int? totalContribution;
+  final String? timeFrame;
+  final List<Members>? members;
 
-  ContributionStatistics(
-      {this.totalContribution, this.timeFrame, this.members});
+  ContributionStatistics({
+    this.totalContribution,
+    this.timeFrame,
+    this.members,
+  });
 
-  ContributionStatistics.fromJson(Map<String, dynamic> json) {
-    totalContribution = json['totalContribution'];
-    timeFrame = json['timeFrame'];
-    if (json['members'] != null) {
-      members = <Members>[];
-      json['members'].forEach((v) {
-        members!.add(new Members.fromJson(v));
-      });
-    }
+  factory ContributionStatistics.fromJson(Map<String, dynamic> json) {
+    return ContributionStatistics(
+      totalContribution: (json['totalContribution'] as num?)?.toInt(),
+      timeFrame: json['timeFrame'] as String?,
+      members: (json['members'] as List<dynamic>?)
+          ?.map((v) => Members.fromJson(v))
+          .toList(),
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['totalContribution'] = this.totalContribution;
-    data['timeFrame'] = this.timeFrame;
-    if (this.members != null) {
-      data['members'] = this.members!.map((v) => v.toJson()).toList();
-    }
-    return data;
+    return {
+      'totalContribution': totalContribution,
+      'timeFrame': timeFrame,
+      if (members != null) 'members': members!.map((v) => v.toJson()).toList(),
+    };
   }
 }
 
 class Members {
-  String? name;
-  int? contribution;
-  int? percentage;
+  final String? name;
+  final int? contribution;
+  final double? percentage;
 
   Members({this.name, this.contribution, this.percentage});
 
-  Members.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-    contribution = json['contribution'];
-    percentage = json['percentage'];
+  factory Members.fromJson(Map<String, dynamic> json) {
+    return Members(
+      name: json['name'] as String?,
+      contribution: (json['contribution'] as num?)?.toInt(),
+      percentage: (json['percentage'] as num?)?.toDouble(),
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
-    data['contribution'] = this.contribution;
-    data['percentage'] = this.percentage;
-    return data;
+    return {
+      'name': name,
+      'contribution': contribution,
+      'percentage': percentage,
+    };
   }
 }
