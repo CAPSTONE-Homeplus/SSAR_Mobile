@@ -230,6 +230,9 @@ class HomeClean extends StatelessWidget {
           BlocProvider(
               create: (context) => DissolutionBloc(walletRepository: sl())),
           BlocProvider(create: (context) => StaffBloc(orderRepository: sl())),
+          BlocProvider(create: (context) => RatingOrderBloc(orderRepository: sl())),
+          BlocProvider(create: (context) => ServicePriceBloc(serviceRepository: sl())),
+          BlocProvider(create: (context) => TransferBloc(walletRepository: sl())),
           BlocProvider(
               create: (context) => RatingOrderBloc(orderRepository: sl())),
           BlocProvider(

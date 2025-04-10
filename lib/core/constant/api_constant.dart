@@ -14,6 +14,9 @@ class ApiConstant {
   /// Service
   static const String services = "/services";
 
+  /// Service status
+  static const String serviceStatus = "/services-by-status";
+
   /// Service category
   static const String serviceCategories = "/service-categories";
 

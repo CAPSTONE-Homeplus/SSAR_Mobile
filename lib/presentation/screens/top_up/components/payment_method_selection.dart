@@ -41,7 +41,7 @@ class PaymentMethodSelection extends StatelessWidget {
           ListView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
-            itemCount: paymentMethods.length,
+            itemCount: 1,
             itemBuilder: (context, index) {
               final payment = paymentMethods[index];
               return PaymentOption(

@@ -19,7 +19,9 @@ class ServiceRepositoryImpl implements ServiceRepository {
       String? search, String? orderBy, int? page, int? size) async {
     try {
 
-        final response = await homeCleanRequest.get(ApiConstant.services, queryParameters: {
+        final response = await homeCleanRequest.get(
+            ApiConstant.services,
+            queryParameters: {
           'search': search ?? '',
           'orderBy': orderBy ?? '',
           'page': page ?? Constant.defaultPage,
@@ -31,6 +33,9 @@ class ServiceRepositoryImpl implements ServiceRepository {
           List<Service> serviceList = data
               .map((item) => ServiceMapper.toEntity(ServiceModel.fromJson(item)))
               .toList();
+          serviceList.map((item) {
+            item.status = "Active";
+          }).toList();
           return BaseResponse<Service>(
             size: response.data['size'] ?? 0,
             page: response.data['page'] ?? 0,

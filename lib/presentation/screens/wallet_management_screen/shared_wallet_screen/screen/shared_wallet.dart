@@ -13,8 +13,9 @@ import 'widget/balance_card.dart';
 
 class SharedWallet extends StatefulWidget {
   final Wallet sharedWallet;
+  final Wallet personalWallet;
 
-   const SharedWallet({super.key, required this.sharedWallet});
+   const SharedWallet({super.key, required this.sharedWallet, required this.personalWallet});
 
   @override
   _SharedWalletState createState() => _SharedWalletState();
@@ -52,7 +53,7 @@ class _SharedWalletState extends State<SharedWallet> with SingleTickerProviderSt
       onRefresh: _resetSharedWalletData,
         child: Column(
           children: [
-            BalanceCard(wallet: widget.sharedWallet),
+            BalanceCard(sharedWallet: widget.sharedWallet, personalWallet: widget.personalWallet),
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -81,8 +82,6 @@ class _SharedWalletState extends State<SharedWallet> with SingleTickerProviderSt
             ),
           ],
         )
-
     );
   }
-
 }

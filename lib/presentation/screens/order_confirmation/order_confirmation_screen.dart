@@ -128,6 +128,10 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       total += priceOfHouseType;
     }
 
+    if(widget.orderDetails.emergencyRequest) {
+      total += 30000; // Add emergency request fee
+    }
+
     return total;
   }
 
@@ -464,18 +468,20 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
         border: Border.all(color: Colors.red[100]!),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.flash_on, size: 16, color: Colors.red[700]),
           const SizedBox(width: 4),
           Text(
-            'Dịch vụ siêu tốc',
+            'Dịch vụ siêu tốc: ',
             style: GoogleFonts.poppins(
               fontSize: 13,
               color: Colors.red[700],
               fontWeight: FontWeight.w500,
             ),
           ),
+          CurrencyDisplay(price: 30000)
         ],
       ),
     );

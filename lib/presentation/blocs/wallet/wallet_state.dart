@@ -140,5 +140,39 @@ class WalletDissolutionError extends WalletState {
   List<Object> get props => [message];
 }
 
+// transfer
+abstract class TransferPointToSharedWalletState {
+  @override
+  List<Object> get props => [];
+}
+
+class TransferPointToSharedWalletInitial extends TransferPointToSharedWalletState {
+  @override
+  List<Object> get props => [];
+}
+
+class TransferPointToSharedWalletLoading extends TransferPointToSharedWalletState {
+  @override
+  List<Object> get props => [];
+}
+
+class TransferPointToSharedWalletSuccess extends TransferPointToSharedWalletState {
+  final bool result;
+
+  TransferPointToSharedWalletSuccess({required this.result});
+
+  @override
+  List<Object> get props => [result];
+}
+
+class TransferPointToSharedWalletError extends TransferPointToSharedWalletState {
+  final String message;
+
+  TransferPointToSharedWalletError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
 
 

@@ -348,4 +348,5 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => StaffBloc(orderRepository: sl()));
   sl.registerLazySingleton(() => RatingOrderBloc(orderRepository: sl()));
   sl.registerLazySingleton(() => ServicePriceBloc(serviceRepository: sl()));
+  sl.registerLazySingleton(() => TransferBloc(walletRepository: sl()));
 }
