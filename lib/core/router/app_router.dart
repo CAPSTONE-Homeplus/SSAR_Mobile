@@ -51,7 +51,6 @@ class AppRouter {
   static const String routeLaundryOrderDetail = '/laundry-order-detail';
   static const String routeRating = '/rating-screen';
 
-
   static List<GetPage> get routes => [
         GetPage(
           name: routeLogin,
@@ -170,8 +169,7 @@ class AppRouter {
             name: routeOrderList,
             page: () => BottomNavigation(child: OrderListScreen()),
             transition: Transition.cupertino,
-            transitionDuration: const Duration(milliseconds: 300)
-        ),
+            transitionDuration: const Duration(milliseconds: 300)),
         GetPage(
           name: routeLaundryService,
           page: () => LaundryServiceScreen(),
@@ -179,10 +177,10 @@ class AppRouter {
           transitionDuration: const Duration(milliseconds: 300),
         ),
         GetPage(
-        name: routeLaundryOrderDetail,
-        page: () => LaundryOrderDetailScreen(orderId: Get.arguments ?? ""),
-        transition: Transition.cupertino,
-        transitionDuration: const Duration(milliseconds: 300),
+          name: routeLaundryOrderDetail,
+          page: () => LaundryOrderDetailScreen(orderId: Get.arguments ?? ""),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
         ),
         GetPage(
           name: routeRating,
@@ -240,6 +238,10 @@ class AppRouter {
     Get.offAndToNamed(routeOrderDetail, arguments: arguments);
   }
 
+  static void navigateToLaundryOrderDetailWithArguments(dynamic arguments) {
+    Get.offAndToNamed(routeLaundryOrderDetail, arguments: arguments);
+  }
+
   static void navigateToRegister() {
     Get.toNamed(routeRegister);
   }
@@ -287,8 +289,8 @@ class AppRouter {
   static void navigateToLaundryOrderDetail(String? orderId) {
     Get.offNamed(routeLaundryOrderDetail, arguments: orderId);
   }
+
   static void navigateToRatingScreen(String? orderId) {
     Get.offNamed(routeRating, arguments: orderId);
   }
-
 }

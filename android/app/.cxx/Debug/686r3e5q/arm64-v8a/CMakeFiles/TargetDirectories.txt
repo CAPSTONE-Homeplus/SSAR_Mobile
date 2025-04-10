@@ -1,0 +1,2 @@
+C:/Users/DLCT/Desktop/SSAR_Mobile/android/app/.cxx/Debug/686r3e5q/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/DLCT/Desktop/SSAR_Mobile/android/app/.cxx/Debug/686r3e5q/arm64-v8a/CMakeFiles/rebuild_cache.dir
