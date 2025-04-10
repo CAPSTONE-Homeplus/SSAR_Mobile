@@ -30,6 +30,7 @@ import '../../data/datasource/local/local_data_source.dart';
 import '../../data/datasource/local/transaction_local_data_source.dart';
 import '../../data/datasource/local/user_local_datasource.dart';
 import '../../data/datasource/local/wallet_local_data_source.dart';
+import '../../data/datasource/signalr/order_laundry_remote_data_source.dart';
 import '../../data/datasource/signalr/order_tracking_remote_data_source.dart';
 import '../../data/laundry_repositories/additional_service_repository.dart';
 import '../../data/laundry_repositories/laundry_order_repo.dart';
@@ -123,6 +124,7 @@ import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/building/building_bloc.dart';
 import '../../presentation/blocs/feedbacks/rating_order_bloc.dart';
 import '../../presentation/blocs/laundry_item_type/laundry_item_type_bloc.dart';
+import '../../presentation/blocs/laundry_order/laundry_order_bloc1.dart';
 import '../../presentation/blocs/order_tracking/order_tracking_bloc.dart';
 import '../../presentation/blocs/payment_method/payment_method_bloc.dart';
 import '../../presentation/blocs/room/room_bloc.dart';
@@ -185,6 +187,12 @@ Future<void> setupServiceLocator() async {
     // serviceLocalDataSource: sl(),
     userLocalDatasource: sl(),
   ));
+
+  sl.registerLazySingleton<OrderLaundryRemoteDataSource>(
+        () => OrderLaundryRemoteDataSource(
+      authLocalDataSource: sl(),
+    ),
+  );
 
   // Repositories (sử dụng LazySingleton vì chúng ta muốn tái sử dụng đối tượng)
   sl.registerLazySingleton<AuthRepository>(
@@ -349,4 +357,5 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => RatingOrderBloc(orderRepository: sl()));
   sl.registerLazySingleton(() => ServicePriceBloc(serviceRepository: sl()));
   sl.registerLazySingleton(() => TransferBloc(walletRepository: sl()));
+  sl.registerLazySingleton(() => LaundryOrderBloc1(sl()));
 }

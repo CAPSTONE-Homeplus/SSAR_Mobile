@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:home_clean/core/constant/colors.dart';
 import '../../core/constant/size_config.dart';
 
 enum DialogType {
@@ -60,8 +61,8 @@ void showCustomDialog({
     DialogType.info: DialogConfig(
       title: 'Thông tin',
       backgroundColor: Colors.blue.shade50,
-      iconColor: Colors.blue.shade700,
-      buttonColor: Colors.blue.shade700,
+      iconColor: AppColors.primaryColor,
+      buttonColor: AppColors.primaryColor,
       icon: Icons.info_outline,
     ),
   };

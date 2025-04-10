@@ -158,7 +158,7 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
 
     setState(() {
       final existingIndex = orderDetails.indexWhere(
-          (existingItem) => existingItem.itemTypeId == item.itemTypeId);
+              (existingItem) => existingItem.itemTypeId == item.itemTypeId);
 
       if (existingIndex != -1) {
         // Ghi đè lại item đã có, giữ lại giá trị cũ nếu giá trị mới là null
@@ -182,8 +182,8 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
 
     final filteredOrderDetails = orderDetails
         .where((detail) =>
-            (detail.quantity != null && detail.quantity! > 0) ||
-            (detail.weight != null && detail.weight! > 0))
+    (detail.quantity != null && detail.quantity! > 0) ||
+        (detail.weight != null && detail.weight! > 0))
         .toList();
 
     final requestData = LaOrderRequest(
@@ -198,7 +198,7 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
     showCustomDialog(
         context: context,
         message: 'Bạn có chắc chắn muốn đặt dịch vụ này? '
-            'Lưu ý rằng đối với số Giat Theo Ki, '
+            'Lưu ý rằng đối với số giặt theo kg, '
             'nhân viên sẽ gọi bạn sau khi đã giặt xong'
             ' và bạn sẽ thanh toán số tiền cuối cùng '
             'trong app để nhân viên có thể giao hàng tới cho bạn.',
@@ -215,6 +215,7 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
   double _calculateTotalPrice() {
     double total = 0.0;
 
+    // Tính giá các item đã chọn
     for (var detail in orderDetails) {
       // Tìm item tương ứng trong danh sách các item
       final item = laundryItemsByService.values
@@ -231,9 +232,10 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
       else if (detail.quantity != null && detail.quantity! > 0) {
         total += (item.pricePerItem ?? 0) * detail.quantity!;
       }
-
-      total += additionalServicePrice;
     }
+
+    // Cộng thêm giá dịch vụ bổ sung
+    total += additionalServicePrice;
 
     return total;
   }
@@ -244,11 +246,9 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
     });
   }
 
-// Thêm widget hiển thị tổng số tiền
+  // Thêm widget hiển thị tổng số tiền
   Widget _buildTotalPriceWidget() {
     if (orderDetails.isEmpty) return SizedBox.shrink();
-
-    final totalPrice = _calculateTotalPrice();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -263,13 +263,11 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
               color: Colors.black87,
             ),
           ),
-          Text(
-            '${NumberFormat('#,###', 'vi_VN').format(totalPrice)} ₫',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: primaryColor,
-            ),
+          CurrencyDisplay(
+            price: totalPrice,
+            fontSize: 18,
+            iconSize: 18,
+            unit: '',
           ),
         ],
       ),
@@ -336,15 +334,15 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
           itemsLaundry.isEmpty
               ? _buildEmptyItemMessage()
               : Column(
-                  children: itemsLaundry.map((item) {
-                    return LaundryServiceItemRow(
-                      item: item,
-                      primaryColor: primaryColor,
-                      serviceType: item.pricePerItem != null ? 'PerItem' : null,
-                      onAddItem: onAddItem,
-                    );
-                  }).toList(),
-                ),
+            children: itemsLaundry.map((item) {
+              return LaundryServiceItemRow(
+                item: item,
+                primaryColor: primaryColor,
+                serviceType: item.pricePerItem != null ? 'PerItem' : null,
+                onAddItem: onAddItem,
+              );
+            }).toList(),
+          ),
         ],
       ),
     );
@@ -445,6 +443,7 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
                           selectedServiceId.remove(service.id);
                           additionalServicePrice -= service.price ?? 0;
                         }
+                        _updateTotalPrice(); // Cập nhật lại tổng giá sau khi thay đổi
                       });
                     },
                     controlAffinity: ListTileControlAffinity.trailing,
@@ -551,7 +550,7 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
                     else
                       Column(
                         children:
-                            laundryServiceType.map(_buildServiceItem).toList(),
+                        laundryServiceType.map(_buildServiceItem).toList(),
                       ),
                     if (!isLoading) _buildAdditionalServicesSection(),
                   ],

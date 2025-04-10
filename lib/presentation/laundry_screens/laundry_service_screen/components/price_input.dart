@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:home_clean/presentation/widgets/currency_display.dart';
 import 'package:intl/intl.dart';
 
 class PriceInputComponent extends StatefulWidget {
@@ -99,26 +100,15 @@ class _PriceInputComponentState extends State<PriceInputComponent> {
           ),
 
           SizedBox(height: 4),
-          Text.rich(
-            TextSpan(
-              children: [
-                const TextSpan(
-                  text: 'Tổng: ',
-                  style: TextStyle(
-                    fontWeight: FontWeight.normal,
-                    fontSize: 14,
-                  ),
-                ),
-                TextSpan(
-                  text: '${NumberFormat('#,###', 'vi_VN').format(_totalPrice)} ₫',
-                  style: TextStyle(
-                    color: widget.primaryColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
+          Row(
+            children: [
+              Text("Tổng giá: "),
+              CurrencyDisplay(
+                price: _totalPrice,
+                fontSize: 14,
+                iconSize: 16,
+              ),
+            ],
           ),
         ],
       ),

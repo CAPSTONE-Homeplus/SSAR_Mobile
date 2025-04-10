@@ -9,6 +9,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/constant/size_config.dart';
 import 'package:home_clean/core/router/app_router.dart';
+import 'package:home_clean/data/datasource/local/order_tracking_data_source.dart';
+import 'package:home_clean/data/datasource/signalr/order_laundry_remote_data_source.dart';
 import 'package:home_clean/data/laundry_repositories/additional_service_repository.dart';
 import 'package:home_clean/data/service/notification_service.dart';
 import 'package:home_clean/domain/repositories/building_repository.dart';
@@ -26,6 +28,7 @@ import 'package:home_clean/presentation/blocs/extra_service/extra_service_bloc.d
 import 'package:home_clean/presentation/blocs/feedbacks/rating_order_bloc.dart';
 import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:home_clean/presentation/blocs/laundry_item_type/laundry_item_type_bloc.dart';
+import 'package:home_clean/presentation/blocs/laundry_order/laundry_order_bloc1.dart';
 import 'package:home_clean/presentation/blocs/laundry_service_type/laundry_service_type_bloc.dart';
 import 'package:home_clean/presentation/blocs/notification/notification_bloc.dart';
 import 'package:home_clean/presentation/blocs/option/option_bloc.dart';
@@ -49,6 +52,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/dependencies_injection/service_locator.dart';
+import 'data/datasource/local/auth_local_datasource.dart';
+import 'data/datasource/signalr/app_signalR_service.dart';
 import 'data/laundry_repositories/laundry_order_repo.dart';
 import 'domain/repositories/authentication_repository.dart';
 import 'domain/repositories/equipment_supply_repository.dart';
@@ -80,6 +85,10 @@ void main() async {
   await _requestNotificationPermission();
   await NotificationService.init();
   await initializeDateFormatting('vi_VN', null);
+  await AppSignalrService.init(
+    authLocalDataSource: sl<AuthLocalDataSource>(),
+    orderTrackingLocalDataSource: sl<OrderTrackingLocalDataSource>(),
+  );
   runApp(HomeClean(preferences: sl<SharedPreferences>()));
 }
 
@@ -237,6 +246,11 @@ class HomeClean extends StatelessWidget {
           BlocProvider(
               create: (context) => TransferBloc(
                   walletRepository: sl(),)),
+          BlocProvider<LaundryOrderBloc1>(
+            create: (context) => LaundryOrderBloc1(
+              sl<OrderLaundryRemoteDataSource>(),
+            ),
+          ),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {

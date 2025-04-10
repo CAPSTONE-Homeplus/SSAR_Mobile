@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:home_clean/data/datasource/signalr/order_laundry_remote_data_source.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
 import 'package:home_clean/presentation/screens/home/home_screen.dart';
 import 'package:home_clean/presentation/screens/message/message_screen.dart';
@@ -12,6 +13,7 @@ import 'package:home_clean/presentation/screens/wallet_management_screen/persona
 import 'package:home_clean/presentation/screens/wallet_management_screen/shared_wallet_screen/shared_wallet_screen.dart';
 
 import '../../domain/entities/order/order.dart';
+import '../../main.dart';
 import '../../presentation/laundry_screens/laundry_order_detail_screen/laundry_order_detail_screen.dart';
 import '../../presentation/laundry_screens/laundry_service_screen/laundry_service_screen.dart';
 import '../../presentation/screens/activity/activity_screen.dart';
@@ -143,7 +145,7 @@ class AppRouter {
         ),
         GetPage(
           name: routeNotification,
-          page: () => NotificationScreen(),
+          page: () => NotificationScreen(remoteDataSource : sl<OrderLaundryRemoteDataSource>()),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -287,7 +289,7 @@ class AppRouter {
   }
 
   static void navigateToLaundryOrderDetail(String? orderId) {
-    Get.offNamed(routeLaundryOrderDetail, arguments: orderId);
+    Get.offAllNamed(routeLaundryOrderDetail, arguments: orderId);
   }
 
   static void navigateToRatingScreen(String? orderId) {

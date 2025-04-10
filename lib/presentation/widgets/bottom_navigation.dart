@@ -2,6 +2,8 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/constant/size_config.dart';
+import '../../core/dependencies_injection/service_locator.dart';
+import '../../data/datasource/signalr/order_laundry_remote_data_source.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/notification/notification.dart';
 import '../screens/order_list/order_list_screen.dart';
@@ -27,7 +29,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
   final List<Widget> _pages = [
     HomeScreen(),
     OrderListScreen(),
-    NotificationScreen(),
+    // NotificationScreen(remoteDataSource : sl<OrderLaundryRemoteDataSource>()),
     SettingsScreen()
   ];
 
@@ -64,7 +66,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
         items: [
           Icon(Icons.home, size: 30 * fem, color: Colors.black),
            Icon(Icons.list_alt, size: 30 * fem, color: Colors.black),
-           Icon(Icons.notifications, size: 30 * fem, color: Colors.black),
+           // Icon(Icons.notifications, size: 30 * fem, color: Colors.black),
            Icon(Icons.person_outline, size: 30 * fem, color: Colors.black),
         ],
         onTap: _onTabTapped,

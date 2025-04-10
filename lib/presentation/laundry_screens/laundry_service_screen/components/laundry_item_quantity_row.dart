@@ -188,13 +188,9 @@ class _LaundryServiceItemRowState extends State<LaundryServiceItemRow> {
               fontSize: 16,
             ),
             SizedBox(height: 4),
-            Text(
-              'Tổng: ${NumberFormat('#,###', 'vi_VN').format(_totalPrice)} ₫',
-              style: TextStyle(
-                color: widget.primaryColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+            CurrencyDisplay(
+              price: _totalPrice,
+              fontSize: 16,
             ),
           ],
         ),

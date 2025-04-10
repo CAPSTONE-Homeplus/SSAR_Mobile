@@ -20,10 +20,11 @@ class ServiceRepositoryImpl implements ServiceRepository {
     try {
 
         final response = await homeCleanRequest.get(
-            ApiConstant.services,
+            ApiConstant.serviceStatus,
             queryParameters: {
           'search': search ?? '',
           'orderBy': orderBy ?? '',
+              'status': 1,
           'page': page ?? Constant.defaultPage,
           'size': size ?? Constant.defaultSize,
         });
