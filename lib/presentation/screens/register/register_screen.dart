@@ -58,6 +58,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
       case 2:
         return AccountInfoScreen(
+          username: _username,
           fullName: _fullName,
           phoneNumber: _phoneNumber,
           email: _email,

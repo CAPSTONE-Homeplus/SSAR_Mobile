@@ -308,7 +308,7 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
 
                   return _buildPaymentOption(
                     title: walletTitle ?? '',
-                    balance: wallet.balance ?? 0,
+                    balance: wallet.balance?.toInt() ?? 0,
                     icon: Icons.account_balance,
                     isSelected: isSelected,
                     onTap: () {

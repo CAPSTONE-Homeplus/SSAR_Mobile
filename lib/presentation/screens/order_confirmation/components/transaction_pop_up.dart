@@ -13,8 +13,10 @@ class TransactionPopup extends StatelessWidget {
     return BlocConsumer<TransactionBloc, TransactionState>(
       listener: (context, state) {
         if (state is TransactionSuccess) {
-          Navigator.pop(context);
-          AppRouter.navigateToOrderDetailWithArguments(state.transaction.orderId ?? "");
+          Future.delayed(const Duration(seconds: 2), () {
+            Navigator.pop(context);
+            AppRouter.navigateToOrderDetailWithArguments(state.transaction.orderId ?? "");
+          });
         }
       },
       builder: (context, state) {
@@ -33,10 +35,8 @@ class TransactionPopup extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                if (state is TransactionLoading)
-                  const CircularProgressIndicator()
 
-                else if (state is TransactionFailure)
+                 if (state is TransactionFailure)
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [

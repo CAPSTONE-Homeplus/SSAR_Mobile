@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/constant/size_config.dart';
 import 'package:home_clean/core/router/app_router.dart';
+import 'package:home_clean/data/datasource/local/local_data_source.dart';
 import 'package:home_clean/data/datasource/local/order_tracking_data_source.dart';
 import 'package:home_clean/data/datasource/signalr/order_laundry_remote_data_source.dart';
 import 'package:home_clean/data/laundry_repositories/additional_service_repository.dart';
@@ -68,6 +69,7 @@ import 'domain/repositories/service_repository.dart';
 import 'domain/repositories/sub_activity_repository.dart';
 import 'domain/repositories/time_slot_repository.dart';
 import 'domain/repositories/wallet_repository.dart';
+import 'domain/use_cases/local/cear_all_data_use_case.dart';
 import 'presentation/blocs/internet/internet_bloc.dart';
 import 'presentation/blocs/room/room_bloc.dart';
 import 'presentation/blocs/theme/theme_bloc.dart';
@@ -85,16 +87,26 @@ void main() async {
   await _requestNotificationPermission();
   await NotificationService.init();
   await initializeDateFormatting('vi_VN', null);
-  await AppSignalrService.init(
-    authLocalDataSource: sl<AuthLocalDataSource>(),
-    orderTrackingLocalDataSource: sl<OrderTrackingLocalDataSource>(),
-  );
+  await initSignalR();
   runApp(HomeClean(preferences: sl<SharedPreferences>()));
 }
 
 Future<void> _requestNotificationPermission() async {
   if (await Permission.notification.isDenied) {
     await Permission.notification.request();
+  }
+}
+
+Future<void> initSignalR() async {
+  try {
+    await AppSignalrService.init(
+      authLocalDataSource: sl<AuthLocalDataSource>(),
+      orderTrackingLocalDataSource: sl<OrderTrackingLocalDataSource>(),
+    );
+  } catch (e) {
+    print('❌ Lỗi kết nối SignalR: $e');
+    sl<ClearAllDataUseCase>().call();
+    AppRouter.navigateToLogin();
   }
 }
 
@@ -269,7 +281,7 @@ class HomeClean extends StatelessWidget {
                 textTheme: GoogleFonts.notoSansTextTheme(themeData.textTheme),
               ),
               getPages: AppRouter.routes,
-              initialRoute: AppRouter.routeSplash,
+              initialRoute: AppRouter.routeRegisterSuccess,
             );
           },
         ),

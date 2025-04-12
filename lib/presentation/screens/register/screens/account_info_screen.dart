@@ -11,6 +11,7 @@ import '../../../blocs/user/user_state.dart';
 import '../../../widgets/show_dialog.dart';
 
 class AccountInfoScreen extends StatefulWidget {
+  final String username;
   final String fullName;
   final String phoneNumber;
   final String email;
@@ -25,10 +26,12 @@ class AccountInfoScreen extends StatefulWidget {
       String username,
       String password,
       ) onRegister;
+
   final Function() onBack;
 
   const AccountInfoScreen({
     super.key,
+    required this.username,
     required this.fullName,
     required this.phoneNumber,
     required this.email,

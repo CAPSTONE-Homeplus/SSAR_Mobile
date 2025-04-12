@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String? title;
   final VoidCallback? onBackPressed;
-  final Function(BuildContext context)? onNotificationPressed;
   final int unreadCount;
   final Color? backgroundColor;
   final bool isHomePage;
@@ -15,7 +14,6 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
     Key? key,
     this.title = '',
     this.onBackPressed,
-    this.onNotificationPressed,
     this.unreadCount = 0,
     this.backgroundColor,
     this.isHomePage = false,
@@ -168,10 +166,10 @@ class _CustomAppBarState extends State<CustomAppBar> {
         onPressed: widget.onBackPressed ?? () => Navigator.of(context).pop(),
       )
           : null,
-      actions: [
-        _buildNotificationButton(context),
-        const SizedBox(width: 8),
-      ],
+      // actions: [
+      //   _buildNotificationButton(context),
+      //   const SizedBox(width: 8),
+      // ],
     );
   }
 
@@ -183,66 +181,66 @@ class _CustomAppBarState extends State<CustomAppBar> {
       titleSpacing: 16,
       title: _buildRoomHeader(widget.roomAddress ?? ''),
       centerTitle: false,
-      actions: [
-        _buildNotificationButton(context),
-        const SizedBox(width: 8),
-      ],
+      // actions: [
+      //   _buildNotificationButton(context),
+      //   const SizedBox(width: 8),
+      // ],
     );
   }
 
-  Widget _buildNotificationButton(BuildContext context) {
-    // Use a single container with the key to ensure proper rendering
-    return Container(
-      key: _notificationButtonKey,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          IconButton(
-            icon: const Icon(
-              Icons.notifications_none_rounded,
-              color: Colors.white,
-              size: 24,
-            ),
-            onPressed: () {
-              if (widget.onNotificationPressed != null) {
-                widget.onNotificationPressed!(context);
-              } else {
-                // Add a small delay to ensure UI is fully rendered
-                Future.delayed(Duration.zero, () {
-                  _showNotificationDialog(context);
-                });
-              }
-            },
-          ),
-          if (widget.unreadCount > 0)
-            Positioned(
-              top: 10,
-              right: 10,
-              child: Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                constraints: const BoxConstraints(
-                  minWidth: 16,
-                  minHeight: 16,
-                ),
-                child: Text(
-                  widget.unreadCount.toString(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildNotificationButton(BuildContext context) {
+  //   // Use a single container with the key to ensure proper rendering
+  //   return Container(
+  //     key: _notificationButtonKey,
+  //     child: Stack(
+  //       alignment: Alignment.center,
+  //       children: [
+  //         IconButton(
+  //           icon: const Icon(
+  //             Icons.notifications_none_rounded,
+  //             color: Colors.white,
+  //             size: 24,
+  //           ),
+  //           onPressed: () {
+  //             if (widget.onNotificationPressed != null) {
+  //               widget.onNotificationPressed!(context);
+  //             } else {
+  //               // Add a small delay to ensure UI is fully rendered
+  //               Future.delayed(Duration.zero, () {
+  //                 _showNotificationDialog(context);
+  //               });
+  //             }
+  //           },
+  //         ),
+  //         if (widget.unreadCount > 0)
+  //           Positioned(
+  //             top: 10,
+  //             right: 10,
+  //             child: Container(
+  //               padding: const EdgeInsets.all(2),
+  //               decoration: BoxDecoration(
+  //                 color: Colors.red,
+  //                 borderRadius: BorderRadius.circular(8),
+  //               ),
+  //               constraints: const BoxConstraints(
+  //                 minWidth: 16,
+  //                 minHeight: 16,
+  //               ),
+  //               child: Text(
+  //                 widget.unreadCount.toString(),
+  //                 style: const TextStyle(
+  //                   color: Colors.white,
+  //                   fontSize: 10,
+  //                   fontWeight: FontWeight.bold,
+  //                 ),
+  //                 textAlign: TextAlign.center,
+  //               ),
+  //             ),
+  //           ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildRoomHeader(String address) {
     return Column(

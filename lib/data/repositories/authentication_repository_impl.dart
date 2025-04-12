@@ -73,7 +73,7 @@ class AuthRepositoryImpl implements AuthRepository {
           "password": createUser.password,
           "buildingCode": createUser.buildingCode,
           "houseCode": createUser.houseCode,
-          "phoneNumber": "0${createUser.phoneNumber}",
+          "phoneNumber": "${createUser.phoneNumber}",
           "email": createUser.email,
         },
       );

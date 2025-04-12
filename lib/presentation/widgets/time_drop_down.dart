@@ -1,94 +1,154 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../../domain/entities/time_slot/time_slot.dart';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../../domain/entities/time_slot/time_slot.dart';
 
 class TimeDropdown extends StatelessWidget {
-  final TimeSlot? value;
-  final List<TimeSlot> items;
-  final ValueChanged<TimeSlot?> onChanged;
+  final TimeSlot? selectedSlot;
+  final List<TimeSlot> availableSlots;
+  final ValueChanged<TimeSlot?> onSlotChanged;
 
   const TimeDropdown({
     Key? key,
-    required this.value,
-    required this.items,
-    required this.onChanged,
+    required this.selectedSlot,
+    required this.availableSlots,
+    required this.onSlotChanged,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final dropdownItems = _buildDropdownItems();
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[400]!)
-      ),
-      child: DropdownButton<TimeSlot?>(
-        value: _validateValue(value, items),
-        icon: const Icon(Icons.access_time, color: Colors.black),
-        isExpanded: true,
-        underline: const SizedBox(),
-        onChanged: onChanged,
-        hint: Text(
-          'Chọn giờ',
-          style: GoogleFonts.poppins(fontSize: 16, color: Colors.black54),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.grey[300]!,
+          width: 1,
         ),
-        items: _buildDropdownItems(),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<TimeSlot?>(
+          dropdownColor: Colors.white,
+          value: dropdownItems.map((item) => item.value).contains(selectedSlot)
+              ? selectedSlot
+              : null, // Explicitly set to null if not in items
+          isExpanded: true,
+          hint: _buildHintWidget(),
+          icon: _buildDropdownIcon(),
+          onChanged: (TimeSlot? newValue) {
+            // Always call the callback, even with null
+            onSlotChanged(newValue);
+          },
+          items: dropdownItems,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHintWidget() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Text(
+        'Chọn khung giờ',
+        style: GoogleFonts.poppins(
+          fontSize: 16,
+          color: Colors.grey[600],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdownIcon() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 16),
+      child: Icon(
+        Icons.schedule_rounded,
+        color: Colors.green[700],
+        size: 24,
       ),
     );
   }
 
   List<DropdownMenuItem<TimeSlot?>> _buildDropdownItems() {
-    final now = DateTime.now();
+    final validSlots = _getValidTimeSlots();
 
-    // Lọc những slot bắt đầu sau 1 tiếng nữa
-    final validItems = items.where((slot) {
-      final start = _parseTime(slot.startTime);
-      return start != null && start.isAfter(now.add(Duration(hours: 1)));
-    }).toList();
-
-    if (validItems.isEmpty) {
-      // Nếu không có slot hợp lệ
-      return [
-        const DropdownMenuItem<TimeSlot?>(
-          value: null,
-          child: Text(
-            'Không khả dụng',
-            style: TextStyle(fontSize: 16, color: Colors.redAccent),
-          ),
-        )
-      ];
-    }
-
-    return [
-      const DropdownMenuItem<TimeSlot?>(
+    List<DropdownMenuItem<TimeSlot?>> items = [
+      // Thêm mục để xóa lựa chọn
+      DropdownMenuItem<TimeSlot?>(
         value: null,
-        child: Text(
-          'Chọn giờ',
-          style: TextStyle(fontSize: 16, color: Colors.black54),
-        ),
-      ),
-      ...validItems.map((TimeSlot timeSlot) {
-        return DropdownMenuItem<TimeSlot>(
-          value: timeSlot,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            '${_removeSeconds(timeSlot.startTime)} - ${_removeSeconds(timeSlot.endTime)}',
+            'Xóa lựa chọn',
             style: GoogleFonts.poppins(
               fontSize: 16,
-              color: Colors.black,
+              color: Colors.red[400],
+            ),
+          ),
+        ),
+      ),
+    ];
+
+    if (validSlots.isEmpty) {
+      items.add(_buildUnavailableItem());
+      return items;
+    }
+
+    // Thêm các slot hợp lệ
+    items.addAll(
+      validSlots.map((timeSlot) {
+        return DropdownMenuItem<TimeSlot>(
+          value: timeSlot,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              '${_formatTime(timeSlot.startTime)} - ${_formatTime(timeSlot.endTime)}',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                color: Colors.black87,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         );
       }).toList(),
-    ];
+    );
+
+    return items;
   }
 
+  DropdownMenuItem<TimeSlot?> _buildUnavailableItem() {
+    return DropdownMenuItem<TimeSlot?>(
+      value: null,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Text(
+          'Không có khung giờ',
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            color: Colors.red[400],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<TimeSlot> _getValidTimeSlots() {
+    final now = DateTime.now();
+    return availableSlots.where((slot) {
+      final startTime = _parseTime(slot.startTime);
+      return startTime != null && startTime.isAfter(now.add(const Duration(hours: 1)));
+    }).toList();
+  }
 
   DateTime? _parseTime(String? timeStr) {
     if (timeStr == null) return null;
@@ -102,13 +162,10 @@ class TimeDropdown extends StatelessWidget {
     }
   }
 
-
-  TimeSlot? _validateValue(TimeSlot? currentValue, List<TimeSlot> availableItems) {
-    return availableItems.contains(currentValue) ? currentValue : null;
-  }
-
-  String _removeSeconds(String? time) {
+  String _formatTime(String? time) {
     if (time == null) return '';
-    return time.contains(':00') ? time.substring(0, time.lastIndexOf(':00')) : time;
+    return time.contains(':00')
+        ? time.substring(0, time.lastIndexOf(':00'))
+        : time;
   }
 }

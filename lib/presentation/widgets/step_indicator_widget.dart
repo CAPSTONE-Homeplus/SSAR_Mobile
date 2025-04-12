@@ -10,9 +10,6 @@ class StepIndicatorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Tính toán lại SizeConfig cho màn hình
-    SizeConfig.init(context);
-
     return Container(
       padding: EdgeInsets.symmetric(vertical: 16 * SizeConfig.hem), // Adjust padding
       color: Colors.white,

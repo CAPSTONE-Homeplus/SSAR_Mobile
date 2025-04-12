@@ -74,7 +74,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
           event.walletId, event.userId);
       emit(WalletInviteMemberSuccess(result: response));
     } on ApiException catch (e) {
-      emit(WalletError(message: e.toString()));
+      emit(WalletError(message: e.description ?? "Có lỗi xảy ra"));
     }
   }
 
@@ -175,7 +175,7 @@ class ChangeOwnerBloc extends Bloc<ChangeOwnerEvent, WalletState> {
       final response = await walletRepository.changeOwner(event.walletId, event.userId);
       emit(WalletChangeOwnerSuccess(wallet: response));
     } on ApiException catch (e) {
-      emit(WalletChangeOwnerError(message: e.toString()));
+      emit(WalletChangeOwnerError(message: e.description ?? "Có lỗi xảy ra"));
     }
   }
 }
@@ -198,7 +198,7 @@ class DissolutionBloc extends Bloc<DissolutionWalletEvent, WalletState> {
       final response = await walletRepository.deleteSharedWalletByAdmin(event.walletId);
       emit(WalletDissolutionSuccess(result: response));
     } on ApiException catch (e) {
-      emit(WalletDissolutionError(message: e.toString()));
+      emit(WalletDissolutionError(message: e.description ?? "Có lỗi xảy ra"));
     }
   }
 }
@@ -219,7 +219,7 @@ class TransferBloc extends Bloc<TransferPointToSharedWallet, TransferPointToShar
       final response = await walletRepository.transferToSharedWallet(event.sharedWalletId, event.personalWalletId, event.amount);
       emit(TransferPointToSharedWalletSuccess(result: response));
     } on ApiException catch (e) {
-      emit(TransferPointToSharedWalletError(message: e.toString()));
+      emit(TransferPointToSharedWalletError(message: e.description ?? "Có lỗi xảy ra"));
     }
   }
 }

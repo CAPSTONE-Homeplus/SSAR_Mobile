@@ -149,7 +149,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    SizeConfig.init(context);
     return BlocBuilder<ServiceBloc, ServiceState>(
       builder: (context, state) {
         if (state is ServiceLoadingState || isLoading) {

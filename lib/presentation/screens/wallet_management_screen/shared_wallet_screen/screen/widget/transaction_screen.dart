@@ -35,7 +35,6 @@ class TransactionScreen extends StatefulWidget {
 }
 
 class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -95,15 +94,16 @@ class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
                   itemCount: transactions.length,
                   itemBuilder: (context, index) {
                     final transaction = transactions[index];
-                    final TransactionType? transactionType = transaction.type?.toTransactionType();
+                    final TransactionType? transactionType =
+                        transaction.type?.toTransactionType();
 
                     if (transactionType == null) {
                       return const SizedBox();
                     }
 
                     final TransactionStatus transactionStatus =
-                    TransactionStatusExtension.fromString(
-                        transaction.status ?? 'pending');
+                        TransactionStatusExtension.fromString(
+                            transaction.status ?? 'pending');
                     final bool isPositiveTransaction =
                         transactionType == TransactionType.deposit ||
                             transactionType == TransactionType.refund;
@@ -117,7 +117,8 @@ class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
                                 top: Radius.circular(16 * fem)),
                           ),
                           builder: (context) {
-                            return _buildTransactionDetailModal(transaction, fem);
+                            return _buildTransactionDetailModal(
+                                transaction, fem);
                           },
                         );
                       },
@@ -142,124 +143,124 @@ class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
                             ),
                           ],
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16 * fem),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          width: 40 * fem,
-                                          height: 40 * fem,
-                                          decoration: BoxDecoration(
-                                            color: transactionStatus ==
-                                                    TransactionStatus.failed
-                                                ? Colors.red.withOpacity(0.1)
-                                                : transactionType.color
-                                                    .withOpacity(0.1),
-                                            borderRadius:
-                                                BorderRadius.circular(12 * fem),
-                                          ),
-                                          child: Icon(
-                                            transactionStatus ==
-                                                    TransactionStatus.failed
-                                                ? transactionStatus.icon
-                                                : transactionType.icon,
-                                            color: transactionStatus ==
-                                                    TransactionStatus.failed
-                                                ? transactionStatus.color
-                                                : transactionType.color,
-                                            size: 20 * fem,
-                                          ),
-                                        ),
-                                        SizedBox(width: 12 * fem),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  transaction.code!.contains('LD') ? 'Giặt sấy' : 'Dọn dẹp',
-                                                  style: GoogleFonts.poppins(
-                                                    fontSize: 16 * fem,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: transactionStatus ==
-                                                            TransactionStatus
-                                                                .failed
-                                                        ? Colors.grey[700]
-                                                        : Colors.black,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-
-                                            SizedBox(height: 4 * fem),
-                                            Text(
-                                              Formater.formatDateTime(
-                                                  transaction.createdAt),
-                                              style: GoogleFonts.poppins(
-                                                fontSize: 12 * fem,
-                                                color: Colors.grey[600],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                        child: Material(
+                          color: Colors.transparent,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      (transaction.note ?? 'Nạp tiền')
+                                          .replaceAll('Personal', '')
+                                          .replaceAll('Shared', '')
+                                          .trim(),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12 * fem,
+                                        fontWeight: FontWeight.w600,
+                                        color: transactionStatus == TransactionStatus.failed
+                                            ? Colors.grey[700]
+                                            : Colors.black,
+                                      ),
                                     ),
-                                    // Right side: Amount
-
-                                    Column(
-                                      children: [
-                                        if (transactionStatus !=
-                                            TransactionStatus.success)
-                                          Padding(
-                                            padding: EdgeInsets.only(
-                                                left: 8 * fem),
-                                            child: _buildStatusBadge(
-                                              transactionStatus.name
-                                                  .toUpperCase(),
-                                              transactionStatus.color,
-                                              fem,
-                                            ),
-                                          ),
-                                        Text(
+                                  )
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 40 * fem,
+                                        height: 40 * fem,
+                                        decoration: BoxDecoration(
+                                          color: transactionStatus ==
+                                                  TransactionStatus.failed
+                                              ? Colors.red.withOpacity(0.1)
+                                              : transactionType.color
+                                                  .withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(12 * fem),
+                                        ),
+                                        child: Icon(
                                           transactionStatus ==
                                                   TransactionStatus.failed
-                                              ? (isPositiveTransaction
-                                                  ? '+${Formater.formatAmount(transaction.amount)}'
-                                                  : '-${Formater.formatAmount(transaction.amount)}')
-                                              : (isPositiveTransaction
-                                                  ? '+${Formater.formatAmount(transaction.amount)}'
-                                                  : '-${Formater.formatAmount(transaction.amount)}'),
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 14 * fem,
-                                            fontWeight: FontWeight.w700,
-                                            color: transactionStatus ==
-                                                    TransactionStatus.failed
-                                                ? Colors.grey[600]
-                                                : transactionType.color,
-                                            decoration: transactionStatus ==
-                                                    TransactionStatus.failed
-                                                ? TextDecoration.lineThrough
-                                                : null,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
+                                              ? transactionStatus.icon
+                                              : transactionType.icon,
+                                          color: transactionStatus ==
+                                                  TransactionStatus.failed
+                                              ? transactionStatus.color
+                                              : transactionType.color,
+                                          size: 20 * fem,
                                         ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                                      ),
+                                      SizedBox(width: 12 * fem),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            Formater.formatDateTime(
+                                                transaction.createdAt),
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 12 * fem,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  // Right side: Amount
+
+                                  Column(
+                                    children: [
+                                      if (transactionStatus !=
+                                          TransactionStatus.success)
+                                        Padding(
+                                          padding:
+                                              EdgeInsets.only(left: 8 * fem),
+                                          child: _buildStatusBadge(
+                                            transactionStatus.name
+                                                .toUpperCase(),
+                                            transactionStatus.color,
+                                            fem,
+                                          ),
+                                        ),
+                                      Text(
+                                        transactionStatus ==
+                                                TransactionStatus.failed
+                                            ? (isPositiveTransaction
+                                                ? '+${Formater.formatAmount(transaction.amount)}'
+                                                : '-${Formater.formatAmount(transaction.amount)}')
+                                            : (isPositiveTransaction
+                                                ? '+${Formater.formatAmount(transaction.amount)}'
+                                                : '-${Formater.formatAmount(transaction.amount)}'),
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 14 * fem,
+                                          fontWeight: FontWeight.w700,
+                                          color: transactionStatus ==
+                                                  TransactionStatus.failed
+                                              ? Colors.grey[600]
+                                              : transactionType.color,
+                                          decoration: transactionStatus ==
+                                                  TransactionStatus.failed
+                                              ? TextDecoration.lineThrough
+                                              : null,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -419,8 +420,7 @@ class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
                                 height: 16 * fem,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius:
-                                      BorderRadius.circular(4 * fem),
+                                  borderRadius: BorderRadius.circular(4 * fem),
                                 ),
                               ),
                               SizedBox(height: 8 * fem),
@@ -429,8 +429,7 @@ class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
                                 height: 12 * fem,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius:
-                                      BorderRadius.circular(4 * fem),
+                                  borderRadius: BorderRadius.circular(4 * fem),
                                 ),
                               ),
                             ],
@@ -502,9 +501,18 @@ class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
               fontWeight: FontWeight.w600,
             ),
           ),
-
           SizedBox(height: 12 * fem),
-
+          Padding(
+            padding: EdgeInsets.only(top: 12 * fem),
+            child: Text(
+              'Loại: ${transaction.note ?? 'Nạp tiền'}',
+              style: GoogleFonts.poppins(
+                fontSize: 14 * fem,
+                color: Colors.grey[700],
+              ),
+            ),
+          ),
+          SizedBox(height: 12 * fem),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -533,7 +541,6 @@ class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
               ),
             ],
           ),
-
           SizedBox(height: 12 * fem),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -595,17 +602,6 @@ class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
               ),
             ],
           ),
-          if (transaction.note != null && transaction.note!.isNotEmpty)
-            Padding(
-              padding: EdgeInsets.only(top: 12 * fem),
-              child: Text(
-                'Ghi chú: ${transaction.note}',
-                style: GoogleFonts.poppins(
-                  fontSize: 14 * fem,
-                  color: Colors.grey[700],
-                ),
-              ),
-            ),
           SizedBox(height: 16 * fem),
           Align(
             alignment: Alignment.centerRight,

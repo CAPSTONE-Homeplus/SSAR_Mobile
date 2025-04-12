@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/entities/wallet/wallet.dart';
-import 'package:home_clean/presentation/blocs/wallet/wallet_bloc.dart';
-import 'package:home_clean/presentation/blocs/wallet/wallet_event.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../../../../core/constant/colors.dart';
-import '../../../../../blocs/wallet/wallet_state.dart';
 import '../../../../../widgets/currency_display.dart';
 import '../confirm_transfer_dialog.dart';
 
@@ -17,7 +11,9 @@ class BalanceCard extends StatelessWidget {
   Wallet sharedWallet;
   Wallet personalWallet;
 
-  BalanceCard({Key? key, required this.sharedWallet, required this.personalWallet}) : super(key: key);
+  BalanceCard(
+      {Key? key, required this.sharedWallet, required this.personalWallet})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +32,8 @@ class BalanceCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CurrencyDisplay(price: sharedWallet.balance ?? 0, fontSize: 24, iconSize: 32),
+              CurrencyDisplay(
+                  price: sharedWallet.balance ?? 0, fontSize: 24, iconSize: 32),
             ],
           ),
           const SizedBox(height: 20),
@@ -55,20 +52,14 @@ class BalanceCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildActionButton(
-                context,
-                Icons.receipt_long,
-                'Chi tiêu',
-                      () {
-                        AppRouter.navigateToSpending();
-
-                  }
-              ),
+              _buildActionButton(context, Icons.receipt_long, 'Đóng góp', () {
+                AppRouter.navigateToSpending();
+              }),
               _buildActionButton(
                 context,
                 Icons.group,
                 'Thành viên',
-                    () {
+                () {
                   AppRouter.navigateToMember();
                 },
               ),
@@ -78,6 +69,7 @@ class BalanceCard extends StatelessWidget {
       ),
     );
   }
+
   void _showContributeFundDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -96,29 +88,29 @@ class BalanceCard extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Bạn muốn chuyển điểm như thế nào?',
-                style: GoogleFonts.poppins(
-                  color: Colors.blueGrey[700],
-                  fontSize: 16,
+          content: Container(
+            // Thay Column bằng Container có kích thước xác định
+            width: double.maxFinite, // Đặt chiều rộng rõ ràng
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Bạn muốn chuyển điểm như thế nào?',
+                  style: GoogleFonts.poppins(
+                    color: Colors.blueGrey[700],
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  return Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      ElevatedButton.icon(
+                const SizedBox(height: 16),
+                // Thay thế LayoutBuilder bằng Row hoặc Column cố định
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
                         onPressed: () {
-                          AppRouter.navigateToPayment(
-                          );
+                          AppRouter.navigateToPayment();
                         },
                         icon: Icon(
                           Icons.house,
@@ -133,14 +125,17 @@ class BalanceCard extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green[50],
                           foregroundColor: Colors.green[700],
-                          minimumSize: Size(constraints.maxWidth / 2.5, 48),
+                          minimumSize: Size(100, 48), // Kích thước cố định
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 2,
                         ),
                       ),
-                      ElevatedButton.icon(
+                    ),
+                    SizedBox(width: 12), // Khoảng cách giữa các nút
+                    Expanded(
+                      child: ElevatedButton.icon(
                         onPressed: () {
                           Navigator.of(dialogContext).pop();
                           showDialog(
@@ -149,7 +144,8 @@ class BalanceCard extends StatelessWidget {
                               sharedWallet: sharedWallet,
                               personalWallet: personalWallet,
                               title: 'Chuyển điểm từ ví riêng',
-                              message: 'Bạn có chắc muốn chuyển điểm từ ví riêng sang ví chung không?',
+                              message:
+                                  'Bạn có chắc muốn chuyển điểm từ ví riêng sang ví chung không?',
                             ),
                           );
                         },
@@ -166,25 +162,26 @@ class BalanceCard extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue[50],
                           foregroundColor: Colors.blue[700],
-                          minimumSize: Size(constraints.maxWidth / 2.5, 48),
+                          minimumSize: Size(100, 48), // Kích thước cố định
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 2,
                         ),
                       ),
-                    ],
-                  );
-                },
-              ),
-            ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildActionButton(BuildContext context, IconData icon, String label, VoidCallback onTap) {
+  Widget _buildActionButton(
+      BuildContext context, IconData icon, String label, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -207,12 +204,11 @@ class BalanceCard extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white,
-            ),
+                  color: Colors.white,
+                ),
           ),
         ],
       ),
     );
   }
-
 }

@@ -59,11 +59,11 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> checkLoginStatus() async {
-    await Future.delayed(Duration(seconds: 3)); // Chờ animation
+    await Future.delayed(Duration(seconds: 3)); // Chờ splash hoặc animation
 
     String? accessToken = await AuthLocalDataSource().getAccessTokenFromStorage();
 
-    if (accessToken != null) {
+    if (accessToken != null && accessToken.isNotEmpty) {
       vinWalletRequest.options.headers['Authorization'] = 'Bearer $accessToken';
       homeCleanRequest.options.headers['Authorization'] = 'Bearer $accessToken';
       vinLaundryRequest.options.headers['Authorization'] = 'Bearer $accessToken';
@@ -165,7 +165,7 @@ class _SplashScreenState extends State<SplashScreen>
                   FadeTransition(
                     opacity: _fadeAnimation,
                     child: Text(
-                      'CleanHome',
+                      'Home Clean',
                       style: GoogleFonts.poppins(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,

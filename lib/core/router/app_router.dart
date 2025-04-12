@@ -21,6 +21,7 @@ import '../../presentation/screens/login/login_screen.dart';
 import '../../presentation/screens/order_list/order_list_screen.dart';
 import '../../presentation/screens/order_tracking/order_tracking_screen.dart';
 import '../../presentation/screens/rating/rating_screen.dart';
+import '../../presentation/screens/register/screens/registration_success_screen.dart';
 import '../../presentation/screens/service_list_screen/service_list_screen.dart';
 import '../../presentation/screens/top_up/top_up_screen.dart';
 import '../../presentation/screens/wallet_management_screen/shared_wallet_screen/member_screen/screen/member_screen.dart';
@@ -52,6 +53,7 @@ class AppRouter {
   static const String routeReservationsLaundry = '/reservations-laundry';
   static const String routeLaundryOrderDetail = '/laundry-order-detail';
   static const String routeRating = '/rating-screen';
+  static const String routeRegisterSuccess = '/register-success';
 
   static List<GetPage> get routes => [
         GetPage(
@@ -145,7 +147,8 @@ class AppRouter {
         ),
         GetPage(
           name: routeNotification,
-          page: () => NotificationScreen(remoteDataSource : sl<OrderLaundryRemoteDataSource>()),
+          page: () => NotificationScreen(
+              remoteDataSource: sl<OrderLaundryRemoteDataSource>()),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -187,6 +190,12 @@ class AppRouter {
         GetPage(
           name: routeRating,
           page: () => RatingReviewPage(orderId: Get.arguments),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+        GetPage(
+          name: routeRegisterSuccess,
+          page: () => RegistrationSuccessScreen(),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -294,5 +303,9 @@ class AppRouter {
 
   static void navigateToRatingScreen(String? orderId) {
     Get.offNamed(routeRating, arguments: orderId);
+  }
+
+  static void navigateToRegisterSuccess() {
+    Get.offNamed(routeRegisterSuccess);
   }
 }

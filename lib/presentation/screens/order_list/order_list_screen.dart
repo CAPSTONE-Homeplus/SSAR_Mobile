@@ -30,7 +30,7 @@ class AppStrings {
   static const orderTitle = 'Đơn hàng của bạn';
   static const searchHint = 'Tìm kiếm đơn hàng theo mã đơn';
   static const cleanServiceTab = 'Dọn dẹp';
-  static const laundryServiceTab = 'Giặt ủi';
+  static const laundryServiceTab = 'Giặt sấy';
   static const emptyOrderMessage = 'Chưa có đơn hàng nào';
   static const startServiceMessage = 'Hãy bắt đầu sử dụng dịch vụ ngay!';
   static const errorLoadingMessage = 'Đã xảy ra lỗi khi tải dữ liệu';
@@ -38,7 +38,7 @@ class AppStrings {
   static const orderCode = 'Mã đơn:';
   static const totalAmount = 'Tổng cộng:';
   static const defaultServiceName = 'Dịch vụ dọn dẹp';
-  static const defaultLaundryType = 'Giặt ủi';
+  static const defaultLaundryType = 'Giặt sấy';
 }
 
 class OrderListScreen extends StatefulWidget {

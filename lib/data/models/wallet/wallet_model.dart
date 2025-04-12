@@ -1,14 +1,14 @@
 class WalletModel {
-  String? id;
-  String? name;
-  int? balance;
-  String? currency;
-  String? type;
-  String? extraField;
-  String? updatedAt;
-  String? createdAt;
-  String? status;
-  String? ownerId;
+  final String? id;
+  final String? name;
+  final double? balance; // <-- Đảm bảo kiểu double
+  final String? currency;
+  final String? type;
+  final String? extraField;
+  final String? updatedAt;
+  final String? createdAt;
+  final String? status;
+  final String? ownerId;
 
   WalletModel({
     this.id,
@@ -23,6 +23,21 @@ class WalletModel {
     this.ownerId,
   });
 
+  factory WalletModel.fromJson(Map<String, dynamic> json) {
+    return WalletModel(
+      id: json['id'],
+      name: json['name'],
+      balance: (json['balance'] as num?)?.toDouble(), // 👈 Đây là điểm mấu chốt
+      currency: json['currency'],
+      type: json['type'],
+      extraField: json['extraField'],
+      updatedAt: json['updatedAt'],
+      createdAt: json['createdAt'],
+      status: json['status'],
+      ownerId: json['ownerId'],
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -36,20 +51,5 @@ class WalletModel {
       'status': status,
       'ownerId': ownerId,
     };
-  }
-
-  factory WalletModel.fromJson(Map<String, dynamic> json) {
-    return WalletModel(
-      id: json['id'],
-      name: json['name'],
-      balance: json['balance'],
-      currency: json['currency'],
-      type: json['type'],
-      extraField: json['extraField'],
-      updatedAt: json['updatedAt'],
-      createdAt: json['createdAt'],
-      status: json['status'],
-      ownerId: json['ownerId'],
-    );
   }
 }

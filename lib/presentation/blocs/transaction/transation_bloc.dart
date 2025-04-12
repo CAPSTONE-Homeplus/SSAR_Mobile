@@ -19,6 +19,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
     on<SaveTransactionEvent>((event, emit) async {
       emit(TransactionLoading());
+      Future.delayed(const Duration(seconds: 2000));
       final result = await saveTransactionUseCase(SaveTransactionParams(transaction: event.transaction));
       result.fold(
             (failure) => emit(TransactionFailure(failure.message)),

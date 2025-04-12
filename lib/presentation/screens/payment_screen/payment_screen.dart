@@ -201,14 +201,14 @@ class _PaymentWebViewState extends State<PaymentWebView> {
           borderRadius: BorderRadius.circular(16),
         ),
         title: Text(
-          'Hủy thanh toán?',
+          'Trở về trang chủ?',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w600,
             fontSize: 18,
           ),
         ),
         content: Text(
-          'Bạn có chắc chắn muốn hủy quá trình thanh toán này không?',
+          'Bạn có chắc chắn muốn quay lại trang chủ',
           style: GoogleFonts.poppins(
             fontSize: 14,
             height: 1.5,
@@ -218,29 +218,20 @@ class _PaymentWebViewState extends State<PaymentWebView> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Tiếp tục thanh toán',
-              style: GoogleFonts.poppins(
-                color: Colors.grey[800],
-                fontWeight: FontWeight.w500,
-              ),
+              'Không',
+              style: GoogleFonts.poppins(),
             ),
           ),
-          ElevatedButton(
+          TextButton(
             onPressed: () {
               Navigator.pop(context);
               AppRouter.navigateToHome();
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF1CAF7D),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              elevation: 0,
-            ),
             child: Text(
-              'Xác nhận hủy',
+              'Có',
               style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w500,
+                color: Colors.red,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -248,6 +239,7 @@ class _PaymentWebViewState extends State<PaymentWebView> {
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {

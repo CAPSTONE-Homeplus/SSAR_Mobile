@@ -23,7 +23,6 @@ class ServiceGridWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SizeConfig.init(context);
 
     return Padding(
       padding: EdgeInsets.all(16 * fem),

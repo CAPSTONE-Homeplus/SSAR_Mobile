@@ -53,8 +53,6 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    SizeConfig.init(context);
-
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: _buildAppBar(context),
@@ -239,7 +237,7 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                       ),
                       SizedBox(height: 4 * SizeConfig.hem),
                       Text(
-                        orders.id ?? 'N/A',
+                        orders.code ?? 'N/A',
                         style: GoogleFonts.poppins(
                           color: Colors.black87,
                           fontWeight: FontWeight.w600,

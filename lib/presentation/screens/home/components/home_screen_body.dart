@@ -24,16 +24,19 @@ class HomeScreenBody extends StatefulWidget {
   House house;
   Building building;
 
-  HomeScreenBody({super.key, required this.servicesToFetch,
-    required this.walletUser, required this.user, required this.house,
-    required this.building});
+  HomeScreenBody(
+      {super.key,
+      required this.servicesToFetch,
+      required this.walletUser,
+      required this.user,
+      required this.house,
+      required this.building});
 
   @override
   State<HomeScreenBody> createState() => _HomeScreenBodyState();
 }
 
 class _HomeScreenBodyState extends State<HomeScreenBody> {
-
   @override
   void initState() {
     super.initState();
@@ -41,11 +44,13 @@ class _HomeScreenBodyState extends State<HomeScreenBody> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildHomeScreen(widget.servicesToFetch, context, widget.walletUser, widget.user, widget.house, widget.building);
+    return _buildHomeScreen(widget.servicesToFetch, context, widget.walletUser,
+        widget.user, widget.house, widget.building);
   }
 }
 
-Widget _buildHomeScreen(List<Service> services, BuildContext context, List<Wallet> walletUser, User user, House house, Building building) {
+Widget _buildHomeScreen(List<Service> services, BuildContext context,
+    List<Wallet> walletUser, User user, House house, Building building) {
   String defaultRoom = house.numberOfRoom ?? '';
   String defaultBuilding = building.name ?? '';
   String address = 'Phòng $defaultRoom, $defaultBuilding';
@@ -55,13 +60,9 @@ Widget _buildHomeScreen(List<Service> services, BuildContext context, List<Walle
 
   return Scaffold(
     backgroundColor: Colors.white,
-    appBar:  CustomAppBar(
+    appBar: CustomAppBar(
       isHomePage: true,
       roomAddress: address,
-      unreadCount: 2,
-      onNotificationPressed: (context) {
-        // Xử lý bấm chuông
-      },
     ),
     body: SingleChildScrollView(
       child: Column(
@@ -74,6 +75,7 @@ Widget _buildHomeScreen(List<Service> services, BuildContext context, List<Walle
             fem: fem,
             ffem: ffem,
           ),
+
           ServiceGridWidget(
             services: services,
             fem: fem,
@@ -90,5 +92,3 @@ Widget _buildHomeScreen(List<Service> services, BuildContext context, List<Walle
     ),
   );
 }
-
-

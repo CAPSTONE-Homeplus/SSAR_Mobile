@@ -94,14 +94,14 @@ class _FormLoginState extends State<FormLogin> {
           isPassword: true,
           validator: (value) => value?.isEmpty == true ? 'Mật khẩu không được để trống' : null,
         ),
-        SizedBox(height: 8 * widget.hem),
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton(
-            onPressed: () {},
-            child: Text('Quên mật khẩu?', style: GoogleFonts.poppins(fontSize: 14 * widget.ffem, color: _primaryColor)),
-          ),
-        ),
+        // SizedBox(height: 8 * widget.hem),
+        // Align(
+        //   alignment: Alignment.centerRight,
+        //   child: TextButton(
+        //     onPressed: () {},
+        //     child: Text('Quên mật khẩu?', style: GoogleFonts.poppins(fontSize: 14 * widget.ffem, color: _primaryColor)),
+        //   ),
+        // ),
       ],
     );
   }

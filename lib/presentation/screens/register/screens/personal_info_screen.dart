@@ -68,6 +68,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               context: context,
               message: state.message,
               type: DialogType.error,
+              onConfirm: () {
+              },
             );
           }
         },

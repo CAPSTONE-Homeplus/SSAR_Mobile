@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/enums/wallet_enums.dart';
+import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/entities/transaction/create_transaction.dart';
 import 'package:home_clean/presentation/blocs/service_in_house_type/service_price_bloc.dart';
 import 'package:home_clean/presentation/widgets/currency_display.dart';
@@ -47,7 +48,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   bool _isOrdering = false;
   House? house;
   late StreamSubscription<OrderState> _stateSubscription;
-   int priceOfHouseType = 0;
+  int priceOfHouseType = 0;
   Building? selectedBuilding;
 
   @override
@@ -61,11 +62,11 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
 
   Future<void> _fetchPriceByHouseType() async {
     context.read<ServicePriceBloc>().add(
-      GetServicePrice(
-        houseId: house?.id ?? '',
-        serviceId: widget.orderDetails.service.id ?? '',
-      ),
-    );
+          GetServicePrice(
+            houseId: house?.id ?? '',
+            serviceId: widget.orderDetails.service.id ?? '',
+          ),
+        );
   }
 
   void _placeOrder(BuildContext context) {
@@ -105,7 +106,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     widget.orderDetails.houseTypeId = house!.houseTypeId;
   }
 
-
   int _calculateTotalPrice() {
     int total = 0;
 
@@ -128,7 +128,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       total += priceOfHouseType;
     }
 
-    if(widget.orderDetails.emergencyRequest) {
+    if (widget.orderDetails.emergencyRequest) {
       total += 30000; // Add emergency request fee
     }
 
@@ -141,7 +141,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       appBar: CustomAppBar(
         title: 'Xác nhận',
         onBackPressed: () {
-          Navigator.pop(context);
+          AppRouter.navigateToServiceDetail(widget.orderDetails.service);
         },
       ),
       body: MultiBlocListener(
@@ -165,17 +165,18 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             listener: (context, state) {
               if (state is OrderCreated) {
                 context.read<TransactionBloc>().add(
-                  SaveTransactionEvent(
-                    CreateTransaction(
-                      walletId: selectedWalletId,
-                      paymentMethodId: '15890b1a-f5a6-42c3-8f37-541029189722',
-                      amount: '0',
-                      note: 'Thanh toán dịch vụ',
-                      orderId: state.order.id,
-                      serviceType: 0,
-                    ),
-                  ),
-                );
+                      SaveTransactionEvent(
+                        CreateTransaction(
+                          walletId: selectedWalletId,
+                          paymentMethodId:
+                              '15890b1a-f5a6-42c3-8f37-541029189722',
+                          amount: '0',
+                          note: 'Thanh toán dịch vụ',
+                          orderId: state.order.id,
+                          serviceType: 0,
+                        ),
+                      ),
+                    );
                 showDialog(
                   context: context,
                   barrierDismissible: false,
@@ -216,7 +217,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                         DetailRowWidget(
                           title: 'Thời gian',
                           value:
-                          '${widget.orderDetails.timeSlot.startTime} - ${widget.orderDetails.timeSlot.endTime}',
+                              '${widget.orderDetails.timeSlot.startTime} - ${widget.orderDetails.timeSlot.endTime}',
                           icon: Icons.access_time,
                         ),
                       ],
@@ -230,10 +231,10 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                         children: widget.orderDetails.option
                             .map(
                               (option) => _buildOptionItem(
-                            title: option.name ?? '',
-                            price: option.price ?? 0,
-                          ),
-                        )
+                                title: option.name ?? '',
+                                price: option.price ?? 0,
+                              ),
+                            )
                             .toList(),
                       ),
                     ),
@@ -245,10 +246,10 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                         children: widget.orderDetails.extraService
                             .map(
                               (service) => _buildOptionItem(
-                            title: service.name ?? '',
-                            price: service.price ?? 0,
-                          ),
-                        )
+                                title: service.name ?? '',
+                                price: service.price ?? 0,
+                              ),
+                            )
                             .toList(),
                       ),
                     ),
@@ -303,7 +304,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
 
                   return _buildPaymentOption(
                     title: walletTitle ?? '',
-                    balance: wallet.balance ?? 0,
+                    balance: (wallet.balance ?? 0).toInt(), // ✅ fix here
                     icon: Icons.account_balance,
                     isSelected: isSelected,
                     onTap: () {
