@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/router/app_router.dart';
+import 'package:home_clean/data/repositories/authentication_repository_impl.dart';
 import 'package:home_clean/domain/entities/refresh_token/refresh_token_model.dart';
+import 'package:home_clean/domain/repositories/authentication_repository.dart';
 import 'package:home_clean/presentation/screens/login/login_screen.dart';
 
 import '../../../core/dependencies_injection/service_locator.dart';
 import '../../../core/request/request.dart';
 import '../../../data/datasource/local/auth_local_datasource.dart';
+import '../../../data/datasource/local/order_tracking_data_source.dart';
+import '../../../data/datasource/signalr/app_signalR_service.dart';
+import '../../../domain/entities/auth/auth.dart';
 import '../../../domain/use_cases/local/cear_all_data_use_case.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
@@ -53,27 +58,82 @@ class _SplashScreenState extends State<SplashScreen>
     ));
 
     _controller.forward();
-
-    // Kiểm tra trạng thái đăng nhập
     checkLoginStatus();
   }
 
   Future<void> checkLoginStatus() async {
-    await Future.delayed(Duration(seconds: 3)); // Chờ splash hoặc animation
+    await Future.delayed(const Duration(seconds: 3));
 
-    String? accessToken = await AuthLocalDataSource().getAccessTokenFromStorage();
+    final authLocalDataSource = AuthLocalDataSource();
+    String? accessToken = await authLocalDataSource.getAccessTokenFromStorage();
 
     if (accessToken != null && accessToken.isNotEmpty) {
-      vinWalletRequest.options.headers['Authorization'] = 'Bearer $accessToken';
-      homeCleanRequest.options.headers['Authorization'] = 'Bearer $accessToken';
-      vinLaundryRequest.options.headers['Authorization'] = 'Bearer $accessToken';
+      _updateAuthorizationHeaders(accessToken);
       AppRouter.navigateToHome();
-    } else {
+      return;
+    }
+    await _handleTokenRefresh(authLocalDataSource);
+  }
+
+  Future<void> _handleTokenRefresh(AuthLocalDataSource authLocalDataSource) async {
+    try {
+      final refreshToken = await authLocalDataSource.getRefreshTokenFromStorage();
+
+      if (refreshToken == null || refreshToken.isEmpty) {
+        await _clearAndLogout();
+        return;
+      }
+
+      final auth = await sl<AuthRepositoryImpl>().refreshToken();
+
+      final newToken = auth.accessToken;
+      final newRefreshToken = auth.refreshToken;
+
+      if (newToken == null || newRefreshToken == null) {
+        await _clearAndLogout();
+        return;
+      }
+      await authLocalDataSource.saveTokensToStorage(newToken, newRefreshToken);
+      _updateAuthorizationHeaders(newToken);
+      AppRouter.navigateToHome();
+    } catch (e) {
+      await _clearAndLogout();
+    }
+  }
+
+  Future<void> _clearAndLogout() async {
+    await clearLocalStorageAndLogout();
+    AppRouter.navigateToLogin();
+  }
+
+  Future<void> _updateAuthorizationHeaders(String token) async {
+    final bearerToken = 'Bearer $token';
+
+    // Explicitly remove old token and set new token
+    vinWalletRequest.options.headers.remove('Authorization');
+    homeCleanRequest.options.headers.remove('Authorization');
+    vinLaundryRequest.options.headers.remove('Authorization');
+
+    // Set new tokens
+    vinWalletRequest.options.headers['Authorization'] = bearerToken;
+    homeCleanRequest.options.headers['Authorization'] = bearerToken;
+    vinLaundryRequest.options.headers['Authorization'] = bearerToken;
+
+    await initSignalR();
+  }
+
+  Future<void> initSignalR() async {
+    try {
+      await AppSignalrService.init(
+        authLocalDataSource: sl<AuthLocalDataSource>(),
+        orderTrackingLocalDataSource: sl<OrderTrackingLocalDataSource>(),
+      );
+    } catch (e) {
+      print('❌ Lỗi kết nối SignalR: $e');
       sl<ClearAllDataUseCase>().call();
       AppRouter.navigateToLogin();
     }
   }
-
 
   void navigateToHome() {
     Navigator.of(context).pushReplacement(

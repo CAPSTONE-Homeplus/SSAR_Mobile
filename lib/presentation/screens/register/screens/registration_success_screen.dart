@@ -16,7 +16,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               Colors.green[50]!,
-              Colors.green[100]!,
+              Colors.green[200]!,
             ],
           ),
         ),
@@ -27,7 +27,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
               // Success Icon
               Icon(
                 Icons.check_circle,
-                color: Colors.green[600],
+                color: AppColors.primaryColor,
                 size: 120,
               ),
 
@@ -39,7 +39,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.green[800],
+                  color: AppColors.primaryColor,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -50,7 +50,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Text(
-                  'Chúc mừng bạn đã trở thành thành viên của HomeClean. Bạn muốn làm gì tiếp theo?',
+                  'Chúc mừng bạn đã trở thành thành viên của HomeClean',
                   style: GoogleFonts.poppins(
                     fontSize: 16,
                     color: Colors.green[700],
@@ -102,48 +102,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 16),
-
-                    // Profile Button
-                    OutlinedButton(
-                      onPressed: () {
-                        // Navigate to profile or account settings
-                        AppRouter.navigateToLogin();
-                      },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primaryColor,
-                        side: BorderSide(
-                          color: AppColors.primaryColor,
-                          width: 2,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Hoàn Thiện Hồ Sơ',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryColor,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Icon(
-                            Icons.person_outline_rounded,
-                            color: AppColors.primaryColor,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    const SizedBox(height: 16),],
                 ),
               ),
             ],

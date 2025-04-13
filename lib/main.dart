@@ -87,7 +87,6 @@ void main() async {
   await _requestNotificationPermission();
   await NotificationService.init();
   await initializeDateFormatting('vi_VN', null);
-  await initSignalR();
   runApp(HomeClean(preferences: sl<SharedPreferences>()));
 }
 
@@ -264,26 +263,17 @@ class HomeClean extends StatelessWidget {
             ),
           ),
         ],
-        child: BlocBuilder<ThemeBloc, ThemeState>(
-          builder: (context, state) {
-            ThemeData themeData = ThemeData.light();
-
-            if (state is ThemeInitial) {
-              themeData = state.themeData;
-            }
-
-            return GetMaterialApp(
-              color: AppColors.primaryColor,
-              navigatorKey: navigatorKey,
-              debugShowCheckedModeBanner: false,
-              title: 'Home Clean',
-              theme: themeData.copyWith(
-                textTheme: GoogleFonts.notoSansTextTheme(themeData.textTheme),
-              ),
-              getPages: AppRouter.routes,
-              initialRoute: AppRouter.routeRegisterSuccess,
-            );
-          },
+        child:GetMaterialApp(
+          color: AppColors.primaryColor,
+          navigatorKey: navigatorKey,
+          debugShowCheckedModeBanner: false,
+          title: 'Home Clean',
+          theme: ThemeData(
+            primaryColor: AppColors.primaryColor,
+            textTheme: GoogleFonts.poppinsTextTheme(),
+          ),
+          getPages: AppRouter.routes,
+          initialRoute: AppRouter.routeSplash,
         ),
       ),
     );

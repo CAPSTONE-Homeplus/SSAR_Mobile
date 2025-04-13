@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/size_config.dart';
 import 'package:home_clean/data/datasource/local/local_data_source.dart';
+import 'package:home_clean/domain/entities/user/create_user.dart';
 import 'package:home_clean/presentation/blocs/theme/theme_bloc.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -107,33 +108,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     icon: Icons.person_outline,
                     title: 'Thông tin cá nhân',
                     subtitle: 'Cập nhật thông tin cá nhân',
-                    onTap: () {},
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 16),
-            _buildSectionHeader('Cài đặt ứng dụng'),
-            Container(
-              color: Colors.white,
-              child: Column(
-                children: [
-                  _buildSettingItem(
-                    icon: Icons.notifications_outlined,
-                    title: 'Thông báo',
-                    subtitle: 'Cho phép thông báo',
-                    showToggle: true,
-                    value: _isNotificationsEnabled,
-                    onChanged: (value) {
-                      setState(() {
-                        _isNotificationsEnabled = value;
-                      });
+                    onTap: () {
+                      AppRouter.navigateToUpdateProfile(CreateUser(
+                        fullName: currentUser.fullName,
+                        phoneNumber: currentUser.phoneNumber,
+                        email: currentUser.email,
+                        username: currentUser.username,
+                        // buildingCode: currentUser.buildingCode,
+                        // houseCode: currentUser.houseCode,
+                      ));
                     },
-                    onTap: _handleNotificationPermission,
                   ),
                 ],
               ),
             ),
+            // SizedBox(height: 16),
+            // _buildSectionHeader('Cài đặt ứng dụng'),
+            // Container(
+            //   color: Colors.white,
+            //   child: Column(
+            //     children: [
+            //       _buildSettingItem(
+            //         icon: Icons.notifications_outlined,
+            //         title: 'Thông báo',
+            //         subtitle: 'Cho phép thông báo',
+            //         showToggle: true,
+            //         value: _isNotificationsEnabled,
+            //         onChanged: (value) {
+            //           setState(() {
+            //             _isNotificationsEnabled = value;
+            //           });
+            //         },
+            //         onTap: _handleNotificationPermission,
+            //       ),
+            //     ],
+            //   ),
+            // ),
             SizedBox(height: 16),
             _buildSectionHeader('Hỗ trợ & Thông tin'),
             Container(
