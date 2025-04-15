@@ -143,19 +143,6 @@ class _LaundryServiceItemRowState extends State<LaundryServiceItemRow> {
     widget.onAddItem(orderDetailsRequest);
   }
 
-  // Hàm xử lý khi tính giá theo kg
-  void _updateTotalPriceByWeight(double weight, double totalPrice) {
-    setState(() {
-      _totalPrice = totalPrice;
-    });
-
-    OrderDetailsRequest orderDetailsRequest = OrderDetailsRequest(
-      itemTypeId: widget.item.id,
-      weight: weight,
-    );
-    widget.onAddItem(orderDetailsRequest);
-  }
-
 
   // Layout khi có giá theo item
   Widget _buildItemPriceLayout() {
@@ -198,23 +185,6 @@ class _LaundryServiceItemRowState extends State<LaundryServiceItemRow> {
     );
   }
 
-  // Layout khi tính giá theo kg
-  Widget _buildWeightPriceLayout() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        PriceInputComponent(
-          primaryColor: widget.primaryColor,
-          pricePerKg: widget.item.pricePerKg ?? 0,
-          initialWeight: 0,
-          onTotalPriceChanged: (kg, total) {
-            _updateTotalPriceByWeight(kg, total);
-          },
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -246,6 +216,10 @@ class _LaundryServiceItemRowState extends State<LaundryServiceItemRow> {
                     fontStyle: FontStyle.italic,
                   ),
                 ),
+                SizedBox(height: 4),
+                widget.item.pricePerItem == null
+                    ? CurrencyDisplay(price: widget.item.pricePerKg, unit: " / kg", fontSize: 16)
+                    : Container(),
               ],
             ),
           ),
@@ -256,7 +230,7 @@ class _LaundryServiceItemRowState extends State<LaundryServiceItemRow> {
             children: [
               widget.item.pricePerItem != null
                   ? _buildItemPriceLayout()
-                  : _buildWeightPriceLayout(),
+                    : Container(),
             ],
           ),
         ],

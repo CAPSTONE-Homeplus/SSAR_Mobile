@@ -196,8 +196,6 @@ class OrderDetailsRequest {
   }
 }
 
-
-// Mô hình dữ liệu cho chi tiết đơn hàng giặt là
 class LaundryOrderDetailModel {
   final String id;
   final String? orderCode;
@@ -219,6 +217,22 @@ class LaundryOrderDetailModel {
   final List<AdditionalService> orderAdditionalServicesResponse;
   final List<OrderDetailResponse> orderDetailsByKg;
   final List<OrderDetailResponse> orderDetailsByItem;
+
+  String get statusName {
+    switch (status) {
+      case 'PENDING':
+        return 'Đang chờ';
+      case 'IN_PROGRESS':
+        return 'Đang thực hiện';
+      case 'COMPLETED':
+        return 'Hoàn thành';
+      case 'CANCELLED':
+        return 'Đã hủy';
+      default:
+        return 'Không xác định';
+    }
+  }
+
 
   LaundryOrderDetailModel({
     required this.id,

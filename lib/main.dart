@@ -27,6 +27,7 @@ import 'package:home_clean/presentation/blocs/building/building_bloc.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_bloc.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_bloc.dart';
 import 'package:home_clean/presentation/blocs/feedbacks/rating_order_bloc.dart';
+import 'package:home_clean/presentation/blocs/forgot_password/forgot_password_bloc.dart';
 import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:home_clean/presentation/blocs/laundry_item_type/laundry_item_type_bloc.dart';
 import 'package:home_clean/presentation/blocs/laundry_order/laundry_order_bloc1.dart';
@@ -42,6 +43,7 @@ import 'package:home_clean/presentation/blocs/service_category/service_category_
 import 'package:home_clean/presentation/blocs/service_in_house_type/service_price_bloc.dart';
 import 'package:home_clean/presentation/blocs/staff/staff_bloc.dart';
 import 'package:home_clean/presentation/blocs/sub_activity/sub_activity_bloc.dart';
+import 'package:home_clean/presentation/blocs/task/task_bloc.dart';
 import 'package:home_clean/presentation/blocs/time_slot/time_slot_bloc.dart';
 import 'package:home_clean/presentation/blocs/transaction/transation_bloc.dart';
 import 'package:home_clean/presentation/blocs/user/user_bloc.dart';
@@ -260,6 +262,16 @@ class HomeClean extends StatelessWidget {
           BlocProvider<LaundryOrderBloc1>(
             create: (context) => LaundryOrderBloc1(
               sl<OrderLaundryRemoteDataSource>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => TaskBloc(
+              taskRepository: sl(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => ForgotPasswordBloc(
+              authRepository: sl<AuthRepository>(),
             ),
           ),
         ],

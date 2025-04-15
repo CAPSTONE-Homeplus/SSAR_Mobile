@@ -103,7 +103,7 @@ class Body extends StatelessWidget {
                                 child: Text(
                                   'Home Clean',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 32 * ffem,
+                                    fontSize: 28 * ffem,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                     height: 1.2,

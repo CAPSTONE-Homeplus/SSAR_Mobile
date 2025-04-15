@@ -41,12 +41,18 @@ class AuthRepositoryImpl implements AuthRepository {
 
       if (response.statusCode == 200 && response.data != null) {
         await authLocalDataSource.saveAuth(response.data);
-        final accessToken = await authLocalDataSource.getAccessTokenFromStorage();
-        vinWalletRequest.options.headers['Authorization'] = 'Bearer $accessToken';
-        homeCleanRequest.options.headers['Authorization'] = 'Bearer $accessToken';
-        vinLaundryRequest.options.headers['Authorization'] = 'Bearer $accessToken';
+        final accessToken =
+            await authLocalDataSource.getAccessTokenFromStorage();
+        final rfToken = await authLocalDataSource.getRefreshTokenFromStorage();
+        vinWalletRequest.options.headers['Authorization'] =
+            'Bearer $accessToken';
+        homeCleanRequest.options.headers['Authorization'] =
+            'Bearer $accessToken';
+        vinLaundryRequest.options.headers['Authorization'] =
+            'Bearer $accessToken';
         final user = await userRepository.getUser(response.data['userId']);
-        await userLocalDatasource.saveUserModel(UserMapper.toModelFromEntity(user));
+        await userLocalDatasource
+            .saveUserModel(UserMapper.toModelFromEntity(user));
         return true;
       } else {
         throw ApiException(
@@ -97,16 +103,16 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<User> getUserFromLocal() async{
+  Future<User> getUserFromLocal() async {
     try {
-      UserModel? userModel = UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
+      UserModel? userModel =
+          UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
       User user = UserMapper.toEntity(userModel);
       return user;
     } catch (e) {
       throw ExceptionHandler.handleException(e);
     }
   }
-
 
   Future<String> _getUserId() async {
     final authModel = AuthMapper.toModel(
@@ -122,10 +128,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Auth> refreshToken() async{
+  Future<Auth> refreshToken() async {
     try {
-      final user = UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
-      final auth = AuthMapper.toModel(await authLocalDataSource.getAuth() ?? {});
+      final user =
+          UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
+      final auth =
+          AuthMapper.toModel(await authLocalDataSource.getAuth() ?? {});
       final response = await vinWalletRequest.post(
         '${ApiConstant.auth}/refresh-token',
         data: {
@@ -136,11 +144,95 @@ class AuthRepositoryImpl implements AuthRepository {
 
       if (response.statusCode == 200 && response.data != null) {
         await authLocalDataSource.saveAuth(response.data);
-        final accessToken = await authLocalDataSource.getAccessTokenFromStorage();
-        vinWalletRequest.options.headers['Authorization'] = 'Bearer $accessToken';
-        homeCleanRequest.options.headers['Authorization'] = 'Bearer $accessToken';
+        final accessToken =
+            await authLocalDataSource.getAccessTokenFromStorage();
+        vinWalletRequest.options.headers['Authorization'] =
+            'Bearer $accessToken';
+        homeCleanRequest.options.headers['Authorization'] =
+            'Bearer $accessToken';
         userRepository.getUser(response.data['userId']);
         return AuthMapper.toEntity(response.data);
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<bool> resetPassword(String email, String newPassword) async {
+    try {
+      final response = await vinWalletRequest.post(
+        '${ApiConstant.users}/reset-password',
+        data: {
+          'email': email,
+          'newPassword': newPassword,
+          'confirmPassword': newPassword,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<bool> sendResetEmail(String email) async {
+    try {
+      final response = await vinWalletRequest.post(
+        '${ApiConstant.users}/forgot-password',
+        data: {
+          'email': email,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<bool> verifyOtp(String email, String otp)async {
+    try {
+      final response = await vinWalletRequest.post(
+        '${ApiConstant.users}/verify-code',
+        data: {
+          'email': email,
+          'verificationCode': otp,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return true;
       } else {
         throw ApiException(
           traceId: response.data['traceId'],

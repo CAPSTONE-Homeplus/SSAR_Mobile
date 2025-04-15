@@ -50,6 +50,7 @@ import '../../data/repositories/service_activity_repository_impl.dart';
 import '../../data/repositories/service_category_repository_impl.dart';
 import '../../data/repositories/service_repository_impl.dart';
 import '../../data/repositories/sub_activity_repository_impl.dart';
+import '../../data/repositories/task_repository.dart';
 import '../../data/repositories/time_slot_repository_impl.dart';
 import '../../data/repositories/transaction_repository_impl.dart';
 import '../../data/repositories/user_repository_impl.dart';
@@ -123,6 +124,7 @@ import '../../presentation/blocs/additional_service/additional_service_bloc.dart
 import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/building/building_bloc.dart';
 import '../../presentation/blocs/feedbacks/rating_order_bloc.dart';
+import '../../presentation/blocs/forgot_password/forgot_password_bloc.dart';
 import '../../presentation/blocs/laundry_item_type/laundry_item_type_bloc.dart';
 import '../../presentation/blocs/laundry_order/laundry_order_bloc1.dart';
 import '../../presentation/blocs/order_tracking/order_tracking_bloc.dart';
@@ -130,6 +132,7 @@ import '../../presentation/blocs/payment_method/payment_method_bloc.dart';
 import '../../presentation/blocs/room/room_bloc.dart';
 import '../../presentation/blocs/service_in_house_type/service_price_bloc.dart';
 import '../../presentation/blocs/staff/staff_bloc.dart';
+import '../../presentation/blocs/task/task_bloc.dart';
 import '../../presentation/blocs/transaction/transation_bloc.dart';
 import '../../presentation/blocs/wallet/wallet_bloc.dart';
 import '../../presentation/laundry_blocs/order/laundry_order_bloc.dart';
@@ -236,7 +239,7 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<AdditionalServiceRepository>(() => AdditionalServiceRepository());
   sl.registerLazySingleton<LaundryOrderRepository>(() => LaundryOrderRepository(authLocalDataSource: sl(), userLocalDatasource: sl()));
 
-
+  sl.registerLazySingleton<TaskRepository>(() => TaskRepositoryImpl());
   // Use Cases
   // sl.registerLazySingleton(() => SaveSelectedServiceIds(sl()));
   // sl.registerLazySingleton(() => GetSelectedServiceIds(sl()));
@@ -358,4 +361,8 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => ServicePriceBloc(serviceRepository: sl()));
   sl.registerLazySingleton(() => TransferBloc(walletRepository: sl()));
   sl.registerLazySingleton(() => LaundryOrderBloc1(sl()));
+  sl.registerLazySingleton(() => TaskBloc(taskRepository: sl()));
+  sl.registerLazySingleton(() => ForgotPasswordBloc(
+    authRepository: sl(),
+  ));
 }

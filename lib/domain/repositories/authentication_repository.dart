@@ -8,4 +8,7 @@ abstract class AuthRepository {
   Future<User> createAccount(CreateUser createUser);
   Future<Auth> refreshToken();
   Future<User> getUserFromLocal();
+  Future<bool> sendResetEmail(String email);
+  Future<bool> verifyOtp(String email, String otp);
+  Future<bool> resetPassword(String email, String newPassword);
 }

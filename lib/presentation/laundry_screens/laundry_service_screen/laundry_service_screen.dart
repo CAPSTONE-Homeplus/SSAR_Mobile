@@ -5,7 +5,6 @@ import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/presentation/laundry_blocs/order/laundry_order_bloc.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
-import 'package:intl/intl.dart';
 
 import '../../../data/laundry_repositories/laundry_order_repo.dart';
 import '../../blocs/additional_service/additional_service_bloc.dart';
@@ -23,6 +22,7 @@ import '../../laundry_blocs/order/laundry_order_state.dart';
 import '../../widgets/currency_display.dart';
 import '../../widgets/show_dialog.dart';
 import 'components/laundry_item_quantity_row.dart';
+import 'components/laundry_service_weight_item_row.dart';
 
 class LaundryServiceScreen extends StatefulWidget {
   const LaundryServiceScreen({Key? key}) : super(key: key);
@@ -39,8 +39,6 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
   static const emptyItemMessage = 'Không có mục giặt';
   static const loadingMessage = 'Đang tải dịch vụ...';
   static const additionalServicesTitle = 'Dịch Vụ Bổ Sung';
-  static const noteTitle = 'Lưu ý';
-  static const orderSummaryTitle = 'Tổng quan đơn hàng';
   static const orderButtonText = 'Đặt Dịch Vụ Ngay';
   static const errorTitle = 'Lỗi';
   static const emptyOrderError =
@@ -152,10 +150,6 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
   }
 
   void onAddItem(OrderDetailsRequest item) {
-    if ((item.quantity ?? 0) <= 0 && (item.weight ?? 0) <= 0) {
-      return;
-    }
-
     setState(() {
       final existingIndex = orderDetails.indexWhere(
               (existingItem) => existingItem.itemTypeId == item.itemTypeId);
@@ -180,18 +174,18 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
       return;
     }
 
-    final filteredOrderDetails = orderDetails
-        .where((detail) =>
-    (detail.quantity != null && detail.quantity! > 0) ||
-        (detail.weight != null && detail.weight! > 0))
-        .toList();
+    // final filteredOrderDetails = orderDetails
+    //     .where((detail) =>
+    //         (detail.weight != null && detail.weight! > 0) ||
+    //         (detail.quantity != null && detail.quantity! > 0))
+
 
     final requestData = LaOrderRequest(
       name: 'Đơn Giặt',
-      type: 'Standard',
+      type: '',
       extraField: null,
       appliedDiscountId: null,
-      orderDetailsRequest: filteredOrderDetails,
+      orderDetailsRequest: orderDetails,
       additionalServiceIds: selectedServiceId,
     );
 
@@ -256,7 +250,7 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Tổng cộng:',
+            'Tổng giá tham khảo:',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -311,7 +305,7 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
   }
 
   Widget _buildServiceItem(dynamic service) {
-    itemsLaundry = laundryItemsByService[service.id] ?? [];
+    final itemsLaundry = laundryItemsByService[service.id] ?? [];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -331,18 +325,25 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildServiceHeader(service),
-          itemsLaundry.isEmpty
-              ? _buildEmptyItemMessage()
-              : Column(
-            children: itemsLaundry.map((item) {
-              return LaundryServiceItemRow(
+          if (itemsLaundry.isEmpty)
+            _buildEmptyItemMessage()
+          else
+            Column(
+              children: itemsLaundry.map((item) =>
+              item.pricePerKg != null
+                  ? LaundryServiceWeightItemRow(
                 item: item,
                 primaryColor: primaryColor,
-                serviceType: item.pricePerItem != null ? 'PerItem' : null,
                 onAddItem: onAddItem,
-              );
-            }).toList(),
-          ),
+              )
+                  : LaundryServiceItemRow(
+                item: item,
+                primaryColor: primaryColor,
+                serviceType: 'PerItem',
+                onAddItem: onAddItem,
+              )
+              ).toList(),
+            ),
         ],
       ),
     );

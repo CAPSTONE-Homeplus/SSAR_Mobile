@@ -54,6 +54,14 @@ class _OrderListScreenState extends State<OrderListScreen> {
   List<Orders> _allCleanOrders = [];
   List<OrderLaundry> _laundryOrders = [];
   String _selectedCategory = 'clean';
+  OrderStatus? _selectedStatus;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
 
   @override
   void initState() {
@@ -88,6 +96,10 @@ class _OrderListScreenState extends State<OrderListScreen> {
     }
   }
 
+  void _applyStatusCleanFilters() {
+    context.read<OrderBloc>().add(GetOrdersByUserEvent(search: _selectedStatus?.name));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,6 +120,8 @@ class _OrderListScreenState extends State<OrderListScreen> {
                 }
               },
             ),
+            _buildStatusDropdown(),
+
             Expanded(
               child: _selectedCategory == 'clean'
                   ? _buildCleanOrdersContent()
@@ -176,7 +190,92 @@ class _OrderListScreenState extends State<OrderListScreen> {
       },
     );
   }
+
+  Widget _buildStatusDropdown() {
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: 16 * SizeConfig.fem,
+        vertical: 8 * SizeConfig.hem,
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 12 * SizeConfig.fem),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12 * SizeConfig.fem),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<OrderStatus>(
+          value: _selectedStatus,
+          isExpanded: true,
+          hint: Text(
+            'Chọn trạng thái',
+            style: GoogleFonts.poppins(
+              color: Colors.grey[600],
+              fontSize: 15 * SizeConfig.ffem,
+            ),
+          ),
+          icon: Icon(
+            Icons.arrow_drop_down,
+            color: Colors.grey[600],
+            size: 28 * SizeConfig.ffem,
+          ),
+          style: GoogleFonts.poppins(
+            color: Colors.black87,
+            fontSize: 15 * SizeConfig.ffem,
+          ),
+          dropdownColor: Colors.white,
+          onChanged: (OrderStatus? newValue) {
+            setState(() {
+              _selectedStatus = newValue;
+
+              // Reapply filters based on current category
+              if (_selectedCategory == 'clean') {
+                _applyStatusCleanFilters();
+              }
+            });
+          },
+          items: [
+            // Add a "All" option
+            DropdownMenuItem<OrderStatus>(
+              value: null,
+              child: Text(
+                'Tất cả trạng thái',
+                style: GoogleFonts.poppins(
+                  color: Colors.black87,
+                  fontSize: 15 * SizeConfig.ffem,
+                ),
+              ),
+            ),
+            // Add specific status options
+            ...OrderStatus.values.map<DropdownMenuItem<OrderStatus>>((OrderStatus status) {
+              return DropdownMenuItem<OrderStatus>(
+                value: status,
+                child: Row(
+                  children: [
+                    Icon(
+                      status.icon,
+                      color: status.color,
+                      size: 20 * SizeConfig.ffem,
+                    ),
+                    SizedBox(width: 8 * SizeConfig.fem),
+                    Text(
+                      status.displayName,
+                      style: GoogleFonts.poppins(
+                        color: status.color,
+                        fontSize: 15 * SizeConfig.ffem,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ],
+        ),
+      ),
+    );
+  }
 }
+
 
 // Extracted Widgets
 class FilterTabs extends StatelessWidget {
