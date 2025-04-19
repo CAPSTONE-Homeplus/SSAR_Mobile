@@ -30,6 +30,7 @@ import '../../../core/format/formater.dart';
 import '../../../domain/entities/house/house.dart';
 import '../../../domain/entities/order/create_order.dart';
 import '../../../domain/entities/service_activity/service_activity.dart';
+import '../../../domain/entities/service_in_house_type/house_type.dart';
 import '../../../domain/entities/time_slot/time_slot.dart';
 import '../../blocs/house/house_bloc.dart';
 import '../../blocs/option/option_bloc.dart';
@@ -54,7 +55,12 @@ class ServiceDetailScreen extends StatefulWidget {
 }
 
 class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
-  int _servicePrice = 0;
+  ServiceInHouseType _servicePriceType = ServiceInHouseType(
+    id: '',
+    name: '',
+    price: 0,
+    serviceId: '',
+  );
   House? house;
   final List<Option> _selectedOptions = [];
   final List<ExtraService> _selectedExtraServices = [];
@@ -65,8 +71,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   final Map<String, List<SubActivity>> _serviceActivities = {};
   int _totalPrice = 0;
   List<TimeSlot> timeSlots = [];
-  late TimeSlot _selectedTimeSlot =
-      TimeSlot(id: '', startTime: '', endTime: '');
+  late TimeSlot _selectedTimeSlot = TimeSlot(
+      id: '',
+      startTime: '',
+      endTime: '',
+      description: '',
+      status: '',
+      code: '');
   final TextEditingController _notesController = TextEditingController();
 
   @override
@@ -190,7 +201,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             if (state is ServicePriceLoaded) {
               setState(() {
                 _totalPrice = state.servicePrice.price!;
-                _servicePrice = _totalPrice;
+                _servicePriceType = state.servicePrice;
               });
             }
           },
@@ -201,7 +212,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         appBar: CustomAppBar(
           title: widget.service.name ?? '',
           onBackPressed: () {
-            Navigator.pop(context);
+            AppRouter.navigateToHome();
           },
         ),
         body: isLoading
@@ -536,7 +547,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       ),
     );
   }
-  
+
   Widget _buildOption() {
     return Container(
       decoration: BoxDecoration(
@@ -594,53 +605,44 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildOriginCost() {
-    return _buildSection(
-      title: "Gía của dịch vụ bạn đang sử dụng",
-      icon: Icons.price_change_outlined,
-      child: Container(
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.grey[300]!,
-            width: 1,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            offset: const Offset(0, -3),
+            blurRadius: 20,
+            spreadRadius: 1,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.monetization_on_outlined,
-                  color: Colors.green[700],
-                  size: 24,
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.monetization_on_outlined,
+                color: AppColors.primaryColor,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '${widget.service.name}',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
                 ),
-                SizedBox(width: 12),
-                Text(
-                  'Tổng giá trị',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[800],
-                  ),
-                ),
-              ],
-            ),
-            CurrencyDisplay(
-              price: _servicePrice,
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+          CurrencyDisplay(
+            price: _servicePriceType.price,
+          ),
+        ],
       ),
     );
   }
@@ -990,12 +992,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
           Padding(
             padding: const EdgeInsets.all(12.0),
-            child: TimeDropdown(
+            child: TimeSelector(
               selectedSlot: _selectedTimeSlot,
               availableSlots: timeSlots,
               onSlotChanged: (newValue) {
                 setState(() {
-                  _selectedTimeSlot = newValue ?? TimeSlot(); // Remove the null assertion
+                  _selectedTimeSlot = newValue;
                 });
               },
             ),

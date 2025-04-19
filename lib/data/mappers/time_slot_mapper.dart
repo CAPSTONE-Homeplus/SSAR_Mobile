@@ -9,8 +9,6 @@ class TimeSlotMapper {
       endTime: model.endTime,
       description: model.description,
       status: model.status,
-      createdAt: model.createdAt,
-      updatedAt: model.updatedAt,
       code: model.code,
     );
   }
@@ -22,8 +20,6 @@ class TimeSlotMapper {
       endTime: entity.endTime,
       description: entity.description,
       status: entity.status,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
       code: entity.code,
     );
   }

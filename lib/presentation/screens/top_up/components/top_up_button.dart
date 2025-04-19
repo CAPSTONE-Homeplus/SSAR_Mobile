@@ -28,7 +28,7 @@ class TopUpButtonWidget extends StatelessWidget {
       width: double.infinity,
       child: BlocConsumer<TransactionBloc, TransactionState>(
         listener: (context, state) async {
-          if (state is TransactionSuccess) {
+          if (state is TopUpTransactionSuccess) {
             if (state.transaction.paymentUrl != null) {
               Navigator.of(context).push(
                 MaterialPageRoute(

@@ -40,34 +40,24 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Future<Transaction> saveTransaction(CreateTransaction transaction) async {
     try {
-      AuthModel? authModel = AuthMapper.toModel(await authLocalDataSource.getAuth() ?? {});
-      String userId = authModel.userId ?? '';
-      CreateTransactionModel trans = CreateTransactionMapper.toModel(transaction);
-      trans.userId = userId;
+      // Get authenticated user ID
+      final authModel = AuthMapper.toModel(
+          await authLocalDataSource.getAuth() ?? {}
+      );
+      final userId = authModel.userId ?? '';
+
+      // Prepare transaction model
+      final transactionModel = CreateTransactionMapper.toModel(transaction)
+        ..userId = userId;
+
+      // Make API request
       final response = await vinWalletRequest.post(
         ApiConstant.transactions,
-        data: trans.toJson(),
+        data: transactionModel.toJson(),
       );
 
-      if (response.statusCode == 201 && response.data != null) {
-        return Transaction(
-          id: response.data['id'],
-          walletId: response.data['walletId'],
-          userId: response.data['userId'],
-          paymentMethodId: response.data['paymentMethodId'],
-          amount: response.data['amount'],
-          type: response.data['type'],
-          paymentUrl: response.data['paymentUrl'],
-          note: response.data['note'],
-          transactionDate: response.data['transactionDate'],
-          status: response.data['status'],
-          createdAt: response.data['createdAt'],
-          updatedAt: response.data['updatedAt'],
-          code: response.data['code'],
-          categoryId: response.data['categoryId'],
-          orderId: response.data['orderId'],
-        );
-      } else {
+      // Validate response
+      if (response.statusCode != 201 || response.data == null) {
         throw ApiException(
           traceId: response.data?['traceId'] ?? '',
           code: response.data?['code'] ?? 'UNKNOWN_ERROR',
@@ -76,9 +66,33 @@ class TransactionRepositoryImpl implements TransactionRepository {
           timestamp: response.data?['timestamp'] ?? '',
         );
       }
+
+      // Map response to Transaction model
+      return _mapResponseToTransaction(response.data);
     } catch (e) {
       throw ExceptionHandler.handleException(e);
     }
+  }
+
+// Extract mapping logic to a separate method for better readability
+  Transaction _mapResponseToTransaction(Map<String, dynamic> data) {
+    return Transaction(
+      id: data['id'],
+      walletId: data['walletId'],
+      userId: data['userId'],
+      paymentMethodId: data['paymentMethodId'],
+      amount: data['amount'],
+      type: data['type'],
+      paymentUrl: data['paymentUrl'],
+      note: data['note'],
+      transactionDate: data['transactionDate'],
+      status: data['status'],
+      createdAt: data['createdAt'],
+      updatedAt: data['updatedAt'],
+      code: data['code'],
+      categoryId: data['categoryId'],
+      orderId: data['orderId'],
+    );
   }
 
   @override

@@ -17,6 +17,8 @@ import '../../data/laundry_repositories/laundry_order_repo.dart';
 import '../../domain/entities/order/order.dart';
 import '../../domain/entities/user/user.dart';
 import '../../main.dart';
+import '../../presentation/laundry_screens/choose_item_type_screen/choose_item_type_screen.dart';
+import '../../presentation/laundry_screens/choose_service_type_screen/choose_service_type_screen.dart';
 import '../../presentation/laundry_screens/laundry_order_detail_screen/components/task_section_widget.dart';
 import '../../presentation/laundry_screens/laundry_order_detail_screen/laundry_order_detail_screen.dart';
 import '../../presentation/laundry_screens/laundry_service_screen/laundry_service_screen.dart';
@@ -63,6 +65,9 @@ class AppRouter {
   static const String routeUpdateProfile = '/update-profile';
   static const String routeForgotPassword = '/forgot-password';
   static const String routeLaundryOrderTracking = '/laundry-order-tracking';
+  static const String routeChooseServiceType = '/choose-service-type';
+  static const String routeChooseItemType= '/choose-item-type';
+
 
   static List<GetPage> get routes => [
         GetPage(
@@ -184,12 +189,12 @@ class AppRouter {
             page: () => BottomNavigation(child: OrderListScreen()),
             transition: Transition.cupertino,
             transitionDuration: const Duration(milliseconds: 300)),
-        GetPage(
-          name: routeLaundryService,
-          page: () => LaundryServiceScreen(),
-          transition: Transition.cupertino,
-          transitionDuration: const Duration(milliseconds: 300),
-        ),
+        // GetPage(
+        //   name: routeLaundryService,
+        //   page: () => LaundryServiceScreen(),
+        //   transition: Transition.cupertino,
+        //   transitionDuration: const Duration(milliseconds: 300),
+        // ),
         GetPage(
           name: routeLaundryOrderDetail,
           page: () => LaundryOrderDetailScreen(orderId: Get.arguments ?? ""),
@@ -223,6 +228,18 @@ class AppRouter {
         GetPage(
           name: routeLaundryOrderTracking,
           page: () => TaskTimelineScreen(orders: Get.arguments),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+        GetPage(
+          name: routeChooseServiceType,
+          page: () => ChooseServiceTypeScreen(),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+        GetPage(
+          name: routeChooseItemType,
+          page: () => ChooseItemTypeScreen(serviceId: Get.arguments),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -346,5 +363,13 @@ class AppRouter {
 
   static void navigateToLaundryOrderTracking(LaundryOrderDetailModel order) {
     Get.toNamed(routeLaundryOrderTracking, arguments: order);
+  }
+
+  static void navigateToChooseServiceType() {
+    Get.toNamed(routeChooseServiceType);
+  }
+
+  static void navigateToChooseItemType(String serviceId) {
+    Get.toNamed(routeChooseItemType, arguments: serviceId);
   }
 }

@@ -50,6 +50,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   late StreamSubscription<OrderState> _stateSubscription;
   int priceOfHouseType = 0;
   Building? selectedBuilding;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -69,27 +70,107 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
         );
   }
 
+  Future<void> _setId(String id) async {
+    selectedWalletId = id.toString();
+  }
+
   void _placeOrder(BuildContext context) {
+    // Show confirmation dialog
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Xác nhận thanh toán'),
+        content: const Text('Bạn có chắc chắn muốn thanh toán không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop(true);
+              _proceedWithOrder(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1CAF7D), // Primary color
+            ),
+            child: const Text('Xác nhận'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _proceedWithOrder(BuildContext context) {
     if (_isOrdering) return;
+
     setState(() => _isOrdering = true);
+
     context.read<OrderBloc>().add(CreateOrderEvent(widget.orderDetails));
-    _stateSubscription =
-        BlocProvider.of<OrderBloc>(context).stream.listen((state) {
-      if (!mounted) {
-        _stateSubscription.cancel();
-        return;
-      }
-      if (state is OrderCreated) {
+
+    _stateSubscription = BlocProvider.of<OrderBloc>(context).stream.listen(
+      (state) {
+        if (!mounted) {
+          _stateSubscription.cancel();
+          return;
+        }
+
+        if (state is OrderCreated) {
+          setState(() => _isOrdering = false);
+          _stateSubscription.cancel();
+        } else if (state is OrderError) {
+          setState(() => _isOrdering = false);
+          _stateSubscription.cancel();
+
+          // Show error dialog
+          showDialog(
+            context: context,
+            builder: (dialogContext) => AlertDialog(
+              title: const Text('Lỗi'),
+              content: Text(state.message),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Đóng'),
+                ),
+              ],
+            ),
+          );
+        }
+      },
+      onError: (error) {
+        if (!mounted) return;
         setState(() => _isOrdering = false);
-        _stateSubscription.cancel();
-      } else if (state is OrderError) {
-        setState(() => _isOrdering = false);
-        _stateSubscription.cancel();
-      }
-    }, onError: (error) {
-      if (!mounted) return;
-      setState(() => _isOrdering = false);
-    });
+
+        // Show generic error dialog
+        showDialog(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Lỗi'),
+            content: Text(error.toString()),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Đóng'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Ensure only one dialog is shown
+  void _showTransactionDialog(BuildContext context) {
+    // Close any existing dialogs
+    Navigator.of(context, rootNavigator: true)
+        .popUntil((route) => route is! DialogRoute);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => const TransactionPopup(),
+    );
   }
 
   @override
@@ -163,9 +244,18 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
           ),
           BlocListener<OrderBloc, OrderState>(
             listener: (context, state) {
+              print('OrderBloc State: $state'); // Debug print state type
+              print('Current Context: $context'); // Print context details
+
               if (state is OrderCreated) {
+                print('OrderCreated received. Order ID: ${state.order.id}');
+
+                // Add a check to prevent multiple calls
+                if (_isProcessing) return;
+                _isProcessing = true;
+
                 context.read<TransactionBloc>().add(
-                      SaveTransactionEvent(
+                      SaveCleaningTransactionEvent(
                         CreateTransaction(
                           walletId: selectedWalletId,
                           paymentMethodId:
@@ -177,11 +267,13 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                         ),
                       ),
                     );
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => const TransactionPopup(),
-                );
+
+                _showTransactionDialog(context);
+
+                // Reset processing flag after a short delay
+                Future.delayed(const Duration(seconds: 2), () {
+                  _isProcessing = false;
+                });
               } else if (state is OrderError) {
                 showCustomDialog(
                   context: context,
@@ -191,6 +283,8 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               }
             },
           ),
+
+// Declare this as a class-level variable
         ],
         child: BlocBuilder<OrderBloc, OrderState>(
           builder: (context, state) {
@@ -211,8 +305,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                               'Dọn dẹp căn hộ',
                           icon: Icons.home_work_outlined,
                         ),
-                        if (widget.orderDetails.emergencyRequest)
-                          _buildEmergencyBadge(),
                         const SizedBox(height: 12),
                         DetailRowWidget(
                           title: 'Thời gian',
@@ -223,44 +315,88 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                       ],
                     ),
                   ),
-                  if (widget.orderDetails.option.isNotEmpty)
-                    SectionWidget(
-                      title: 'Tùy chọn đã chọn',
-                      icon: Icons.checklist_outlined,
+                  SectionWidget(
+                      title: 'Chi phí dịch vụ',
+                      icon: Icons.calculate,
                       child: Column(
-                        children: widget.orderDetails.option
-                            .map(
-                              (option) => _buildOptionItem(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Các dịch vụ chọn thêm:',
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          if (widget.orderDetails.option.isEmpty && widget.orderDetails.extraService.isEmpty)
+                            Center(
+                              child: const Text(
+                                'Không có dịch vụ chọn thêm',
+                                style: TextStyle(fontSize: 14, color: Colors.grey),
+                              ),
+                            )
+                          else ...[
+                            ...widget.orderDetails.option.map(
+                                  (option) => _buildOptionItem(
                                 title: option.name ?? '',
                                 price: option.price ?? 0,
                               ),
-                            )
-                            .toList(),
-                      ),
-                    ),
-                  if (widget.orderDetails.extraService.isNotEmpty)
-                    SectionWidget(
-                      title: 'Dịch vụ thêm',
-                      icon: Icons.add_circle_outline,
-                      child: Column(
-                        children: widget.orderDetails.extraService
-                            .map(
-                              (service) => _buildOptionItem(
+                            ),
+                            ...widget.orderDetails.extraService.map(
+                                  (service) => _buildOptionItem(
                                 title: service.name ?? '',
                                 price: service.price ?? 0,
                               ),
-                            )
-                            .toList(),
-                      ),
-                    ),
-                  SectionWidget(
-                    title: 'Chi phí dịch vụ',
-                    icon: Icons.calculate,
-                    child: _buildOptionItem(
-                      title: 'Tổng tiền',
-                      price: _calculateTotalPrice(),
-                    ),
-                  ),
+                            ),
+                          ],
+                          const SizedBox(height: 8),
+
+                          Text(
+                            'Thành tiền:',
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          _buildOptionItem(
+                            title: 'Giá dịch vụ',
+                            price: priceOfHouseType,
+                          ),
+                          if (widget.orderDetails.emergencyRequest)
+                            _buildOptionItem(
+                              title: 'Phí đặt ngay',
+                              price: 30000,
+                            ),
+                          Divider(
+                            color: Colors.grey[300],
+                            thickness: 1,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Tổng cộng:',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 15,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const Spacer(),
+                              CurrencyDisplay(
+                                price: _calculateTotalPrice(),
+                                fontSize: 16,
+                                iconSize: 18,
+                                unit: '',
+                              ),
+                            ],
+                          ),
+
+                        ],
+                      )),
                   _buildWallet(context),
                   const SizedBox(height: 100),
                 ],
@@ -304,12 +440,13 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
 
                   return _buildPaymentOption(
                     title: walletTitle ?? '',
-                    balance: (wallet.balance ?? 0).toInt(), // ✅ fix here
+                    balance: (wallet.balance ?? 0).toInt(),
+                    // ✅ fix here
                     icon: Icons.account_balance,
                     isSelected: isSelected,
                     onTap: () {
                       setState(() {
-                        selectedWalletId = wallet.id;
+                        _setId(wallet.id ?? '');
                       });
                     },
                   );

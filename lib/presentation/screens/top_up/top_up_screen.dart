@@ -136,7 +136,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
         amount: amount.toString(),
       );
 
-      context.read<TransactionBloc>().add(SaveTransactionEvent(newTransaction));
+      context.read<TransactionBloc>().add(SaveTopUpTransactionEvent(newTransaction));
     }
   }
 

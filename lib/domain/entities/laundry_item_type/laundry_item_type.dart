@@ -18,7 +18,7 @@ class LaundryItemType extends Equatable{
   double? maxWeight;
   int? standardProcessingTime;
   String? serviceTypeId;
-  String? serviceTypeName;
+  String? serviceType;
 
   LaundryItemType({
     this.id,
@@ -38,7 +38,7 @@ class LaundryItemType extends Equatable{
     this.maxWeight,
     this.standardProcessingTime,
     this.serviceTypeId,
-    this.serviceTypeName,
+    this.serviceType,
   });
 
 
@@ -61,6 +61,6 @@ class LaundryItemType extends Equatable{
     maxWeight,
     standardProcessingTime,
     serviceTypeId,
-    serviceTypeName,
+    serviceType,
   ];
 }

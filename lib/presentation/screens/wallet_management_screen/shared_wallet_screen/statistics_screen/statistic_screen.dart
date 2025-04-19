@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/colors.dart';
+import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/entities/contribution_statistics/contribution_statistics.dart';
 import 'package:home_clean/presentation/blocs/wallet/wallet_bloc.dart';
 import 'package:home_clean/presentation/blocs/wallet/wallet_event.dart';
@@ -58,7 +59,7 @@ class _SpendingScreenState extends State<SpendingScreen> {
       backgroundColor: Colors.grey[100],
       appBar: CustomAppBar(
         title: 'Hoạt động đóng góp',
-        onBackPressed: () => Navigator.pop(context),
+        onBackPressed: () => AppRouter.navigateToSharedWallet()
       ),
       body: BlocConsumer<SharedWalletBloc, WalletState>(
         listener: (context, state) {

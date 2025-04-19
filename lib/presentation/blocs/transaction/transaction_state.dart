@@ -39,3 +39,65 @@ class TransactionFailure extends TransactionState {
   @override
   List<Object> get props => [error];
 }
+
+/////
+
+class TopUpTransactionLoading extends TransactionState {}
+
+class TopUpTransactionSuccess extends TransactionState {
+  final Transaction transaction;
+
+  const TopUpTransactionSuccess(this.transaction);
+
+  @override
+  List<Object> get props => [transaction];
+}
+
+class TopUpTransactionFailure extends TransactionState {
+  final String error;
+
+  const TopUpTransactionFailure(this.error);
+
+  @override
+  List<Object> get props => [error];
+}
+
+class LaundryTransactionLoading extends TransactionState {}
+
+class LaundryTransactionSuccess extends TransactionState {
+  final Transaction transaction;
+
+  const LaundryTransactionSuccess(this.transaction);
+
+  @override
+  List<Object> get props => [transaction];
+}
+
+class LaundryTransactionFailure extends TransactionState {
+  final String error;
+
+  const LaundryTransactionFailure(this.error);
+
+  @override
+  List<Object> get props => [error];
+}
+
+class CleaningTransactionLoading extends TransactionState {}
+
+class CleaningTransactionSuccess extends TransactionState {
+  final Transaction transaction;
+
+  const CleaningTransactionSuccess(this.transaction);
+
+  @override
+  List<Object> get props => [transaction];
+}
+
+class CleaningTransactionFailure extends TransactionState {
+  final String error;
+
+  const CleaningTransactionFailure(this.error);
+
+  @override
+  List<Object> get props => [error];
+}

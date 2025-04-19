@@ -52,7 +52,7 @@ class LaundryGridWidget extends StatelessWidget {
           title: laundryServices[0]["title"],
           color: laundryServices[0]["color"],
           onTap: () {
-            AppRouter.navigateToLaundryService();
+            AppRouter.navigateToChooseServiceType();
           },
           fem: fem,
         ),

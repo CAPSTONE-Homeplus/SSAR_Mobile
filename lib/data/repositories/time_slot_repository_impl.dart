@@ -20,7 +20,7 @@ class TimeSlotRepositoryImpl implements TimeSlotRepository {
     try {
       final response =
           await homeCleanRequest.get(ApiConstant.timeSlots, queryParameters: {
-            'search': search ?? '',
+            'search':  'Active',
             'orderBy': orderBy ?? '',
             'page': page ?? Constant.defaultPage,
             'size': size ?? Constant.defaultSize

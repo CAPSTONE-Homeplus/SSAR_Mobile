@@ -174,11 +174,6 @@ class _LaundryServiceScreenState extends State<LaundryServiceScreen> {
       return;
     }
 
-    // final filteredOrderDetails = orderDetails
-    //     .where((detail) =>
-    //         (detail.weight != null && detail.weight! > 0) ||
-    //         (detail.quantity != null && detail.quantity! > 0))
-
 
     final requestData = LaOrderRequest(
       name: 'Đơn Giặt',

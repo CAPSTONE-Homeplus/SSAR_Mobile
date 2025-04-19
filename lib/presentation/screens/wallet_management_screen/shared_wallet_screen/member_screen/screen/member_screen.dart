@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
-import 'package:home_clean/presentation/widgets/show_dialog.dart';
 
 import '../../../../../../../domain/entities/user/user.dart';
 import '../../../../../../../domain/entities/wallet/wallet.dart';
@@ -15,7 +14,6 @@ import '../../../../../blocs/user/user_state.dart';
 import '../../../../../blocs/wallet/wallet_bloc.dart';
 import '../../../../../blocs/wallet/wallet_event.dart';
 import '../../../../../blocs/wallet/wallet_state.dart';
-import 'member_screen_error.dart';
 import 'member_screen_loading.dart';
 
 class MembersScreen extends StatefulWidget {
@@ -155,8 +153,8 @@ class _MembersScreenState extends State<MembersScreen> {
       builder: (context) => BlocListener<UserBloc, UserState>(
         listener: (context, state) {
           if (state is UserLoadedByPhone) {
-            Navigator.pop(context); // Close the first dialog
-            _showConfirmationDialog(state.user); // Show confirmation dialog
+            Navigator.pop(context);
+            _showConfirmationDialog(state.user);
           }
         },
         child: AlertDialog(
@@ -209,7 +207,6 @@ class _MembersScreenState extends State<MembersScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        // Thêm biến để theo dõi trạng thái loading
         bool isLoading = false;
 
         return StatefulBuilder(

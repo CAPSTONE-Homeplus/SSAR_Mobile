@@ -4,8 +4,6 @@ class TimeSlotModel {
   String? endTime;
   String? description;
   String? status;
-  String? createdAt;
-  String? updatedAt;
   String? code;
 
   TimeSlotModel({
@@ -14,8 +12,6 @@ class TimeSlotModel {
     this.endTime,
     this.description,
     this.status,
-    this.createdAt,
-    this.updatedAt,
     this.code,
   });
 
@@ -26,8 +22,6 @@ class TimeSlotModel {
       endTime: json['endTime'],
       description: json['description'],
       status: json['status'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
       code: json['code'],
     );
   }
@@ -39,8 +33,6 @@ class TimeSlotModel {
       'endTime': endTime,
       'description': description,
       'status': status,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
       'code': code,
     };
   }

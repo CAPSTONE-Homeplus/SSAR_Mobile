@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../domain/entities/time_slot/time_slot.dart';
 
-class TimeDropdown extends StatelessWidget {
-  final TimeSlot? selectedSlot;
-  final List<TimeSlot> availableSlots;
-  final ValueChanged<TimeSlot?> onSlotChanged;
+class TimeSelector extends StatelessWidget {
+  /// The currently selected time slot
+  final TimeSlot selectedSlot;
 
-  const TimeDropdown({
+  /// List of available time slots to choose from
+  final List<TimeSlot> availableSlots;
+
+  /// Callback function when a new slot is selected
+  final Function(TimeSlot) onSlotChanged;
+
+  // Define the primary color
+  static const Color _primaryColor = Color(0xFF1CAF7D);
+
+  const TimeSelector({
     Key? key,
     required this.selectedSlot,
     required this.availableSlots,
@@ -16,156 +24,128 @@ class TimeDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dropdownItems = _buildDropdownItems();
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        border: Border.all(
-          color: Colors.grey[300]!,
-          width: 1,
+    return InkWell(
+      onTap: () {
+        _showTimeSelectionSheet(context);
+      },
+      borderRadius: BorderRadius.circular(12.0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        decoration: BoxDecoration(
+          border: Border.all(color: _primaryColor.withOpacity(0.5), width: 1.5),
+          borderRadius: BorderRadius.circular(12.0),
+          color: _primaryColor.withOpacity(0.1),
         ),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<TimeSlot?>(
-          dropdownColor: Colors.white,
-          value: dropdownItems.map((item) => item.value).contains(selectedSlot)
-              ? selectedSlot
-              : null, // Explicitly set to null if not in items
-          isExpanded: true,
-          hint: _buildHintWidget(),
-          icon: _buildDropdownIcon(),
-          onChanged: (TimeSlot? newValue) {
-            // Always call the callback, even with null
-            onSlotChanged(newValue);
-          },
-          items: dropdownItems,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHintWidget() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Text(
-        'Chọn khung giờ',
-        style: GoogleFonts.poppins(
-          fontSize: 16,
-          color: Colors.grey[600],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDropdownIcon() {
-    return Padding(
-      padding: const EdgeInsets.only(right: 16),
-      child: Icon(
-        Icons.schedule_rounded,
-        color: Colors.green[700],
-        size: 24,
-      ),
-    );
-  }
-
-  List<DropdownMenuItem<TimeSlot?>> _buildDropdownItems() {
-    final validSlots = _getValidTimeSlots();
-
-    List<DropdownMenuItem<TimeSlot?>> items = [
-      // Thêm mục để xóa lựa chọn
-      DropdownMenuItem<TimeSlot?>(
-        value: null,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'Xóa lựa chọn',
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              color: Colors.red[400],
-            ),
-          ),
-        ),
-      ),
-    ];
-
-    if (validSlots.isEmpty) {
-      items.add(_buildUnavailableItem());
-      return items;
-    }
-
-    // Thêm các slot hợp lệ
-    items.addAll(
-      validSlots.map((timeSlot) {
-        return DropdownMenuItem<TimeSlot>(
-          value: timeSlot,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              '${_formatTime(timeSlot.startTime)} - ${_formatTime(timeSlot.endTime)}',
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                color: Colors.black87,
-                fontWeight: FontWeight.w500,
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                selectedSlot.startTime!.isEmpty
+                    ? 'Chưa chọn thời gian'
+                    : '${selectedSlot.startTime} - ${selectedSlot.endTime}',
+                style: TextStyle(
+                  fontSize: 16.0,
+                  color: _primaryColor.withOpacity(0.8),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
-        );
-      }).toList(),
-    );
-
-    return items;
-  }
-
-  DropdownMenuItem<TimeSlot?> _buildUnavailableItem() {
-    return DropdownMenuItem<TimeSlot?>(
-      value: null,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Text(
-          'Không có khung giờ',
-          style: GoogleFonts.poppins(
-            fontSize: 16,
-            color: Colors.red[400],
-          ),
+            Icon(Icons.access_time, color: _primaryColor),
+          ],
         ),
       ),
     );
   }
 
-  List<TimeSlot> _getValidTimeSlots() {
-    final now = DateTime.now();
-    return availableSlots.where((slot) {
-      final startTime = _parseTime(slot.startTime);
-      return startTime != null && startTime.isAfter(now.add(const Duration(hours: 1)));
-    }).toList();
-  }
+  void _showTimeSelectionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    Text(
+                      'Chọn thời gian',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: Icon(Icons.close, color: _primaryColor),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1, color: Colors.grey),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: availableSlots.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return ListTile(
+                      title: Text(
+                        'Không chọn',
+                        style: TextStyle(
+                          color: selectedSlot.startTime!.isEmpty ? _primaryColor : Colors.black87,
+                          fontWeight: selectedSlot.startTime!.isEmpty ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                      leading: Icon(
+                        Icons.clear,
+                        color: selectedSlot.startTime!.isEmpty ? _primaryColor : Colors.grey,
+                      ),
+                      onTap: () {
+                        onSlotChanged(TimeSlot(
+                          id: '',
+                          startTime: '',
+                          endTime: '',
+                        ));
+                        Navigator.pop(context);
+                      },
+                      tileColor: selectedSlot.startTime!.isEmpty ? _primaryColor.withOpacity(0.1) : null,
+                    );
+                  }
 
-  DateTime? _parseTime(String? timeStr) {
-    if (timeStr == null) return null;
-    try {
-      final parts = timeStr.split(':');
-      final now = DateTime.now();
-      return DateTime(now.year, now.month, now.day,
-          int.parse(parts[0]), int.parse(parts[1]));
-    } catch (_) {
-      return null;
-    }
-  }
+                  final slot = availableSlots[index - 1];
+                  final isSelected = slot.startTime == selectedSlot.startTime &&
+                      slot.endTime == selectedSlot.endTime;
 
-  String _formatTime(String? time) {
-    if (time == null) return '';
-    return time.contains(':00')
-        ? time.substring(0, time.lastIndexOf(':00'))
-        : time;
+                  return ListTile(
+                    title: Text(
+                      '${slot.startTime} - ${slot.endTime}',
+                      style: TextStyle(
+                        color: isSelected ? _primaryColor : Colors.black87,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    leading: Icon(
+                      Icons.schedule,
+                      color: isSelected ? _primaryColor : Colors.grey,
+                    ),
+                    onTap: () {
+                      onSlotChanged(slot);
+                      Navigator.pop(context);
+                    },
+                    tileColor: isSelected ? _primaryColor.withOpacity(0.1) : null,
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

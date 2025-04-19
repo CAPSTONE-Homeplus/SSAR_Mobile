@@ -42,3 +42,33 @@ class GetTransactionByWalletEvent extends TransactionEvent {
   @override
   List<Object> get props => [walletId ?? '', search ?? '', orderBy ?? '', page ?? Constant.defaultPage, size ?? Constant.defaultSize];
 }
+
+
+class SaveTopUpTransactionEvent extends TransactionEvent {
+  final CreateTransaction transaction;
+
+  const SaveTopUpTransactionEvent(this.transaction);
+
+  @override
+  List<Object> get props => [transaction];
+}
+
+class SaveLaundryTransactionEvent extends TransactionEvent {
+  final CreateTransaction transaction;
+
+  const SaveLaundryTransactionEvent(this.transaction);
+
+  @override
+  List<Object> get props => [transaction];
+}
+
+class SaveCleaningTransactionEvent extends TransactionEvent {
+  final CreateTransaction transaction;
+
+  const SaveCleaningTransactionEvent(this.transaction);
+
+  @override
+  List<Object> get props => [transaction];
+}
+
+

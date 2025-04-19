@@ -28,7 +28,7 @@ class AppColors {
 
 class AppStrings {
   static const orderTitle = 'Đơn hàng của bạn';
-  static const searchHint = 'Tìm kiếm đơn hàng theo mã đơn';
+  static const searchHint = 'Mã đơn hàng';
   static const cleanServiceTab = 'Dọn dẹp';
   static const laundryServiceTab = 'Giặt sấy';
   static const emptyOrderMessage = 'Chưa có đơn hàng nào';
@@ -61,7 +61,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
     _searchController.dispose();
     super.dispose();
   }
-
 
   @override
   void initState() {
@@ -97,7 +96,9 @@ class _OrderListScreenState extends State<OrderListScreen> {
   }
 
   void _applyStatusCleanFilters() {
-    context.read<OrderBloc>().add(GetOrdersByUserEvent(search: _selectedStatus?.name));
+    context
+        .read<OrderBloc>()
+        .add(GetOrdersByUserEvent(search: _selectedStatus?.name));
   }
 
   @override
@@ -112,16 +113,28 @@ class _OrderListScreenState extends State<OrderListScreen> {
               selectedCategory: _selectedCategory,
               onCategorySelected: _switchCategory,
             ),
-            SearchBar(
-              controller: _searchController,
-              onChanged: (_) {
-                if (_selectedCategory == 'clean') {
-                  _applyCleanFilters();
-                }
-              },
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: SizeConfig.hem * 20,
+                vertical: SizeConfig.fem * 8,
+              ),
+              child: Row(
+                children: [
+                  SizedBox(child: _buildStatusDropdown()),
+                  SizedBox(width: SizeConfig.fem * 8),
+                  Expanded(
+                    child: SearchBar(
+                      controller: _searchController,
+                      onChanged: (_) {
+                        if (_selectedCategory == 'clean') {
+                          _applyCleanFilters();
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
-            _buildStatusDropdown(),
-
             Expanded(
               child: _selectedCategory == 'clean'
                   ? _buildCleanOrdersContent()
@@ -192,36 +205,43 @@ class _OrderListScreenState extends State<OrderListScreen> {
   }
 
   Widget _buildStatusDropdown() {
-    return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: 16 * SizeConfig.fem,
-        vertical: 8 * SizeConfig.hem,
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 12 * SizeConfig.fem),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12 * SizeConfig.fem),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: DropdownButtonHideUnderline(
+    return DropdownButtonHideUnderline(
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: SizeConfig.fem * 120,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12 * SizeConfig.fem),
+          border: Border.all(color: Colors.grey[300]!),
+        ),
         child: DropdownButton<OrderStatus>(
           value: _selectedStatus,
           isExpanded: true,
-          hint: Text(
-            'Chọn trạng thái',
-            style: GoogleFonts.poppins(
-              color: Colors.grey[600],
-              fontSize: 15 * SizeConfig.ffem,
+          hint: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12 * SizeConfig.fem),
+            child: Text(
+              'Trạng thái',
+              style: GoogleFonts.poppins(
+                color: Colors.grey[600],
+                fontSize: 12 * SizeConfig.ffem,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
-          icon: Icon(
-            Icons.arrow_drop_down,
-            color: Colors.grey[600],
-            size: 28 * SizeConfig.ffem,
+          icon: Padding(
+            padding: EdgeInsets.only(right: 8 * SizeConfig.fem),
+            child: Icon(
+              Icons.arrow_drop_down,
+              color: Colors.grey[600],
+              size: 24 * SizeConfig.ffem,
+            ),
           ),
+          underline: Container(),
           style: GoogleFonts.poppins(
             color: Colors.black87,
-            fontSize: 15 * SizeConfig.ffem,
+            fontSize: 14 * SizeConfig.ffem,
           ),
           dropdownColor: Colors.white,
           onChanged: (OrderStatus? newValue) {
@@ -238,34 +258,48 @@ class _OrderListScreenState extends State<OrderListScreen> {
             // Add a "All" option
             DropdownMenuItem<OrderStatus>(
               value: null,
-              child: Text(
-                'Tất cả trạng thái',
-                style: GoogleFonts.poppins(
-                  color: Colors.black87,
-                  fontSize: 15 * SizeConfig.ffem,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12 * SizeConfig.fem),
+                child: Text(
+                  'Tất cả',
+                  style: GoogleFonts.poppins(
+                    color: Colors.black87,
+                    fontSize: 12 * SizeConfig.ffem,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ),
             ),
             // Add specific status options
-            ...OrderStatus.values.map<DropdownMenuItem<OrderStatus>>((OrderStatus status) {
+            ...OrderStatus.values
+                .map<DropdownMenuItem<OrderStatus>>((OrderStatus status) {
               return DropdownMenuItem<OrderStatus>(
                 value: status,
-                child: Row(
-                  children: [
-                    Icon(
-                      status.icon,
-                      color: status.color,
-                      size: 20 * SizeConfig.ffem,
-                    ),
-                    SizedBox(width: 8 * SizeConfig.fem),
-                    Text(
-                      status.displayName,
-                      style: GoogleFonts.poppins(
+                child: Padding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12 * SizeConfig.fem),
+                  child: Row(
+                    children: [
+                      Icon(
+                        status.icon,
                         color: status.color,
-                        fontSize: 15 * SizeConfig.ffem,
+                        size: 20 * SizeConfig.ffem,
                       ),
-                    ),
-                  ],
+                      SizedBox(width: 8 * SizeConfig.fem),
+                      Expanded(
+                        child: Text(
+                          status.displayName,
+                          style: GoogleFonts.poppins(
+                            color: status.color,
+                            fontSize: 14 * SizeConfig.ffem,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }).toList(),
@@ -275,7 +309,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
     );
   }
 }
-
 
 // Extracted Widgets
 class FilterTabs extends StatelessWidget {
@@ -349,10 +382,10 @@ class SearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: SizeConfig.hem * 20,
         vertical: SizeConfig.fem * 10,
       ),
       child: Container(
+        height: SizeConfig.fem * 48,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -446,8 +479,8 @@ class CleanOrderCard extends StatelessWidget {
       dateText: order.timeSlotDetail ?? 'Đặt ngay',
       orderCode: order.code != null
           ? order.code!.length > 20
-          ? (order.code?.substring(0, 20) ?? 'Không xác định') + '...'
-          : (order.code ?? 'Không xác định')
+              ? (order.code?.substring(0, 20) ?? 'Không xác định') + '...'
+              : (order.code ?? 'Không xác định')
           : 'Không xác định',
       totalAmount: order.totalAmount?.toDouble() ?? 0,
     );
@@ -560,7 +593,8 @@ class OrderCardBase extends StatelessWidget {
 class ServiceTypeLabel extends StatelessWidget {
   final String serviceType;
 
-  const ServiceTypeLabel({Key? key, required this.serviceType}) : super(key: key);
+  const ServiceTypeLabel({Key? key, required this.serviceType})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

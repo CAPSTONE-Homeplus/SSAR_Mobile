@@ -20,7 +20,7 @@ class LaundryItemTypeMapper {
       maxWeight: map['maxWeight'],
       standardProcessingTime: map['standardProcessingTime'],
       serviceTypeId: map['serviceTypeId'],
-      serviceTypeName: map['serviceTypeName'],
+      serviceType: map['serviceType'],
     );
   }
 
@@ -44,7 +44,7 @@ class LaundryItemTypeMapper {
       'maxWeight': laundryItemType.maxWeight,
       'standardProcessingTime': laundryItemType.standardProcessingTime,
       'serviceTypeId': laundryItemType.serviceTypeId,
-      'serviceTypeName': laundryItemType.serviceTypeName,
+      'serviceType': laundryItemType.serviceType,
     };
   }
 }
