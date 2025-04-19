@@ -66,6 +66,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     final authLocalDataSource = AuthLocalDataSource();
     String? accessToken = await authLocalDataSource.getAccessTokenFromStorage();
+    print('📤 Load accessToken: $accessToken');
 
     if (accessToken != null && accessToken.isNotEmpty) {
       _updateAuthorizationHeaders(accessToken);

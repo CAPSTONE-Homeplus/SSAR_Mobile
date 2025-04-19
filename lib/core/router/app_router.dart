@@ -342,7 +342,7 @@ class AppRouter {
   }
 
   static void navigateToLaundryOrderDetail(String? orderId) {
-    Get.offAllNamed(routeLaundryOrderDetail, arguments: orderId);
+    Get.offNamed(routeLaundryOrderDetail, arguments: orderId);
   }
 
   static void navigateToRatingScreen(String? orderId) {

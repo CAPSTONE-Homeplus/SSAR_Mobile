@@ -2,8 +2,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_clean/core/constant/colors.dart';
+import 'package:home_clean/presentation/laundry_screens/choose_item_type_screen/widget/continue_button.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 
+import '../../../core/router/app_router.dart';
 import '../../../data/laundry_repositories/laundry_order_repo.dart';
 import '../../../domain/entities/laundry_item_type/laundry_item_type.dart';
 import '../../blocs/additional_service/additional_service_bloc.dart';
@@ -14,8 +16,11 @@ import '../../blocs/laundry_item_type/laundry_item_type_event.dart';
 import '../../blocs/laundry_item_type/laundry_item_type_state.dart';
 import '../../laundry_blocs/order/laundry_order_bloc.dart';
 import '../../laundry_blocs/order/laundry_order_event.dart';
+import '../../laundry_blocs/order/laundry_order_state.dart';
 import '../../widgets/currency_display.dart';
 import '../../widgets/show_dialog.dart';
+
+enum ServiceType { perKg, perItem }
 
 class ChooseItemTypeScreen extends StatefulWidget {
   final String serviceId;
@@ -42,18 +47,97 @@ class _ChooseItemTypeScreenState extends State<ChooseItemTypeScreen> {
     'Set': 'assets/icons/set.png',
   };
   String? _selectedCategory;
+  ServiceType? serviceMode;
 
-  // Method to update quantity
-  void _updateQuantity(LaundryItemType itemType, int change) {
+  void updateItemAndAddToOrder(LaundryItemType itemType, int change) {
     setState(() {
       final key = itemType.id?.toString() ?? itemType.name ?? 'unknown';
       _itemQuantities[key] = (_itemQuantities[key] ?? 0) + change;
-
-      // Ensure quantity doesn't go below zero
       if (_itemQuantities[key]! < 0) {
         _itemQuantities[key] = 0;
       }
+      final newItem = OrderDetailsRequest(
+        itemTypeId: itemType.id?.toString(),
+        quantity: _itemQuantities[key],
+      );
+      final existingIndex = orderDetails.indexWhere(
+          (existingItem) => existingItem.itemTypeId == newItem.itemTypeId);
+
+      if (existingIndex != -1) {
+        orderDetails[existingIndex] = OrderDetailsRequest(
+          itemTypeId: newItem.itemTypeId,
+          quantity: newItem.quantity ?? orderDetails[existingIndex].quantity,
+        );
+      } else {
+        orderDetails.add(newItem);
+      }
     });
+  }
+
+  void _placeOrder() {
+    if (orderDetails.isEmpty && serviceMode == ServiceType.perItem) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Vui lòng chọn ít nhất một loại đồ'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+    final requestData = LaOrderRequest(
+      name: 'Đơn Giặt',
+      type: '',
+      extraField: null,
+      appliedDiscountId: null,
+      orderDetailsRequest: orderDetails,
+      additionalServiceIds: selectedServiceId,
+    );
+
+    showCustomDialog(
+      context: context,
+      message: 'Bạn có chắc chắn muốn đặt hàng không?',
+      type: DialogType.info,
+      onConfirm: () {
+        // Add the event to create the order
+        context
+            .read<LaundryOrderBloc>()
+            .add(CreateLaundryOrderEvent(requestData));
+
+        // After confirming, show a loading dialog with BlocListener
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (dialogContext) => BlocListener<LaundryOrderBloc, LaundryOrderState>(
+            listener: (listenerContext, state) {
+              if (state is CreateLaundrySuccess) {
+                Navigator.of(context, rootNavigator: true).pop();
+                AppRouter.navigateToLaundryOrderDetail(
+                  state.order.id,
+                );
+              }
+
+              if (state is LaundryOrderFailure) {
+                Navigator.of(context, rootNavigator: true).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.errorMessage ?? 'Đã có lỗi xảy ra'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primaryColor,
+              ),
+            ),
+          ),
+        );
+      },
+      confirmButtonText: 'Tiếp Tục',
+      onCancel: () {},
+    );
   }
 
   // Build quantity counter for a specific item type
@@ -106,9 +190,10 @@ class _ChooseItemTypeScreenState extends State<ChooseItemTypeScreen> {
             ),
             padding: EdgeInsets.all(8),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 GestureDetector(
-                  onTap: () => _updateQuantity(itemType, -1),
+                  onTap: () => updateItemAndAddToOrder(itemType, -1),
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
@@ -126,7 +211,9 @@ class _ChooseItemTypeScreenState extends State<ChooseItemTypeScreen> {
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  width: 40,
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(vertical: 8),
                   color: Colors.grey[200],
                   child: Text(
                     '$quantity',
@@ -137,7 +224,7 @@ class _ChooseItemTypeScreenState extends State<ChooseItemTypeScreen> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () => _updateQuantity(itemType, 1),
+                  onTap: () => updateItemAndAddToOrder(itemType, 1),
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
@@ -206,33 +293,6 @@ class _ChooseItemTypeScreenState extends State<ChooseItemTypeScreen> {
     });
   }
 
-  void _placeOrder() {
-    final requestData = LaOrderRequest(
-      name: 'Đơn Giặt',
-      type: '',
-      extraField: null,
-      appliedDiscountId: null,
-      orderDetailsRequest: orderDetails,
-      additionalServiceIds: selectedServiceId,
-    );
-
-    showCustomDialog(
-        context: context,
-        message: 'Bạn có chắc chắn muốn đặt dịch vụ này? '
-            'Lưu ý rằng đối với số giặt theo kg, '
-            'nhân viên sẽ gọi bạn sau khi đã giặt xong'
-            ' và bạn sẽ thanh toán số tiền cuối cùng '
-            'trong app để nhân viên có thể giao hàng tới cho bạn.',
-        type: DialogType.info,
-        onConfirm: () {
-          context
-              .read<LaundryOrderBloc>()
-              .add(CreateLaundryOrderEvent(requestData));
-        },
-        confirmButtonText: 'Tiếp Tục',
-        onCancel: () {});
-  }
-
   Widget _buildPriceOnly(LaundryItemType itemType) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -240,20 +300,64 @@ class _ChooseItemTypeScreenState extends State<ChooseItemTypeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Giặt ${itemType.name}',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            'Giá giặt ${itemType.name?.toLowerCase() ?? 'đồ'}',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
           ),
-          const SizedBox(height: 8),
+          CurrencyDisplay(
+            price: itemType.pricePerKg,
+            fontSize: 16,
+            iconSize: 16,
+            unit: ' /kg',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPolicy() {
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.yellow.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.yellow.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Giá 1 kg'),
-              CurrencyDisplay(
-                price: itemType.pricePerKg,
-                fontSize: 16,
-                iconSize: 16,
+              Icon(
+                Icons.info_outline,
+                color: Colors.orange.shade700,
+                size: 20,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Chính sách dịch vụ',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange.shade700,
+                ),
               ),
             ],
+          ),
+          SizedBox(height: 8),
+          Text(
+            '• Nhân viên sẽ đến lấy đồ và phân loại tại xưởng giặt\n'
+            '• Sau khi phân loại, chúng tôi sẽ liên hệ để bạn xác nhận đơn hàng và thanh toán. Nếu không đồng ý, bạn có thể chọn hình thức hoàn trả phù hợp\n'
+            '• Kiểm tra kỹ đồ trước khi giao\n'
+            '• Chúng tôi không chịu trách nhiệm với các hư hỏng phát sinh sau khi giao dịch\n',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
+              height: 1.5,
+            ),
           ),
         ],
       ),
@@ -309,6 +413,19 @@ class _ChooseItemTypeScreenState extends State<ChooseItemTypeScreen> {
                 : state.laundryItemTypes.items
                     .where((item) => item.category == _selectedCategory)
                     .toList();
+
+            final isPerKgService =
+                filteredItems.any((item) => item.serviceType == "PerKg");
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (serviceMode !=
+                  (isPerKgService ? ServiceType.perKg : ServiceType.perItem)) {
+                setState(() {
+                  serviceMode =
+                      isPerKgService ? ServiceType.perKg : ServiceType.perItem;
+                });
+              }
+            });
             return SingleChildScrollView(
               child: Center(
                 child: Container(
@@ -368,41 +485,12 @@ class _ChooseItemTypeScreenState extends State<ChooseItemTypeScreen> {
                         ),
                       ),
                       _buildAdditionalServicesSection(),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            final selectedItems =
-                                state.laundryItemTypes.items.where((itemType) {
-                              final key = itemType.id?.toString() ??
-                                  itemType.name ??
-                                  'unknown';
-                              return (_itemQuantities[key] ?? 0) > 0;
-                            }).toList();
-
-                            if (selectedItems.isNotEmpty) {}
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Tiếp theo',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      _buildPolicy(),
+                      const SizedBox(height: 8),
+                      ContinueButton(
+                        onPressed: () {
+                          _placeOrder();
+                        },
                       ),
                     ],
                   ),
