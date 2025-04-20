@@ -8,4 +8,5 @@ abstract class ServiceRepository {
     int? page,
     int? size,
   );
+  Future<Service> getServiceById(String id);
 }

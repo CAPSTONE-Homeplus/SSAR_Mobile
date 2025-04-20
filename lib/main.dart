@@ -171,9 +171,7 @@ class HomeClean extends StatelessWidget {
           BlocProvider(
               create: (context) => ServiceBloc(
                     getServicesUseCase: sl(),
-                    // saveSelectedServiceIds: sl(),
-                    // getSelectedServiceIds: sl(),
-                    // clearSelectedServiceIds: sl()
+                    serviceRepository: sl(),
                   )),
           BlocProvider(
               create: (context) => ServiceCategoryBloc(

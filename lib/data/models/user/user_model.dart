@@ -10,6 +10,7 @@ class UserModel {
   String? role;
   String? email;
   String? phoneNumber;
+  String? citizenCode;
 
   UserModel({
     this.id,
@@ -23,6 +24,7 @@ class UserModel {
     this.role,
     this.email,
     this.phoneNumber,
+    this.citizenCode,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,7 @@ class UserModel {
       role: json['role'],
       email: json['email'],
       phoneNumber: json['phoneNumber'],
+      citizenCode: json['citizenCode'],
     );
   }
 
@@ -54,6 +57,7 @@ class UserModel {
       'role': role,
       'email': email,
       'phoneNumber': phoneNumber,
+      'citizenCode': citizenCode,
     };
   }
 }

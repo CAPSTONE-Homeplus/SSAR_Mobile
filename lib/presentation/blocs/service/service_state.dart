@@ -44,3 +44,11 @@ class ServiceExceptionState extends ServiceState {
   ServiceExceptionState({required this.message});
 }
 
+class GetServiceByIdState extends ServiceState {
+  final Service service;
+
+  GetServiceByIdState({required this.service});
+}
+
+
+

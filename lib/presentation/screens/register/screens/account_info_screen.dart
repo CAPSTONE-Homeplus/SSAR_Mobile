@@ -17,6 +17,7 @@ class AccountInfoScreen extends StatefulWidget {
   final String email;
   final String buildingCode;
   final String houseCode;
+  final String citizenCode;
   final Function(
       String fullName,
       String phoneNumber,
@@ -25,6 +26,7 @@ class AccountInfoScreen extends StatefulWidget {
       String houseCode,
       String username,
       String password,
+      String citizenCode,
       ) onRegister;
 
   final Function() onBack;
@@ -38,6 +40,7 @@ class AccountInfoScreen extends StatefulWidget {
     required this.buildingCode,
     required this.houseCode,
     required this.onRegister,
+    required this.citizenCode,
     required this.onBack,
   });
 
@@ -111,6 +114,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                           houseCode: widget.houseCode,
                           phoneNumber: widget.phoneNumber,
                           email: widget.email,
+                          citizenCode: widget.citizenCode,
                         ),
                       );
                     } else if (state is UserError) {
@@ -133,7 +137,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                         _isRegistering = false;
                       });
 
-                      AppRouter.navigateToLogin();
+                      AppRouter.navigateToRegisterSuccess();
                     } else if (state is RegisterFailed) {
                       setState(() {
                         _isRegistering = false;

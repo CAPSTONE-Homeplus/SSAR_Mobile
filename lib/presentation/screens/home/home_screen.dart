@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_clean/core/router/app_router.dart';
@@ -44,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
   House? house;
   Building? building;
   bool isLoading = true;
+  bool hasError = false;
 
   @override
   void initState() {
@@ -53,30 +56,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _init() async {
     try {
-      setState(() => isLoading = true);
+      setState(() {
+        isLoading = true;
+        hasError = false;
+      });
 
+      // Initialize blocs
       _walletBloc = context.read<WalletBloc>();
       _authBloc = context.read<AuthBloc>();
       _houseBloc = context.read<HouseBloc>();
       _buildingBloc = context.read<BuildingBloc>();
+
+      // Dispatch initial events
       context.read<ServiceBloc>().add(GetServicesEvent());
       _walletBloc.add(GetWallet());
       _authBloc.add(GetUserFromLocal());
 
-      await _processUser();
-      if (user?.houseId != null) {
-        _houseBloc.add(GetHouseById(houseId: user!.houseId!));
-        await _processHouse();
-      }
-
-      if (house?.buildingId != null) {
-        _buildingBloc.add(GetBuilding(buildingId: house!.buildingId!));
-        await _processBuilding();
-      }
-
+      // Process data sequentially
+      await _processAuthentication();
+      await _processHouseAndBuilding();
       await _processWallet();
     } catch (e) {
-      print('Error: $e');
+      print('Initialization Error: $e');
+      if (mounted) {
+        setState(() {
+          hasError = true;
+        });
+      }
     } finally {
       if (mounted) {
         setState(() => isLoading = false);
@@ -84,76 +90,120 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _processAuthentication() async {
+    try {
+      final state = _authBloc.state;
+      if (state is AuthenticationFromLocal) {
+        user = state.user;
+      } else {
+        final completer = Completer<void>();
+        late StreamSubscription<AuthState> subscription;
+
+        subscription = _authBloc.stream.listen(
+              (state) {
+            if (state is AuthenticationFromLocal) {
+              user = state.user;
+              subscription.cancel();
+              completer.complete();
+            } else if (state is AuthenticationFailed) {
+              subscription.cancel();
+              completer.completeError(state.error);
+            }
+          },
+          onError: (error) {
+            subscription.cancel();
+            completer.completeError(error);
+          },
+          cancelOnError: true,
+        );
+
+        await completer.future;
+      }
+    } catch (e) {
+      print('Authentication Process Error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> _processHouseAndBuilding() async {
+    if (user?.houseId == null) return;
+
+    try {
+      // Fetch House
+      _houseBloc.add(GetHouseById(houseId: user!.houseId!));
+      final houseState = await _waitForState<HouseState, HouseLoadedById>(
+        _houseBloc,
+            (state) => state is HouseLoadedById,
+      );
+      house = houseState.house;
+
+      // Fetch Building if house has a building ID
+      if (house?.buildingId != null) {
+        _buildingBloc.add(GetBuilding(buildingId: house!.buildingId!));
+        final buildingState = await _waitForState<BuildingState, OneBuildingLoaded>(
+          _buildingBloc,
+              (state) => state is OneBuildingLoaded,
+        );
+        building = buildingState.building;
+      }
+    } catch (e) {
+      print('House and Building Process Error: $e');
+      rethrow;
+    }
+  }
+
   Future<void> _processWallet() async {
-    final state = _walletBloc.state;
-    if (state is WalletLoaded) {
-      walletUser = state.wallets;
-      return;
-    }
-
-    await for (final newState in _walletBloc.stream) {
-      if (newState is WalletLoaded && mounted) {
-        walletUser = newState.wallets;
-        break;
+    try {
+      final state = _walletBloc.state;
+      if (state is WalletLoaded) {
+        walletUser = state.wallets;
+      } else {
+        final walletState = await _waitForState<WalletState, WalletLoaded>(
+          _walletBloc,
+              (state) => state is WalletLoaded,
+        );
+        walletUser = walletState.wallets;
       }
+    } catch (e) {
+      print('Wallet Process Error: $e');
+      rethrow;
     }
   }
 
-  Future<void> _processUser() async {
-    final state = _authBloc.state;
-    if (state is AuthenticationFromLocal) {
-      user = state.user;
-      return;
-    }
+  // Generic method to wait for a specific state
+  Future<T> _waitForState<S, T>(Bloc bloc, bool Function(S) predicate) {
+    final completer = Completer<T>();
+    late StreamSubscription subscription;
 
-    await for (final newState in _authBloc.stream) {
-      if (newState is AuthenticationFromLocal && mounted) {
-        user = newState.user;
-        break;
-      }
-    }
+    subscription = bloc.stream.listen(
+          (state) {
+        if (predicate(state)) {
+          subscription.cancel();
+          completer.complete(state);
+        }
+      },
+      onError: (error) {
+        subscription.cancel();
+        completer.completeError(error);
+      },
+      cancelOnError: true,
+    );
+
+    return completer.future;
   }
-
-  Future<void> _processHouse() async {
-    final state = _houseBloc.state;
-    if (state is HouseLoadedById) {
-      house = state.house;
-      return;
-    }
-
-    await for (final newState in _houseBloc.stream) {
-      if (newState is HouseLoadedById && mounted) {
-        house = newState.house;
-        break;
-      }
-    }
-  }
-
-
-  Future<void> _processBuilding() async {
-    final state = _buildingBloc.state;
-    if (state is OneBuildingLoaded) {
-      building = state.building;
-      return;
-    }
-
-    await for (final newState in _buildingBloc.stream) {
-      if (newState is OneBuildingLoaded && mounted) {
-        building = newState.building;
-        break;
-      }
-    }
-  }
-
-
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ServiceBloc, ServiceState>(
       builder: (context, state) {
         if (state is ServiceLoadingState || isLoading) {
           return HomeScreenLoading();
-        } else if (state is ServiceSuccessState && !isLoading) {
+        }
+
+        if (hasError) {
+          return _buildErrorScreen();
+        }
+
+        if (state is ServiceSuccessState) {
           return HomeScreenBody(
             servicesToFetch: state.services.items,
             walletUser: walletUser,
@@ -161,9 +211,9 @@ class _HomeScreenState extends State<HomeScreen> {
             house: house ?? House(),
             building: building ?? Building(),
           );
-        } else {
-          return _buildErrorScreen();
         }
+
+        return _buildErrorScreen();
       },
     );
   }

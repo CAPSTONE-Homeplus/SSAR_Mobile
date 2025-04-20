@@ -63,6 +63,42 @@ extension LaundryOrderStatusExtension on LaundryOrderStatus {
         throw ArgumentError('Invalid status: $status');
     }
   }
+}
 
+enum TaskStatusEnum { Pending, InProgress, Completed }
 
+extension TaskStatusEnumExtension on TaskStatusEnum {
+  static TaskStatusEnum fromString(String value) {
+    switch (value) {
+      case 'Pending':
+        return TaskStatusEnum.Pending;
+      case 'InProgress':
+        return TaskStatusEnum.InProgress;
+      case 'Completed':
+        return TaskStatusEnum.Completed;
+      default:
+        throw ArgumentError(
+            'Không thể chuyển đổi "$value" thành TaskStatusEnum');
+    }
+  }
+
+  String get name => switch (this) {
+        TaskStatusEnum.Pending => 'Chờ xử lý',
+        TaskStatusEnum.InProgress => 'Đang thực hiện',
+        TaskStatusEnum.Completed => 'Hoàn thành',
+      };
+
+  Color get color => switch (this) {
+        TaskStatusEnum.Pending => Colors.orange.shade600,
+        TaskStatusEnum.InProgress => Colors.blue.shade600,
+        TaskStatusEnum.Completed => Colors.green.shade600,
+      };
+
+  IconData get iconData => switch (this) {
+        TaskStatusEnum.Pending => Icons.pending,
+        TaskStatusEnum.InProgress => Icons.hourglass_empty,
+        TaskStatusEnum.Completed => Icons.check_circle,
+      };
+
+  Widget get iconWidget => Icon(iconData, color: color);
 }

@@ -29,3 +29,10 @@ class CancelOrder extends OrderEvent {
 
   CancelOrder(this.orderId, this.cancellationRequest);
 }
+
+class ReOrderEvent extends OrderEvent {
+  final CreateOrder createOrder;
+  final String oldOrderId;
+
+  ReOrderEvent(this.createOrder, this.oldOrderId);
+}

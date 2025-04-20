@@ -36,3 +36,16 @@ class OrderCancelled extends OrderState {
   OrderCancelled(this.isCancelled);
 }
 
+// reorder
+class ReOrderCreated extends OrderState {
+  final Orders order;
+
+  ReOrderCreated(this.order);
+}
+class ReOrderError extends OrderState {
+  final String message;
+
+  ReOrderError(this.message);
+}
+class ReOrderLoading extends OrderState {}
+class ReOrderInitial extends OrderState {}

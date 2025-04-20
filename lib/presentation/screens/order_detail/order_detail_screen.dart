@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 import 'package:intl/intl.dart';
@@ -32,9 +33,8 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
   final Color backgroundColor = const Color(0xFFF8F9FA);
   final Color cardColor = Colors.white;
   final Color errorColor = const Color(0xFFFF3B30);
-   Staff? _loadedStaff;
+  Staff? _loadedStaff;
   bool _staffFetched = false;
-
 
   @override
   void initState() {
@@ -55,6 +55,7 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
       return dateTimeString;
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,7 +122,8 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                                     vertical: 12 * SizeConfig.hem,
                                   ),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8 * SizeConfig.fem),
+                                    borderRadius: BorderRadius.circular(
+                                        8 * SizeConfig.fem),
                                   ),
                                 ),
                                 child: Text(
@@ -143,7 +145,9 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (!_staffFetched && state.order.employeeId != null) {
                         _staffFetched = true;
-                        context.read<StaffBloc>().add(GetStaffById(state.order.employeeId!));
+                        context
+                            .read<StaffBloc>()
+                            .add(GetStaffById(state.order.employeeId!));
                       }
                     });
 
@@ -547,6 +551,7 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
       ),
     );
   }
+
   Widget _buildExtraServicesAndOptionsCard(Orders orders) {
     // Combine and check if either list has items
     final hasExtraServicesOrOptions =
@@ -590,54 +595,57 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
             // Extra Services Section
             if (orders.extraServices?.isNotEmpty == true)
               Column(
-                children: orders.extraServices!.map((service) => Padding(
-                  padding: EdgeInsets.only(bottom: 12 * SizeConfig.hem),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 48 * SizeConfig.fem,
-                        height: 48 * SizeConfig.hem,
-                        decoration: BoxDecoration(
-                          color: primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8 * SizeConfig.fem),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.add_circle_outline,
-                            color: primaryColor,
-                            size: 24 * SizeConfig.ffem,
+                children: orders.extraServices!
+                    .map((service) => Padding(
+                          padding: EdgeInsets.only(bottom: 12 * SizeConfig.hem),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 48 * SizeConfig.fem,
+                                height: 48 * SizeConfig.hem,
+                                decoration: BoxDecoration(
+                                  color: primaryColor.withOpacity(0.1),
+                                  borderRadius:
+                                      BorderRadius.circular(8 * SizeConfig.fem),
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    Icons.add_circle_outline,
+                                    color: primaryColor,
+                                    size: 24 * SizeConfig.ffem,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 16 * SizeConfig.fem),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      service.name ?? 'Dịch vụ không xác định',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.black87,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15 * SizeConfig.ffem,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4 * SizeConfig.hem),
+                                    Text(
+                                      'Chi tiết dịch vụ bổ sung',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.black54,
+                                        fontSize: 13 * SizeConfig.ffem,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              CurrencyDisplay(price: service.price ?? 0),
+                            ],
                           ),
-                        ),
-                      ),
-                      SizedBox(width: 16 * SizeConfig.fem),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              service.name ?? 'Dịch vụ không xác định',
-                              style: GoogleFonts.poppins(
-                                color: Colors.black87,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 15 * SizeConfig.ffem,
-                              ),
-                            ),
-                            SizedBox(height: 4 * SizeConfig.hem),
-                            Text(
-                              'Chi tiết dịch vụ bổ sung',
-                              style: GoogleFonts.poppins(
-                                color: Colors.black54,
-                                fontSize: 13 * SizeConfig.ffem,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      CurrencyDisplay(price: service.price ?? 0),
-                    ],
-                  ),
-                )).toList(),
+                        ))
+                    .toList(),
               ),
 
             // Options Section
@@ -649,54 +657,60 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                       height: 24 * SizeConfig.hem,
                       color: Colors.grey[300],
                     ),
-                  ...orders.options!.map((option) => Padding(
-                    padding: EdgeInsets.only(bottom: 12 * SizeConfig.hem),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 48 * SizeConfig.fem,
-                          height: 48 * SizeConfig.hem,
-                          decoration: BoxDecoration(
-                            color: primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8 * SizeConfig.fem),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.check_circle_outline,
-                              color: primaryColor,
-                              size: 24 * SizeConfig.ffem,
+                  ...orders.options!
+                      .map((option) => Padding(
+                            padding:
+                                EdgeInsets.only(bottom: 12 * SizeConfig.hem),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 48 * SizeConfig.fem,
+                                  height: 48 * SizeConfig.hem,
+                                  decoration: BoxDecoration(
+                                    color: primaryColor.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(
+                                        8 * SizeConfig.fem),
+                                  ),
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.check_circle_outline,
+                                      color: primaryColor,
+                                      size: 24 * SizeConfig.ffem,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 16 * SizeConfig.fem),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        option.name ??
+                                            'Lựa chọn không xác định',
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.black87,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 15 * SizeConfig.ffem,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4 * SizeConfig.hem),
+                                      Text(
+                                        'Chi tiết lựa chọn',
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.black54,
+                                          fontSize: 13 * SizeConfig.ffem,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                CurrencyDisplay(price: option.price ?? 0),
+                              ],
                             ),
-                          ),
-                        ),
-                        SizedBox(width: 16 * SizeConfig.fem),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                option.name ?? 'Lựa chọn không xác định',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15 * SizeConfig.ffem,
-                                ),
-                              ),
-                              SizedBox(height: 4 * SizeConfig.hem),
-                              Text(
-                                'Chi tiết lựa chọn',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.black54,
-                                  fontSize: 13 * SizeConfig.ffem,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        CurrencyDisplay(price: option.price ?? 0),
-                      ],
-                    ),
-                  )).toList(),
+                          ))
+                      .toList(),
                 ],
               ),
           ],
@@ -785,12 +799,14 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                 ),
               ],
             )
-          else if (orders.status.toString().toOrderStatus() == OrderStatus.completed)
+          else if (orders.status.toString().toOrderStatus() ==
+              OrderStatus.completed)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Check if customer feedback and employee rating exist
-                if (orders.customerFeedback != null && orders.employeeRating != null)
+                if (orders.customerFeedback != null &&
+                    orders.employeeRating != null)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -817,10 +833,13 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                       ),
                       SizedBox(height: 8 * SizeConfig.hem),
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Expanded(
-                            child: Row(
+                            child: Wrap(
+                              alignment: WrapAlignment.start,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 8 * SizeConfig.fem,
                               children: [
                                 Text(
                                   'Đánh giá của bạn: ${orders.employeeRating}/5',
@@ -835,11 +854,45 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                                   color: Colors.amber,
                                   size: 20 * SizeConfig.ffem,
                                 ),
-                                SizedBox(width: 4 * SizeConfig.fem),
+                                Text(
+                                  'đối với nhân viên ${_loadedStaff?.fullName ?? 'Thông tin nhân viên chưa được cập nhật'}',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.black54,
+                                    fontSize: 14 * SizeConfig.ffem,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                         ],
+                      ),
+                      SizedBox(width: 8 * SizeConfig.fem),
+                      ElevatedButton(
+                        onPressed: () {
+                          AppRouter.navigateToServiceDetail(
+                              orders.serviceId ?? '',
+                              orderIdToReOrder: orders.id,
+                            staff: _loadedStaff);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 24 * SizeConfig.fem,
+                            vertical: 12 * SizeConfig.hem,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(8 * SizeConfig.fem),
+                          ),
+                        ),
+                        child: Text(
+                          'Đăng ký lại dịch vụ',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16 * SizeConfig.ffem,
+                          ),
+                        ),
                       ),
                     ],
                   )
@@ -1127,7 +1180,6 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
             ),
           if (status == OrderStatus.completed ||
               status == OrderStatus.completed)
-
             _buildRatingSupportButton(orders),
           if (status == OrderStatus.pending || status == OrderStatus.draft) ...[
             ElevatedButton(
@@ -1177,12 +1229,12 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.check_circle_outline,
-              color: Colors.green,
+              Icons.feedback,
+              color: AppColors.primaryColor,
             ),
             SizedBox(width: 8 * SizeConfig.fem),
             Text(
-              'Đã đánh giá hỗ trợ',
+              'Đã đánh giá dịch vụ',
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.w600,
                 fontSize: 16 * SizeConfig.ffem,
@@ -1373,104 +1425,6 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildContactMethod({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      margin: EdgeInsets.symmetric(
-        vertical: 8 * SizeConfig.hem,
-        horizontal: 4 * SizeConfig.fem,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16 * SizeConfig.fem),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10 * SizeConfig.fem,
-            offset: Offset(0, 4 * SizeConfig.fem),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16 * SizeConfig.fem),
-          splashColor: const Color(0xFF1CAF7D).withOpacity(0.2),
-          highlightColor: const Color(0xFF1CAF7D).withOpacity(0.1),
-          onTap: onTap,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 16 * SizeConfig.fem,
-              vertical: 12 * SizeConfig.hem,
-            ),
-            child: Row(
-              children: [
-                // Icon container with gradient background
-                Container(
-                  padding: EdgeInsets.all(12 * SizeConfig.fem),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color(0xFF1CAF7D).withOpacity(0.2),
-                        const Color(0xFF1CAF7D).withOpacity(0.4),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(12 * SizeConfig.fem),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: const Color(0xFF1CAF7D),
-                    size: 24 * SizeConfig.ffem,
-                  ),
-                ),
-
-                // Spacer
-                SizedBox(width: 16 * SizeConfig.fem),
-
-                // Text Content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                          fontSize: 15 * SizeConfig.ffem,
-                        ),
-                      ),
-                      Text(
-                        subtitle,
-                        style: GoogleFonts.poppins(
-                          color: Colors.black54,
-                          fontSize: 13 * SizeConfig.ffem,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Trailing Icon
-                Icon(
-                  Icons.chevron_right,
-                  color: Colors.black54,
-                  size: 24 * SizeConfig.ffem,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

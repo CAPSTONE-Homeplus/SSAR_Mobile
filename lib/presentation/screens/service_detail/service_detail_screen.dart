@@ -34,6 +34,7 @@ import '../../../domain/entities/service_in_house_type/house_type.dart';
 import '../../../domain/entities/time_slot/time_slot.dart';
 import '../../blocs/house/house_bloc.dart';
 import '../../blocs/option/option_bloc.dart';
+import '../../blocs/service/service_bloc.dart';
 import '../../blocs/service_in_house_type/service_price_bloc.dart';
 import '../../blocs/service_in_house_type/service_price_event.dart';
 import '../../blocs/service_in_house_type/service_price_state.dart';
@@ -45,9 +46,9 @@ import '../../widgets/step_indicator_widget.dart';
 import '../../widgets/time_drop_down.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
-  final Service service;
+  ServiceDetailArguments? arguments;
 
-  const ServiceDetailScreen({super.key, required this.service});
+  ServiceDetailScreen({super.key, required this.arguments});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -79,11 +80,22 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       status: '',
       code: '');
   final TextEditingController _notesController = TextEditingController();
+  Service service = Service(
+    id: '',
+    name: '',
+    description: '',
+  );
 
   @override
   void initState() {
     super.initState();
-    _init();
+    _initializeService();
+  }
+
+  void _initializeService() {
+    fetchService().then((_) {
+      _init();
+    });
   }
 
   @override
@@ -103,23 +115,22 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       context.read<ServicePriceBloc>().add(
             GetServicePrice(
               houseId: house?.id ?? '',
-              serviceId: widget.service.id ?? '',
+              serviceId: service.id ?? '',
             ),
           );
 
       // Dispatch events to fetch data
       context.read<ServiceActivityBloc>().add(
-            GetServiceActivitiesByServiceIdEvent(
-                serviceId: widget.service.id ?? ''),
+            GetServiceActivitiesByServiceIdEvent(serviceId: service.id ?? ''),
           );
       context
           .read<OptionBloc>()
-          .add(GetOptionsEvent(serviceId: widget.service.id ?? ''));
+          .add(GetOptionsEvent(serviceId: service.id ?? ''));
       context.read<ExtraServiceBloc>().add(
-            GetExtraServices(serviceId: widget.service.id ?? ''),
+            GetExtraServices(serviceId: service.id ?? ''),
           );
       context.read<EquipmentSupplyBloc>().add(
-            GetEquipmentSupplies(serviceId: widget.service.id ?? ''),
+            GetEquipmentSupplies(serviceId: service.id ?? ''),
           );
       context.read<TimeSlotBloc>().add(GetTimeSlotEvents());
     });
@@ -130,9 +141,22 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     house = houseBloc.cachedHouse;
   }
 
+  Future<void> fetchService() async {
+    final serviceBloc = context.read<ServiceBloc>();
+    serviceBloc.add(GetServiceByIdEvent(widget.arguments?.serviceId ?? ''));
+
+    final state = await serviceBloc.stream
+        .firstWhere((state) => state is GetServiceByIdState);
+    if (state is GetServiceByIdState) {
+      setState(() {
+        service = state.service;
+      });
+    }
+  }
+
   void _handleCreateOrder(bool isEmergency) {
     final createOrder = CreateOrder(
-      service: widget.service,
+      service: service,
       option: _selectedOptions,
       extraService: _selectedExtraServices,
       timeSlot: isEmergency
@@ -142,7 +166,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       emergencyRequest: isEmergency,
       address: '',
     );
-    AppRouter.navigateToOrderConfirmation(createOrder);
+    AppRouter.navigateToOrderConfirmation(
+      createOrder,
+      reOrderId: widget.arguments?.orderIdToReOrder,
+      staff: widget.arguments?.staff,
+    );
   }
 
   @override
@@ -210,7 +238,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       child: Scaffold(
         backgroundColor: Colors.grey.shade200,
         appBar: CustomAppBar(
-          title: widget.service.name ?? '',
+          title: (widget.arguments?.orderIdToReOrder != null
+                  ? 'Order lại - '
+                  : '') +
+              (service.name ?? ''),
           onBackPressed: () {
             AppRouter.navigateToHome();
           },
@@ -238,6 +269,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                           _buildJobDetailsSection(),
                           SizedBox(height: 10),
                           _buildNotesField(),
+                          if (widget.arguments?.staff != null) ...[
+                            SizedBox(height: 10),
+                            _buildEmployee(),
+                          ],
                           SizedBox(height: 10),
                           _build(),
                         ],
@@ -631,7 +666,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               ),
               const SizedBox(width: 12),
               Text(
-                '${widget.service.name}',
+                '${service.name}',
                 style: GoogleFonts.poppins(
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
@@ -781,7 +816,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                               ),
                               child: ListTile(
                                 leading: const Icon(
-                                  Icons.check_circle_outline,
+                                  Icons.assignment_outlined,
                                   color: Color(0xFF1CAF7D),
                                 ),
                                 title: Text(
@@ -798,32 +833,31 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                               padding: const EdgeInsets.only(left: 16),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: subActivities
-                                    .map(
-                                      (subActivity) => Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 4.0),
-                                        child: Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.circle,
-                                              size: 8,
-                                              color: Colors.grey,
+                                children: subActivities.asMap().entries.map(
+                                  (entry) {
+                                    final index = entry.key;
+                                    final subActivity = entry.value;
+
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 4.0),
+                                      child: Row(
+                                        children: [
+                                          Text("${index + 1}:"),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            subActivity.name ??
+                                                'Unnamed Sub-Activity',
+                                            style: GoogleFonts.poppins(
+                                              color: Colors.black87,
+                                              fontSize: 14,
                                             ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              subActivity.name ??
-                                                  'Unnamed Sub-Activity',
-                                              style: GoogleFonts.poppins(
-                                                color: Colors.black87,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
-                                    )
-                                    .toList(),
+                                    );
+                                  },
+                                ).toList(),
                               ),
                             ),
                           ],
@@ -859,6 +893,81 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             ),
             maxLines: 3,
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmployee() {
+    final staff = widget.arguments?.staff;
+
+    return _buildSection(
+      title: "Nhân viên được bạn yêu cầu",
+      icon: Icons.person,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (staff != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      '${staff.fullName ?? 'Chưa có tên'}',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.blueGrey.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: RichText(
+                        text: TextSpan(
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.blueGrey[700],
+                            fontWeight: FontWeight.w500,
+                          ),
+                          children: [
+                            const TextSpan(
+                              text: 'Mã nhân viên: ',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            TextSpan(
+                              text: staff.code ?? 'N/A',
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  staff.phoneNumber ?? 'Chưa có số điện thoại',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
+                ),
+              ],
+            )
+          else
+            Text(
+              'Chưa có nhân viên nào được chỉ định',
+              style: GoogleFonts.poppins(
+                color: Colors.grey,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
         ],
       ),
     );

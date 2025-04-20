@@ -71,6 +71,53 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
+  Future<Orders> createReOrder(
+      CreateOrder createOrder, String oldOrderId) async {
+    try {
+      final user =
+          UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
+      final requestData = {
+        "address": createOrder.address,
+        "notes": createOrder.notes.toString(),
+        "emergencyRequest": createOrder.emergencyRequest,
+        if (createOrder.timeSlot.id != null &&
+            createOrder.timeSlot.id.toString().isNotEmpty)
+          'timeSlotId': createOrder.timeSlot.id.toString(),
+        "serviceId": createOrder.service.id.toString(),
+        "userId": user.id.toString(),
+        "houseTypeId": createOrder.houseTypeId.toString(),
+        "optionIds": (createOrder.option).map((e) => e.id).toList(),
+        "extraServiceIds": (createOrder.extraService).map((e) => e.id).toList(),
+      };
+
+      final response = await homeCleanRequest.post(
+        '${ApiConstant.orders}/$oldOrderId/pre-order',
+        data: requestData,
+        queryParameters: {
+          'id': oldOrderId,
+        },
+      );
+
+      if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
+        return OrderMapper.toEntity(
+            OrderMapper.fromMapToOrderModel(response.data));
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      print(e.toString());
+
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
   Future<BaseResponse<Orders>> getOrdersByUser(
       String? search, String? orderBy, int? page, int? size) async {
     try {

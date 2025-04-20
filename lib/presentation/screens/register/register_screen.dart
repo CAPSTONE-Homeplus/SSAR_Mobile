@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:home_clean/presentation/screens/register/screens/account_info_screen.dart';
 import 'package:home_clean/presentation/screens/register/screens/building_info_screen.dart';
 import 'package:home_clean/presentation/screens/register/screens/personal_info_screen.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -17,6 +18,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String _buildingCode = '';
   String _houseCode = '';
   String _username = '';
+  String _citizenCode = '';
   String _password = '';
 
   @override
@@ -27,11 +29,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           initialFullName: _fullName,
           initialPhoneNumber: _phoneNumber,
           initialEmail: _email,
-          onNext: (fullName, phoneNumber, email) {
+          initialCitizenCode: _citizenCode,
+          onNext: (fullName, phoneNumber, email, citizenCode) {
             setState(() {
               _fullName = fullName;
               _phoneNumber = phoneNumber;
               _email = email;
+              _citizenCode = citizenCode;
               _currentStep = 1;
             });
           },
@@ -43,7 +47,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
           fullName: _fullName,
           phoneNumber: _phoneNumber,
           email: _email,
-          onNext: (fullName, phoneNumber, email, buildingCode, houseCode) {
+          citizenCode: _citizenCode,
+          onNext:
+              (fullName, phoneNumber, email, citizen, buildingCode, houseCode) {
             setState(() {
               _buildingCode = buildingCode;
               _houseCode = houseCode;
@@ -64,7 +70,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
           email: _email,
           buildingCode: _buildingCode,
           houseCode: _houseCode,
-          onRegister: (fullName, phoneNumber, email, buildingCode, houseCode, username, password) {
+          citizenCode: _citizenCode,
+          onRegister: (fullName, phoneNumber, email, buildingCode, houseCode,
+              username, password, citizenCode) {
             setState(() {
               _username = username;
               _password = password;

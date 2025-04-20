@@ -57,4 +57,27 @@ class ServiceRepositoryImpl implements ServiceRepository {
       throw ExceptionHandler.handleException(e);
     }
   }
+
+  @override
+  Future<Service> getServiceById(String id) async {
+    try {
+      final response = await homeCleanRequest.get(
+        '${ApiConstant.services}/$id',
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        return ServiceMapper.toEntity(ServiceModel.fromJson(response.data));
+      } else {
+        throw ApiException(
+          traceId: response.data?['traceId'],
+          code: response.data?['code'],
+          message: response.data?['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data?['description'],
+          timestamp: response.data?['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
 }

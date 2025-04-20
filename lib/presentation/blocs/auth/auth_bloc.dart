@@ -80,6 +80,7 @@ class AuthBloc
         houseCode: event.houseCode,
         phoneNumber: event.phoneNumber,
         email: event.email,
+        citizenCode: event.citizenCode,
       ),
     );
 

@@ -81,6 +81,7 @@ class AuthRepositoryImpl implements AuthRepository {
           "houseCode": createUser.houseCode,
           "phoneNumber": "${createUser.phoneNumber}",
           "email": createUser.email,
+          "citizenCode": createUser.citizenCode,
         },
       );
 
@@ -221,7 +222,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<bool> verifyOtp(String email, String otp)async {
+  Future<bool> verifyOtp(String email, String otp) async {
     try {
       final response = await vinWalletRequest.post(
         '${ApiConstant.users}/verify-code',

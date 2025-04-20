@@ -12,11 +12,13 @@ import '../../../widgets/show_dialog.dart';
 class OrderPaymentButton extends StatefulWidget {
   final dynamic order;
   final String selectedWalletId;
+  final VoidCallback? onSuccess;
 
   const OrderPaymentButton({
     Key? key,
     required this.order,
     required this.selectedWalletId,
+    this.onSuccess,
   }) : super(key: key);
 
   @override
@@ -35,26 +37,17 @@ class _OrderPaymentButtonState extends State<OrderPaymentButton> {
       height: 50,
       child: BlocListener<TransactionBloc, TransactionState>(
         listener: (context, state) {
-          if (state is TransactionSuccess) {
+          if (state is LaundryTransactionSuccess) {
             setState(() {
               isLoading = false;
             });
 
-            showCustomDialog(
-                context: context,
-                message: 'Giao dịch thành công',
-                type: DialogType.success,
-                onConfirm: () {
-                  Navigator.of(context).pop();
-                  AppRouter.navigateToLaundryOrderDetail(widget.order.id ?? "");
-                },
-                confirmButtonText: 'Tiếp Tục',
-                onCancel: () {});
-          } else if (state is TransactionLoading) {
+            widget.onSuccess?.call();
+          } else if (state is LaundryTransactionLoading) {
             setState(() {
               isLoading = true;
             });
-          } else if (state is TransactionFailure) {
+          } else if (state is LaundryTransactionFailure) {
             setState(() {
               isLoading = false;
             });
@@ -73,20 +66,21 @@ class _OrderPaymentButtonState extends State<OrderPaymentButton> {
         child: ElevatedButton(
           onPressed: (widget.order.status == 'PendingPayment' && !isLoading)
               ? () {
-            // Tạo và gửi sự kiện thanh toán
-            context.read<TransactionBloc>().add(
-              SaveTransactionEvent(
-                CreateTransaction(
-                  walletId: widget.selectedWalletId,
-                  paymentMethodId: '15890b1a-f5a6-42c3-8f37-541029189722',
-                  amount: '0',
-                  note: 'Thanh toán dịch vụ',
-                  orderId: widget.order.id,
-                  serviceType: 1,
-                ),
-              ),
-            );
-          }
+                  // Tạo và gửi sự kiện thanh toán
+                  context.read<TransactionBloc>().add(
+                        SaveLaundryTransactionEvent(
+                          CreateTransaction(
+                            walletId: widget.selectedWalletId,
+                            paymentMethodId:
+                                '15890b1a-f5a6-42c3-8f37-541029189722',
+                            amount: '0',
+                            note: 'Thanh toán dịch vụ',
+                            orderId: widget.order.id,
+                            serviceType: 1,
+                          ),
+                        ),
+                      );
+                }
               : null, // Các trạng thái khác hoặc đang loading sẽ disable nút
           style: ElevatedButton.styleFrom(
             backgroundColor: primaryColor,
@@ -96,24 +90,25 @@ class _OrderPaymentButtonState extends State<OrderPaymentButton> {
           ),
           child: isLoading
               ? const SizedBox(
-            height: 20,
-            width: 20,
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              strokeWidth: 2.5,
-            ),
-          )
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    strokeWidth: 2.5,
+                  ),
+                )
               : Text(
-            // Hiển thị tên trạng thái hoặc text tương ứng
-            widget.order.status == 'PendingPayment'
-                ? 'Thanh toán'
-                : LaundryOrderStatusExtension.fromString(widget.order.status ?? '').name,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
+                  widget.order.status == 'PendingPayment'
+                      ? 'Thanh toán'
+                      : LaundryOrderStatusExtension.fromString(
+                              widget.order.status ?? '')
+                          .name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
         ),
       ),
     );

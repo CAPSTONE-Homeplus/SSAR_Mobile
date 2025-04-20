@@ -31,11 +31,11 @@ import '../../widgets/step_indicator_widget.dart';
 import 'components/transaction_pop_up.dart';
 
 class OrderConfirmationScreen extends StatefulWidget {
-  final CreateOrder orderDetails;
+  final OrderConfirmationArguments arguments;
 
   const OrderConfirmationScreen({
     super.key,
-    required this.orderDetails,
+    required this.arguments,
   });
 
   @override
@@ -51,6 +51,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   int priceOfHouseType = 0;
   Building? selectedBuilding;
   bool _isProcessing = false;
+  late CreateOrder orderDetails = widget.arguments.createOrder;
 
   @override
   void initState() {
@@ -65,7 +66,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     context.read<ServicePriceBloc>().add(
           GetServicePrice(
             houseId: house?.id ?? '',
-            serviceId: widget.orderDetails.service.id ?? '',
+            serviceId: orderDetails.service.id ?? '',
           ),
         );
   }
@@ -105,8 +106,13 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     if (_isOrdering) return;
 
     setState(() => _isOrdering = true);
-
-    context.read<OrderBloc>().add(CreateOrderEvent(widget.orderDetails));
+    if (widget.arguments.reOrderId != null && widget.arguments.staff != null) {
+      context
+          .read<OrderBloc>()
+          .add(ReOrderEvent(orderDetails, widget.arguments.reOrderId!));
+    } else {
+      context.read<OrderBloc>().add(CreateOrderEvent(orderDetails));
+    }
 
     _stateSubscription = BlocProvider.of<OrderBloc>(context).stream.listen(
       (state) {
@@ -183,23 +189,23 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   void fetchHouse() {
     final houseBloc = context.read<HouseBloc>();
     house = houseBloc.cachedHouse;
-    widget.orderDetails.address = house!.id.toString();
-    widget.orderDetails.houseTypeId = house!.houseTypeId;
+    orderDetails.address = house!.id.toString();
+    orderDetails.houseTypeId = house!.houseTypeId;
   }
 
   int _calculateTotalPrice() {
     int total = 0;
 
     // Add prices from additional options
-    if (widget.orderDetails.option.isNotEmpty) {
-      total += widget.orderDetails.option
+    if (orderDetails.option.isNotEmpty) {
+      total += orderDetails.option
           .map((option) => option.price ?? 0)
           .reduce((a, b) => a + b);
     }
 
     // Add prices from extra services
-    if (widget.orderDetails.extraService.isNotEmpty) {
-      total += widget.orderDetails.extraService
+    if (orderDetails.extraService.isNotEmpty) {
+      total += orderDetails.extraService
           .map((service) => service.price ?? 0)
           .reduce((a, b) => a + b);
     }
@@ -209,7 +215,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       total += priceOfHouseType;
     }
 
-    if (widget.orderDetails.emergencyRequest) {
+    if (orderDetails.emergencyRequest) {
       total += 30000; // Add emergency request fee
     }
 
@@ -222,7 +228,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       appBar: CustomAppBar(
         title: 'Xác nhận',
         onBackPressed: () {
-          AppRouter.navigateToServiceDetail(widget.orderDetails.service);
+          AppRouter.navigateToServiceDetail(orderDetails.service.id ?? '');
         },
       ),
       body: MultiBlocListener(
@@ -283,126 +289,140 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               }
             },
           ),
-
-// Declare this as a class-level variable
         ],
-        child: BlocBuilder<OrderBloc, OrderState>(
-          builder: (context, state) {
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  StepIndicatorWidget(currentStep: 3),
-                  const SizedBox(height: 8),
-                  SectionWidget(
-                    title: 'Chi tiết dịch vụ',
-                    icon: Icons.cleaning_services_outlined,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        DetailRowWidget(
-                          title: 'Dịch vụ',
-                          value: widget.orderDetails.service.name ??
-                              'Dọn dẹp căn hộ',
-                          icon: Icons.home_work_outlined,
-                        ),
-                        const SizedBox(height: 12),
-                        DetailRowWidget(
-                          title: 'Thời gian',
-                          value:
-                              '${widget.orderDetails.timeSlot.startTime} - ${widget.orderDetails.timeSlot.endTime}',
-                          icon: Icons.access_time,
-                        ),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              StepIndicatorWidget(currentStep: 3),
+              const SizedBox(height: 8),
+              SectionWidget(
+                title: 'Chi tiết dịch vụ',
+                icon: Icons.cleaning_services_outlined,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DetailRowWidget(
+                      title: 'Dịch vụ',
+                      value: orderDetails.service.name ?? 'Dọn dẹp căn hộ',
+                      icon: Icons.home_work_outlined,
+                    ),
+                    const SizedBox(height: 12),
+                    DetailRowWidget(
+                      title: 'Thời gian',
+                      value:
+                          '${orderDetails.timeSlot.startTime} - ${orderDetails.timeSlot.endTime}',
+                      icon: Icons.access_time,
+                    ),
+                    DetailRowMultiInfoWidget(
+                      title: 'Nhân viên thực hiện',
+                      icon: Icons.person,
+                      iconColor: Colors.blue,
+                      verticalSpacing: 4,
+                      values: [
+                        {
+                          'label': 'Tên',
+                          'value':
+                              widget.arguments.staff?.fullName ?? 'Chưa có tên',
+                        },
+                        {
+                          'label': 'Mã NV',
+                          'value': widget.arguments.staff?.code ?? 'Chưa có mã',
+                        },
+                        {
+                          'label': 'SĐT',
+                          'value': widget.arguments.staff?.phoneNumber ??
+                              'Chưa có số điện thoại',
+                        },
                       ],
                     ),
-                  ),
-                  SectionWidget(
-                      title: 'Chi phí dịch vụ',
-                      icon: Icons.calculate,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  ],
+                ),
+              ),
+              SectionWidget(
+                  title: 'Chi phí dịch vụ',
+                  icon: Icons.calculate,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Các dịch vụ chọn thêm:',
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (orderDetails.option.isEmpty &&
+                          orderDetails.extraService.isEmpty)
+                        Center(
+                          child: const Text(
+                            'Không có dịch vụ chọn thêm',
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                          ),
+                        )
+                      else ...[
+                        ...orderDetails.option.map(
+                          (option) => _buildOptionItem(
+                            title: option.name ?? '',
+                            price: option.price ?? 0,
+                          ),
+                        ),
+                        ...orderDetails.extraService.map(
+                          (service) => _buildOptionItem(
+                            title: service.name ?? '',
+                            price: service.price ?? 0,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Text(
+                        'Thành tiền:',
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildOptionItem(
+                        title: 'Giá dịch vụ',
+                        price: priceOfHouseType,
+                      ),
+                      if (orderDetails.emergencyRequest)
+                        _buildOptionItem(
+                          title: 'Phí đặt ngay',
+                          price: 30000,
+                        ),
+                      Divider(
+                        color: Colors.grey[300],
+                        thickness: 1,
+                      ),
+                      Row(
                         children: [
                           Text(
-                            'Các dịch vụ chọn thêm:',
+                            'Tổng cộng:',
                             style: GoogleFonts.poppins(
                               fontSize: 15,
                               color: Colors.black,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          if (widget.orderDetails.option.isEmpty && widget.orderDetails.extraService.isEmpty)
-                            Center(
-                              child: const Text(
-                                'Không có dịch vụ chọn thêm',
-                                style: TextStyle(fontSize: 14, color: Colors.grey),
-                              ),
-                            )
-                          else ...[
-                            ...widget.orderDetails.option.map(
-                                  (option) => _buildOptionItem(
-                                title: option.name ?? '',
-                                price: option.price ?? 0,
-                              ),
-                            ),
-                            ...widget.orderDetails.extraService.map(
-                                  (service) => _buildOptionItem(
-                                title: service.name ?? '',
-                                price: service.price ?? 0,
-                              ),
-                            ),
-                          ],
-                          const SizedBox(height: 8),
-
-                          Text(
-                            'Thành tiền:',
-                            style: GoogleFonts.poppins(
-                              fontSize: 15,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          const Spacer(),
+                          CurrencyDisplay(
+                            price: _calculateTotalPrice(),
+                            fontSize: 16,
+                            iconSize: 18,
+                            unit: '',
                           ),
-                          const SizedBox(height: 8),
-                          _buildOptionItem(
-                            title: 'Giá dịch vụ',
-                            price: priceOfHouseType,
-                          ),
-                          if (widget.orderDetails.emergencyRequest)
-                            _buildOptionItem(
-                              title: 'Phí đặt ngay',
-                              price: 30000,
-                            ),
-                          Divider(
-                            color: Colors.grey[300],
-                            thickness: 1,
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                'Tổng cộng:',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 15,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const Spacer(),
-                              CurrencyDisplay(
-                                price: _calculateTotalPrice(),
-                                fontSize: 16,
-                                iconSize: 18,
-                                unit: '',
-                              ),
-                            ],
-                          ),
-
                         ],
-                      )),
-                  _buildWallet(context),
-                  const SizedBox(height: 100),
-                ],
-              ),
-            );
-          },
+                      ),
+                    ],
+                  )),
+              _buildWallet(context),
+              const SizedBox(height: 100),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: _buildBottomBar(context),
@@ -592,35 +612,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildEmergencyBadge() {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.red[50],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.red[100]!),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.flash_on, size: 16, color: Colors.red[700]),
-          const SizedBox(width: 4),
-          Text(
-            'Dịch vụ siêu tốc: ',
-            style: GoogleFonts.poppins(
-              fontSize: 13,
-              color: Colors.red[700],
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          CurrencyDisplay(price: 30000)
-        ],
       ),
     );
   }

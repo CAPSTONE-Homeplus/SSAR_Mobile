@@ -8,10 +8,13 @@ import 'package:home_clean/presentation/blocs/payment_method/payment_method_even
 
 import '../../../domain/entities/transaction/create_transaction.dart';
 import '../../../domain/entities/wallet/wallet.dart';
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_event.dart';
 import '../../blocs/payment_method/payment_method_bloc.dart';
 import '../../blocs/payment_method/payment_method_state.dart';
 import '../../blocs/transaction/transaction_event.dart';
 import '../../blocs/transaction/transation_bloc.dart';
+import '../../blocs/user/user_bloc.dart';
 import '../../blocs/wallet/wallet_bloc.dart';
 import '../../blocs/wallet/wallet_event.dart';
 import '../../blocs/wallet/wallet_state.dart';
@@ -38,6 +41,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
   late String _selectedPaymentId = '';
   final TextEditingController _amountController = TextEditingController();
   late WalletBloc _walletBloc;
+  late UserBloc _userBloc;
   late PaymentMethodBloc _paymentMethodBloc;
   List<Wallet> walletUser = [];
   List<PaymentMethod> paymentMethods = [];
@@ -56,6 +60,29 @@ class _TopUpScreenState extends State<TopUpScreen> {
   void initState() {
     super.initState();
     _init();
+    _initUser();
+  }
+
+
+  Future<void> _initUser() async {
+    final authBloc = context.read<AuthBloc>();
+    authBloc.add(GetUserFromLocal());
+  }
+
+  Future<void> _processUser() async {
+    await for (final state in _walletBloc.stream) {
+      if (state is WalletLoaded && mounted) {
+        setState(() {
+          walletUser = state.wallets;
+          _selectedWalletType = walletUser;
+
+          if (_selectedWalletType.isNotEmpty) {
+            _selectedWalletId = _selectedWalletType[0].id!;
+          }
+        });
+        break;
+      }
+    }
   }
 
 

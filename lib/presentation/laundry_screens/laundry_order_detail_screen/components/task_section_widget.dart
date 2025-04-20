@@ -29,7 +29,9 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
   void initState() {
     super.initState();
     // Load tasks when screen initializes
-    context.read<TaskBloc>().add(FetchOrderTasksEvent(orderId: widget.orders.id ?? ''));
+    context
+        .read<TaskBloc>()
+        .add(FetchOrderTasksEvent(orderId: widget.orders.id ?? ''));
   }
 
   @override
@@ -40,14 +42,15 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
         title: 'Tiến Trình Đơn Hàng ${widget.orders.orderCode}',
         onBackPressed: () {
           AppRouter.navigateToLaundryOrderDetail(
-             widget.orders.id ?? '',
+            widget.orders.id ?? '',
           );
         },
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: StepIndicatorTaskTimelineWidget(orderId: widget.orders.id ?? ''),
+          child:
+              StepIndicatorTaskTimelineWidget(orderId: widget.orders.id ?? ''),
         ),
       ),
     );
@@ -57,7 +60,8 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
 class StepIndicatorTaskTimelineWidget extends StatelessWidget {
   final String orderId;
 
-  const StepIndicatorTaskTimelineWidget({Key? key, required this.orderId}) : super(key: key);
+  const StepIndicatorTaskTimelineWidget({Key? key, required this.orderId})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +172,9 @@ class StepIndicatorTaskTimelineWidget extends StatelessWidget {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              context.read<TaskBloc>().add(FetchOrderTasksEvent(orderId: orderId));
+              context
+                  .read<TaskBloc>()
+                  .add(FetchOrderTasksEvent(orderId: orderId));
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue.shade50,
@@ -204,9 +210,12 @@ class StepIndicatorTaskTimelineWidget extends StatelessWidget {
           itemCount: tasks.length,
           itemBuilder: (context, index) {
             final task = tasks[index];
-            final statusColor = StatusUtility.getStatusColor(task.status);
-            final statusName = StatusUtility.getStatusName(task.status);
-            final statusIcon = StatusUtility.getStatusIcon(task.status);
+            final statusColor = StatusUtility.getStatusColor(
+                TaskStatusEnumExtension.fromString(task.status ?? ''));
+            final statusName = StatusUtility.getStatusName(
+                TaskStatusEnumExtension.fromString(task.status ?? ''));
+            final statusIcon = StatusUtility.getStatusIcon(
+                TaskStatusEnumExtension.fromString(task.status ?? ''));
             final isLastItem = index == tasks.length - 1;
 
             return Container(
@@ -230,11 +239,7 @@ class StepIndicatorTaskTimelineWidget extends StatelessWidget {
                             ),
                           ),
                           child: Center(
-                            child: Icon(
-                              statusIcon,
-                              color: statusColor,
-                              size: 20,
-                            ),
+                            child: statusIcon,
                           ),
                         ),
 
@@ -293,7 +298,8 @@ class StepIndicatorTaskTimelineWidget extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 8),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
                                     color: statusColor.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(12),
@@ -335,7 +341,8 @@ class StepIndicatorTaskTimelineWidget extends StatelessWidget {
                             if (task.completedDate != null)
                               _buildDetailRow(
                                 icon: Icons.check_circle_outline,
-                                text: "Hoàn thành: ${_formatDate(task.completedDate)}",
+                                text:
+                                    "Hoàn thành: ${_formatDate(task.completedDate)}",
                                 color: Colors.green,
                               ),
                           ],
@@ -352,11 +359,8 @@ class StepIndicatorTaskTimelineWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow({
-    required IconData icon,
-    required String text,
-    Color? color
-  }) {
+  Widget _buildDetailRow(
+      {required IconData icon, required String text, Color? color}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -380,11 +384,13 @@ class StepIndicatorTaskTimelineWidget extends StatelessWidget {
       ),
     );
   }
+
   String _formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return "Không có";
     try {
       final date = DateTime.parse(dateStr);
-      return DateFormat('dd/MM/yyyy – HH:mm').format(date); // ví dụ: 15/04/2025 – 12:34
+      return DateFormat('dd/MM/yyyy – HH:mm')
+          .format(date); // ví dụ: 15/04/2025 – 12:34
     } catch (e) {
       return "Không hợp lệ";
     }
@@ -392,46 +398,9 @@ class StepIndicatorTaskTimelineWidget extends StatelessWidget {
 }
 
 class StatusUtility {
-  static String getStatusName(String? status) {
-    if (status == null) return 'Không rõ';
-    try {
-      final enumValue = LaundryOrderStatusExtension.fromString(status);
-      return enumValue.name;
-    } catch (_) {
-      return 'Không rõ';
-    }
-  }
+  static Color getStatusColor(TaskStatusEnum status) => status.color;
 
-  static Color getStatusColor(String? status) {
-    if (status == null) return Colors.grey;
-    try {
-      final enumValue = LaundryOrderStatusExtension.fromString(status);
-      return enumValue.color;
-    } catch (_) {
-      return Colors.grey;
-    }
-  }
+  static String getStatusName(TaskStatusEnum status) => status.name;
 
-  static IconData getStatusIcon(String? status) {
-    if (status == null) return Icons.help_outline;
-    try {
-      final enumValue = LaundryOrderStatusExtension.fromString(status);
-      switch (enumValue) {
-        case LaundryOrderStatus.draft:
-          return Icons.edit_note;
-        case LaundryOrderStatus.pendingPayment:
-          return Icons.payment;
-        case LaundryOrderStatus.processing:
-          return Icons.sync;
-        case LaundryOrderStatus.completed:
-          return Icons.check_circle;
-        case LaundryOrderStatus.cancelled:
-          return Icons.cancel;
-        case LaundryOrderStatus.paid:
-          return Icons.attach_money;
-      }
-    } catch (_) {
-      return Icons.help_outline;
-    }
-  }
+  static Widget getStatusIcon(TaskStatusEnum status) => status.iconWidget;
 }

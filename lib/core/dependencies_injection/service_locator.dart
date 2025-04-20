@@ -302,9 +302,7 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(
         () => ServiceBloc(
       getServicesUseCase: sl(),
-      // saveSelectedServiceIds: sl(),
-      // getSelectedServiceIds: sl(),
-      // clearSelectedServiceIds: sl(),
+      serviceRepository: sl(),
     ),
   );
   sl.registerFactory(() => ServiceCategoryBloc(

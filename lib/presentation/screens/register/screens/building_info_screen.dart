@@ -14,7 +14,8 @@ class BuildingInfoScreen extends StatefulWidget {
   final String fullName;
   final String phoneNumber;
   final String email;
-  final Function(String fullName, String phoneNumber, String email, String buildingCode, String houseCode) onNext;
+  final String citizenCode;
+  final Function(String fullName, String phoneNumber, String email,String citizenCode, String buildingCode, String houseCode) onNext;
   final Function() onBack;
   final String initialBuildingCode;
   final String initialHouseCode;
@@ -26,6 +27,7 @@ class BuildingInfoScreen extends StatefulWidget {
     required this.email,
     required this.onNext,
     required this.onBack,
+    required this.citizenCode,
     required this.initialBuildingCode,
     required this.initialHouseCode,
   });
@@ -166,6 +168,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                               widget.fullName,
                               widget.phoneNumber,
                               widget.email,
+                              widget.citizenCode,
                               selectedBuilding!.code ?? '',
                               selectedHouse!.code ?? '',
                             );

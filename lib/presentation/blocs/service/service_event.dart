@@ -43,3 +43,10 @@ class RemoveServiceIdEvent extends ServiceEvent {
 }
 
 class ClearServiceIdsEvent extends ServiceEvent {}
+
+//
+class GetServiceByIdEvent extends ServiceEvent {
+  final String id;
+
+  GetServiceByIdEvent(this.id);
+}

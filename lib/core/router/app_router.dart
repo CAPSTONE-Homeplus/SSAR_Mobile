@@ -14,7 +14,9 @@ import 'package:home_clean/presentation/screens/wallet_management_screen/persona
 import 'package:home_clean/presentation/screens/wallet_management_screen/shared_wallet_screen/shared_wallet_screen.dart';
 
 import '../../data/laundry_repositories/laundry_order_repo.dart';
+import '../../domain/entities/order/create_order.dart';
 import '../../domain/entities/order/order.dart';
+import '../../domain/entities/staff/staff.dart';
 import '../../domain/entities/user/user.dart';
 import '../../main.dart';
 import '../../presentation/laundry_screens/choose_item_type_screen/choose_item_type_screen.dart';
@@ -66,8 +68,7 @@ class AppRouter {
   static const String routeForgotPassword = '/forgot-password';
   static const String routeLaundryOrderTracking = '/laundry-order-tracking';
   static const String routeChooseServiceType = '/choose-service-type';
-  static const String routeChooseItemType= '/choose-item-type';
-
+  static const String routeChooseItemType = '/choose-item-type';
 
   static List<GetPage> get routes => [
         GetPage(
@@ -121,17 +122,18 @@ class AppRouter {
         GetPage(
           name: routeServiceDetail,
           page: () {
-            final Service service = Get.arguments;
-            return ServiceDetailScreen(service: service);
+            final args = Get.arguments as ServiceDetailArguments;
+            return ServiceDetailScreen(arguments: args);
           },
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
         GetPage(
           name: routeOrderConfirmation,
-          page: () => OrderConfirmationScreen(
-            orderDetails: Get.arguments,
-          ),
+          page: () {
+            final args = Get.arguments as OrderConfirmationArguments;
+            return OrderConfirmationScreen(arguments: args);
+          },
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -221,7 +223,7 @@ class AppRouter {
         ),
         GetPage(
           name: routeForgotPassword,
-          page: () =>  EmailInputScreen(),
+          page: () => EmailInputScreen(),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -246,7 +248,7 @@ class AppRouter {
       ];
 
   static void navigateToLogin() {
-    Get.toNamed(routeLogin);
+    Get.offAllNamed(routeLogin);
   }
 
   static void navigateToHome() {
@@ -273,8 +275,16 @@ class AppRouter {
     Get.offAllNamed(routeSplash);
   }
 
-  static void navigateToServiceDetail(Service service) {
-    Get.toNamed(routeServiceDetail, arguments: service);
+  static void navigateToServiceDetail(String serviceId,
+      {String? orderIdToReOrder, Staff? staff}) {
+    Get.toNamed(
+      routeServiceDetail,
+      arguments: ServiceDetailArguments(
+        serviceId: serviceId,
+        orderIdToReOrder: orderIdToReOrder,
+        staff: staff,
+      ),
+    );
   }
 
   static void navigateToServiceDetails() {
@@ -285,8 +295,14 @@ class AppRouter {
     Get.toNamed(routeTimeCollection);
   }
 
-  static void navigateToOrderConfirmation(dynamic arguments) {
-    Get.toNamed(routeOrderConfirmation, arguments: arguments);
+  static void navigateToOrderConfirmation(CreateOrder createOrder,
+      {String? reOrderId, Staff? staff}) {
+    Get.toNamed(routeOrderConfirmation,
+        arguments: OrderConfirmationArguments(
+          createOrder: createOrder,
+          reOrderId: reOrderId,
+          staff: staff,
+        ));
   }
 
   static void navigateToOrderDetailWithArguments(dynamic arguments) {
@@ -372,4 +388,28 @@ class AppRouter {
   static void navigateToChooseItemType(String serviceId) {
     Get.toNamed(routeChooseItemType, arguments: serviceId);
   }
+}
+
+class ServiceDetailArguments {
+  final String serviceId;
+  final String? orderIdToReOrder;
+  final Staff? staff;
+
+  ServiceDetailArguments({
+    required this.serviceId,
+    this.orderIdToReOrder,
+    this.staff,
+  });
+}
+
+class OrderConfirmationArguments {
+  final CreateOrder createOrder;
+  final String? reOrderId;
+  final Staff? staff;
+
+  OrderConfirmationArguments({
+    required this.createOrder,
+    this.reOrderId,
+    this.staff,
+  });
 }

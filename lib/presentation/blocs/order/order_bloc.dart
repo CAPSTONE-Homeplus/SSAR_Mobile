@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dartz/dartz.dart';
 import 'package:home_clean/core/base/base_model.dart';
+import 'package:home_clean/core/exception/exception_handler.dart';
 import 'package:home_clean/domain/repositories/order_repository.dart';
 import 'package:home_clean/domain/use_cases/order/get_order_by_user_use_case.dart';
 import 'package:home_clean/domain/use_cases/order/get_order_use_case.dart';
@@ -14,6 +15,7 @@ import '../../../domain/use_cases/order/cancel_order_use_case.dart';
 import '../../../domain/use_cases/order/create_orders_use_case.dart';
 
 part 'order_event.dart';
+
 part 'order_state.dart';
 
 class OrderBloc extends Bloc<OrderEvent, OrderState> {
@@ -23,59 +25,86 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   final CancelOrderUseCase cancelOrderUseCase;
   final OrderRepository orderRepository;
 
-  OrderBloc({required this.createOrderUseCase, required this.getOrderByUserUseCase,
-    required this.getOrderUseCase, required this.cancelOrderUseCase, required this.orderRepository}) : super(OrderInitial()) {
+  OrderBloc(
+      {required this.createOrderUseCase,
+      required this.getOrderByUserUseCase,
+      required this.getOrderUseCase,
+      required this.cancelOrderUseCase,
+      required this.orderRepository})
+      : super(OrderInitial()) {
     on<CreateOrderEvent>(_onCreateOrder);
     on<GetOrdersByUserEvent>(_onGetOrdersByUser);
     on<GetOrderEvent>(_onGetOrder);
     on<CancelOrder>(_onCancelOrder);
+    on<ReOrderEvent>(_onReOrder);
   }
 
-  Future<void> _onCreateOrder(CreateOrderEvent event, Emitter<OrderState> emit) async {
+  Future<void> _onCreateOrder(
+      CreateOrderEvent event, Emitter<OrderState> emit) async {
     emit(OrderLoading());
 
-    final Either<Failure, Orders> result = await createOrderUseCase.execute(SaveOrderParams(createOrder: event.createOrder));
+    final Either<Failure, Orders> result = await createOrderUseCase
+        .execute(SaveOrderParams(createOrder: event.createOrder));
 
     result.fold(
-          (failure) => emit(OrderError(failure.message)),
-          (order) => emit(OrderCreated(order)),
+      (failure) => emit(OrderError(failure.message)),
+      (order) => emit(OrderCreated(order)),
     );
   }
 
-  Future<void> _onGetOrdersByUser(GetOrdersByUserEvent event, Emitter<OrderState> emit) async {
+  Future<void> _onReOrder(ReOrderEvent event, Emitter<OrderState> emit) async {
+    emit(OrderLoading());
+    try {
+      final response = await orderRepository.createReOrder(
+        event.createOrder,
+        event.oldOrderId,
+      );
+      emit(OrderCreated(response));
+    } on ApiException catch (e) {
+      emit(OrderError(e.description ?? 'Đã xảy ra lỗi không xác định'));
+    } catch (e) {
+      emit(OrderError('Đã xảy ra lỗi không xác định'));
+    }
+  }
+
+
+  Future<void> _onGetOrdersByUser(
+      GetOrdersByUserEvent event, Emitter<OrderState> emit) async {
     emit(OrderLoading());
 
-    final Either<Failure, BaseResponse<Orders>> result = await getOrderByUserUseCase.execute(event.search, event.orderBy, event.page, event.size);
+    final Either<Failure, BaseResponse<Orders>> result =
+        await getOrderByUserUseCase.execute(
+            event.search, event.orderBy, event.page, event.size);
 
     result.fold(
-          (failure) => emit(OrderError(failure.message)),
-          (orders) => emit(OrdersByUserLoaded(orders)),
+      (failure) => emit(OrderError(failure.message)),
+      (orders) => emit(OrdersByUserLoaded(orders)),
     );
   }
 
-  Future<void> _onGetOrder(GetOrderEvent event, Emitter<OrderState> emit) async {
+  Future<void> _onGetOrder(
+      GetOrderEvent event, Emitter<OrderState> emit) async {
     emit(OrderLoading());
 
-    final Either<Failure, Orders> result = await getOrderUseCase.execute(event.orderId);
+    final Either<Failure, Orders> result =
+        await getOrderUseCase.execute(event.orderId);
 
     result.fold(
-          (failure) => emit(OrderError(failure.message)),
-          (order) => emit(OrderLoaded(order)),
+      (failure) => emit(OrderError(failure.message)),
+      (order) => emit(OrderLoaded(order)),
     );
   }
 
-  Future<void> _onCancelOrder(CancelOrder event, Emitter<OrderState> emit) async {
+  Future<void> _onCancelOrder(
+      CancelOrder event, Emitter<OrderState> emit) async {
     emit(OrderLoading());
 
-    final Either<Failure, bool> result = await cancelOrderUseCase.execute(event.orderId, event.cancellationRequest);
+    final Either<Failure, bool> result = await cancelOrderUseCase.execute(
+        event.orderId, event.cancellationRequest);
 
     result.fold(
-          (failure) => emit(OrderError(failure.message)),
-          (isCanceled) => emit(OrderCancelled(isCanceled)),
+      (failure) => emit(OrderError(failure.message)),
+      (isCanceled) => emit(OrderCancelled(isCanceled)),
     );
   }
-
 }
-
-
-

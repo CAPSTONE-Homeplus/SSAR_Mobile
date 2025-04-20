@@ -12,13 +12,15 @@ class PersonalInfoScreen extends StatefulWidget {
   final String? initialFullName;
   final String? initialPhoneNumber;
   final String? initialEmail;
-  final Function(String fullName, String phoneNumber, String email) onNext;
+  final String? initialCitizenCode;
+  final Function(String fullName, String phoneNumber, String email, String citizenCode) onNext;
 
   PersonalInfoScreen({
     super.key,
     this.initialFullName,
     this.initialPhoneNumber,
     this.initialEmail,
+    this.initialCitizenCode,
     required this.onNext,
   });
 
@@ -30,6 +32,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   late TextEditingController _fullNameController;
   late TextEditingController _phoneNumberController;
   late TextEditingController _emailController;
+  late TextEditingController _citizenController;
 
   final _formKey = GlobalKey<FormState>();
   final Color _primaryColor = const Color(0xFF1CAF7D);
@@ -41,6 +44,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     _phoneNumberController =
         TextEditingController(text: widget.initialPhoneNumber);
     _emailController = TextEditingController(text: widget.initialEmail);
+    _citizenController = TextEditingController(text: widget.initialCitizenCode);
   }
 
   @override
@@ -62,6 +66,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               _fullNameController.text,
               _phoneNumberController.text,
               _emailController.text,
+              _citizenController.text,
             );
           } else if (state is UserError) {
             showCustomDialog(
@@ -147,9 +152,26 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             return null;
                           },
                         ),
+                        const SizedBox(height: 16),
+                        _buildTextField(controller: _citizenController,
+                          label: 'Mã dân cư',
+                          hint: 'Nhập mã dân cư của bạn',
+                          icon: Icons.credit_card_outlined,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Vui lòng nhập mã dân cư';
+                            }
+                            if (value.trim().isEmpty) {
+                              return 'Không được để trống mã dân cư';
+                            }
+
+
+                            return null;
+                          },
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 12),
                     BlocBuilder<UserBloc, UserState>(
                       builder: (context, state) {
                         final bool isLoading = state is UserLoading;
@@ -268,6 +290,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     _fullNameController.dispose();
     _phoneNumberController.dispose();
     _emailController.dispose();
+    _citizenController.dispose();
     super.dispose();
   }
 }

@@ -16,6 +16,7 @@ class UserMapper {
       role: userModel.role ?? '',
       phoneNumber: userModel.phoneNumber ?? '',
       email: userModel.email ?? '',
+      citizenCode: userModel.citizenCode ?? '',
     );
   }
 
@@ -32,6 +33,7 @@ class UserMapper {
       role: json['role'],
       email: json['email'],
       phoneNumber: json['phoneNumber'],
+      citizenCode: json['citizenCode'],
     );
   }
 
@@ -48,7 +50,7 @@ class UserMapper {
       role: user.role,
       email: user.email,
       phoneNumber: user.phoneNumber,
+      citizenCode: user.citizenCode,
     );
   }
-
 }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/presentation/blocs/task/task_bloc.dart';
+import 'package:home_clean/presentation/widgets/show_dialog.dart';
 import 'package:intl/intl.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 
@@ -36,6 +37,9 @@ class LaundryOrderDetailScreen extends StatefulWidget {
       _LaundryOrderDetailScreenState();
 }
 
+final GlobalKey<RefreshIndicatorState> _refreshKey =
+    GlobalKey<RefreshIndicatorState>();
+
 class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
   late final LaundryOrderDetailModel order;
   String? selectedWalletId;
@@ -43,6 +47,10 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
   @override
   void initState() {
     super.initState();
+    _init();
+  }
+
+  void _init() {
     context.read<LaundryOrderBloc>().add(GetLaundryOrderEvent(widget.orderId));
     context.read<LaundryOrderBloc1>().add(ConnectToLaundryOrderHub1());
     context.read<TaskBloc>().add(FetchOrderTasksEvent(orderId: widget.orderId));
@@ -98,111 +106,126 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
             } else if (state is GetLaundrySuccess) {
               final order = state.order;
 
-              return SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildCard(
-                        title: 'Thông Tin Đơn Hàng',
-                        content: Column(
-                          children: [
-                            _buildInfoRow('Mã đơn hàng:', order.orderCode,
-                                boldValue: true),
-                            _buildInfoRow('Tên đơn hàng:', order.name),
-                            // _buildInfoRow('Loại dịch vụ:', order.type),
-                            _buildInfoRow(
-                                'Trạng thái:',
-                                LaundryOrderStatusExtension.fromString(
-                                        order.status ?? '')
-                                    .name,
-                                valueColor:
-                                    LaundryOrderStatusExtension.fromString(
-                                            order.status ?? '')
-                                        .color),
-                            _buildInfoRow(
-                                'Ngày đặt:', _formatDate(order.orderDate)),
-                            if (order.deliveryDate != null)
-                              _buildInfoRow('Ngày giao:',
-                                  _formatDate(order.deliveryDate)),
-                            if (order.estimatedCompletionTime != null)
-                              _buildInfoRow('Dự kiến hoàn thành:',
-                                  _formatDate(order.estimatedCompletionTime)),
-                            const SizedBox(height: 16),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(Icons.receipt,
-                                    color: Colors.orange, size: 20),
-                                const SizedBox(width: 8),
-                                Text("Dịch vụ bổ sung:",
-                                    style: TextStyle(
-                                        fontSize: 14, color: Colors.black)),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            ...order.orderAdditionalServicesResponse.map(
-                              (service) => _buildInfoRow(
-                                service.name,
-                                currencyFormatter.format(service.price),
-                                isPrice: true,
-                                boldValue: true,
-                                valueColor: primaryColor,
+              return RefreshIndicator(
+                key: _refreshKey,
+                onRefresh: () {
+                  context
+                      .read<LaundryOrderBloc>()
+                      .add(GetLaundryOrderEvent(widget.orderId));
+                  return Future.value();
+                },
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildCard(
+                          title: 'Thông Tin Đơn Hàng',
+                          content: Column(
+                            children: [
+                              _buildInfoRow('Mã đơn hàng:', order.orderCode,
+                                  boldValue: true),
+                              _buildInfoRow('Tên đơn hàng:', order.name),
+                              // _buildInfoRow('Loại dịch vụ:', order.type),
+                              _buildInfoRow(
+                                  'Trạng thái:',
+                                  LaundryOrderStatusExtension.fromString(
+                                          order.status ?? '')
+                                      .name,
+                                  valueColor:
+                                      LaundryOrderStatusExtension.fromString(
+                                              order.status ?? '')
+                                          .color),
+                              _buildInfoRow(
+                                  'Ngày đặt:', _formatDate(order.orderDate)),
+                              if (order.deliveryDate != null)
+                                _buildInfoRow('Ngày giao:',
+                                    _formatDate(order.deliveryDate)),
+                              if (order.estimatedCompletionTime != null)
+                                _buildInfoRow('Dự kiến hoàn thành:',
+                                    _formatDate(order.estimatedCompletionTime)),
+                              const SizedBox(height: 16),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.receipt,
+                                      color: Colors.orange, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text("Dịch vụ bổ sung:",
+                                      style: TextStyle(
+                                          fontSize: 14, color: Colors.black)),
+                                ],
                               ),
-                            ),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                AppRouter.navigateToLaundryOrderTracking(order);
-                              },
-                              label: const Text('Theo Dõi Đơn Hàng'),
-                              icon: const Icon(Icons.track_changes_sharp),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue.shade50,
-                                foregroundColor: Colors.blue.shade700,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 0,
-                                textStyle: const TextStyle(
-                                  fontWeight: FontWeight.bold,
+                              const SizedBox(height: 16),
+                              ...order.orderAdditionalServicesResponse.map(
+                                (service) => _buildInfoRow(
+                                  service.name,
+                                  currencyFormatter.format(service.price),
+                                  isPrice: true,
+                                  boldValue: true,
+                                  valueColor: primaryColor,
                                 ),
                               ),
-                            ),
-                          ],
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  AppRouter.navigateToLaundryOrderTracking(
+                                      order);
+                                },
+                                label: const Text('Theo Dõi Đơn Hàng'),
+                                icon: const Icon(Icons.track_changes_sharp),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue.shade50,
+                                  foregroundColor: Colors.blue.shade700,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  elevation: 0,
+                                  textStyle: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          icon: Icons.receipt_long,
+                          color: primaryColor,
                         ),
-                        icon: Icons.receipt_long,
-                        color: primaryColor,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildLaundryDetailsCard(context, order),
-                      const SizedBox(height: 16),
-                      _buildCard(
-                        title: 'Chi Phí',
-                        content: Column(
-                          children: [
-                            _buildInfoRow('Tổng cộng:', null,
-                                isPrice: true,
-                                price: order.totalAmount,
-                                boldValue: true,
-                                valueColor: primaryColor)
-                          ],
+                        const SizedBox(height: 16),
+                        _buildLaundryDetailsCard(context, order),
+                        const SizedBox(height: 16),
+                        _buildCard(
+                          title: 'Chi Phí',
+                          content: Column(
+                            children: [
+                              _buildInfoRow('Tổng cộng:', null,
+                                  isPrice: true,
+                                  price: order.totalAmount,
+                                  boldValue: true,
+                                  valueColor: primaryColor)
+                            ],
+                          ),
+                          icon: Icons.attach_money,
+                          color: Colors.green,
                         ),
-                        icon: Icons.attach_money,
-                        color: Colors.green,
-                      ),
-                      const SizedBox(height: 16),
-                      LaundryOrderStatusExtension.fromString(order.status ?? '') == LaundryOrderStatus.pendingPayment
-                          ? _buildWallet(context)
-                          : SizedBox(height: 16),
-                      const SizedBox(height: 16),
-                      OrderPaymentButton(
-                        order: order,
-                        selectedWalletId: selectedWalletId ?? '',
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+                        LaundryOrderStatusExtension.fromString(
+                                    order.status ?? '') ==
+                                LaundryOrderStatus.pendingPayment
+                            ? _buildWallet(context)
+                            : SizedBox(height: 16),
+                        const SizedBox(height: 16),
+                        OrderPaymentButton(
+                          order: order,
+                          selectedWalletId: selectedWalletId ?? '',
+                          onSuccess: () {
+                            showSuccessDialog(context);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -215,13 +238,78 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
     );
   }
 
+  void showSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.check_circle_outline,
+                color: Colors.green,
+                size: 80,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Thanh Toán Thành Công',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green[700],
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _refreshKey.currentState?.show();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Thoát',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildLaundryDetailsCard(
       BuildContext context, LaundryOrderDetailModel order) {
     final currencyFormatter =
         NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
 
     // Check if both kg-based and item-based lists are empty
-    if ((order.orderDetailsByKg?.isEmpty ?? true) &&
+    if ((order.orderDetailsByKg.isEmpty ?? true) &&
         order.orderDetailsByItem.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -285,7 +373,7 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...order.orderDetailsByKg!.map((item) => _buildItemRow(
+                  ...order.orderDetailsByKg.map((item) => _buildItemRow(
                         item.itemTypeResponse.name ?? 'Không tên',
                         quantity: item.quantity,
                         weight: item.weight,

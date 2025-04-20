@@ -8,6 +8,7 @@ class CreateUser extends Equatable {
   String? houseCode;
   String? phoneNumber;
   String? email;
+  String? citizenCode;
 
   CreateUser({
     this.fullName,
@@ -17,8 +18,9 @@ class CreateUser extends Equatable {
     this.houseCode,
     this.phoneNumber,
     this.email,
+    this.citizenCode,
     });
 
   @override
-  List<Object?> get props => [fullName, username, password, buildingCode, houseCode, phoneNumber, email];
+  List<Object?> get props => [fullName, username, password, buildingCode, houseCode, phoneNumber, email, citizenCode];
 }

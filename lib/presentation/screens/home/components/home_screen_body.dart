@@ -14,15 +14,14 @@ import '../../../../domain/entities/house/house.dart';
 import '../../../../domain/entities/laundry_service_type/laundry_service_type.dart';
 import '../../../../domain/entities/user/user.dart';
 import '../../../../domain/entities/wallet/wallet.dart';
-import '../../address_option/address_option_screen.dart';
 import 'laundry_service/laundry_grid_widget.dart';
 
 class HomeScreenBody extends StatefulWidget {
-  List<Service> servicesToFetch;
-  List<Wallet> walletUser = [];
-  User user;
-  House house;
-  Building building;
+  final List<Service> servicesToFetch;
+  final List<Wallet> walletUser;
+  final User user;
+  final House house;
+  final Building building;
 
   HomeScreenBody(
       {super.key,
@@ -75,7 +74,6 @@ Widget _buildHomeScreen(List<Service> services, BuildContext context,
             fem: fem,
             ffem: ffem,
           ),
-
           ServiceGridWidget(
             services: services,
             fem: fem,
