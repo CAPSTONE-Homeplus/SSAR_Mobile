@@ -87,3 +87,12 @@ class UserWalletError extends UserState {
   List<Object?> get props => [message];
 }
 
+
+class GetUserSuccess extends UserState {
+  final User user;
+
+  GetUserSuccess(this.user);
+
+  @override
+  List<Object?> get props => [user];
+}

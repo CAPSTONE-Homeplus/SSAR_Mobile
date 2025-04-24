@@ -242,8 +242,11 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               } else if (state is ServicePriceError) {
                 showCustomDialog(
                   context: context,
-                  message: 'Không thể tải giá dịch vụ: ${state.message}',
+                  message: 'Dịch vụ không khả dụng',
                   type: DialogType.error,
+                  onConfirm: () {
+                    AppRouter.navigateToHome();
+                  },
                 );
               }
             },

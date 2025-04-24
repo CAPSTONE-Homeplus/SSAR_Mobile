@@ -20,6 +20,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     on<GetUsersBySharedWalletEvent>(_getUsersBySharedWallet);
     on<GetUserByPhoneNumberEvent>(_getUserByPhoneNumber);
     on<CheckUserInfoEvent>(_checkUserInfo);
+    on<GetUserEvent>(_getUser);
   }
 
   Future<void> _getUsersBySharedWallet(
@@ -57,5 +58,12 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       (failure) => emit(UserError(failure.message)),
       (isClear) => emit(CheckUserInfoSuccess(isClear)),
     );
+  }
+
+  Future<void> _getUser(
+      GetUserEvent event, Emitter<UserState> emit) async {
+    emit(UserLoading());
+    final response = await userRepository.getUser(event.userId);
+    emit(GetUserSuccess(response));
   }
 }

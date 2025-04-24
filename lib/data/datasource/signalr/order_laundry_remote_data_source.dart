@@ -39,7 +39,7 @@ class OrderLaundryRemoteDataSource {
   Future<void> _initLaundryOrderHub() async {
     _laundryOrderHubConnection = HubConnectionBuilder()
         .withUrl(
-      'https://vinlaundry.onrender.com/vinLaundryHub',
+      'https://vinlaundry.vinhomesresident.com/vinLaundryHub',
       options: HttpConnectionOptions(
         accessTokenFactory: () async => await _getAccessToken(),
       ),

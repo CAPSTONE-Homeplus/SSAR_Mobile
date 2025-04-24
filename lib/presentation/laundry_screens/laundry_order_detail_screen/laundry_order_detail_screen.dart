@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/presentation/blocs/task/task_bloc.dart';
+import 'package:home_clean/presentation/laundry_blocs/cancel/cancel_order_bloc.dart';
 import 'package:home_clean/presentation/widgets/show_dialog.dart';
 import 'package:intl/intl.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
@@ -17,6 +18,8 @@ import '../../blocs/laundry_order/laundry_order_state1.dart';
 import '../../blocs/task/task_event.dart';
 import '../../blocs/wallet/wallet_bloc.dart';
 import '../../blocs/wallet/wallet_state.dart';
+import '../../laundry_blocs/cancel/cancel_order_event.dart';
+import '../../laundry_blocs/cancel/cancel_order_state.dart';
 import '../../laundry_blocs/order/laundry_order_bloc.dart';
 import '../../laundry_blocs/order/laundry_order_event.dart';
 import '../../laundry_blocs/order/laundry_order_state.dart';
@@ -37,12 +40,11 @@ class LaundryOrderDetailScreen extends StatefulWidget {
       _LaundryOrderDetailScreenState();
 }
 
-final GlobalKey<RefreshIndicatorState> _refreshKey =
-    GlobalKey<RefreshIndicatorState>();
-
 class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
   late final LaundryOrderDetailModel order;
   String? selectedWalletId;
+  final GlobalKey<RefreshIndicatorState> _refreshKey =
+      GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
@@ -77,25 +79,58 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => BottomNavigation(
-              child: Container(),
               initialIndex: 1,
+              child: Container(),
             ),
           ),
         ),
       ),
-      body: BlocListener<LaundryOrderBloc1, LaundryOrderState1>(
-        listenWhen: (previous, current) =>
-            current is LaundryOrderNotificationReceived1,
-        listener: (context, state) {
-          if (state is LaundryOrderNotificationReceived1) {
-            final noti = state.orderNotification;
-            if (noti.id == widget.orderId) {
-              context
-                  .read<LaundryOrderBloc>()
-                  .add(GetLaundryOrderEvent(widget.orderId));
-            }
-          }
-        },
+      body: MultiBlocListener(
+        listeners: [
+          // Notification Listener
+          BlocListener<LaundryOrderBloc1, LaundryOrderState1>(
+            listenWhen: (previous, current) =>
+                current is LaundryOrderNotificationReceived1,
+            listener: (context, state) {
+              if (state is LaundryOrderNotificationReceived1) {
+                final noti = state.orderNotification;
+                if (noti.id == widget.orderId) {
+                  context
+                      .read<LaundryOrderBloc>()
+                      .add(GetLaundryOrderEvent(widget.orderId));
+                }
+              }
+            },
+          ),
+
+          // Order Cancel Listener
+// Improved BlocListener for cancel order
+          BlocListener<CancelOrderBloc, CancelOrderState>(
+            listenWhen: (previous, current) =>
+                current is CancelLaundryOrderSuccess ||
+                current is CancelLaundryOrderFailure,
+            listener: (context, state) {
+              if (state is CancelLaundryOrderSuccess) {
+                // Instead of navigating, just refresh the current page
+                _refreshKey.currentState?.show();
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Đơn hàng đã được hủy thành công'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } else if (state is CancelLaundryOrderFailure) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("Không thể hủy đơn hàng"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+          )
+        ],
         child: BlocBuilder<LaundryOrderBloc, LaundryOrderState>(
           builder: (context, state) {
             if (state is LaundryOrderLoading) {
@@ -224,6 +259,8 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                             showSuccessDialog(context);
                           },
                         ),
+                        const SizedBox(height: 16),
+                        _buildCancelOrderButton(order),
                       ],
                     ),
                   ),
@@ -233,6 +270,75 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
               return Center(child: Text('Vui lòng đợi trong giây lát'));
             }
           },
+        ),
+      ),
+    );
+  }
+
+  // Improved cancel order button implementation
+  Widget _buildCancelOrderButton(LaundryOrderDetailModel order) {
+    // Only show cancel button for certain order statuses
+    if (LaundryOrderStatusExtension.fromString(order.status ?? '') !=
+            LaundryOrderStatus.pendingPayment &&
+        LaundryOrderStatusExtension.fromString(order.status ?? '') !=
+            LaundryOrderStatus.processing) {
+      return SizedBox
+          .shrink(); // Don't show button for non-cancellable statuses
+    }
+
+    return Container(
+      margin: EdgeInsets.only(top: 8),
+      decoration: BoxDecoration(
+        color: Colors.red.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: GestureDetector(
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Xác Nhận Hủy Đơn'),
+              content: Text('Bạn có chắc chắn muốn hủy đơn hàng này?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('Không', style: TextStyle(color: Colors.black)),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    context.read<CancelOrderBloc>().add(
+                          CancelLaundryOrderEvent(order.id),
+                        );
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  child: Text('Có', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.red.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.cancel_outlined, color: Colors.red),
+              const SizedBox(width: 8),
+              Text(
+                'Hủy Đơn',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -399,16 +505,18 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...order.orderDetailsByItem.map((item) => _buildItemRow(
-                        item.itemTypeResponse.name ?? 'Không tên',
-                        quantity: item.quantity,
-                        price: item.unitPrice,
-                        subtotal: item.subtotal,
-                        notes: item.notes,
-                        isKgBased: false,
-                        currencyFormatter: currencyFormatter,
-                        context: context,
-                      )),
+                  ...order.orderDetailsByItem.map(
+                    (item) => _buildItemRow(
+                      item.itemTypeResponse.name ?? 'Không tên',
+                      quantity: item.quantity,
+                      price: item.unitPrice,
+                      subtotal: item.subtotal,
+                      notes: item.notes,
+                      isKgBased: false,
+                      currencyFormatter: currencyFormatter,
+                      context: context,
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -707,6 +815,8 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
     required NumberFormat currencyFormatter,
     required BuildContext context,
   }) {
+    final displayPrice = subtotal == 0 ? quantity! * price! : subtotal;
+
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(12),
@@ -729,7 +839,7 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                   ),
                 ),
               ),
-              CurrencyDisplay(price: subtotal)
+              CurrencyDisplay(price: displayPrice),
             ],
           ),
           SizedBox(height: 8),

@@ -132,6 +132,7 @@ import '../../presentation/blocs/staff/staff_bloc.dart';
 import '../../presentation/blocs/task/task_bloc.dart';
 import '../../presentation/blocs/transaction/transation_bloc.dart';
 import '../../presentation/blocs/wallet/wallet_bloc.dart';
+import '../../presentation/laundry_blocs/cancel/cancel_order_bloc.dart';
 import '../../presentation/laundry_blocs/order/laundry_order_bloc.dart';
 
 final sl = GetIt.instance;
@@ -359,5 +360,8 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => TaskBloc(taskRepository: sl()));
   sl.registerLazySingleton(() => ForgotPasswordBloc(
     authRepository: sl(),
+  ));
+  sl.registerLazySingleton(() => CancelOrderBloc(
+    repository: sl<LaundryOrderRepository>(),
   ));
 }

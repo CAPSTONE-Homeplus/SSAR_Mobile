@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/size_config.dart';
+import 'package:home_clean/presentation/widgets/currency_display.dart';
 import 'package:intl/intl.dart';
 import 'package:home_clean/presentation/blocs/transaction/transaction_event.dart';
 import 'package:home_clean/core/constant/colors.dart';
@@ -232,29 +233,23 @@ class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
                                             fem,
                                           ),
                                         ),
-                                      Text(
-                                        transactionStatus ==
-                                                TransactionStatus.failed
-                                            ? (isPositiveTransaction
-                                                ? '+${Formater.formatAmount(transaction.amount)}'
-                                                : '-${Formater.formatAmount(transaction.amount)}')
-                                            : (isPositiveTransaction
-                                                ? '+${Formater.formatAmount(transaction.amount)}'
-                                                : '-${Formater.formatAmount(transaction.amount)}'),
-                                        style: GoogleFonts.poppins(
+                                      CurrencyDisplay(
+                                          price: transaction.amount,
                                           fontSize: 14 * fem,
-                                          fontWeight: FontWeight.w700,
-                                          color: transactionStatus ==
-                                                  TransactionStatus.failed
-                                              ? Colors.grey[600]
-                                              : transactionType.color,
-                                          decoration: transactionStatus ==
-                                                  TransactionStatus.failed
-                                              ? TextDecoration.lineThrough
-                                              : null,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
+                                          unit: transactionStatus == TransactionStatus.pending
+                                              ? ''
+                                              : (isPositiveTransaction ? '+' : '-'),
+                                          key: Key('transaction_amount'),
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.w700,
+                                            color: transactionStatus == TransactionStatus.failed
+                                                ? Colors.grey[600]
+                                                : transactionType.color,
+                                            decoration: transactionStatus == TransactionStatus.failed
+                                                ? TextDecoration.lineThrough
+                                                : null,
+                                          ),
+                                          isUnitBefore: true
                                       ),
                                     ],
                                   ),
@@ -360,7 +355,7 @@ class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
       child: Text(
         Formater.parseStatusToString(status),
         style: GoogleFonts.poppins(
-          fontSize: 10 * fem,
+          fontSize: 8 * fem,
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
@@ -473,6 +468,19 @@ class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
   }
 
   Widget _buildTransactionDetailModal(Transaction transaction, double fem) {
+    final TransactionType? transactionType =
+    transaction.type?.toTransactionType();
+
+    if (transactionType == null) {
+      return const SizedBox();
+    }
+
+    final TransactionStatus transactionStatus =
+    TransactionStatusExtension.fromString(
+        transaction.status ?? 'pending');
+    final bool isPositiveTransaction =
+        transactionType == TransactionType.deposit ||
+            transactionType == TransactionType.refund;
     return Container(
       padding: EdgeInsets.all(16 * fem),
       decoration: BoxDecoration(
@@ -505,7 +513,7 @@ class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
           Padding(
             padding: EdgeInsets.only(top: 12 * fem),
             child: Text(
-              'Loại: ${transaction.note ?? 'Nạp tiền'}',
+              'Loại: ${transaction.note ?? 'Giao dịch'}',
               style: GoogleFonts.poppins(
                 fontSize: 14 * fem,
                 color: Colors.grey[700],
@@ -572,13 +580,25 @@ class _ShareWalletTransactionScreenState extends State<TransactionScreen> {
                   color: Colors.grey[700],
                 ),
               ),
-              Text(
-                Formater.formatAmount(transaction.amount),
-                style: GoogleFonts.poppins(
-                  fontSize: 14 * fem,
-                  fontWeight: FontWeight.w600,
-                  color: transaction.type!.toTransactionType().color,
-                ),
+              CurrencyDisplay(
+                  price: transaction.amount,
+                  fontSize: 16 * fem,
+                  unit: transactionStatus == TransactionStatus.pending
+                      ? ''
+                      : (isPositiveTransaction ? '+' : '-'),
+                  key: Key('transaction_amount'),
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w700,
+                    color: transactionStatus == TransactionStatus.failed
+                        ? Colors.grey[600]
+                        : transactionType.color,
+                    decoration: transactionStatus == TransactionStatus.failed
+                        ? TextDecoration.lineThrough
+                        : null,
+                    decorationThickness: 2.0, // Tăng độ dày của đường gạch ngang
+                    decorationColor: Colors.grey[600], // Đặt màu gạch ngang
+                  ),
+                  isUnitBefore: true
               ),
             ],
           ),

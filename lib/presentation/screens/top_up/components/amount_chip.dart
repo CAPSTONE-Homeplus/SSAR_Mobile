@@ -6,7 +6,7 @@ class AmountChipWidget extends StatelessWidget {
   final int amount;
   final double fem;
   final double ffem;
-  final Function(int) onAmountSelected; // Callback thay vì controller
+  final Function(int) onAmountSelected;
 
   const AmountChipWidget(
       this.amount, {
@@ -25,7 +25,7 @@ class AmountChipWidget extends StatelessWidget {
     ).format(amount);
 
     return InkWell(
-      onTap: () => onAmountSelected(amount), // Gửi số tiền lên trên
+      onTap: () => onAmountSelected(amount),
       borderRadius: BorderRadius.circular(8 * fem),
       child: Container(
         padding: EdgeInsets.symmetric(

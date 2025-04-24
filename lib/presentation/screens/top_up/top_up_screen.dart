@@ -5,11 +5,15 @@ import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/constant/size_config.dart';
 import 'package:home_clean/domain/entities/payment_method/payment_method.dart';
 import 'package:home_clean/presentation/blocs/payment_method/payment_method_event.dart';
+import 'package:home_clean/presentation/blocs/user/user_event.dart';
+import 'package:home_clean/presentation/blocs/user/user_state.dart';
 
 import '../../../domain/entities/transaction/create_transaction.dart';
+import '../../../domain/entities/user/user.dart';
 import '../../../domain/entities/wallet/wallet.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
+import '../../blocs/auth/auth_state.dart';
 import '../../blocs/payment_method/payment_method_bloc.dart';
 import '../../blocs/payment_method/payment_method_state.dart';
 import '../../blocs/transaction/transaction_event.dart';
@@ -45,6 +49,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
   late PaymentMethodBloc _paymentMethodBloc;
   List<Wallet> walletUser = [];
   List<PaymentMethod> paymentMethods = [];
+  late User user;
   bool isLoading = true;
 
   // Predefined amounts
@@ -64,26 +69,29 @@ class _TopUpScreenState extends State<TopUpScreen> {
   }
 
 
-  Future<void> _initUser() async {
+  Future<void> _initUser() async{
     final authBloc = context.read<AuthBloc>();
     authBloc.add(GetUserFromLocal());
-  }
-
-  Future<void> _processUser() async {
-    await for (final state in _walletBloc.stream) {
-      if (state is WalletLoaded && mounted) {
+    await for (final state in authBloc.stream) {
+      if (state is AuthenticationFromLocal && mounted) {
         setState(() {
-          walletUser = state.wallets;
-          _selectedWalletType = walletUser;
-
-          if (_selectedWalletType.isNotEmpty) {
-            _selectedWalletId = _selectedWalletType[0].id!;
-          }
+          user = state.user;
+        });
+        break;
+      }
+    }
+    final userBloc = context.read<UserBloc>();
+    userBloc.add(GetUserEvent(user.id ?? ''));
+    await for (final state in _userBloc.stream) {
+      if (state is GetUserSuccess && mounted) {
+        setState(() {
+          user = state.user;
         });
         break;
       }
     }
   }
+
 
 
   void _init() {
@@ -153,6 +161,13 @@ class _TopUpScreenState extends State<TopUpScreen> {
       if (amount <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Số tiền không hợp lệ")),
+        );
+        return;
+      }
+
+      if (user.status == 'Unverified' && amount > 1000000) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Tài khoản chưa được xác thực không thể nạp tiền lớn hơn 1 triệu")),
         );
         return;
       }

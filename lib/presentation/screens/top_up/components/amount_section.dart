@@ -41,7 +41,6 @@ class _AmountSectionWidgetState extends State<AmountSectionWidget> {
 
     if (amount > 50000000) {
       amount = 50000000;
-      // Set lại controller với giá trị đã format
       widget.controller.text =
           NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0)
               .format(amount);

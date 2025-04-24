@@ -37,7 +37,7 @@ class _EmailInputScreenState extends State<EmailInputScreen> {
       child: Scaffold(
         backgroundColor: backgroundColor,
         appBar: CustomAppBar(
-        title: 'Xác Thực OTP',
+        title: 'Xác Thực Email',
         onBackPressed: () {
           AppRouter.navigateToLogin();
         },

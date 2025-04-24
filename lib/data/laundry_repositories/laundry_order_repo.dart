@@ -81,6 +81,30 @@ class LaundryOrderRepository {
       throw ExceptionHandler.handleException(e);
     }
   }
+
+  Future<bool> cancelLaundryOrder(String orderId) async {
+    try {
+      final response = await vinLaundryRequest.put(
+        '${ApiConstant.orders}/$orderId/cancel',
+        queryParameters: {
+          'id ': orderId,
+        },
+      );
+      if (response.statusCode == 200 || response.data == true) {
+        return true;
+      } else {
+        throw ApiException(
+          traceId: response.data?['traceId'],
+          code: response.data?['code'],
+          message: response.data?['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data?['description'],
+          timestamp: response.data?['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
 }
 
 

@@ -48,6 +48,7 @@ import 'package:home_clean/presentation/blocs/time_slot/time_slot_bloc.dart';
 import 'package:home_clean/presentation/blocs/transaction/transation_bloc.dart';
 import 'package:home_clean/presentation/blocs/user/user_bloc.dart';
 import 'package:home_clean/presentation/blocs/wallet/wallet_bloc.dart';
+import 'package:home_clean/presentation/laundry_blocs/cancel/cancel_order_bloc.dart';
 import 'package:home_clean/presentation/laundry_blocs/order/aundry_order_bloc_v2.dart';
 import 'package:home_clean/presentation/laundry_blocs/order/laundry_order_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -270,6 +271,11 @@ class HomeClean extends StatelessWidget {
           BlocProvider(
             create: (context) => ForgotPasswordBloc(
               authRepository: sl<AuthRepository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => CancelOrderBloc(
+              repository: sl<LaundryOrderRepository>(),
             ),
           ),
         ],

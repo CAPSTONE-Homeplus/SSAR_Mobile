@@ -64,12 +64,18 @@ class _ChooseItemTypeScreenState extends State<ChooseItemTypeScreen> {
           (existingItem) => existingItem.itemTypeId == newItem.itemTypeId);
 
       if (existingIndex != -1) {
-        orderDetails[existingIndex] = OrderDetailsRequest(
-          itemTypeId: newItem.itemTypeId,
-          quantity: newItem.quantity ?? orderDetails[existingIndex].quantity,
-        );
+        if (newItem.quantity == 0) {
+          orderDetails.removeAt(existingIndex);
+        } else {
+          orderDetails[existingIndex] = OrderDetailsRequest(
+            itemTypeId: newItem.itemTypeId,
+            quantity: newItem.quantity ?? orderDetails[existingIndex].quantity,
+          );
+        }
       } else {
-        orderDetails.add(newItem);
+        if (newItem.quantity != 0) {
+          orderDetails.add(newItem);
+        }
       }
     });
   }
@@ -466,7 +472,7 @@ class _ChooseItemTypeScreenState extends State<ChooseItemTypeScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Chọn loại đồ',
+                                    'Các loại đồ',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black,

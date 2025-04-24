@@ -65,7 +65,7 @@ extension LaundryOrderStatusExtension on LaundryOrderStatus {
   }
 }
 
-enum TaskStatusEnum { Pending, InProgress, Completed }
+enum TaskStatusEnum { Pending, InProgress, Completed, Canceled }
 
 extension TaskStatusEnumExtension on TaskStatusEnum {
   static TaskStatusEnum fromString(String value) {
@@ -76,6 +76,8 @@ extension TaskStatusEnumExtension on TaskStatusEnum {
         return TaskStatusEnum.InProgress;
       case 'Completed':
         return TaskStatusEnum.Completed;
+      case 'Canceled':
+        return TaskStatusEnum.Canceled;
       default:
         throw ArgumentError(
             'Không thể chuyển đổi "$value" thành TaskStatusEnum');
@@ -86,18 +88,21 @@ extension TaskStatusEnumExtension on TaskStatusEnum {
         TaskStatusEnum.Pending => 'Chờ xử lý',
         TaskStatusEnum.InProgress => 'Đang thực hiện',
         TaskStatusEnum.Completed => 'Hoàn thành',
+        TaskStatusEnum.Canceled => 'Đã hủy',
       };
 
   Color get color => switch (this) {
         TaskStatusEnum.Pending => Colors.orange.shade600,
         TaskStatusEnum.InProgress => Colors.blue.shade600,
         TaskStatusEnum.Completed => Colors.green.shade600,
+        TaskStatusEnum.Canceled => Colors.red.shade600,
       };
 
   IconData get iconData => switch (this) {
         TaskStatusEnum.Pending => Icons.pending,
         TaskStatusEnum.InProgress => Icons.hourglass_empty,
         TaskStatusEnum.Completed => Icons.check_circle,
+        TaskStatusEnum.Canceled => Icons.cancel,
       };
 
   Widget get iconWidget => Icon(iconData, color: color);

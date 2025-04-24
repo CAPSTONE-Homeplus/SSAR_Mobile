@@ -38,3 +38,12 @@ class CheckUserInfoEvent extends UserEvent {
   @override
   List<Object?> get props => [phoneNumber, email, username];
 }
+
+class GetUserEvent extends UserEvent {
+  final String userId;
+
+  GetUserEvent(this.userId);
+
+  @override
+  List<Object?> get props => [userId];
+}
