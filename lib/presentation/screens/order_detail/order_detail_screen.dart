@@ -174,6 +174,7 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
               builder: (context) => BottomNavigation(
                 child: Container(),
                 initialIndex: 1,
+                selectedCategory: 'clean',
               ),
             ),
           );
@@ -938,7 +939,7 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                 SizedBox(height: 4 * SizeConfig.hem),
                 Text(
                   orders.emergencyRequest == true
-                      ? 'Nhân viên sẽ được phân công ngay lập tức'
+                      ? 'Nhân viên sẽ được phân công ngay lập tức trong vòng 1 tiếng'
                       : 'Yêu cầu được đặt lịch theo thời gian bạn chọn',
                   style: GoogleFonts.poppins(
                     color: Colors.black54,

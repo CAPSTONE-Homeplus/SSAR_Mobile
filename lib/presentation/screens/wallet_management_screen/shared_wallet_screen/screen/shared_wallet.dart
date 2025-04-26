@@ -54,24 +54,6 @@ class _SharedWalletState extends State<SharedWallet> with SingleTickerProviderSt
         child: Column(
           children: [
             BalanceCard(sharedWallet: widget.sharedWallet, personalWallet: widget.personalWallet),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Hoạt động gần đây',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
             Expanded(
               child: TransactionScreen(
                 wallet: widget.sharedWallet,

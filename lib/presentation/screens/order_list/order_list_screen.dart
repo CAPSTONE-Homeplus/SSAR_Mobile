@@ -42,7 +42,10 @@ class AppStrings {
 }
 
 class OrderListScreen extends StatefulWidget {
-  const OrderListScreen({Key? key}) : super(key: key);
+  late String? selectedCategory;
+
+   OrderListScreen({Key? key, this.selectedCategory = 'clean'
+  }) : super(key: key);
 
   @override
   State<OrderListScreen> createState() => _OrderListScreenState();
@@ -53,7 +56,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
   List<Orders> _filteredCleanOrders = [];
   List<Orders> _allCleanOrders = [];
   List<OrderLaundry> _laundryOrders = [];
-  String _selectedCategory = 'clean';
   OrderStatus? _selectedStatus;
 
   @override
@@ -83,7 +85,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
 
   void _switchCategory(String category) {
     setState(() {
-      _selectedCategory = category;
+      widget.selectedCategory = category;
     });
 
     if (category == 'clean') {
@@ -110,7 +112,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
         child: Column(
           children: [
             FilterTabs(
-              selectedCategory: _selectedCategory,
+              selectedCategory:  widget.selectedCategory ?? 'clean',
               onCategorySelected: _switchCategory,
             ),
             Container(
@@ -126,7 +128,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                     child: SearchBar(
                       controller: _searchController,
                       onChanged: (_) {
-                        if (_selectedCategory == 'clean') {
+                        if ( widget.selectedCategory == 'clean') {
                           _applyCleanFilters();
                         }
                       },
@@ -136,7 +138,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
               ),
             ),
             Expanded(
-              child: _selectedCategory == 'clean'
+              child:  widget.selectedCategory == 'clean'
                   ? _buildCleanOrdersContent()
                   : _buildLaundryOrdersContent(),
             ),
@@ -249,7 +251,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
               _selectedStatus = newValue;
 
               // Reapply filters based on current category
-              if (_selectedCategory == 'clean') {
+              if (widget.selectedCategory == 'clean') {
                 _applyStatusCleanFilters();
               }
             });

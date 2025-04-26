@@ -80,6 +80,7 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
           MaterialPageRoute(
             builder: (context) => BottomNavigation(
               initialIndex: 1,
+              selectedCategory: "laundry",
               child: Container(),
             ),
           ),
@@ -200,6 +201,7 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                                   isPrice: true,
                                   boldValue: true,
                                   valueColor: primaryColor,
+                                  price: (service.price),
                                 ),
                               ),
                               ElevatedButton.icon(
@@ -260,7 +262,11 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                           },
                         ),
                         const SizedBox(height: 16),
-                        _buildCancelOrderButton(order),
+                        LaundryOrderStatusExtension.fromString(
+                            order.status ?? '') ==
+                            LaundryOrderStatus.pendingPayment
+                            ? _buildCancelOrderButton(order)
+                            : SizedBox(height: 16),
                       ],
                     ),
                   ),

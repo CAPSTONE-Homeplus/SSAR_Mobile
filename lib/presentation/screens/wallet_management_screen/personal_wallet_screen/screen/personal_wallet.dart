@@ -52,26 +52,6 @@ class _PersonalWalletState extends State<PersonalWallet> with SingleTickerProvid
       child: Column(
         children: [
           BalanceCard(wallet: widget.personalWallet),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Hoạt động gần đây',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 8),
           Expanded(
             child: TransactionScreen(
               wallet: widget.personalWallet,

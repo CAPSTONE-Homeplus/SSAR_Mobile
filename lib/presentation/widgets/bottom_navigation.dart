@@ -12,11 +12,13 @@ import '../screens/setting/settings_screen.dart';
 class BottomNavigation extends StatefulWidget {
   final int initialIndex;
   final Widget child;
+  final String? selectedCategory;
 
   const BottomNavigation({
     Key? key,
     required this.child,
     this.initialIndex = 0,
+    this.selectedCategory = "clean",
   }) : super(key: key);
 
   @override
@@ -26,12 +28,13 @@ class BottomNavigation extends StatefulWidget {
 class _BottomNavigationState extends State<BottomNavigation> {
   late int _currentIndex;
 
-  final List<Widget> _pages = [
-    HomeScreen(),
-    OrderListScreen(),
-    // NotificationScreen(remoteDataSource : sl<OrderLaundryRemoteDataSource>()),
-    SettingsScreen()
-  ];
+  List<Widget> _getPages() {
+    return [
+      HomeScreen(),
+      OrderListScreen(selectedCategory: widget.selectedCategory ?? ''),
+      SettingsScreen()
+    ];
+  }
 
   @override
   void initState() {
@@ -54,7 +57,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _pages,
+        children: _getPages(),
       ),
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: Colors.grey[100]!,
@@ -65,12 +68,12 @@ class _BottomNavigationState extends State<BottomNavigation> {
         animationDuration: const Duration(milliseconds: 300),
         items: [
           Icon(Icons.home, size: 30 * fem, color: Colors.black),
-           Icon(Icons.list_alt, size: 30 * fem, color: Colors.black),
-           // Icon(Icons.notifications, size: 30 * fem, color: Colors.black),
-           Icon(Icons.person_outline, size: 30 * fem, color: Colors.black),
+          Icon(Icons.list_alt, size: 30 * fem, color: Colors.black),
+          Icon(Icons.person_outline, size: 30 * fem, color: Colors.black),
         ],
         onTap: _onTabTapped,
       ),
     );
   }
 }
+
