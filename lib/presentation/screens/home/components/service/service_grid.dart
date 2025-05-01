@@ -71,7 +71,7 @@ class ServiceGridWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Dịch vụ',
+          'Dịch Vụ Dọn Dẹp',
           style: GoogleFonts.poppins(
             fontSize: 18 * ffem,
             fontWeight: FontWeight.bold,

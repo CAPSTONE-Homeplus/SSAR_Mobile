@@ -59,7 +59,7 @@ void showCustomDialog({
       icon: Icons.warning_amber_outlined,
     ),
     DialogType.info: DialogConfig(
-      title: 'Thông tin',
+      title: 'Thông báo',
       backgroundColor: Colors.blue.shade50,
       iconColor: AppColors.primaryColor,
       buttonColor: AppColors.primaryColor,

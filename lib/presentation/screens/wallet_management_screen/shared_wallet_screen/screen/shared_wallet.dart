@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/presentation/screens/wallet_management_screen/shared_wallet_screen/screen/widget/transaction_screen.dart';
 
@@ -40,14 +41,13 @@ class _SharedWalletState extends State<SharedWallet> with SingleTickerProviderSt
       appBar: CustomAppBar(
         title: 'Ví chung',
         onBackPressed: () {
-          AppRouter.navigateToHome();
+          Get.back();
         },
       ),
       body: _buildSharedWalletView(),
     );
   }
 
-  /// Hiển thị thông tin Ví Chung với lịch sử hoạt động
   Widget _buildSharedWalletView() {
     return RefreshIndicator(
       onRefresh: _resetSharedWalletData,

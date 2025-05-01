@@ -103,16 +103,12 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
               }
             },
           ),
-
-          // Order Cancel Listener
-// Improved BlocListener for cancel order
           BlocListener<CancelOrderBloc, CancelOrderState>(
             listenWhen: (previous, current) =>
                 current is CancelLaundryOrderSuccess ||
                 current is CancelLaundryOrderFailure,
             listener: (context, state) {
               if (state is CancelLaundryOrderSuccess) {
-                // Instead of navigating, just refresh the current page
                 _refreshKey.currentState?.show();
 
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -283,13 +279,12 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
 
   // Improved cancel order button implementation
   Widget _buildCancelOrderButton(LaundryOrderDetailModel order) {
-    // Only show cancel button for certain order statuses
     if (LaundryOrderStatusExtension.fromString(order.status ?? '') !=
             LaundryOrderStatus.pendingPayment &&
         LaundryOrderStatusExtension.fromString(order.status ?? '') !=
             LaundryOrderStatus.processing) {
       return SizedBox
-          .shrink(); // Don't show button for non-cancellable statuses
+          .shrink();
     }
 
     return Container(

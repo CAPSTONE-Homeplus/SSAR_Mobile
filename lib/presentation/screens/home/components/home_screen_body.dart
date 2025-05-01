@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/entities/service/service.dart';
-import 'package:home_clean/presentation/screens/home/components/room_header.dart';
 import 'package:home_clean/presentation/screens/home/components/service/service_grid.dart';
 import 'package:home_clean/presentation/screens/home/components/wallet/wallet_container.dart';
-import 'package:home_clean/presentation/screens/home/components/wallet_grid/wallet_grid.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 
 import '../../../../core/constant/size_config.dart';
 import '../../../../domain/entities/building/building.dart';
 import '../../../../domain/entities/house/house.dart';
-import '../../../../domain/entities/laundry_service_type/laundry_service_type.dart';
 import '../../../../domain/entities/user/user.dart';
 import '../../../../domain/entities/wallet/wallet.dart';
 import 'laundry_service/laundry_grid_widget.dart';
@@ -62,6 +58,7 @@ Widget _buildHomeScreen(List<Service> services, BuildContext context,
     appBar: CustomAppBar(
       isHomePage: true,
       roomAddress: address,
+      isVerified: user.status == 'Verified' ? true : false,
     ),
     body: SingleChildScrollView(
       child: Column(

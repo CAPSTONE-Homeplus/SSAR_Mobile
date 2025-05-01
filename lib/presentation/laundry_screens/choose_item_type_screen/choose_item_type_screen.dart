@@ -101,8 +101,9 @@ class _ChooseItemTypeScreenState extends State<ChooseItemTypeScreen> {
     );
 
     showCustomDialog(
+
       context: context,
-      message: 'Bạn có chắc chắn muốn đặt hàng không?',
+      message: 'Bạn đồng ý với chính sách và điều khoản để tiếp tục?',
       type: DialogType.info,
       onConfirm: () {
         // Add the event to create the order

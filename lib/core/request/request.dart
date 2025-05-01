@@ -2,13 +2,17 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:home_clean/core/constant/api_constant.dart';
+import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/data/datasource/local/auth_local_datasource.dart';
 import 'package:home_clean/data/datasource/local/user_local_datasource.dart';
 import 'package:home_clean/domain/repositories/authentication_repository.dart';
 
 import '../../data/mappers/user/user_mapper.dart';
 import '../../domain/entities/auth/auth.dart';
+import '../../main.dart';
+import '../../presentation/widgets/show_dialog.dart';
 
 enum BaseUrlType {
   homeClean,
@@ -178,32 +182,21 @@ class MyRequest {
         onError: (e, handler) async {
           if (e.response?.statusCode == 401) {
             print("Unauthorized - Attempting token refresh");
-
-            try {
-              final refreshToken = await _authLocalDataSource.getRefreshTokenFromStorage();
-
-              if (refreshToken == null || refreshToken.isEmpty) {
-                clearLocalStorageAndLogout();
-                return handler.next(e);
-              }
-              Auth auth = await _authRepository.refreshToken();
-              final newToken = auth.accessToken;
-              final newRefreshToken = auth.refreshToken;
-              if (newToken == null || newRefreshToken == null) {
-                clearLocalStorageAndLogout();
-                return handler.next(e);
-              }
-              await _authLocalDataSource.saveTokensToStorage(newToken, newRefreshToken);
-              requestObj.setToken = newToken;
-              final options = e.requestOptions;
-              options.headers["Authorization"] = "Bearer $newToken";
-              final response = await request.fetch(options);
-              return handler.resolve(response);
-            } catch (refreshError) {
-              print("Token refresh failed: $refreshError");
+            if (navigatorKey.currentContext != null && ModalRoute.of(navigatorKey.currentContext!)?.isCurrent == true) {
+              showCustomDialog(
+                context: navigatorKey.currentContext!,
+                message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+                type: DialogType.error,
+                onConfirm: () {
+                  clearLocalStorageAndLogout();
+                  AppRouter.navigateToLogin();
+                },
+              );
+            } else {
               clearLocalStorageAndLogout();
-              return handler.next(e);
             }
+
+            return handler.next(e);
           } else if (e.response?.statusCode == 400) {
             print("Bad Request");
           } else if (e.response?.statusCode == 500) {

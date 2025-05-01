@@ -8,6 +8,7 @@ import '../screens/home/home_screen.dart';
 import '../screens/notification/notification.dart';
 import '../screens/order_list/order_list_screen.dart';
 import '../screens/setting/settings_screen.dart';
+import '../screens/transaction_history/transaction_history.dart';
 
 class BottomNavigation extends StatefulWidget {
   final int initialIndex;
@@ -32,6 +33,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
     return [
       HomeScreen(),
       OrderListScreen(selectedCategory: widget.selectedCategory ?? ''),
+      TransactionHistory(),
       SettingsScreen()
     ];
   }
@@ -67,9 +69,10 @@ class _BottomNavigationState extends State<BottomNavigation> {
         index: _currentIndex,
         animationDuration: const Duration(milliseconds: 300),
         items: [
-          Icon(Icons.home, size: 30 * fem, color: Colors.black),
-          Icon(Icons.list_alt, size: 30 * fem, color: Colors.black),
-          Icon(Icons.person_outline, size: 30 * fem, color: Colors.black),
+          Icon(Icons.home, size: 25 * fem, color: Colors.black),
+          Icon(Icons.list_alt, size: 25 * fem, color: Colors.black),
+          Icon(Icons.receipt_long_rounded, size: 25 * fem, color: Colors.black),
+          Icon(Icons.person_outline, size: 25 * fem, color: Colors.black),
         ],
         onTap: _onTabTapped,
       ),

@@ -28,7 +28,7 @@ class LaundryGridWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Dịch vụ giặt sấy',
+            'Dịch Vụ Giặt Sấy',
             style: GoogleFonts.poppins(
               fontSize: 18 * ffem,
               fontWeight: FontWeight.bold,

@@ -235,53 +235,56 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           },
         ),
       ],
-      child: Scaffold(
-        backgroundColor: Colors.grey.shade200,
-        appBar: CustomAppBar(
-          title: (widget.arguments?.orderIdToReOrder != null
-                  ? 'Order lại - '
-                  : '') +
-              (service.name ?? ''),
-          onBackPressed: () {
-            AppRouter.navigateToHome();
-          },
-        ),
-        body: isLoading
-            ? _loadingPlaceholder()
-            : SingleChildScrollView(
-                child: Column(
-                  children: [
-                    StepIndicatorWidget(currentStep: 2),
-                    SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // _buildServiceSupply(),
-                          // SizedBox(height: 10),
-                          _buildOriginCost(),
-                          SizedBox(height: 10),
-                          _buildAdditionalOptionsSection(),
-                          SizedBox(height: 10),
-                          _buildExtraService(),
-                          SizedBox(height: 10),
-                          _buildJobDetailsSection(),
-                          SizedBox(height: 10),
-                          _buildNotesField(),
-                          if (widget.arguments?.staff != null) ...[
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+          backgroundColor: Colors.grey.shade200,
+          appBar: CustomAppBar(
+            title: (widget.arguments?.orderIdToReOrder != null
+                    ? 'Order lại - '
+                    : '') +
+                (service.name ?? ''),
+            onBackPressed: () {
+              AppRouter.navigateToHome();
+            },
+          ),
+          body: isLoading
+              ? _loadingPlaceholder()
+              : SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      StepIndicatorWidget(currentStep: 2),
+                      SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // _buildServiceSupply(),
+                            // SizedBox(height: 10),
+                            _buildOriginCost(),
                             SizedBox(height: 10),
-                            _buildEmployee(),
+                            _buildAdditionalOptionsSection(),
+                            SizedBox(height: 10),
+                            _buildExtraService(),
+                            SizedBox(height: 10),
+                            _buildJobDetailsSection(),
+                            SizedBox(height: 10),
+                            _buildNotesField(),
+                            if (widget.arguments?.staff != null) ...[
+                              SizedBox(height: 10),
+                              _buildEmployee(),
+                            ],
+                            SizedBox(height: 10),
+                            _build(),
                           ],
-                          SizedBox(height: 10),
-                          _build(),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-        bottomNavigationBar: _buildBottomBar(),
+          bottomNavigationBar: _buildBottomBar(),
+        ),
       ),
     );
   }
@@ -880,6 +883,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         children: [
           TextField(
             controller: _notesController,
+            onSubmitted: (_) => FocusScope.of(context).unfocus(),
             decoration: InputDecoration(
               hintText: 'Nhập ghi chú',
               border: OutlineInputBorder(

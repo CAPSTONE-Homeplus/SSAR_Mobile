@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:home_clean/core/constant/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_clean/presentation/widgets/sparklePaint.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String? title;
@@ -9,6 +10,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Color? backgroundColor;
   final bool isHomePage;
   final String? roomAddress;
+  final bool? isVerified;
 
   const CustomAppBar({
     Key? key,
@@ -18,6 +20,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.backgroundColor,
     this.isHomePage = false,
     this.roomAddress,
+    this.isVerified = false,
   }) : super(key: key);
 
   @override
@@ -78,6 +81,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                     padding: EdgeInsets.symmetric(vertical: 16.0),
                     child: Center(child: Text('Không có thông báo mới')),
                   ),
+
               ],
             ),
           ),
@@ -181,66 +185,104 @@ class _CustomAppBarState extends State<CustomAppBar> {
       titleSpacing: 16,
       title: _buildRoomHeader(widget.roomAddress ?? ''),
       centerTitle: false,
-      // actions: [
-      //   _buildNotificationButton(context),
-      //   const SizedBox(width: 8),
-      // ],
+      actions: [
+        if (widget.isVerified == true)
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Tooltip(
+              message: 'Đã xác thực',
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade300,
+                  borderRadius: BorderRadius.circular(20), // Thay đổi thành borderRadius để chứa text
+                  boxShadow: [
+
+                  ],
+                  // Hiệu ứng lấp lánh
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.amber.shade200,
+                      Colors.amber.shade300,
+                      Colors.amber.shade400,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.verified,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          'Đã xác thực',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        if (widget.isVerified == false)
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Tooltip(
+              message: 'Chưa xác thực',
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.grey.shade600,
+                      Colors.grey.shade700,
+                      Colors.grey.shade800,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      'Chưa xác thực',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        const SizedBox(width: 8),
+      ],
     );
   }
-
-  // Widget _buildNotificationButton(BuildContext context) {
-  //   // Use a single container with the key to ensure proper rendering
-  //   return Container(
-  //     key: _notificationButtonKey,
-  //     child: Stack(
-  //       alignment: Alignment.center,
-  //       children: [
-  //         IconButton(
-  //           icon: const Icon(
-  //             Icons.notifications_none_rounded,
-  //             color: Colors.white,
-  //             size: 24,
-  //           ),
-  //           onPressed: () {
-  //             if (widget.onNotificationPressed != null) {
-  //               widget.onNotificationPressed!(context);
-  //             } else {
-  //               // Add a small delay to ensure UI is fully rendered
-  //               Future.delayed(Duration.zero, () {
-  //                 _showNotificationDialog(context);
-  //               });
-  //             }
-  //           },
-  //         ),
-  //         if (widget.unreadCount > 0)
-  //           Positioned(
-  //             top: 10,
-  //             right: 10,
-  //             child: Container(
-  //               padding: const EdgeInsets.all(2),
-  //               decoration: BoxDecoration(
-  //                 color: Colors.red,
-  //                 borderRadius: BorderRadius.circular(8),
-  //               ),
-  //               constraints: const BoxConstraints(
-  //                 minWidth: 16,
-  //                 minHeight: 16,
-  //               ),
-  //               child: Text(
-  //                 widget.unreadCount.toString(),
-  //                 style: const TextStyle(
-  //                   color: Colors.white,
-  //                   fontSize: 10,
-  //                   fontWeight: FontWeight.bold,
-  //                 ),
-  //                 textAlign: TextAlign.center,
-  //               ),
-  //             ),
-  //           ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildRoomHeader(String address) {
     return Column(

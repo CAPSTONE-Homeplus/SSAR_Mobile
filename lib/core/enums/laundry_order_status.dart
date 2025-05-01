@@ -13,7 +13,7 @@ extension LaundryOrderStatusExtension on LaundryOrderStatus {
   String get name {
     switch (this) {
       case LaundryOrderStatus.draft:
-        return 'Nháp';
+        return 'Đang yêu cầu nhân viên tới lấy đồ';
       case LaundryOrderStatus.pendingPayment:
         return 'Chờ thanh toán';
       case LaundryOrderStatus.processing:

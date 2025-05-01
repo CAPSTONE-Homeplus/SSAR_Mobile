@@ -87,32 +87,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _processAuthentication() async {
     try {
-      final state = _authBloc.state;
-      if (state is AuthenticationFromLocal) {
-        user = state.user;
-      } else {
-        final completer = Completer<void>();
-        late StreamSubscription<AuthState> subscription;
 
-        subscription = _authBloc.stream.listen(
-              (state) {
-            if (state is AuthenticationFromLocal) {
-              user = state.user;
-              subscription.cancel();
-              completer.complete();
-            } else if (state is AuthenticationFailed) {
-              subscription.cancel();
-              completer.completeError(state.error);
-            }
-          },
-          onError: (error) {
-            subscription.cancel();
-            completer.completeError(error);
-          },
-          cancelOnError: true,
-        );
+      if (_authBloc.state is AuthenticationFromLocal) {
+        user = (_authBloc.state as AuthenticationFromLocal).user;
+        return;
+      }
 
-        await completer.future;
+      final stateChangeFuture = _authBloc.stream.firstWhere(
+            (state) =>
+        state is AuthenticationFromLocal ||
+            state is AuthenticationFailed,
+        orElse: () => AuthenticationFailed(error: 'Không thể xác thực'),
+      );
+      final result = await stateChangeFuture;
+      if (result is AuthenticationFromLocal) {
+        user = result.user;
+      } else if (result is AuthenticationFailed) {
+        throw result.error;
       }
     } catch (e) {
       print('Authentication Process Error: $e');

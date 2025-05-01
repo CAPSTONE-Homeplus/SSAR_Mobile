@@ -436,13 +436,18 @@ class CleanOrderList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: SizeConfig.hem * 20),
-      itemCount: orders.length,
-      itemBuilder: (context, index) {
-        final order = orders[index];
-        return CleanOrderCard(order: order);
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<OrderBloc>().add(GetOrdersByUserEvent());
       },
+      child: ListView.builder(
+        padding: EdgeInsets.symmetric(horizontal: SizeConfig.hem * 20),
+        itemCount: orders.length,
+        itemBuilder: (context, index) {
+          final order = orders[index];
+          return CleanOrderCard(order: order);
+        },
+      ),
     );
   }
 }
@@ -454,13 +459,21 @@ class LaundryOrderList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: SizeConfig.hem * 20),
-      itemCount: orders.length,
-      itemBuilder: (context, index) {
-        final order = orders[index];
-        return LaundryOrderCard(order: order);
+    return RefreshIndicator(
+      onRefresh: () async {
+        context
+            .read<LaundryOrderBlocV2>()
+            .add(GetLaundryOrdersV2('laundry-user-id-goes-here'));
       },
+      child: ListView.builder(
+        padding: EdgeInsets.symmetric(horizontal: SizeConfig.hem * 20),
+
+        itemCount: orders.length,
+        itemBuilder: (context, index) {
+          final order = orders[index];
+          return LaundryOrderCard(order: order);
+        },
+      ),
     );
   }
 }
@@ -472,19 +485,22 @@ class CleanOrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OrderCardBase(
-      onTap: () {
-        AppRouter.navigateToOrderDetailWithArguments(order.id ?? '');
-      },
-      title: order.serviceType ?? AppStrings.defaultServiceName,
-      statusWidget: OrderStatusChip(status: order.status ?? ''),
-      dateText: order.timeSlotDetail ?? 'Đặt ngay',
-      orderCode: order.code != null
-          ? order.code!.length > 20
-              ? (order.code?.substring(0, 20) ?? 'Không xác định') + '...'
-              : (order.code ?? 'Không xác định')
-          : 'Không xác định',
-      totalAmount: order.totalAmount?.toDouble() ?? 0,
+    return Container(
+      margin: EdgeInsets.only(bottom: SizeConfig.fem * 16),
+      child: OrderCardBase(
+        onTap: () {
+          AppRouter.navigateToOrderDetailWithArguments(order.id ?? '');
+        },
+        title: order.serviceType ?? AppStrings.defaultServiceName,
+        statusWidget: OrderStatusChip(status: order.status ?? ''),
+        dateText: order.timeSlotDetail ?? 'Đặt ngay',
+        orderCode: order.code != null
+            ? order.code!.length > 20
+                ? (order.code?.substring(0, 20) ?? 'Không xác định') + '...'
+                : (order.code ?? 'Không xác định')
+            : 'Không xác định',
+        totalAmount: order.totalAmount?.toDouble() ?? 0,
+      ),
     );
   }
 }
@@ -496,16 +512,19 @@ class LaundryOrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OrderCardBase(
-      onTap: () {
-        AppRouter.navigateToLaundryOrderDetailWithArguments(order.id ?? '');
-      },
-      title: order.name,
-      statusWidget: LaundryStatusChip(status: order.status ?? 'pending'),
-      dateText: order.orderDate.toString(),
-      serviceType: order.type ?? AppStrings.defaultLaundryType,
-      orderCode: order.orderCode ?? 'Không xác định',
-      totalAmount: order.totalAmount ?? 0,
+    return Container(
+      margin: EdgeInsets.only(bottom: SizeConfig.fem * 16),
+      child: OrderCardBase(
+        onTap: () {
+          AppRouter.navigateToLaundryOrderDetailWithArguments(order.id ?? '');
+        },
+        title: order.name,
+        statusWidget: LaundryStatusChip(status: order.status ?? 'pending'),
+        dateText: order.orderDate.toString(),
+        serviceType: order.type ?? AppStrings.defaultLaundryType,
+        orderCode: order.orderCode ?? 'Không xác định',
+        totalAmount: order.totalAmount ?? 0,
+      ),
     );
   }
 }
@@ -532,59 +551,62 @@ class OrderCardBase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.only(bottom: SizeConfig.fem * 16),
-      elevation: 3,
-      shadowColor: Colors.black.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
+    return Material(
+      child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: AppColors.cardBorderColor, width: 1),
-      ),
-      child: Material(
-        color: Colors.white,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Padding(
-            padding: EdgeInsets.all(SizeConfig.hem * 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          fontSize: SizeConfig.hem * 16,
-                          color: AppColors.textPrimaryColor,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.all(SizeConfig.hem * 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.bold,
+                        fontSize: SizeConfig.hem * 16,
+                        color: AppColors.textPrimaryColor,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    statusWidget,
-                  ],
-                ),
-                SizedBox(height: SizeConfig.fem * 12),
-                if (serviceType != null)
-                  ServiceTypeLabel(serviceType: serviceType!),
-                SizedBox(height: SizeConfig.fem * 12),
-                DateLabel(dateText: dateText),
-                SizedBox(height: SizeConfig.fem * 8),
-                Divider(color: AppColors.cardBorderColor, thickness: 1),
-                SizedBox(height: SizeConfig.fem * 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    OrderCodeDisplay(code: orderCode),
-                    OrderTotalDisplay(amount: totalAmount),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                  statusWidget,
+                ],
+              ),
+              SizedBox(height: SizeConfig.fem * 12),
+              if (serviceType != null)
+                ServiceTypeLabel(serviceType: serviceType!),
+              SizedBox(height: SizeConfig.fem * 12),
+              DateLabel(dateText: dateText),
+              SizedBox(height: SizeConfig.fem * 8),
+              Divider(color: AppColors.cardBorderColor, thickness: 1),
+              SizedBox(height: SizeConfig.fem * 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  OrderCodeDisplay(code: orderCode),
+                  OrderTotalDisplay(amount: totalAmount),
+                ],
+              ),
+
+            ],
           ),
         ),
       ),
