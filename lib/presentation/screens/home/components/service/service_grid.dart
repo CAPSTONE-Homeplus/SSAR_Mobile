@@ -49,9 +49,9 @@ class ServiceGridWidget extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final service = services[index];
                   return ServiceItemWidget(
-                    icon: Constant.iconMapping[service.code?.toLowerCase()] ?? Icons.help,
+                    icon: Constant.iconMapping[service.code] ?? Icons.help,
                     title: service.name ?? '',
-                    color: Constant.iconColorMapping[service.code?.toLowerCase()] ?? const Color(0xFF000000),
+                    color: Constant.iconColorMapping[service.code] ?? const Color(0xFF000000),
                     onTap: () {
                       AppRouter.navigateToServiceDetail(service.id ?? '');
                     },

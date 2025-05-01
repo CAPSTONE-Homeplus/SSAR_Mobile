@@ -50,7 +50,7 @@ class PaymentOption extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8 * fem),
               ),
               child: Image.asset(
-                title == 'VNPay' ? 'assets/icons/vnpay.jpg' :
+                title == 'Vnpay' ? 'assets/icons/vnpay.jpg' :
                 title == 'Paypal' ? 'assets/icons/paypal.png' :
                 'assets/icons/default_wallet.jpg',
                 width: 20 * fem,

@@ -318,11 +318,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   void _checkAllDataLoaded() {
-    if (_serviceActivities.isNotEmpty &&
-        _options.isNotEmpty &&
-        _extraServices.isNotEmpty &&
-        _supplies.isNotEmpty &&
-        timeSlots.isNotEmpty) {
+    // if (_serviceActivities.isNotEmpty &&
+    if (    _options.isNotEmpty &&
+        _extraServices.isNotEmpty) {
       setState(() {
         isLoading = false;
       });

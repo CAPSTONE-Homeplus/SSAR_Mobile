@@ -337,7 +337,7 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
                       ),
                       SizedBox(height: 4 * SizeConfig.hem),
                       Text(
-                        '${orders.estimatedDuration} giờ',
+                        '${orders.estimatedDuration} phút',
                         style: GoogleFonts.poppins(
                           color: Colors.black87,
                           fontWeight: FontWeight.w600,

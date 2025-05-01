@@ -43,7 +43,7 @@ class PaymentMethodSelection extends StatelessWidget {
             physics: NeverScrollableScrollPhysics(),
             itemCount: 1,
             itemBuilder: (context, index) {
-              final payment = paymentMethods[index];
+              final payment = paymentMethods[1];
               return PaymentOption(
                 value: payment.id!,
                 title: payment.name!,

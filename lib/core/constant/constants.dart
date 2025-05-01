@@ -87,19 +87,20 @@ final class Message {
 
 class Constant {
   static Map<String, IconData> iconMapping = {
-    'tongvesinh': Icons.auto_delete,
-    'vesinhphong': Icons.bedroom_child,
-    'dondeptongquat': Icons.house,
-    'chuyennha': Icons.house,
-    'vssd': Icons.home_repair_service,
+    'TVS': Icons.cleaning_services,         // Tổng vệ sinh
+    'DDST': Icons.celebration,              // Dọn dẹp sau tiệc
+    'VSPN': Icons.bed,                      // Vệ sinh phòng ngủ
+    'VSPK': Icons.weekend,                  // Vệ sinh phòng khách (sofa)
+    'LCTL': Icons.wash,                     // Lau chùi toilet
   };
 
+
   static Map<String, Color> iconColorMapping = {
-    'tongvesinh': Color(0xFF1CAF7D),
-    'vesinhphong': Color.fromARGB(255, 255, 99, 71),
-    'dondeptongquat': Color(0xFF1E90FF),
-    'chuyennha': Color(0xFF8A2BE2),
-    'vssd': Color(0xFFFFA500),
+    'TVS': Color(0xFF1CAF7D),
+    'DDST': Color.fromARGB(255, 255, 99, 71),
+    'VSPN': Color(0xFF1E90FF),
+    'VSPK': Color(0xFF8A2BE2),
+    'LCTL': Color(0xFFFFA500),
   };
 
   static const int defaultPage = 1;
