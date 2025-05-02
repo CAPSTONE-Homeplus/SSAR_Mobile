@@ -41,7 +41,7 @@ class _SharedWalletState extends State<SharedWallet> with SingleTickerProviderSt
       appBar: CustomAppBar(
         title: 'Ví chung',
         onBackPressed: () {
-          Get.back();
+          AppRouter.navigateToHome();
         },
       ),
       body: _buildSharedWalletView(),

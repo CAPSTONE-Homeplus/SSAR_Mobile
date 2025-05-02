@@ -34,6 +34,7 @@ class _ConfirmTransferDialogState extends State<ConfirmTransferDialog> {
   late final TextEditingController _amountController;
   final NumberFormat _currencyFormatter = NumberFormat.decimalPattern('vi');
   static const int _maxAmount = 20000000;
+  static const int _minAmount = 10000;
 
   @override
   void initState() {
@@ -121,6 +122,13 @@ class _ConfirmTransferDialogState extends State<ConfirmTransferDialog> {
                     }
                     final number = int.parse(newValue.text);
 
+
+                    if (number < _minAmount) {
+                      return TextEditingValue(
+                        text: _currencyFormatter.format(_minAmount), // Giá trị tối thiểu được format
+                        selection: TextSelection.collapsed(offset: 6),
+                      );
+                    }
                     // Limit to max amount
                     if (number > _maxAmount) {
                       return TextEditingValue(
@@ -194,7 +202,7 @@ class _ConfirmTransferDialogState extends State<ConfirmTransferDialog> {
         _amountController.text.replaceAll(RegExp(r'[.,]'), '')
     ) ?? 0;
 
-    if (amount > 0 && amount <= _maxAmount) {
+    if (amount >= _minAmount && amount <= _maxAmount) {
       BlocProvider.of<TransferBloc>(context).add(
         TransferToSharedWallet(
           sharedWalletId: widget.sharedWallet.id!,
@@ -204,7 +212,7 @@ class _ConfirmTransferDialogState extends State<ConfirmTransferDialog> {
       );
     } else {
       // Show error SnackBar
-      _showErrorSnackBar('Vui lòng nhập số điểm hợp lệ (0 - 20.000.000)');
+      _showErrorSnackBar('Vui lòng nhập số điểm từ 10.000 đến 20.000.000');
     }
   }
 

@@ -31,6 +31,8 @@ class HomeScreenBody extends StatefulWidget {
   State<HomeScreenBody> createState() => _HomeScreenBodyState();
 }
 
+
+
 class _HomeScreenBodyState extends State<HomeScreenBody> {
   @override
   void initState() {
@@ -58,7 +60,7 @@ Widget _buildHomeScreen(List<Service> services, BuildContext context,
     appBar: CustomAppBar(
       isHomePage: true,
       roomAddress: address,
-      isVerified: user.status == 'Verified' ? true : false,
+      isVerified: user.status == 'Active' ? true : false,
     ),
     body: SingleChildScrollView(
       child: Column(

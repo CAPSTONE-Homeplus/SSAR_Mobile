@@ -195,11 +195,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.amber.shade300,
-                  borderRadius: BorderRadius.circular(20), // Thay đổi thành borderRadius để chứa text
-                  boxShadow: [
-
-                  ],
-                  // Hiệu ứng lấp lánh
+                  borderRadius: BorderRadius.circular(20),
                   gradient: LinearGradient(
                     colors: [
                       Colors.amber.shade200,

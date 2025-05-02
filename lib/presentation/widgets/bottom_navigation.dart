@@ -2,13 +2,9 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/constant/size_config.dart';
-import '../../core/dependencies_injection/service_locator.dart';
-import '../../data/datasource/signalr/order_laundry_remote_data_source.dart';
 import '../screens/home/home_screen.dart';
-import '../screens/notification/notification.dart';
 import '../screens/order_list/order_list_screen.dart';
 import '../screens/setting/settings_screen.dart';
-import '../screens/transaction_history/transaction_history.dart';
 
 class BottomNavigation extends StatefulWidget {
   final int initialIndex;
@@ -33,7 +29,6 @@ class _BottomNavigationState extends State<BottomNavigation> {
     return [
       HomeScreen(),
       OrderListScreen(selectedCategory: widget.selectedCategory ?? ''),
-      TransactionHistory(),
       SettingsScreen()
     ];
   }
@@ -71,7 +66,6 @@ class _BottomNavigationState extends State<BottomNavigation> {
         items: [
           Icon(Icons.home, size: 25 * fem, color: Colors.black),
           Icon(Icons.list_alt, size: 25 * fem, color: Colors.black),
-          Icon(Icons.receipt_long_rounded, size: 25 * fem, color: Colors.black),
           Icon(Icons.person_outline, size: 25 * fem, color: Colors.black),
         ],
         onTap: _onTabTapped,

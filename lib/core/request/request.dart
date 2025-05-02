@@ -182,21 +182,6 @@ class MyRequest {
         onError: (e, handler) async {
           if (e.response?.statusCode == 401) {
             print("Unauthorized - Attempting token refresh");
-            if (navigatorKey.currentContext != null && ModalRoute.of(navigatorKey.currentContext!)?.isCurrent == true) {
-              showCustomDialog(
-                context: navigatorKey.currentContext!,
-                message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
-                type: DialogType.error,
-                onConfirm: () {
-                  clearLocalStorageAndLogout();
-                  AppRouter.navigateToLogin();
-                },
-              );
-            } else {
-              clearLocalStorageAndLogout();
-            }
-
-            return handler.next(e);
           } else if (e.response?.statusCode == 400) {
             print("Bad Request");
           } else if (e.response?.statusCode == 500) {

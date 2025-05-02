@@ -6,6 +6,7 @@ import 'package:home_clean/domain/use_cases/user/get_users_by_shared_wallet_use_
 import 'package:home_clean/presentation/blocs/user/user_event.dart';
 import 'package:home_clean/presentation/blocs/user/user_state.dart';
 
+import '../../../core/exception/exception_handler.dart';
 import '../../../domain/use_cases/user/get_user_by_phone_number_use_case.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
@@ -41,23 +42,30 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
   Future<void> _getUserByPhoneNumber(
       GetUserByPhoneNumberEvent event, Emitter<UserState> emit) async {
-    emit(UserLoading());
-    final response = await getUserByPhoneNumberUseCase.execute(event.phone);
-    response.fold(
-      (failure) => emit(UserErrorByPhone(failure.message)),
-      (user) => emit(UserLoadedByPhone(user)),
-    );
+    try {
+      emit(UserLoading());
+      final response = await userRepository.getUserByPhone(
+        event.phone,
+      );
+      emit(UserLoadedByPhone(response));
+    } on ApiException catch (e) {
+      emit(UserErrorByPhone(e.description ?? "Có lỗi xảy ra"));
+    }
   }
 
   Future<void> _checkUserInfo(
       CheckUserInfoEvent event, Emitter<UserState> emit) async {
-    emit(UserLoading());
-    final response = await checkUserInfoUseCase.execute(
-        event.phoneNumber, event.email, event.username);
-    response.fold(
-      (failure) => emit(UserError(failure.message)),
-      (isClear) => emit(CheckUserInfoSuccess(isClear)),
-    );
+    try {
+      emit(UserLoading());
+      final response = await userRepository.checkInfo(
+        event.phoneNumber,
+        event.email,
+        event.username,
+      );
+      emit(CheckUserInfoSuccess(response));
+    }on ApiException catch (e) {
+      emit(UserError(e.description ?? "Có lỗi xảy ra"));
+    }
   }
 
   Future<void> _getUser(

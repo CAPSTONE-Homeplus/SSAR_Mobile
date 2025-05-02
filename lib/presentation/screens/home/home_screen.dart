@@ -22,6 +22,9 @@ import '../../blocs/auth/auth_state.dart';
 import '../../blocs/building/building_bloc.dart';
 import '../../blocs/building/building_state.dart';
 import '../../blocs/house/house_bloc.dart';
+import '../../blocs/user/user_bloc.dart';
+import '../../blocs/user/user_event.dart';
+import '../../blocs/user/user_state.dart';
 import '../../blocs/wallet/wallet_event.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -36,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late AuthBloc _authBloc;
   late HouseBloc _houseBloc;
   late BuildingBloc _buildingBloc;
+  late UserBloc _userBloc;
   List<Wallet> walletUser = [];
   User? user;
   House? house;
@@ -87,27 +91,54 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _processAuthentication() async {
     try {
-
       if (_authBloc.state is AuthenticationFromLocal) {
-        user = (_authBloc.state as AuthenticationFromLocal).user;
+        final authState = _authBloc.state as AuthenticationFromLocal;
+        user = authState.user;
+
+        if (user?.id != null) {
+          await _fetchUserDetails(user!.id ?? '');
+        }
+
         return;
       }
 
-      final stateChangeFuture = _authBloc.stream.firstWhere(
+      final result = await _authBloc.stream.firstWhere(
             (state) =>
         state is AuthenticationFromLocal ||
             state is AuthenticationFailed,
         orElse: () => AuthenticationFailed(error: 'Không thể xác thực'),
       );
-      final result = await stateChangeFuture;
+
       if (result is AuthenticationFromLocal) {
         user = result.user;
+
+        if (user?.id != null) {
+          await _fetchUserDetails(user!.id ?? '');
+        }
       } else if (result is AuthenticationFailed) {
         throw result.error;
       }
     } catch (e) {
       print('Authentication Process Error: $e');
       rethrow;
+    }
+  }
+
+  Future<void> _fetchUserDetails(String userId) async {
+    final userBloc = context.read<UserBloc>();
+    userBloc.add(GetUserEvent(userId));
+
+    try {
+      await for (final state in _userBloc.stream) {
+        if (state is GetUserSuccess && mounted) {
+          setState(() {
+            user = state.user;
+          });
+          break;
+        }
+      }
+    } catch (e) {
+      print('Lỗi trong quá trình fetch user: $e');
     }
   }
 
@@ -157,25 +188,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Generic method to wait for a specific state
-  Future<T> _waitForState<S, T>(Bloc bloc, bool Function(S) predicate) {
-    final completer = Completer<T>();
-    late StreamSubscription subscription;
-
-    subscription = bloc.stream.listen(
-          (state) {
-        if (predicate(state)) {
-          subscription.cancel();
-          completer.complete(state);
-        }
-      },
-      onError: (error) {
-        subscription.cancel();
-        completer.completeError(error);
-      },
-      cancelOnError: true,
-    );
-
-    return completer.future;
+  Future<T> _waitForState<S, T>(Bloc bloc, bool Function(S) predicate) async {
+    try {
+      return await bloc.stream.firstWhere(
+            (state) => predicate(state),
+        orElse: () => throw StateError('Không tìm thấy trạng thái phù hợp'),
+      ) as T;
+    } catch (e) {
+      print('Lỗi trong _waitForState: $e');
+      rethrow;
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -190,12 +212,17 @@ class _HomeScreenState extends State<HomeScreen> {
         }
 
         if (state is ServiceSuccessState) {
-          return HomeScreenBody(
-            servicesToFetch: state.services.items,
-            walletUser: walletUser,
-            user: user ?? User(),
-            house: house ?? House(),
-            building: building ?? Building(),
+          return RefreshIndicator(
+            onRefresh: () async {
+              _init();
+            },
+            child: HomeScreenBody(
+              servicesToFetch: state.services.items,
+              walletUser: walletUser,
+              user: user ?? User(),
+              house: house ?? House(),
+              building: building ?? Building(),
+            ),
           );
         }
 

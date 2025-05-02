@@ -655,9 +655,95 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Tiêu đề rõ ràng về loại căn hộ
+          Text(
+            'Thông Tin Dịch Vụ',
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Chi tiết loại căn hộ
+          Row(
+            children: [
+              Icon(
+                Icons.home_outlined,
+                color: AppColors.primaryColor,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Loại Căn Hộ',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      _servicePriceType.houseTypeDescription ?? 'Chưa xác định',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const Divider(height: 16, thickness: 0.5),
+
+          // Chi tiết dịch vụ và giá
+          Row(
+            children: [
+              Icon(
+                Icons.clean_hands_outlined,
+                color: AppColors.primaryColor,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Dịch Vụ',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      service.name ?? 'Chưa xác định',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const Divider(height: 16, thickness: 0.5),
+
+          // Giá tiền
           Row(
             children: [
               Icon(
@@ -666,17 +752,30 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 size: 24,
               ),
               const SizedBox(width: 12),
-              Text(
-                '${service.name}',
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Đơn Giá',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                      ),
+                    ),
+                    CurrencyDisplay(
+                      price: _servicePriceType.price,
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryColor,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
-          ),
-          CurrencyDisplay(
-            price: _servicePriceType.price,
           ),
         ],
       ),

@@ -18,6 +18,7 @@ import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
 import '../../widgets/bottom_navigation.dart';
+import '../../widgets/show_dialog.dart';
 import '../home/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -62,65 +63,49 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> checkLoginStatus() async {
-    await Future.delayed(const Duration(seconds: 3));
 
     final authLocalDataSource = AuthLocalDataSource();
     String? accessToken = await authLocalDataSource.getAccessTokenFromStorage();
     print('📤 Load accessToken: $accessToken');
 
-    if (accessToken != null && accessToken.isNotEmpty) {
-      _updateAuthorizationHeaders(accessToken);
-      AppRouter.navigateToHome();
-      return;
-    }
-    await _handleTokenRefresh(authLocalDataSource);
-  }
+    if (accessToken == null || accessToken.isEmpty) {
+      showCustomDialog(
+        context: context,
+        message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+        type: DialogType.error,
+        onConfirm: () {
+          _clearAndLogout();
+        },
+      );
+    } else {
+      final authRepository = sl<AuthRepository>();
+      final isValidToken = await authRepository.isValidToken();
 
-  Future<void> _handleTokenRefresh(AuthLocalDataSource authLocalDataSource) async {
-    try {
-      final refreshToken = await authLocalDataSource.getRefreshTokenFromStorage();
-
-      if (refreshToken == null || refreshToken.isEmpty) {
-        await _clearAndLogout();
-        return;
+      if (isValidToken) {
+        vinWalletRequest.options.headers['Authorization'] =
+        'Bearer $accessToken';
+        homeCleanRequest.options.headers['Authorization'] =
+        'Bearer $accessToken';
+        vinLaundryRequest.options.headers['Authorization'] =
+        'Bearer $accessToken';
+        initSignalR();
+        navigateToHome();
+      } else {
+        showCustomDialog(
+          context: context,
+          message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+          type: DialogType.error,
+          onConfirm: () {
+            _clearAndLogout();
+          },
+        );
       }
-
-      final auth = await sl<AuthRepositoryImpl>().refreshToken();
-
-      final newToken = auth.accessToken;
-      final newRefreshToken = auth.refreshToken;
-
-      if (newToken == null || newRefreshToken == null) {
-        await _clearAndLogout();
-        return;
-      }
-      await authLocalDataSource.saveTokensToStorage(newToken, newRefreshToken);
-      _updateAuthorizationHeaders(newToken);
-      AppRouter.navigateToHome();
-    } catch (e) {
-      await _clearAndLogout();
     }
   }
 
   Future<void> _clearAndLogout() async {
     await clearLocalStorageAndLogout();
-    AppRouter.navigateToLogin();
-  }
-
-  Future<void> _updateAuthorizationHeaders(String token) async {
-    final bearerToken = 'Bearer $token';
-
-    // Explicitly remove old token and set new token
-    vinWalletRequest.options.headers.remove('Authorization');
-    homeCleanRequest.options.headers.remove('Authorization');
-    vinLaundryRequest.options.headers.remove('Authorization');
-
-    // Set new tokens
-    vinWalletRequest.options.headers['Authorization'] = bearerToken;
-    homeCleanRequest.options.headers['Authorization'] = bearerToken;
-    vinLaundryRequest.options.headers['Authorization'] = bearerToken;
-
-    await initSignalR();
+    navigateToLogin();
   }
 
   Future<void> initSignalR() async {
@@ -143,7 +128,7 @@ class _SplashScreenState extends State<SplashScreen>
             BottomNavigation(child: HomeScreen()),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           var fadeAnimation =
-          Tween<double>(begin: 0.0, end: 1.0).animate(animation);
+              Tween<double>(begin: 0.0, end: 1.0).animate(animation);
           return FadeTransition(opacity: fadeAnimation, child: child);
         },
         transitionDuration: Duration(milliseconds: 500),
@@ -157,7 +142,7 @@ class _SplashScreenState extends State<SplashScreen>
         pageBuilder: (context, animation, secondaryAnimation) => LoginScreen(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           var fadeAnimation =
-          Tween<double>(begin: 0.0, end: 1.0).animate(animation);
+              Tween<double>(begin: 0.0, end: 1.0).animate(animation);
           return FadeTransition(opacity: fadeAnimation, child: child);
         },
         transitionDuration: Duration(milliseconds: 500),

@@ -6,6 +6,7 @@ import 'package:home_clean/data/models/user/user_model.dart';
 import 'package:home_clean/domain/entities/user/user.dart';
 import 'package:home_clean/domain/repositories/authentication_repository.dart';
 
+import '../../core/constant/constants.dart';
 import '../../core/exception/exception_handler.dart';
 import '../../core/constant/api_constant.dart';
 import '../../domain/entities/auth/auth.dart';
@@ -247,4 +248,39 @@ class AuthRepositoryImpl implements AuthRepository {
       throw ExceptionHandler.handleException(e);
     }
   }
+
+  @override
+  Future<bool> isValidToken() async {
+    try {
+      final user =
+      UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
+      final response = await homeCleanRequest.get(
+        '${ApiConstant.orders}/by-user',
+        queryParameters: {
+          'userId': user.id,
+          'search': '',
+          'orderBy': '',
+          'page': Constant.defaultPage,
+          'size': Constant.defaultSize
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else if (response.statusCode == 401) {
+        return false;
+      } else {
+        throw ApiException(
+          traceId: response.data['traceId'],
+          code: response.data['code'],
+          message: response.data['message'] ?? 'Lỗi từ máy chủ',
+          description: response.data['description'],
+          timestamp: response.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
 }

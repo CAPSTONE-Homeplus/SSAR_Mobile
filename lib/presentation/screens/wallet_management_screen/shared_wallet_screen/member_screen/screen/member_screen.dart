@@ -147,6 +147,7 @@ class _MembersScreenState extends State<MembersScreen> {
 
   void _showAddMemberDialog() {
     final TextEditingController phoneController = TextEditingController();
+    final ValueNotifier<String?> _errorNotifier = ValueNotifier<String?>(null);
 
     showDialog(
       context: context,
@@ -155,6 +156,9 @@ class _MembersScreenState extends State<MembersScreen> {
           if (state is UserLoadedByPhone) {
             Navigator.pop(context);
             _showConfirmationDialog(state.user);
+          }
+          if (state is UserErrorByPhone) {
+            _errorNotifier.value = state.message;
           }
         },
         child: AlertDialog(
@@ -176,6 +180,26 @@ class _MembersScreenState extends State<MembersScreen> {
                 ),
                 keyboardType: TextInputType.phone,
               ),
+              // Hiển thị lỗi ngay dưới TextField
+              ValueListenableBuilder<String?>(
+                valueListenable: _errorNotifier,
+                builder: (context, errorMessage, child) {
+                  if (errorMessage != null) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        errorMessage,
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  }
+                  return SizedBox.shrink();
+                },
+              ),
             ],
           ),
           actions: [
@@ -189,11 +213,14 @@ class _MembersScreenState extends State<MembersScreen> {
                 foregroundColor: Colors.white,
               ),
               onPressed: () {
+                // Xóa thông báo lỗi trước đó
+                _errorNotifier.value = null;
+
                 context
                     .read<UserBloc>()
                     .add(GetUserByPhoneNumberEvent(
-             phoneController.text.trim(),
-                ),);
+                  phoneController.text.trim(),
+                ));
               },
               child: const Text('Tìm thành viên'),
             ),
@@ -263,7 +290,7 @@ class _MembersScreenState extends State<MembersScreen> {
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Lỗi: $state'),
+                            content: Text(state.message),
                             backgroundColor: Colors.red,
                           ),
                         );
