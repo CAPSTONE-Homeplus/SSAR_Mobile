@@ -22,19 +22,6 @@ class HomeScreenLoading extends StatelessWidget {
                 fontSize: 12,
               ),
             ),
-            Row(
-              children: [
-                Text(
-                  '',
-                  style: GoogleFonts.poppins(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-              ],
-            ),
           ],
         ),
         actions: [

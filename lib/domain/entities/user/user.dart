@@ -13,6 +13,8 @@ class User extends Equatable {
   String? email;
   String? phoneNumber;
   String? citizenCode;
+  String? buildingCode;
+  String? houseCode;
 
   User({
     this.id,
@@ -26,7 +28,9 @@ class User extends Equatable {
     this.role,
     this.email,
     this.phoneNumber,
-    this.citizenCode
+    this.citizenCode,
+    this.buildingCode,
+    this.houseCode,
   });
 
   @override
@@ -42,6 +46,8 @@ class User extends Equatable {
     role,
     email,
     phoneNumber,
-    citizenCode
+    citizenCode,
+    buildingCode,
+    houseCode,
   ];
 }

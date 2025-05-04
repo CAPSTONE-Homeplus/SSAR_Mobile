@@ -9,6 +9,7 @@ import 'package:home_clean/presentation/screens/order_confirmation/order_confirm
 import 'package:home_clean/presentation/screens/order_detail/order_detail_screen.dart';
 import 'package:home_clean/presentation/screens/register/register_screen.dart';
 import 'package:home_clean/presentation/screens/service_detail/service_detail_screen.dart';
+import 'package:home_clean/presentation/screens/setting/policy_screen.dart';
 import 'package:home_clean/presentation/screens/start/splash_screen.dart';
 import 'package:home_clean/presentation/screens/wallet_management_screen/personal_wallet_screen/personal_wallet_screen.dart';
 import 'package:home_clean/presentation/screens/wallet_management_screen/shared_wallet_screen/shared_wallet_screen.dart';
@@ -69,6 +70,7 @@ class AppRouter {
   static const String routeLaundryOrderTracking = '/laundry-order-tracking';
   static const String routeChooseServiceType = '/choose-service-type';
   static const String routeChooseItemType = '/choose-item-type';
+  static const String routePolicy = '/policy';
 
   static List<GetPage> get routes => [
         GetPage(
@@ -163,8 +165,7 @@ class AppRouter {
         ),
         GetPage(
           name: routeNotification,
-          page: () => NotificationScreen(
-              remoteDataSource: sl<OrderLaundryRemoteDataSource>()),
+          page: () => NotificationScreen(),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -242,6 +243,12 @@ class AppRouter {
         GetPage(
           name: routeChooseItemType,
           page: () => ChooseItemTypeScreen(serviceId: Get.arguments),
+          transition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+        GetPage(
+          name: routePolicy,
+          page: () => PolicyPage(),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
@@ -387,6 +394,10 @@ class AppRouter {
 
   static void navigateToChooseItemType(String serviceId) {
     Get.toNamed(routeChooseItemType, arguments: serviceId);
+  }
+
+  static void navigateToPolicy() {
+    Get.toNamed(routePolicy);
   }
 }
 

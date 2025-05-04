@@ -3,8 +3,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/router/app_router.dart';
+import 'package:home_clean/presentation/widgets/show_dialog.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../domain/entities/wallet/wallet.dart';
@@ -83,7 +85,14 @@ class _ConfirmTransferDialogState extends State<ConfirmTransferDialog> {
           );
         } else if (state is TransferPointToSharedWalletError) {
           if (!context.mounted) return;
-          _showErrorSnackBar('Chuyển điểm thất bại: $state');
+          showCustomDialog(
+            context: context,
+            message: state.message,
+            type: DialogType.error,
+            onConfirm: () {
+              Get.back();
+            },
+          );
         }
       },
       builder: (context, state) {
@@ -125,7 +134,7 @@ class _ConfirmTransferDialogState extends State<ConfirmTransferDialog> {
 
                     if (number < _minAmount) {
                       return TextEditingValue(
-                        text: _currencyFormatter.format(_minAmount), // Giá trị tối thiểu được format
+                        text: _currencyFormatter.format(_minAmount),
                         selection: TextSelection.collapsed(offset: 6),
                       );
                     }

@@ -4,6 +4,8 @@ import 'package:home_clean/domain/entities/service/service.dart';
 import 'package:home_clean/presentation/screens/home/components/service/service_grid.dart';
 import 'package:home_clean/presentation/screens/home/components/wallet/wallet_container.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../globals.dart';
 
 import '../../../../core/constant/size_config.dart';
 import '../../../../domain/entities/building/building.dart';
@@ -31,12 +33,17 @@ class HomeScreenBody extends StatefulWidget {
   State<HomeScreenBody> createState() => _HomeScreenBodyState();
 }
 
-
-
 class _HomeScreenBodyState extends State<HomeScreenBody> {
   @override
   void initState() {
     super.initState();
+    _saveAddress();
+
+  }
+
+  void _saveAddress() {
+    currentHouseCode = widget.house.code ?? '';
+    currentBuildingCode = widget.building.code ?? '';
   }
 
   @override
@@ -48,9 +55,10 @@ class _HomeScreenBodyState extends State<HomeScreenBody> {
 
 Widget _buildHomeScreen(List<Service> services, BuildContext context,
     List<Wallet> walletUser, User user, House house, Building building) {
-  String defaultRoom = house.numberOfRoom ?? '';
+  String defaultRoom = house.no?? '';
   String defaultBuilding = building.name ?? '';
-  String address = 'Phòng $defaultRoom, $defaultBuilding';
+  String address = 'Phòng $defaultRoom, Tòa $defaultBuilding';
+
   final fem = SizeConfig.fem;
   final hem = SizeConfig.hem;
   final ffem = SizeConfig.ffem;
@@ -100,10 +108,7 @@ Widget _buildConvenienceMarketingWidget() {
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
         gradient: LinearGradient(
-          colors: [
-            Colors.green.shade50,
-            Colors.green.shade100
-          ],
+          colors: [Colors.green.shade50, Colors.green.shade100],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

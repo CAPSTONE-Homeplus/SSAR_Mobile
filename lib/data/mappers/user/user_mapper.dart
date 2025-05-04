@@ -17,6 +17,8 @@ class UserMapper {
       phoneNumber: userModel.phoneNumber ?? '',
       email: userModel.email ?? '',
       citizenCode: userModel.citizenCode ?? '',
+      buildingCode: userModel.buildingCode,
+      houseCode: userModel.houseCode,
     );
   }
 
@@ -34,6 +36,8 @@ class UserMapper {
       email: json['email'],
       phoneNumber: json['phoneNumber'],
       citizenCode: json['citizenCode'],
+      buildingCode: json['buildingCode'],
+      houseCode: json['houseCode'],
     );
   }
 
@@ -51,6 +55,8 @@ class UserMapper {
       email: user.email,
       phoneNumber: user.phoneNumber,
       citizenCode: user.citizenCode,
+      buildingCode: user.buildingCode,
+      houseCode: user.houseCode,
     );
   }
 }

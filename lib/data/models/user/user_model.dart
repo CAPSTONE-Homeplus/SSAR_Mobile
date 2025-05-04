@@ -11,6 +11,8 @@ class UserModel {
   String? email;
   String? phoneNumber;
   String? citizenCode;
+  String? buildingCode;
+  String? houseCode;
 
   UserModel({
     this.id,
@@ -25,6 +27,8 @@ class UserModel {
     this.email,
     this.phoneNumber,
     this.citizenCode,
+    this.buildingCode,
+    this.houseCode,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -41,6 +45,8 @@ class UserModel {
       email: json['email'],
       phoneNumber: json['phoneNumber'],
       citizenCode: json['citizenCode'],
+      buildingCode: json['buildingCode'],
+      houseCode: json['houseCode'],
     );
   }
 
@@ -58,6 +64,8 @@ class UserModel {
       'email': email,
       'phoneNumber': phoneNumber,
       'citizenCode': citizenCode,
+      'buildingCode': buildingCode,
+      'houseCode': houseCode,
     };
   }
 }

@@ -85,7 +85,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Hủy'),
+            child: const Text('Hủy', style: TextStyle(color: Colors.red)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -95,7 +95,9 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF1CAF7D), // Primary color
             ),
-            child: const Text('Xác nhận'),
+            child: const Text('Xác nhận',
+                style: TextStyle(color: Colors.white),
+          ),
           ),
         ],
       ),

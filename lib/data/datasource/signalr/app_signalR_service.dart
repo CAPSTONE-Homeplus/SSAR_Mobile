@@ -90,7 +90,6 @@ class AppSignalrService {
   }
 
   void _onNotificationTap(NotificationResponse notificationResponse) {
-    // Xử lý khi người dùng nhấn vào thông báo
     print('Người dùng nhấn vào thông báo: ${notificationResponse.payload}');
     // TODO: Thêm code chuyển hướng đến màn hình tương ứng dựa vào payload
   }

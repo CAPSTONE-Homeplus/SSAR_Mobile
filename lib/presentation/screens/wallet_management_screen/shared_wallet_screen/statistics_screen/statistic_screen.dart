@@ -60,7 +60,7 @@ class _SpendingScreenState extends State<SpendingScreen> {
       backgroundColor: Colors.grey[100],
       appBar: CustomAppBar(
         title: 'Hoạt động đóng góp',
-        onBackPressed: () => Get.back(),
+        onBackPressed: () =>  AppRouter.navigateToSharedWallet(),
       ),
       body: BlocConsumer<SharedWalletBloc, WalletState>(
         listener: (context, state) {

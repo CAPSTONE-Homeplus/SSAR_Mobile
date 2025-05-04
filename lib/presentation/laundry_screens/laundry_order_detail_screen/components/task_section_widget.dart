@@ -201,159 +201,171 @@ class StepIndicatorTaskTimelineWidget extends StatelessWidget {
       if (a.startDate == null) return 1;
     });
 
-    return SingleChildScrollView(
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 16),
-        child: ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: tasks.length,
-          itemBuilder: (context, index) {
-            final task = tasks[index];
-            final statusColor = StatusUtility.getStatusColor(
-                TaskStatusEnumExtension.fromString(task.status ?? ''));
-            final statusName = StatusUtility.getStatusName(
-                TaskStatusEnumExtension.fromString(task.status ?? ''));
-            final statusIcon = StatusUtility.getStatusIcon(
-                TaskStatusEnumExtension.fromString(task.status ?? ''));
-            final isLastItem = index == tasks.length - 1;
+    return RefreshIndicator(
+      onRefresh: () async {
+        context
+            .read<TaskBloc>()
+            .add(FetchOrderTasksEvent(orderId: orderId));
+      },
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 16),
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: tasks.length,
+                itemBuilder: (context, index) {
+                  final task = tasks[index];
+                  final statusColor = StatusUtility.getStatusColor(
+                      TaskStatusEnumExtension.fromString(task.status ?? ''));
+                  final statusName = StatusUtility.getStatusName(
+                      TaskStatusEnumExtension.fromString(task.status ?? ''));
+                  final statusIcon = StatusUtility.getStatusIcon(
+                      TaskStatusEnumExtension.fromString(task.status ?? ''));
+                  final isLastItem = index == tasks.length - 1;
 
-            return Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Timeline Indicator Column
-                    Column(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: statusColor,
-                              width: 3,
-                            ),
-                          ),
-                          child: Center(
-                            child: statusIcon,
-                          ),
-                        ),
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Timeline Indicator Column
+                          Column(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: statusColor.withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: statusColor,
+                                    width: 3,
+                                  ),
+                                ),
+                                child: Center(
+                                  child: statusIcon,
+                                ),
+                              ),
 
-                        // Connecting Line (except for the last item)
-                        if (!isLastItem)
+                              // Connecting Line (except for the last item)
+                              if (!isLastItem)
+                                Expanded(
+                                  child: Container(
+                                    width: 3,
+                                    color: statusColor.withOpacity(0.5),
+                                    margin: const EdgeInsets.symmetric(vertical: 4),
+                                  ),
+                                ),
+                            ],
+                          ),
+
+                          // Spacing between indicator and content
+                          const SizedBox(width: 16),
+
+                          // Task Content
                           Expanded(
                             child: Container(
-                              width: 3,
-                              color: statusColor.withOpacity(0.5),
-                              margin: const EdgeInsets.symmetric(vertical: 4),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.shade200,
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: statusColor.withOpacity(0.2),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Task Name and Status
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          task.taskName ?? 'Nhiệm Vụ Không Tên',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.grey[800],
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: statusColor.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          statusName,
+                                          style: TextStyle(
+                                            color: statusColor,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 12),
+
+                                  // Additional Task Details
+                                  _buildDetailRow(
+                                    icon: Icons.assignment_outlined,
+                                    text: task.taskCode != null
+                                        ? "Mã: ${task.taskCode}"
+                                        : "Không có mã",
+                                  ),
+
+                                  if (task.employeeName != null)
+                                    _buildDetailRow(
+                                      icon: Icons.person_outline,
+                                      text: "Người thực hiện: ${task.employeeName}",
+                                    ),
+
+                                  // Dates
+                                  _buildDetailRow(
+                                    icon: Icons.calendar_today,
+                                    text: "Bắt đầu: ${_formatDate(task.startDate)}",
+                                  ),
+
+                                  if (task.completedDate != null)
+                                    _buildDetailRow(
+                                      icon: Icons.check_circle_outline,
+                                      text:
+                                          "Hoàn thành: ${_formatDate(task.completedDate)}",
+                                      color: Colors.green,
+                                    ),
+                                ],
+                              ),
                             ),
                           ),
-                      ],
-                    ),
-
-                    // Spacing between indicator and content
-                    const SizedBox(width: 16),
-
-                    // Task Content
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.shade200,
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                          border: Border.all(
-                            color: statusColor.withOpacity(0.2),
-                            width: 1,
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Task Name and Status
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    task.taskName ?? 'Nhiệm Vụ Không Tên',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[800],
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: statusColor.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    statusName,
-                                    style: TextStyle(
-                                      color: statusColor,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            // Additional Task Details
-                            _buildDetailRow(
-                              icon: Icons.assignment_outlined,
-                              text: task.taskCode != null
-                                  ? "Mã: ${task.taskCode}"
-                                  : "Không có mã",
-                            ),
-
-                            if (task.employeeName != null)
-                              _buildDetailRow(
-                                icon: Icons.person_outline,
-                                text: "Người thực hiện: ${task.employeeName}",
-                              ),
-
-                            // Dates
-                            _buildDetailRow(
-                              icon: Icons.calendar_today,
-                              text: "Bắt đầu: ${_formatDate(task.startDate)}",
-                            ),
-
-                            if (task.completedDate != null)
-                              _buildDetailRow(
-                                icon: Icons.check_circle_outline,
-                                text:
-                                    "Hoàn thành: ${_formatDate(task.completedDate)}",
-                                color: Colors.green,
-                              ),
-                          ],
-                        ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+            const SizedBox(height: 350),
+          ],
         ),
       ),
     );

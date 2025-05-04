@@ -4,19 +4,16 @@ import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/domain/entities/notification/notification.dart';
 import 'package:intl/intl.dart';
 
-import '../../../data/datasource/signalr/order_laundry_remote_data_source.dart';
 import '../../blocs/laundry_order/laundry_order_bloc1.dart';
 import '../../blocs/laundry_order/laundry_order_event1.dart';
-import '../../blocs/laundry_order/laundry_order_state1.dart'; // Make sure to import this
+import '../../blocs/laundry_order/laundry_order_state1.dart';
 import '../../blocs/notification/notification_bloc.dart';
 import 'notification_item.dart';
 
 class NotificationScreen extends StatefulWidget {
-  final OrderLaundryRemoteDataSource remoteDataSource;
 
   const NotificationScreen({
     Key? key,
-    required this.remoteDataSource,
   }) : super(key: key);
 
   @override
@@ -24,15 +21,12 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  // Định nghĩa màu chính - tương tự bTaskee
   @override
   void initState() {
     super.initState();
     context.read<LaundryOrderBloc1>().add(ConnectToLaundryOrderHub1());
     context.read<NotificationBloc>().add(ConnectToHubEvent());
     context.read<NotificationBloc>().add(LoadNotificationsEvent());
-
-    // Print a debug message to confirm LaundryOrderBloc is connected
     print('Connecting to LaundryOrderBloc');
   }
 
@@ -70,13 +64,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
       body: Column(
         children: [
-          // Add a BlocListener for LaundryOrderBloc to log state changes
           BlocListener<LaundryOrderBloc1, LaundryOrderState1>(
             listener: (context, state) {
-              // Log whenever LaundryOrderBloc state changes
               print('LaundryOrderBloc state changed: ${state.runtimeType}');
-
-              // Add more detailed logging based on specific states
               if (state is LaundryOrderHubConnected1) {
                 print('LaundryOrder hub connected successfully');
               } else if (state is LaundryOrderHubDisconnected1) {
@@ -87,10 +77,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 print('LaundryOrder error: ${state.errorMessage}');
               }
             },
-            child: SizedBox(), // Empty widget as we only need the listener
+            child: SizedBox(),
           ),
-
-          // Optional: Add a small section to display LaundryOrderBloc status
           BlocBuilder<LaundryOrderBloc1, LaundryOrderState1>(
             builder: (context, state) {
               return Container(
@@ -118,8 +106,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
               );
             },
           ),
-
-          // Existing NotificationBloc builder
           Expanded(
             child: BlocBuilder<NotificationBloc, NotificationState>(
               builder: (context, state) {
@@ -161,14 +147,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
         ],
       ),
-      // Add a button to debug LaundryOrderBloc
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primaryColor,
-        child: Icon(Icons.bug_report),
-        onPressed: () {
-          _showLaundryOrderDebugPanel(context);
-        },
-      ),
     );
   }
 
@@ -192,164 +170,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return Colors.grey;
   }
 
-  void _showLaundryOrderDebugPanel(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(16),
-          height: MediaQuery.of(context).size.height * 0.6,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Laundry Order Debug Panel',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 16),
-              Expanded(
-                child: BlocBuilder<LaundryOrderBloc1, LaundryOrderState1>(
-                  builder: (context, state) {
-                    if (state is LaundryOrderHubConnecting1) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircularProgressIndicator(),
-                            SizedBox(height: 16),
-                            Text('Connecting to hub...'),
-                          ],
-                        ),
-                      );
-                    } else if (state is LaundryOrderNotificationReceived1) {
-                      final notification = state.orderNotification;
-                      return Card(
-                        margin: EdgeInsets.all(16),
-                        child: Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Latest Order Notification',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 16),
-                              Text('Type: ${notification.runtimeType}'),
-                              SizedBox(height: 8),
-                              Text('Details:'),
-                              SizedBox(height: 8),
-                              Text(notification.toString()),
-                            ],
-                          ),
-                        ),
-                      );
-                    } else if (state is LaundryOrderError1) {
-                      return Center(
-                        child: Text(
-                          'Error: ${state.errorMessage}',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      );
-                    } else if (state is LaundryOrderHubConnected1) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.check_circle_outline,
-                              color: Colors.green,
-                              size: 48,
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              'Connected to LaundryOrder Hub',
-                              style: TextStyle(
-                                color: Colors.green,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text('Waiting for notifications...'),
-                          ],
-                        ),
-                      );
-                    } else if (state is LaundryOrderHubDisconnected1) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.cloud_off,
-                              color: Colors.orange,
-                              size: 48,
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              'Disconnected from LaundryOrder Hub',
-                              style: TextStyle(
-                                color: Colors.orange,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                    return Center(
-                      child: Text('Laundry Order Hub Status: ${state.runtimeType}'),
-                    );
-                  },
-                ),
-              ),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      // Reconnect to hub
-                      print('Manually reconnecting to LaundryOrderHub');
-                      context.read<LaundryOrderBloc1>().add(ConnectToLaundryOrderHub1());
-                    },
-                    icon: Icon(Icons.refresh),
-                    label: Text('Reconnect to Hub'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      // Disconnect from hub
-                      print('Manually disconnecting from LaundryOrderHub');
-                      context.read<LaundryOrderBloc1>().add(DisconnectFromLaundryOrderHub1());
-                    },
-                    icon: Icon(Icons.power_settings_new),
-                    label: Text('Disconnect'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade400,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildEmptyState() {
     return Center(

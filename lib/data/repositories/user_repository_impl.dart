@@ -13,7 +13,6 @@ import '../datasource/local/user_local_datasource.dart';
 import '../models/user/user_model.dart';
 
 class UserRepositoryImpl implements UserRepository {
-
   final UserLocalDatasource userLocalDatasource;
 
   UserRepositoryImpl({
@@ -46,7 +45,8 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<BaseResponse<User>> getUsersBySharedWallet(String walletId, int? page, int? size) async {
+  Future<BaseResponse<User>> getUsersBySharedWallet(
+      String walletId, int? page, int? size) async {
     try {
       final userResponse = await vinWalletRequest.get(
         '${ApiConstant.wallets}/$walletId/users-in-sharewallet',
@@ -60,7 +60,8 @@ class UserRepositoryImpl implements UserRepository {
         List<UserModel> userModelList = (userResponse.data['items'] as List)
             .map((e) => UserMapper.toModel(e))
             .toList();
-        List<User> userList = userModelList.map((e) => UserMapper.toEntity(e)).toList();
+        List<User> userList =
+            userModelList.map((e) => UserMapper.toEntity(e)).toList();
         return BaseResponse<User>(
           size: userResponse.data['size'] ?? 0,
           page: userResponse.data['page'] ?? 0,
@@ -93,7 +94,7 @@ class UserRepositoryImpl implements UserRepository {
       );
 
       if (userResponse.statusCode == 200 && userResponse.data != null) {
-         UserModel userModel = UserMapper.toModel(userResponse.data);
+        UserModel userModel = UserMapper.toModel(userResponse.data);
         return UserMapper.toEntity(userModel);
       } else {
         throw ApiException(
@@ -110,7 +111,8 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<bool> checkInfo(String? phoneNumber, String? email, String? username) async {
+  Future<bool> checkInfo(
+      String? phoneNumber, String? email, String? username) async {
     try {
       final userResponse = await vinWalletRequest.get(
         '${ApiConstant.users}/check-info',
@@ -118,6 +120,44 @@ class UserRepositoryImpl implements UserRepository {
           'phoneNumber': phoneNumber,
           'email': email ?? '',
           'username': username ?? '',
+        },
+      );
+
+      if (userResponse.statusCode == 200 && userResponse.data != null) {
+        return true;
+      } else {
+        throw ApiException(
+          traceId: userResponse.data['traceId'],
+          code: userResponse.data['code'],
+          message: userResponse.data['message'] ?? 'Lỗi từ máy chủ',
+          description: userResponse.data['description'],
+          timestamp: userResponse.data['timestamp'],
+        );
+      }
+    } catch (e) {
+      throw ExceptionHandler.handleException(e);
+    }
+  }
+
+  @override
+  Future<bool> updateProfile(
+    String? fullName,
+    String? buildingCode,
+    String? houseCode,
+    String? phoneNumber,
+    String? email,
+  ) async {
+    try {
+      final user =
+          UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
+      final userResponse = await vinWalletRequest.put(
+        '${ApiConstant.users}/${user.id}',
+        data: {
+          "fullName": fullName,
+          "buildingCode": buildingCode,
+          "houseCode": houseCode,
+          "phoneNumber": phoneNumber,
+          "email": email,
         },
       );
 

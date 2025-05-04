@@ -253,34 +253,23 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<bool> isValidToken() async {
     try {
       final user =
-      UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
-      final response = await homeCleanRequest.get(
-        '${ApiConstant.orders}/by-user',
+          UserMapper.toModel(await userLocalDatasource.getUser() ?? {});
+      final response = await vinWalletRequest.get(
+        '${ApiConstant.users}/${user.id}/wallets',
         queryParameters: {
-          'userId': user.id,
-          'search': '',
-          'orderBy': '',
+          'id': user.id,
           'page': Constant.defaultPage,
-          'size': Constant.defaultSize
+          'size': Constant.defaultSize,
         },
       );
 
       if (response.statusCode == 200) {
         return true;
-      } else if (response.statusCode == 401) {
-        return false;
       } else {
-        throw ApiException(
-          traceId: response.data['traceId'],
-          code: response.data['code'],
-          message: response.data['message'] ?? 'Lỗi từ máy chủ',
-          description: response.data['description'],
-          timestamp: response.data['timestamp'],
-        );
+        return false;
       }
     } catch (e) {
-      throw ExceptionHandler.handleException(e);
+      return false;
     }
   }
-
 }

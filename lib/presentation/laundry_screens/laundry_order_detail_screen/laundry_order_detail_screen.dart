@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/presentation/blocs/task/task_bloc.dart';
@@ -27,7 +28,6 @@ import '../../widgets/bottom_navigation.dart';
 import '../../widgets/currency_display.dart';
 import '../../widgets/section_widget.dart';
 import 'components/OrderPaymentButton.dart';
-import 'components/task_section_widget.dart';
 
 class LaundryOrderDetailScreen extends StatefulWidget {
   final String orderId;
@@ -254,7 +254,15 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                           order: order,
                           selectedWalletId: selectedWalletId ?? '',
                           onSuccess: () {
-                            showSuccessDialog(context);
+                            showCustomDialog(
+                              context: context,
+                              message: 'Thanh toán thành công',
+                              type: DialogType.success,
+                              onConfirm: () {
+                                Get.back();
+                                _refreshKey.currentState?.show();
+                              },
+                            );
                           },
                         ),
                         const SizedBox(height: 16),
@@ -299,7 +307,7 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
             context: context,
             builder: (context) => AlertDialog(
               title: Text('Xác Nhận Hủy Đơn'),
-              content: Text('Bạn có chắc chắn muốn hủy đơn hàng này?'),
+              content: Text('Bạn muốn hủy đơn hàng?\nVui lòng đến trung tâm để nhận hàng nếu tiếp tục.'),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
@@ -345,77 +353,11 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
     );
   }
 
-  void showSuccessDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.check_circle_outline,
-                color: Colors.green,
-                size: 80,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Thanh Toán Thành Công',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green[700],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _refreshKey.currentState?.show();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'Thoát',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildLaundryDetailsCard(
       BuildContext context, LaundryOrderDetailModel order) {
     final currencyFormatter =
         NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
 
-    // Check if both kg-based and item-based lists are empty
     if ((order.orderDetailsByKg.isEmpty ?? true) &&
         order.orderDetailsByItem.isEmpty) {
       return const SizedBox.shrink();

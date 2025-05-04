@@ -286,22 +286,32 @@ class _CustomAppBarState extends State<CustomAppBar> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'Phòng bạn đang ở',
+          'Địa chỉ của bạn',
           style: GoogleFonts.poppins(
             color: Colors.white70,
             fontSize: 12,
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          address,
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        Row(
+          children: [
+            const Icon(
+              Icons.location_on,
+              color: Colors.white,
+              size: 13,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              address,
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ],
     );

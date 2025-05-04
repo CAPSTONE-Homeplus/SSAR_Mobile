@@ -22,6 +22,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     on<GetUserByPhoneNumberEvent>(_getUserByPhoneNumber);
     on<CheckUserInfoEvent>(_checkUserInfo);
     on<GetUserEvent>(_getUser);
+    on<UpdateProfileEvent>(_updateProfile);
   }
 
   Future<void> _getUsersBySharedWallet(
@@ -63,15 +64,31 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         event.username,
       );
       emit(CheckUserInfoSuccess(response));
-    }on ApiException catch (e) {
+    } on ApiException catch (e) {
       emit(UserError(e.description ?? "Có lỗi xảy ra"));
     }
   }
 
-  Future<void> _getUser(
-      GetUserEvent event, Emitter<UserState> emit) async {
+  Future<void> _getUser(GetUserEvent event, Emitter<UserState> emit) async {
     emit(UserLoading());
     final response = await userRepository.getUser(event.userId);
     emit(GetUserSuccess(response));
+  }
+
+  Future<void> _updateProfile(
+      UpdateProfileEvent event, Emitter<UserState> emit) async {
+    try {
+      emit(UserLoading());
+      final response = await userRepository.updateProfile(
+        event.fullName,
+        event.buildingCode,
+        event.houseCode,
+        event.phoneNumber,
+        event.email,
+      );
+      emit(UserUpdateSuccess(response));
+    } on ApiException catch (e) {
+      emit(UserError(e.description ?? "Có lỗi xảy ra"));
+    }
   }
 }

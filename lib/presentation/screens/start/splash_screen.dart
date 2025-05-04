@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -63,48 +64,65 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> checkLoginStatus() async {
+    // Kiểm tra kết nối mạng
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      showCustomDialog(
+        context: context,
+        message: "Không có kết nối Internet. Vui lòng kiểm tra mạng của bạn.",
+        type: DialogType.error,
+        onConfirm: () {},
+      );
+      return;
+    }
 
     final authLocalDataSource = AuthLocalDataSource();
-    String? accessToken = await authLocalDataSource.getAccessTokenFromStorage();
+    final accessToken = await authLocalDataSource.getAccessTokenFromStorage();
     print('📤 Load accessToken: $accessToken');
 
     if (accessToken == null || accessToken.isEmpty) {
+      await clearLocalStorageAndLogout();
+      navigateToLogin();
+      return;
+    }
+
+    setAuthorizationHeader(accessToken);
+    final authRepository = sl<AuthRepository>();
+    final isValidToken = await authRepository.isValidToken();
+
+    if (isValidToken) {
+      initSignalR();
+      navigateToHome();
+    } else {
       showCustomDialog(
         context: context,
         message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
         type: DialogType.error,
-        onConfirm: () {
-          _clearAndLogout();
+        onConfirm: () async {
+          await _clearAndLogout();
         },
       );
-    } else {
-      final authRepository = sl<AuthRepository>();
-      final isValidToken = await authRepository.isValidToken();
-
-      if (isValidToken) {
-        vinWalletRequest.options.headers['Authorization'] =
-        'Bearer $accessToken';
-        homeCleanRequest.options.headers['Authorization'] =
-        'Bearer $accessToken';
-        vinLaundryRequest.options.headers['Authorization'] =
-        'Bearer $accessToken';
-        initSignalR();
-        navigateToHome();
-      } else {
-        showCustomDialog(
-          context: context,
-          message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
-          type: DialogType.error,
-          onConfirm: () {
-            _clearAndLogout();
-          },
-        );
-      }
     }
+  }
+
+
+
+  void setAuthorizationHeader(String accessToken) {
+    final authHeader = 'Bearer $accessToken';
+    vinWalletRequest.options.headers['Authorization'] = authHeader;
+    homeCleanRequest.options.headers['Authorization'] = authHeader;
+    vinLaundryRequest.options.headers['Authorization'] = authHeader;
+  }
+
+  voidRemoveAuthHeader() {
+    vinWalletRequest.options.headers.remove('Authorization');
+    homeCleanRequest.options.headers.remove('Authorization');
+    vinLaundryRequest.options.headers.remove('Authorization');
   }
 
   Future<void> _clearAndLogout() async {
     await clearLocalStorageAndLogout();
+    voidRemoveAuthHeader();
     navigateToLogin();
   }
 

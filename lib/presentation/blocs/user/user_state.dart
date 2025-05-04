@@ -96,3 +96,13 @@ class GetUserSuccess extends UserState {
   @override
   List<Object?> get props => [user];
 }
+
+
+class UserUpdateSuccess extends UserState {
+  final bool isSuccess;
+
+  UserUpdateSuccess(this.isSuccess);
+
+  @override
+  List<Object?> get props => [isSuccess];
+}

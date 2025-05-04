@@ -258,9 +258,14 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
               return const Iterable<House>.empty();
             }
             return availableHouses.where((house) =>
-                house.code!.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+                house.no!.toLowerCase().contains(textEditingValue.text.toLowerCase()));
           },
-          displayStringForOption: (House option) => option.code ?? '',
+          displayStringForOption: (House option) {
+            if (option.no?.contains('-') == true) {
+              return option.no?.split('-').last ?? '';
+            }
+            return option.no ?? '';
+          },
           fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
             _houseController.text = controller.text;
             return TextField(

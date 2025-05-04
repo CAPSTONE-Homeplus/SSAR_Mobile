@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/constant/colors.dart';
+import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/entities/building/building.dart';
 import 'package:home_clean/domain/entities/house/house.dart';
 import 'package:home_clean/domain/entities/user/create_user.dart';
@@ -12,6 +14,9 @@ import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:home_clean/presentation/blocs/house/house_event.dart';
 import 'package:home_clean/presentation/blocs/house/house_state.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
+import '../../blocs/user/user_bloc.dart';
+import '../../blocs/user/user_event.dart';
+import '../../blocs/user/user_state.dart';
 import '../../widgets/bottom_navigation.dart';
 
 class UpdateProfileScreen extends StatefulWidget {
@@ -26,59 +31,42 @@ class UpdateProfileScreen extends StatefulWidget {
 
 class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-
-  // Text Controllers
+  late CreateUser createUser;
   late TextEditingController _fullNameController;
   late TextEditingController _usernameController;
   late TextEditingController _phoneNumberController;
   late TextEditingController _emailController;
-
-  // Building and House Controllers
   late TextEditingController _buildingController;
   late TextEditingController _houseController;
-
-  // State variables
   List<Building> availableBuildings = [];
   List<House> availableHouses = [];
   Building? selectedBuilding;
   House? selectedHouse;
   bool isHouseLoading = false;
-
   final Color _primaryColor = AppColors.primaryColor;
 
   @override
   void initState() {
     super.initState();
+    _fullNameController =
+        TextEditingController(text: widget.currentUser.fullName ?? '');
+    _usernameController =
+        TextEditingController(text: widget.currentUser.username ?? '');
+    _phoneNumberController =
+        TextEditingController(text: widget.currentUser.phoneNumber ?? '');
+    _emailController =
+        TextEditingController(text: widget.currentUser.email ?? '');
 
-    // Initialize user data controllers
-    _fullNameController = TextEditingController(
-        text: widget.currentUser.fullName ?? ''
-    );
-    _usernameController = TextEditingController(
-        text: widget.currentUser.username ?? ''
-    );
-    _phoneNumberController = TextEditingController(
-        text: widget.currentUser.phoneNumber ?? ''
-    );
-    _emailController = TextEditingController(
-        text: widget.currentUser.email ?? ''
-    );
-
-    // Initialize building and house controllers
-    _buildingController = TextEditingController(
-        text: widget.currentUser.buildingCode ?? 'S102'
-    );
-    _houseController = TextEditingController(
-        text: widget.currentUser.houseCode ?? 'S102'
-    );
-
-    // Fetch buildings
+    _buildingController =
+        TextEditingController(text: widget.currentUser.buildingCode ?? '');
+    _houseController =
+        TextEditingController(text: widget.currentUser.houseCode ?? '');
     context.read<BuildingBloc>().add(GetBuildings());
   }
 
+
   @override
   void dispose() {
-    // Dispose all controllers
     _fullNameController.dispose();
     _usernameController.dispose();
     _phoneNumberController.dispose();
@@ -88,85 +76,105 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     super.dispose();
   }
 
-  /// Finds and sets default building and house based on user's codes
-  void _setDefaultBuildingAndHouse() {
-    // First, ensure we have buildings
+  void _setDefaultBuilding() {
     if (availableBuildings.isEmpty) return;
 
-    // Find default building
-    Building? defaultBuilding;
-    if (widget.currentUser.buildingCode != null &&
-        widget.currentUser.buildingCode!.isNotEmpty) {
-      defaultBuilding = availableBuildings.firstWhere(
-            (building) => building.code == widget.currentUser.buildingCode,
-        orElse: () => availableBuildings.first, // Fallback to first building
-      );
-    }
-
-    // If a building is found, update building controller and fetch houses
+    Building? defaultBuilding = _findDefaultBuilding();
     if (defaultBuilding != null) {
-      setState(() {
-        selectedBuilding = defaultBuilding;
-        _buildingController.text = defaultBuilding?.name ?? '';
-      });
-
-      // Trigger house fetching for the selected building
-      context.read<HouseBloc>().add(
-          GetHouseByBuilding(buildingId: defaultBuilding.id ?? ''));
+      _updateSelectedBuilding(defaultBuilding);
+      _fetchHousesForBuilding(defaultBuilding);
     }
   }
 
-  /// Sets default house after houses are loaded
-  void _setDefaultHouse() {
-    // Ensure we have houses and a selected building
-    if (availableHouses.isEmpty || selectedBuilding == null) return;
-
-    // Find default house
-    House? defaultHouse;
-    if (widget.currentUser.houseCode != null &&
-        widget.currentUser.houseCode!.isNotEmpty) {
-      defaultHouse = availableHouses.firstWhere(
-            (house) => house.code == widget.currentUser.houseCode,
-        orElse: () => availableHouses.first, // Fallback to first house
-      );
+  Building? _findDefaultBuilding() {
+    if (widget.currentUser.buildingCode == null ||
+        widget.currentUser.buildingCode!.isEmpty) {
+      return availableBuildings.first;
     }
 
-    // Update house controller if a house is found
-    if (defaultHouse != null) {
-      setState(() {
-        selectedHouse = defaultHouse;
-        _houseController.text = defaultHouse?.code ?? '';
-      });
-    }
+    return availableBuildings.firstWhere(
+      (building) => building.code == widget.currentUser.buildingCode,
+      orElse: () => availableBuildings.first,
+    );
+  }
+
+  void _updateSelectedBuilding(Building building) {
+    setState(() {
+      selectedBuilding = building;
+      _buildingController.text = building.name ?? '';
+    });
+  }
+
+  void _fetchHousesForBuilding(Building building) {
+    context.read<HouseBloc>().add(
+          GetHouseByBuilding(buildingId: building.id ?? ''),
+        );
   }
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
+      FocusScope.of(context).unfocus();
+
       if (selectedBuilding == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vui lòng chọn tòa nhà')),
-        );
-        return;
-      }
-      if (selectedHouse == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vui lòng chọn căn hộ')),
+          SnackBar(
+            content: Text('Vui lòng chọn tòa nhà'),
+            backgroundColor: Colors.black,
+          ),
         );
         return;
       }
 
-      // Prepare user update object
-      final updatedUser = {
-        "fullName": _fullNameController.text,
-        "username": _usernameController.text,
-        "buildingCode": selectedBuilding?.code ?? '',
-        "houseCode": selectedHouse?.code ?? '',
-        "phoneNumber": _phoneNumberController.text,
-        "email": _emailController.text
-      };
+      // if (selectedHouse == null) {
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(
+      //       content: Text('Vui lòng chọn căn hộ'),
+      //       backgroundColor: Colors.black,
+      //     ),
+      //   );
+      //   return;
+      // }
 
-      // TODO: Implement update logic using BLoC
-      // context.read<ProfileBloc>().add(UpdateProfileEvent(updatedUser));
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Center(
+          child: CircularProgressIndicator(
+            color: _primaryColor,
+          ),
+        ),
+      );
+
+      context.read<UserBloc>().add(UpdateProfileEvent(
+        fullName: _fullNameController.text,
+        username: widget.currentUser.username,
+        buildingCode: selectedBuilding?.code ?? '',
+        houseCode: selectedHouse?.code,
+        phoneNumber: _phoneNumberController.text,
+        email: _emailController.text,
+      ));
+
+      context.read<UserBloc>().stream.listen((state) {
+        if (state is UserUpdateSuccess) {
+          Get.back();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BottomNavigation(
+                initialIndex: 3,
+                child: Container(),
+              ),
+            ),
+          );
+        } else if (state is UserError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      });
     }
   }
 
@@ -176,27 +184,24 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       appBar: CustomAppBar(
           title: 'Cập Nhật Thông Tin',
           onBackPressed: () {
-            Navigator.push(
+            Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    BottomNavigation(
-                      initialIndex: 2,
-                      child: Container(),
-                    ),
+                builder: (context) => BottomNavigation(
+                  initialIndex: 3,
+                  child: Container(),
+                ),
               ),
+                  (Route<dynamic> route) => false,
             );
-          }
-      ),
+          }),
       body: BlocConsumer<BuildingBloc, BuildingState>(
         listener: (context, state) {
           if (state is BuildingLoaded) {
             setState(() {
               availableBuildings = state.buildings.items;
             });
-
-            // Set default building after buildings are loaded
-            _setDefaultBuildingAndHouse();
+            _setDefaultBuilding();
           }
         },
         builder: (context, buildingState) {
@@ -207,9 +212,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                   availableHouses = state.houses.items;
                   isHouseLoading = false;
                 });
-
-                // Set default house after houses are loaded
-                _setDefaultHouse();
               } else if (state is HouseLoading) {
                 setState(() {
                   isHouseLoading = true;
@@ -224,15 +226,12 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Existing fields...
                       _buildTextField(
                         controller: _fullNameController,
                         label: 'Họ và Tên',
                         icon: Icons.person,
                         validator: (value) =>
-                        value!.isEmpty
-                            ? 'Vui lòng nhập họ và tên'
-                            : null,
+                            value!.isEmpty ? 'Vui lòng nhập họ và tên' : null,
                       ),
                       const SizedBox(height: 16),
                       _buildTextField(
@@ -244,9 +243,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                       const SizedBox(height: 16),
                       _buildBuildingAutocomplete(),
                       const SizedBox(height: 16),
-                      isHouseLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : _buildHouseAutocomplete(),
+                      _buildHouseAutocomplete(),
                       const SizedBox(height: 16),
                       _buildTextField(
                         controller: _phoneNumberController,
@@ -304,17 +301,23 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
         ),
         const SizedBox(height: 8),
         Autocomplete<Building>(
+          initialValue: TextEditingValue(text: _buildingController.text),
           optionsBuilder: (TextEditingValue textEditingValue) {
             if (textEditingValue.text.isEmpty) {
               return const Iterable<Building>.empty();
             }
-            return availableBuildings.where((building) =>
-                building.name!.toLowerCase().contains(
-                    textEditingValue.text.toLowerCase()));
+            return availableBuildings.where(
+                  (building) =>
+                  building.name!.toLowerCase().contains(textEditingValue.text.toLowerCase()),
+            );
           },
           displayStringForOption: (Building option) => option.name ?? '',
           fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-            _buildingController.text = controller.text;
+            controller.text = _buildingController.text;
+            controller.addListener(() {
+              _buildingController.text = controller.text;
+            });
+
             return TextField(
               controller: controller,
               focusNode: focusNode,
@@ -326,15 +329,53 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                 ),
                 prefixIcon: Icon(Icons.apartment, color: _primaryColor),
               ),
+              onSubmitted: (value) {
+                // Nếu chỉ có một kết quả khớp, chọn luôn
+                final matchedBuildings = availableBuildings.where(
+                      (building) => building.name!.toLowerCase().contains(value.toLowerCase()),
+                ).toList();
+
+                if (matchedBuildings.length == 1) {
+                  setState(() {
+                    selectedBuilding = matchedBuildings.first;
+                    _buildingController.text = matchedBuildings.first.name ?? '';
+
+                    // Reset house-related fields
+                    selectedHouse = null;
+                    _houseController.clear();
+                    availableHouses = [];
+
+                    // Fetch houses cho tòa nhà mới
+                    context.read<HouseBloc>().add(
+                      GetHouseByBuilding(buildingId: matchedBuildings.first.id ?? ''),
+                    );
+                  });
+
+                  // Di chuyển focus sang field tiếp theo
+                  FocusScope.of(context).nextFocus();
+                } else if (matchedBuildings.isEmpty) {
+                  // Hiển thị thông báo nếu không tìm thấy
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Không tìm thấy tòa nhà phù hợp')),
+                  );
+                }
+              },
             );
           },
           onSelected: (Building selection) {
             setState(() {
               selectedBuilding = selection;
               _buildingController.text = selection.name ?? '';
-              // Fetch houses for the selected building
+
+              // Reset house-related fields
+              selectedHouse = null;
+              _houseController.clear();
+              availableHouses = [];
+
+              // Fetch houses cho tòa nhà mới
               context.read<HouseBloc>().add(
-                  GetHouseByBuilding(buildingId: selection.id ?? ''));
+                GetHouseByBuilding(buildingId: selection.id ?? ''),
+              );
             });
           },
         ),
@@ -342,7 +383,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     );
   }
 
-  // Autocomplete for Houses
   Widget _buildHouseAutocomplete() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -352,105 +392,92 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
           style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
-        // Check if a building is selected and no houses are available
-        if (selectedBuilding != null && availableHouses.isEmpty)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.info_outline, color: Colors.grey[600]),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Không có căn hộ nào trong tòa nhà này',
-                    style: GoogleFonts.poppins(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          )
-        else
-          Autocomplete<House>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              if (selectedBuilding == null) {
-                return const Iterable<House>.empty();
-              }
+        Autocomplete<House>(
+          initialValue: TextEditingValue(text: _houseController.text),
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            if (textEditingValue.text.isEmpty) {
+              return const Iterable<House>.empty();
+            }
 
-              // If no houses are available, return a special "No houses" option
-              if (availableHouses.isEmpty) {
-                return [
-                  House(
-                      id: 'no_houses',
-                      code: 'Không có căn hộ',
-                      buildingId: selectedBuilding?.id
-                  )
-                ];
-              }
-
-              // Normal filtering when houses are available
-              if (textEditingValue.text.isEmpty) {
-                return availableHouses;
-              }
-
-              return availableHouses.where((house) =>
-                  house.code!.toLowerCase().contains(
-                      textEditingValue.text.toLowerCase()));
-            },
-            displayStringForOption: (House option) =>
-            option.id == 'no_houses' ? 'Không có căn hộ' : (option.code ?? ''),
-            fieldViewBuilder: (context, controller, focusNode,
-                onFieldSubmitted) {
+            return availableHouses.where(
+                  (house) =>
+              (house.code?.toLowerCase().contains(textEditingValue.text.toLowerCase()) ?? false) ||
+                  (house.no?.toLowerCase().contains(textEditingValue.text.toLowerCase()) ?? false),
+            );
+          },
+          displayStringForOption: (House option) => option.code ?? '',
+          fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+            controller.text = _houseController.text;
+            controller.addListener(() {
               _houseController.text = controller.text;
-              return TextField(
-                controller: controller,
-                focusNode: focusNode,
-                decoration: InputDecoration(
-                  hintText: "Nhập mã căn hộ",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  prefixIcon: Icon(Icons.home, color: _primaryColor),
+            });
+
+            return TextField(
+              controller: controller,
+              focusNode: focusNode,
+              decoration: InputDecoration(
+                hintText: "Nhập tên căn hộ",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
-              );
-            },
-            onSelected: (House selection) {
-              if (selection.id == 'no_houses') {
-                // Handle the case when "No houses" is selected
-                setState(() {
-                  selectedHouse = null;
-                  _houseController.clear();
-                });
-              } else {
-                setState(() {
-                  selectedHouse = selection;
-                  _houseController.text = selection.code ?? '';
-                });
-              }
-            },
-          ),
+                prefixIcon: Icon(Icons.apartment, color: _primaryColor),
+              ),
+              onSubmitted: (value) {
+                // Nếu chỉ có một kết quả khớp, chọn luôn
+                final matchedHouses = availableHouses.where(
+                      (house) =>
+                  (house.code?.toLowerCase().contains(value.toLowerCase()) ?? false) ||
+                      (house.no?.toLowerCase().contains(value.toLowerCase()) ?? false),
+                ).toList();
+
+                if (matchedHouses.length == 1) {
+                  setState(() {
+                    selectedHouse = matchedHouses.first;
+                    _houseController.text = matchedHouses.first.code ?? '';
+                  });
+
+                  // Di chuyển focus sang field tiếp theo
+                  FocusScope.of(context).nextFocus();
+                } else if (matchedHouses.isEmpty) {
+                  // Hiển thị thông báo nếu không tìm thấy
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Không tìm thấy căn hộ phù hợp')),
+                  );
+                }
+              },
+            );
+          },
+          onSelected: (House selection) {
+            setState(() {
+              selectedHouse = selection;
+              _houseController.text = selection.code ?? '';
+            });
+          },
+        ),
       ],
     );
   }
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
-    bool readOnly = false, // Add this parameter
+    bool readOnly = false,
+    VoidCallback? onSubmitted,
   }) {
     return TextFormField(
       controller: controller,
-      readOnly: readOnly, // Apply read-only status
+      readOnly: readOnly,
+      textInputAction: TextInputAction.done,
+      onFieldSubmitted: (_) {
+        if (!readOnly && validator != null) {
+          _submitForm();
+        }
+        onSubmitted?.call();
+      },
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: AppColors.primaryColor),
@@ -461,19 +488,17 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
         ),
-        // Add a visual indicator for read-only field
         disabledBorder: readOnly
             ? OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-        )
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+              )
             : null,
-        // Add a slight background color for read-only fields
         fillColor: readOnly ? Colors.grey[100] : null,
         filled: readOnly,
       ),
       keyboardType: keyboardType,
-      validator: readOnly ? null : validator, // Disable validation for read-only fields
+      validator: readOnly ? null : validator,
     );
   }
 

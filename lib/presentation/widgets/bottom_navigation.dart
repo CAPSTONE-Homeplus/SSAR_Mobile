@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/constant/size_config.dart';
 import '../screens/home/home_screen.dart';
+import '../screens/notification/notification.dart';
 import '../screens/order_list/order_list_screen.dart';
 import '../screens/setting/settings_screen.dart';
 
@@ -29,6 +30,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
     return [
       HomeScreen(),
       OrderListScreen(selectedCategory: widget.selectedCategory ?? ''),
+      NotificationScreen(),
       SettingsScreen()
     ];
   }
@@ -66,6 +68,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
         items: [
           Icon(Icons.home, size: 25 * fem, color: Colors.black),
           Icon(Icons.list_alt, size: 25 * fem, color: Colors.black),
+          Icon(Icons.notifications, size: 25 * fem, color: Colors.black),
           Icon(Icons.person_outline, size: 25 * fem, color: Colors.black),
         ],
         onTap: _onTabTapped,

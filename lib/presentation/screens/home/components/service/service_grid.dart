@@ -77,19 +77,6 @@ class ServiceGridWidget extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        TextButton(
-          onPressed: () {
-            AppRouter.navigateToServiceDetails();
-          },
-          child: Text(
-            'Xem tất cả',
-            style: GoogleFonts.poppins(
-              fontSize: 14 * ffem,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF1CAF7D),
-            ),
-          ),
-        ),
       ],
     );
   }

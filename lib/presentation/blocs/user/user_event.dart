@@ -47,3 +47,32 @@ class GetUserEvent extends UserEvent {
   @override
   List<Object?> get props => [userId];
 }
+
+class UpdateProfileEvent extends UserEvent {
+
+  final String? fullName;
+  final String? username;
+  final String? buildingCode;
+  final String? houseCode;
+  final String? phoneNumber;
+  final String? email;
+
+  UpdateProfileEvent({
+    this.fullName,
+    this.username,
+    this.buildingCode,
+    this.houseCode,
+    this.phoneNumber,
+    this.email,
+  });
+
+  @override
+  List<Object?> get props => [
+        fullName,
+        username,
+        buildingCode,
+        houseCode,
+        phoneNumber,
+        email,
+      ];
+}

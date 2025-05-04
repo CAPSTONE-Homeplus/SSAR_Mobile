@@ -147,10 +147,6 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => storage);
 
 
-  // LocalDataSources
-  // sl.registerLazySingleton<ServiceLocalDataSource>(
-  //       () => ServiceLocalDataSource(),
-  // );
   sl.registerLazySingleton<AuthLocalDataSource>(
         () => AuthLocalDataSource(),
   );
@@ -159,9 +155,6 @@ Future<void> setupServiceLocator() async {
         () => UserLocalDatasource(),
   );
 
-  // sl.registerLazySingleton<TransactionLocalDataSource>(
-  //       () => TransactionLocalDataSource(),
-  // );
   sl.registerLazySingleton<WalletLocalDataSource>(
         () => WalletLocalDataSource(),
   );

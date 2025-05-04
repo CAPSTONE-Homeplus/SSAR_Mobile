@@ -45,6 +45,9 @@ class _ChooseItemTypeScreenState extends State<ChooseItemTypeScreen> {
     'Skirt': 'assets/icons/skirt.png',
     'Towel': 'assets/icons/towel.png',
     'Set': 'assets/icons/set.png',
+    'Blanket': 'assets/icons/blanket.png',
+    'Vest': 'assets/icons/vest.png',
+    'Mattress': 'assets/icons/mattress.png',
   };
   String? _selectedCategory;
   ServiceType? serviceMode;
