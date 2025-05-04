@@ -36,6 +36,7 @@ import 'package:home_clean/presentation/blocs/notification/notification_bloc.dar
 import 'package:home_clean/presentation/blocs/option/option_bloc.dart';
 import 'package:home_clean/presentation/blocs/order/order_bloc.dart';
 import 'package:home_clean/presentation/blocs/order_tracking/order_tracking_bloc.dart';
+import 'package:home_clean/presentation/blocs/order_tracking_notification/order_tracking_bloc.dart';
 import 'package:home_clean/presentation/blocs/payment_method/payment_method_bloc.dart';
 import 'package:home_clean/presentation/blocs/service/service_bloc.dart';
 import 'package:home_clean/presentation/blocs/service_activity/service_activity_bloc.dart';
@@ -58,6 +59,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/dependencies_injection/service_locator.dart';
 import 'data/datasource/local/auth_local_datasource.dart';
 import 'data/datasource/signalr/app_signalR_service.dart';
+import 'data/datasource/signalr/order_tracking_remote_data_source.dart';
 import 'data/laundry_repositories/laundry_order_repo.dart';
 import 'domain/repositories/authentication_repository.dart';
 import 'domain/repositories/equipment_supply_repository.dart';
@@ -276,6 +278,12 @@ class HomeClean extends StatelessWidget {
           BlocProvider(
             create: (context) => CancelOrderBloc(
               repository: sl<LaundryOrderRepository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => OrderTrackingBloc1(
+              remoteDataSource: sl<OrderTrackingRemoteDataSource>(),
+              localDataSource: sl<OrderTrackingLocalDataSource>(),
             ),
           ),
         ],

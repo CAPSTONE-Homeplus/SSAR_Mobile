@@ -30,7 +30,6 @@ class _BottomNavigationState extends State<BottomNavigation> {
     return [
       HomeScreen(),
       OrderListScreen(selectedCategory: widget.selectedCategory ?? ''),
-      NotificationScreen(),
       SettingsScreen()
     ];
   }
@@ -68,7 +67,6 @@ class _BottomNavigationState extends State<BottomNavigation> {
         items: [
           Icon(Icons.home, size: 25 * fem, color: Colors.black),
           Icon(Icons.list_alt, size: 25 * fem, color: Colors.black),
-          Icon(Icons.notifications, size: 25 * fem, color: Colors.black),
           Icon(Icons.person_outline, size: 25 * fem, color: Colors.black),
         ],
         onTap: _onTabTapped,

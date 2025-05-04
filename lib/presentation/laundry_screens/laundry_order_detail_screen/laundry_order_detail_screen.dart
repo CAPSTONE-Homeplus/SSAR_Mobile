@@ -24,7 +24,6 @@ import '../../laundry_blocs/cancel/cancel_order_state.dart';
 import '../../laundry_blocs/order/laundry_order_bloc.dart';
 import '../../laundry_blocs/order/laundry_order_event.dart';
 import '../../laundry_blocs/order/laundry_order_state.dart';
-import '../../widgets/bottom_navigation.dart';
 import '../../widgets/currency_display.dart';
 import '../../widgets/section_widget.dart';
 import 'components/OrderPaymentButton.dart';
@@ -75,16 +74,7 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
       backgroundColor: Colors.grey[100],
       appBar: CustomAppBar(
         title: 'Chi Tiết Đơn Giặt',
-        onBackPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BottomNavigation(
-              initialIndex: 1,
-              selectedCategory: "laundry",
-              child: Container(),
-            ),
-          ),
-        ),
+        onBackPressed: () => Get.back(),
       ),
       body: MultiBlocListener(
         listeners: [
@@ -259,7 +249,6 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                               message: 'Thanh toán thành công',
                               type: DialogType.success,
                               onConfirm: () {
-                                Get.back();
                                 _refreshKey.currentState?.show();
                               },
                             );

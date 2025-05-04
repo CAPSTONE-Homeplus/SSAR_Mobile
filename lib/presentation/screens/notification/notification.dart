@@ -1,340 +1,186 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_clean/core/constant/colors.dart';
-import 'package:home_clean/domain/entities/notification/notification.dart';
-import 'package:intl/intl.dart';
 
+import '../../../core/router/app_router.dart';
 import '../../blocs/laundry_order/laundry_order_bloc1.dart';
 import '../../blocs/laundry_order/laundry_order_event1.dart';
 import '../../blocs/laundry_order/laundry_order_state1.dart';
-import '../../blocs/notification/notification_bloc.dart';
-import 'notification_item.dart';
+import '../../blocs/order_tracking_notification/order_tracking_bloc.dart';
+import '../../blocs/order_tracking_notification/order_tracking_event.dart';
+import '../../blocs/order_tracking_notification/order_tracking_state.dart';
 
-class NotificationScreen extends StatefulWidget {
 
-  const NotificationScreen({
-    Key? key,
-  }) : super(key: key);
+class NotificationBell extends StatefulWidget {
+  const NotificationBell({super.key});
 
   @override
-  _NotificationScreenState createState() => _NotificationScreenState();
+  State<NotificationBell> createState() => _NotificationBellState();
 }
 
-class _NotificationScreenState extends State<NotificationScreen> {
+class _NotificationBellState extends State<NotificationBell> {
+  final List<dynamic> _notifications = [];
+  final LayerLink _layerLink = LayerLink();
+  OverlayEntry? _overlayEntry;
+
   @override
   void initState() {
     super.initState();
     context.read<LaundryOrderBloc1>().add(ConnectToLaundryOrderHub1());
-    context.read<NotificationBloc>().add(ConnectToHubEvent());
-    context.read<NotificationBloc>().add(LoadNotificationsEvent());
-    print('Connecting to LaundryOrderBloc');
+    context.read<OrderTrackingBloc1>().add(ConnectToOrderTrackingHub());
   }
 
   @override
   void dispose() {
-    context.read<NotificationBloc>().add(DisconnectFromHubEvent());
     context.read<LaundryOrderBloc1>().add(DisconnectFromLaundryOrderHub1());
-    print('Disconnecting from LaundryOrderBloc');
+    context.read<OrderTrackingBloc1>().add(DisconnectFromOrderTrackingHub());
+    _overlayEntry?.remove();
     super.dispose();
+  }
+
+  void _toggleOverlay() {
+    if (_overlayEntry != null) {
+      _overlayEntry!.remove();
+      _overlayEntry = null;
+    } else {
+      _overlayEntry = _createOverlayEntry();
+      Overlay.of(context).insert(_overlayEntry!);
+    }
+    setState(() {});
+  }
+
+  OverlayEntry _createOverlayEntry() {
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
+    final size = renderBox.size;
+    final offset = renderBox.localToGlobal(Offset.zero);
+
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        top: offset.dy + size.height + 10,
+        right: 10,
+        width: 300,
+        child: CompositedTransformFollower(
+          link: _layerLink,
+          offset: Offset(-220, size.height + 8),
+          child: Material(
+            elevation: 8,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              constraints: const BoxConstraints(maxHeight: 400),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: _notifications.isEmpty
+                  ? const Padding(
+                padding: EdgeInsets.all(16),
+                child: Text("Chưa có thông báo mới."),
+              )
+                  : ListView.builder(
+                shrinkWrap: true,
+                itemCount: _notifications.length,
+                itemBuilder: (context, index) {
+                  final notification = _notifications[index];
+                  return ListTile(
+                    leading: Icon(
+                      Icons.local_laundry_service,
+                      color: _getStatusColor(notification.status),
+                    ),
+                    title: Text('Mã đơn: ${notification.orderCode}'),
+                    subtitle: Text(
+                      'Trạng thái: ${notification.status}',
+                      style: TextStyle(
+                        color: _getStatusColor(notification.status),
+                      ),
+                    ),
+                    onTap: () {
+                      AppRouter.navigateToLaundryOrderDetail(notification.id);
+                      _toggleOverlay();
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: AppColors.primaryColor,
-        title: Text(
-          'Thông báo',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh, color: Colors.white),
-            onPressed: () {
-              context.read<NotificationBloc>().add(RefreshNotificationsEvent());
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          BlocListener<LaundryOrderBloc1, LaundryOrderState1>(
-            listener: (context, state) {
-              print('LaundryOrderBloc state changed: ${state.runtimeType}');
-              if (state is LaundryOrderHubConnected1) {
-                print('LaundryOrder hub connected successfully');
-              } else if (state is LaundryOrderHubDisconnected1) {
-                print('LaundryOrder hub disconnected');
-              } else if (state is LaundryOrderNotificationReceived1) {
-                print('LaundryOrder notification received: ${state.orderNotification.toString()}');
-              } else if (state is LaundryOrderError1) {
-                print('LaundryOrder error: ${state.errorMessage}');
-              }
-            },
-            child: SizedBox(),
-          ),
-          BlocBuilder<LaundryOrderBloc1, LaundryOrderState1>(
-            builder: (context, state) {
-              return Container(
-                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                color: Colors.grey.shade200,
-                child: Row(
-                  children: [
-                    Text(
-                      'Laundry Order Status: ',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      _getLaundryOrderStatusText(state),
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: _getLaundryOrderStatusColor(state),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          Expanded(
-            child: BlocBuilder<NotificationBloc, NotificationState>(
-              builder: (context, state) {
-                if (state is NotificationInitial || state is NotificationLoading) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
-                    ),
-                  );
-                } else if (state is NotificationLoaded) {
-                  final notifications = state.notifications;
-
-                  if (notifications.isEmpty) {
-                    return _buildEmptyState();
-                  }
-
-                  return RefreshIndicator(
-                    color: AppColors.primaryColor,
-                    onRefresh: () async {
-                      context.read<NotificationBloc>().add(RefreshNotificationsEvent());
-                    },
-                    child: ListView.builder(
-                      padding: EdgeInsets.only(top: 8),
-                      itemCount: notifications.length,
-                      itemBuilder: (context, index) {
-                        return NotificationItem(
-                          notification: notifications[index],
-                        );
-                      },
-                    ),
-                  );
-                } else if (state is NotificationError) {
-                  return _buildErrorState(state.message);
-                }
-
-                return Container();
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getLaundryOrderStatusText(LaundryOrderState1 state) {
-    if (state is LaundryOrderInitial1) return 'Initializing';
-    if (state is LaundryOrderHubConnecting1) return 'Connecting';
-    if (state is LaundryOrderHubConnected1) return 'Connected';
-    if (state is LaundryOrderHubDisconnected1) return 'Disconnected';
-    if (state is LaundryOrderNotificationReceived1) return 'Notification Received';
-    if (state is LaundryOrderError1) return 'Error: ${state.errorMessage}';
-    return 'Unknown';
-  }
-
-  Color _getLaundryOrderStatusColor(LaundryOrderState1 state) {
-    if (state is LaundryOrderInitial1) return Colors.grey;
-    if (state is LaundryOrderHubConnecting1) return Colors.blue;
-    if (state is LaundryOrderHubConnected1) return Colors.green;
-    if (state is LaundryOrderHubDisconnected1) return Colors.orange;
-    if (state is LaundryOrderNotificationReceived1) return Colors.purple;
-    if (state is LaundryOrderError1) return Colors.red;
-    return Colors.grey;
-  }
-
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(height: 24),
-          Text(
-            'Bạn chưa có thông báo nào',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Thông báo sẽ xuất hiện khi có cập nhật về đơn hàng của bạn',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade500,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () {
-              context.read<NotificationBloc>().add(RefreshNotificationsEvent());
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text('Làm mới'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorState(String message) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: 64,
-              color: Colors.red.shade400,
-            ),
-            SizedBox(height: 24),
-            Text(
-              'Không thể tải thông báo',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade800,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Đã xảy ra lỗi: $message',
-              style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                context.read<NotificationBloc>().add(LoadNotificationsEvent());
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text('Thử lại'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showNotificationDetails(BuildContext context, NotificationEntity notification) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Row(
-          children: [
-            Icon(
-              Icons.notifications_outlined,
-              color: AppColors.primaryColor,
-              size: 24,
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                notification.title,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              notification.message,
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.grey.shade800,
-                height: 1.4,
-              ),
-            ),
-            SizedBox(height: 20),
-            Row(
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: BlocListener<LaundryOrderBloc1, LaundryOrderState1>(
+        listener: (context, state) {
+          if (state is LaundryOrderNotificationReceived1) {
+            setState(() {
+              _notifications.insert(0, state.orderNotification);
+            });
+          }
+        },
+        child: BlocListener<OrderTrackingBloc1, OrderTrackingState1>(
+          listener: (context, state) {
+            if (state is OrderTrackingReceived) {
+              setState(() {
+                _notifications.insert(0, {
+                  'id': state.orderTrackings,
+                });
+              });
+            }
+          },
+          child: IconButton(
+            iconSize: 24,
+            icon: Stack(
               children: [
-                Icon(
-                  Icons.access_time,
-                  size: 16,
-                  color: Colors.grey.shade500,
+                const Icon(
+                  Icons.notifications,
+                  color: Colors.white,
+                  size: 24,
                 ),
-                SizedBox(width: 6),
-                Text(
-                  'Nhận lúc: ${DateFormat('dd/MM/yyyy HH:mm').format(notification.timestamp)}',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade500,
+                if (_notifications.isNotEmpty)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '${_notifications.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
-                ),
               ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.primaryColor,
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            ),
-            child: Text(
-              'Đóng',
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 15,
-              ),
-            ),
+            onPressed: _toggleOverlay,
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  Color _getStatusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'processing':
+        return Colors.orange;
+      case 'completed':
+        return Colors.green;
+      case 'cancelled':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 }

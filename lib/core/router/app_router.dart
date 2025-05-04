@@ -164,12 +164,6 @@ class AppRouter {
           transitionDuration: const Duration(milliseconds: 300),
         ),
         GetPage(
-          name: routeNotification,
-          page: () => NotificationScreen(),
-          transition: Transition.cupertino,
-          transitionDuration: const Duration(milliseconds: 300),
-        ),
-        GetPage(
           name: routePersonalWallet,
           page: () => PersonalWalletScreen(),
           transition: Transition.cupertino,

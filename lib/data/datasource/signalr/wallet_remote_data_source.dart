@@ -70,7 +70,7 @@ class WalletRemoteDataSource {
 
     print('📢 Nhận thông báo từ $source: $message');
     _walletNotificationController.add(notification);
-    NotificationService.showNotification("Ví", message);
+    NotificationService.showNotification(title: "Ví", body: message);
   }
 
 

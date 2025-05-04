@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:home_clean/core/router/app_router.dart';
 
 import '../../core/constant/colors.dart';
 
@@ -8,21 +9,37 @@ class NotificationService {
   FlutterLocalNotificationsPlugin();
 
   static Future<void> init() async {
+    // Cấu hình Android
     const AndroidInitializationSettings androidSettings =
     AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const InitializationSettings settings = InitializationSettings(
-      android: androidSettings,
+    // Cấu hình iOS
+    const DarwinInitializationSettings iOSSettings = DarwinInitializationSettings(
+      requestSoundPermission: false,
+      requestBadgePermission: false,
+      requestAlertPermission: false,
     );
 
-    await _notificationsPlugin.initialize(settings);
+    final InitializationSettings settings = InitializationSettings(
+      android: androidSettings,
+      iOS: iOSSettings,
+    );
+
+    // Xử lý khi nhấn vào thông báo
+    await _notificationsPlugin.initialize(
+      settings,
+      onDidReceiveNotificationResponse: (NotificationResponse details) {
+        _handleNotificationTap(details.payload);
+      },
+    );
   }
 
-  static Future<void> showNotification(
-      String title,
-      String body,
-      {String? imageUrl}
-      ) async {
+  static Future<void> showNotification({
+    required String title,
+    required String body,
+    String? payload,
+    String? imageUrl,
+  }) async {
     // Cấu hình chi tiết Android
     final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       'channel_id',
@@ -30,19 +47,15 @@ class NotificationService {
       importance: Importance.max,
       priority: Priority.high,
 
-      // Tùy chỉnh giao diện
+      // Cải thiện hiển thị văn bản dài
       styleInformation: BigTextStyleInformation(
         body,
         contentTitle: title,
         htmlFormatContentTitle: true,
         htmlFormatBigText: true,
-
-        // Màu sắc và định dạng
-        summaryText: 'Thông báo mới',
-        htmlFormatSummaryText: true,
+        summaryText: body,
       ),
 
-      // Tùy chỉnh màu sắc
       color: AppColors.primaryColor,
 
       // Hình ảnh (nếu có)
@@ -50,7 +63,6 @@ class NotificationService {
           ? DrawableResourceAndroidBitmap(imageUrl)
           : null,
 
-      // Các thuộc tính giao diện khác
       channelShowBadge: true,
       enableLights: true,
       ledColor: const Color(0xFF2ecc71),
@@ -58,30 +70,45 @@ class NotificationService {
       ledOffMs: 500,
     );
 
-    // Cấu hình chi tiết thông báo
-    final NotificationDetails notificationDetails = NotificationDetails(
-      android: androidDetails,
-      // Có thể thêm cấu hình cho iOS ở đây nếu cần
+    // Cấu hình iOS
+    final DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
     );
 
-    // Hiển thị thông báo
-    await FlutterLocalNotificationsPlugin().show(
-      0, // ID thông báo
+    final NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iOSDetails,
+    );
+
+    // Hiển thị thông báo với payload tùy chọn
+    await _notificationsPlugin.show(
+      DateTime.now().millisecondsSinceEpoch.remainder(100000), // Unique ID
       title,
       body,
       notificationDetails,
-
-      // Payload để xử lý khi nhấn vào thông báo
-      payload: 'custom_notification',
+      payload: payload,
     );
   }
 
-  // Phương thức để xử lý khi người dùng nhấn vào thông báo
-  static void onNotificationTap(String? payload) {
-    if (payload != null) {
-      // Xử lý khi nhấn vào thông báo
-      // Ví dụ: chuyển đến một màn hình cụ thể
-      // Navigator.of(context).push(...)
-    }
+  // Xử lý khi nhấn vào thông báo
+  static void _handleNotificationTap(String? payload) {
+    if (payload == null) return;
+
+    print('Notification Payload: $payload');
+
+    AppRouter.navigateToHome();
+  }
+}
+
+// Sử dụng ví dụ
+class ExampleUsage {
+  void sendNotification() {
+    NotificationService.showNotification(
+      title: 'Thông báo mới',
+      body: 'Nội dung thông báo rất dài có thể hiển thị trên nhiều dòng...',
+      payload: 'order_detail', // Điều hướng khi nhấn
+    );
   }
 }

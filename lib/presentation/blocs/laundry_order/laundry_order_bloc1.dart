@@ -14,12 +14,12 @@ class LaundryOrderBloc1 extends Bloc<LaundryOrderEvent1, LaundryOrderState1> {
     on<ConnectToLaundryOrderHub1>(_onConnectToHub);
     on<DisconnectFromLaundryOrderHub1>(_onDisconnectFromHub);
     on<ReceiveLaundryOrderNotification1>(_onReceiveNotification);
-
-    // Set up stream listener when bloc is created
     _setupNotificationListener();
   }
 
   void _setupNotificationListener() {
+    _notificationSubscription?.cancel();
+
     _notificationSubscription = _remoteDataSource.notificationStream.listen(
           (orderNotification) {
         add(ReceiveLaundryOrderNotification1(orderNotification));
@@ -30,27 +30,26 @@ class LaundryOrderBloc1 extends Bloc<LaundryOrderEvent1, LaundryOrderState1> {
     );
   }
 
+
   Future<void> _onConnectToHub(
       ConnectToLaundryOrderHub1 event,
-      Emitter<LaundryOrderState1> emit
+      Emitter<LaundryOrderState1> emit,
       ) async {
     try {
       emit(LaundryOrderHubConnecting1());
-
-      // Check network connection first
       final hasConnection = await _remoteDataSource.hasNetworkConnection();
       if (!hasConnection) {
         emit(LaundryOrderError1('No network connection'));
         return;
       }
-
-      // Connect to hub
       await _remoteDataSource.connectToHub();
+      _setupNotificationListener();
       emit(LaundryOrderHubConnected1());
     } catch (e) {
       emit(LaundryOrderError1('Failed to connect to hub: ${e.toString()}'));
     }
   }
+
 
   Future<void> _onDisconnectFromHub(
       DisconnectFromLaundryOrderHub1 event,

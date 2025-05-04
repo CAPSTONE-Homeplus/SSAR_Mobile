@@ -3,6 +3,8 @@ import 'package:home_clean/core/constant/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/presentation/widgets/sparklePaint.dart';
 
+import '../screens/notification/notification.dart';
+
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String? title;
   final VoidCallback? onBackPressed;
@@ -27,9 +29,8 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   State<CustomAppBar> createState() => _CustomAppBarState();
 
   @override
-  Size get preferredSize => isHomePage
-      ? const Size.fromHeight(72.0)
-      : const Size.fromHeight(56.0);
+  Size get preferredSize =>
+      isHomePage ? const Size.fromHeight(72.0) : const Size.fromHeight(56.0);
 }
 
 class _CustomAppBarState extends State<CustomAppBar> {
@@ -39,7 +40,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
   void _showNotificationDialog(BuildContext context) {
     // Make sure the key is attached to a rendered object
     final RenderBox? renderBox =
-    _notificationButtonKey.currentContext?.findRenderObject() as RenderBox?;
+        _notificationButtonKey.currentContext?.findRenderObject() as RenderBox?;
 
     if (renderBox == null) {
       debugPrint("Notification button render box is null");
@@ -81,7 +82,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
                     padding: EdgeInsets.symmetric(vertical: 16.0),
                     child: Center(child: Text('Không có thông báo mới')),
                   ),
-
               ],
             ),
           ),
@@ -94,7 +94,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
   List<Widget> _buildNotificationItems() {
     return List.generate(
       widget.unreadCount,
-          (index) => Column(
+      (index) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
@@ -153,27 +153,28 @@ class _CustomAppBarState extends State<CustomAppBar> {
       centerTitle: true,
       leading: widget.onBackPressed != null
           ? IconButton(
-        icon: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.all(8),
-          child: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Colors.black87,
-            size: 20,
-          ),
-        ),
-        onPressed: widget.onBackPressed ?? () => Navigator.of(context).pop(),
-      )
+              icon: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.all(8),
+                child: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Colors.black87,
+                  size: 20,
+                ),
+              ),
+              onPressed:
+                  widget.onBackPressed ?? () => Navigator.of(context).pop(),
+            )
           : null,
-      // actions: [
-      //   _buildNotificationButton(context),
-      //   const SizedBox(width: 8),
-      // ],
+      actions: [
+        NotificationBell(),
+        const SizedBox(width: 8),
+      ],
     );
   }
 
@@ -242,7 +243,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-
                   gradient: LinearGradient(
                     colors: [
                       Colors.grey.shade600,
@@ -289,7 +289,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
           'Địa chỉ của bạn',
           style: GoogleFonts.poppins(
             color: Colors.white70,
-            fontSize: 12,
+            fontSize: 14,
           ),
         ),
         const SizedBox(height: 4),
@@ -305,7 +305,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
               address,
               style: GoogleFonts.poppins(
                 color: Colors.white,
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
               maxLines: 1,

@@ -5,17 +5,21 @@ import 'package:signalr_netcore/http_connection_options.dart';
 import 'package:signalr_netcore/hub_connection.dart';
 import 'package:signalr_netcore/hub_connection_builder.dart';
 
-import '../../../domain/entities/order/order_tracking.dart';
+import '../../../core/enums/laundry_order_status.dart';
+import '../../service/notification_service.dart';
 import '../local/auth_local_datasource.dart';
-import '../local/order_tracking_data_source.dart';
 
 class OrderLaundryRemoteDataSource {
-  late HubConnection _laundryOrderHubConnection;
+  HubConnection? _laundryOrderHubConnection;
   final AuthLocalDataSource authLocalDataSource;
+
   final StreamController<LaundryOrderToUser> _laundryOrderToUserNotificationController =
   StreamController<LaundryOrderToUser>.broadcast();
 
-  /// Stream of order tracking notificationus
+  bool _isConnecting = false;
+  bool _isDisposed = false;
+
+  /// Stream of order tracking notifications
   Stream<LaundryOrderToUser> get notificationStream =>
       _laundryOrderToUserNotificationController.stream;
 
@@ -31,12 +35,29 @@ class OrderLaundryRemoteDataSource {
 
   /// Connect to the order tracking SignalR hub
   Future<void> connectToHub() async {
-    await _initLaundryOrderHub();
-    await _startSignalRConnection(_laundryOrderHubConnection, 'LaundryOrderToUser');
+    if (_isConnecting ||
+        (_laundryOrderHubConnection != null &&
+            _laundryOrderHubConnection!.state == HubConnectionState.Connected)) {
+      print('🔄 SignalR đã kết nối hoặc đang kết nối, không cần kết nối lại.');
+      return;
+    }
+    _isConnecting = true;
+
+    try {
+      await _initLaundryOrderHub();
+      await _startSignalRConnection();
+    } finally {
+      _isConnecting = false;
+    }
   }
 
   /// Initialize the SignalR hub for order tracking
   Future<void> _initLaundryOrderHub() async {
+    // Nếu đã khởi tạo rồi thì không cần khởi tạo lại
+    if (_laundryOrderHubConnection != null) {
+      return;
+    }
+
     _laundryOrderHubConnection = HubConnectionBuilder()
         .withUrl(
       'https://vinlaundry.vinhomesresident.com/vinLaundryHub',
@@ -47,18 +68,21 @@ class OrderLaundryRemoteDataSource {
         .withAutomaticReconnect()
         .build();
 
-    // Set up listeners for different notification types
-    _laundryOrderHubConnection.on('ReceiveNotificationToAll',
+    // Set up listeners for different notification types - chỉ đăng ký một lần
+    _laundryOrderHubConnection!.on('ReceiveNotificationToAll',
             (arguments) => _handleOrderLaundryNotification(arguments, 'All'));
-    _laundryOrderHubConnection.on('ReceiveNotificationToUser',
+    _laundryOrderHubConnection!.on('ReceiveNotificationToUser',
             (arguments) => _handleOrderLaundryNotification(arguments, 'User'));
-    _laundryOrderHubConnection.on('ReceiveNotificationToGroup',
+    _laundryOrderHubConnection!.on('ReceiveNotificationToGroup',
             (arguments) => _handleOrderLaundryNotification(arguments, 'Group'));
+
+    print('✅ Đã khởi tạo SignalR hub');
   }
 
-  Future<void> _handleOrderLaundryNotification(Object? arguments, String source) async {
-    if (arguments == null) {
-      print('⚠️ Không nhận được dữ liệu theo dõi đơn hàng từ $source');
+  Future<void> _handleOrderLaundryNotification(
+      Object? arguments, String source) async {
+    if (_isDisposed || arguments == null) {
+      print('⚠️ Đã dispose hoặc không nhận được dữ liệu theo dõi đơn hàng từ $source');
       return;
     }
 
@@ -91,7 +115,8 @@ class OrderLaundryRemoteDataSource {
             return;
           }
         } else {
-          print('⚠️ Phần tử đầu tiên không phải Map hoặc String: ${firstItem.runtimeType}');
+          print(
+              '⚠️ Phần tử đầu tiên không phải Map hoặc String: ${firstItem.runtimeType}');
           return;
         }
       }
@@ -106,7 +131,8 @@ class OrderLaundryRemoteDataSource {
       }
       // Trường hợp khác không xử lý được
       else {
-        print('⚠️ Dữ liệu không phải String, List, hoặc Map: ${arguments.runtimeType}');
+        print(
+            '⚠️ Dữ liệu không phải String, List, hoặc Map: ${arguments.runtimeType}');
         return;
       }
 
@@ -118,21 +144,40 @@ class OrderLaundryRemoteDataSource {
         if (type == 'LaundryOrderToUser') {
           final data = jsonData['Data'];
           if (data is Map<String, dynamic>) {
-            final LaundryOrderToUser laundryOrderToUser = LaundryOrderToUser.fromJson(data);
-            print('📢 Nhận thông báo theo dõi đơn hàng từ $source: Đơn hàng ${laundryOrderToUser}');
-            _laundryOrderToUserNotificationController.add(laundryOrderToUser);
+            final LaundryOrderToUser laundryOrderToUser =
+            LaundryOrderToUser.fromJson(data);
+            print(
+                '📢 Nhận thông báo theo dõi đơn hàng từ $source: Đơn hàng ${laundryOrderToUser}');
+            if (!_isDisposed) {
+              _laundryOrderToUserNotificationController.add(laundryOrderToUser);
+              NotificationService.showNotification(
+                title: "Theo dõi đơn hàng",
+                body:
+                "Đơn hàng ${laundryOrderToUser.orderCode} đã được cập nhật thành ${LaundryOrderStatusExtension.fromString(laundryOrderToUser.status ?? "processing").name}",
+              );
+            }
           } else {
-            print('⚠️ Dữ liệu Data không phải Map<String, dynamic>: ${data.runtimeType}');
+            print(
+                '⚠️ Dữ liệu Data không phải Map<String, dynamic>: ${data.runtimeType}');
           }
         } else {
           print('⚠️ Type không phải LaundryOrderToUser: $type');
         }
       } else {
         // Trường hợp không có wrapper, thử parse trực tiếp
-        final LaundryOrderToUser laundryOrderToUser = LaundryOrderToUser.fromJson(jsonData);
-        print('📢 Nhận thông báo theo dõi đơn hàng từ $source: Đơn hàng ${laundryOrderToUser}');
+        final LaundryOrderToUser laundryOrderToUser =
+        LaundryOrderToUser.fromJson(jsonData);
+        print(
+            '📢 Nhận thông báo theo dõi đơn hàng từ $source: Đơn hàng ${laundryOrderToUser}');
 
-        _laundryOrderToUserNotificationController.add(laundryOrderToUser);
+        if (!_isDisposed) {
+          _laundryOrderToUserNotificationController.add(laundryOrderToUser);
+          NotificationService.showNotification(
+            title: "Theo dõi đơn hàng",
+            body:
+            "Đơn hàng ${laundryOrderToUser.orderCode} đã được cập nhật thành ${LaundryOrderStatusExtension.fromString(laundryOrderToUser.status ?? "processing").name}",
+          );
+        }
       }
     } catch (e, stackTrace) {
       print('❌ Lỗi xử lý thông báo theo dõi đơn hàng: $e');
@@ -142,49 +187,74 @@ class OrderLaundryRemoteDataSource {
   }
 
   /// Start the SignalR connection with retry logic
-  Future<void> _startSignalRConnection(
-      HubConnection connection,
-      String sourceName
-      ) async {
-    // Check if already connected or connecting
-    if (connection.state == HubConnectionState.Connected ||
-        connection.state == HubConnectionState.Connecting) {
-      print('🔄 SignalR $sourceName đã kết nối hoặc đang kết nối, không cần kết nối lại.');
+  Future<void> _startSignalRConnection() async {
+    if (_laundryOrderHubConnection == null) {
+      print('❌ Kết nối chưa được khởi tạo');
       return;
     }
 
-    try {
-      await connection.start();
-      print('✅ Kết nối SignalR $sourceName thành công');
-    } catch (e) {
-      print('❌ Lỗi kết nối SignalR $sourceName: $e');
+    // Check if already connected or connecting
+    if (_laundryOrderHubConnection!.state == HubConnectionState.Connected) {
+      print('🔄 SignalR đã kết nối, không cần kết nối lại.');
+      return;
+    }
 
-      // Wait and retry
-      await Future.delayed(const Duration(seconds: 5));
-      await _startSignalRConnection(connection, sourceName);
+    // Giới hạn số lần thử kết nối
+    int retryCount = 0;
+    const maxRetries = 3;
+
+    while (retryCount < maxRetries && !_isDisposed) {
+      try {
+        await _laundryOrderHubConnection!.start();
+        print('✅ Kết nối SignalR thành công lần thứ ${retryCount + 1}');
+        return;
+      } catch (e) {
+        retryCount++;
+        print('❌ Lỗi kết nối SignalR (lần thử $retryCount/$maxRetries): $e');
+
+        if (retryCount >= maxRetries) {
+          print('❌ Đã thử kết nối SignalR $maxRetries lần không thành công, dừng thử lại');
+          break;
+        }
+
+        // Wait before retry
+        await Future.delayed(const Duration(seconds: 5));
+      }
     }
   }
 
   /// Disconnect from the order tracking hub
   Future<void> disconnectFromHub() async {
-    if (_laundryOrderHubConnection.state == HubConnectionState.Connected) {
-      await _laundryOrderHubConnection.stop();
+    if (_laundryOrderHubConnection != null &&
+        _laundryOrderHubConnection!.state == HubConnectionState.Connected) {
+      await _laundryOrderHubConnection!.stop();
       print('🔌 Đã ngắt kết nối từ LaundryOrderToUser hub');
     }
   }
 
   /// Retrieve the access token for authentication
   Future<String> _getAccessToken() async {
-    String? currentToken = await authLocalDataSource.getAccessTokenFromStorage();
+    String? currentToken =
+    await authLocalDataSource.getAccessTokenFromStorage();
     return currentToken ?? '';
   }
 
-  /// Close the notification stream
-  void dispose() {
-    _laundryOrderToUserNotificationController.close();
+  /// Close the notification stream and cleanup resources
+  Future<void> dispose() async {
+    // Đánh dấu là đã dispose để không xử lý thêm sự kiện
+    _isDisposed = true;
+
+    // Ngắt kết nối SignalR
+    await disconnectFromHub();
+
+    // Đóng stream controller
+    if (!_laundryOrderToUserNotificationController.isClosed) {
+      await _laundryOrderToUserNotificationController.close();
+    }
+
+    print('🧹 Đã dispose tất cả tài nguyên OrderLaundryRemoteDataSource');
   }
 }
-
 
 class LaundryOrderToUser {
   final String? id;
@@ -206,16 +276,15 @@ class LaundryOrderToUser {
   // Factory constructor for creating an instance from a map
   factory LaundryOrderToUser.fromJson(Map<String, dynamic> json) {
     return LaundryOrderToUser(
-      id: json['Id'] as String?,
-      orderCode: json['OrderCode'] as String?,
-      name: json['Name'] as String?,
+      id: json['Id']?.toString() ?? '',
+      orderCode: json['OrderCode']?.toString() ?? '',
+      name: json['Name']?.toString() ?? '',
       totalAmount: json['TotalAmount'] is num
-          ? (json['TotalAmount'] as num?)?.toDouble()
-          : null,
-      orderDate: json['OrderDate'] != null
-          ? DateTime.tryParse(json['OrderDate'].toString())
-          : null,
-      status: json['Status'] as String?,
+          ? (json['TotalAmount'] as num).toDouble()
+          : 0.0,
+      orderDate: DateTime.tryParse(json['OrderDate']?.toString() ?? '') ??
+          DateTime.now(),
+      status: json['Status']?.toString() ?? '',
     );
   }
 
@@ -263,7 +332,6 @@ class LaundryOrderToUser {
         other.orderDate == orderDate &&
         other.status == status;
   }
-
 
   // ToString for debugging
   @override

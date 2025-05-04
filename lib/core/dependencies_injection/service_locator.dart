@@ -125,6 +125,7 @@ import '../../presentation/blocs/forgot_password/forgot_password_bloc.dart';
 import '../../presentation/blocs/laundry_item_type/laundry_item_type_bloc.dart';
 import '../../presentation/blocs/laundry_order/laundry_order_bloc1.dart';
 import '../../presentation/blocs/order_tracking/order_tracking_bloc.dart';
+import '../../presentation/blocs/order_tracking_notification/order_tracking_bloc.dart';
 import '../../presentation/blocs/payment_method/payment_method_bloc.dart';
 import '../../presentation/blocs/room/room_bloc.dart';
 import '../../presentation/blocs/service_in_house_type/service_price_bloc.dart';
@@ -356,5 +357,9 @@ Future<void> setupServiceLocator() async {
   ));
   sl.registerLazySingleton(() => CancelOrderBloc(
     repository: sl<LaundryOrderRepository>(),
+  ));
+  sl.registerLazySingleton(() => OrderTrackingBloc1(
+      remoteDataSource: sl<OrderTrackingRemoteDataSource>(),
+      localDataSource: sl<OrderTrackingLocalDataSource>(),
   ));
 }
