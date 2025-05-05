@@ -41,15 +41,16 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
 
   Future<void> _onCreateOrder(
       CreateOrderEvent event, Emitter<OrderState> emit) async {
-    emit(OrderLoading());
+    try {
+      emit(OrderLoading());
 
-    final Either<Failure, Orders> result = await createOrderUseCase
-        .execute(SaveOrderParams(createOrder: event.createOrder));
-
-    result.fold(
-      (failure) => emit(OrderError(failure.message)),
-      (order) => emit(OrderCreated(order)),
-    );
+      final result = await orderRepository.createOrder(event.createOrder);
+      emit(OrderCreated(result));
+    } on ApiException catch (e) {
+      emit(OrderError(e.description ?? 'Đã xảy ra lỗi không xác định'));
+    } catch (e) {
+      emit(OrderError('Đã xảy ra lỗi không xác định'));
+    }
   }
 
   Future<void> _onReOrder(ReOrderEvent event, Emitter<OrderState> emit) async {
@@ -66,7 +67,6 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       emit(OrderError('Đã xảy ra lỗi không xác định'));
     }
   }
-
 
   Future<void> _onGetOrdersByUser(
       GetOrdersByUserEvent event, Emitter<OrderState> emit) async {

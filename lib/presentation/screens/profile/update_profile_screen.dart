@@ -161,7 +161,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => BottomNavigation(
-                initialIndex: 3,
+                initialIndex: 2,
                 child: Container(),
               ),
             ),
@@ -184,7 +184,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       appBar: CustomAppBar(
           title: 'Cập Nhật Thông Tin',
           onBackPressed: () {
-            Navigator.pushAndRemoveUntil(
+            Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => BottomNavigation(
@@ -192,7 +192,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                   child: Container(),
                 ),
               ),
-                  (Route<dynamic> route) => false,
             );
           }),
       body: BlocConsumer<BuildingBloc, BuildingState>(

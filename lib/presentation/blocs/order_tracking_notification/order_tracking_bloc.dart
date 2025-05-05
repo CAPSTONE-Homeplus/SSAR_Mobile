@@ -10,6 +10,7 @@ class OrderTrackingBloc1 extends Bloc<OrderTrackingEvent1, OrderTrackingState1> 
   final OrderTrackingRemoteDataSource _remoteDataSource;
   final OrderTrackingLocalDataSource _localDataSource;
   StreamSubscription<OrderTracking>? _orderTrackingSubscription;
+  StreamSubscription<SendOrderToStaff>? _sendOrderToStaffSubscription;
 
   OrderTrackingBloc1({
     required OrderTrackingRemoteDataSource remoteDataSource,
@@ -21,13 +22,22 @@ class OrderTrackingBloc1 extends Bloc<OrderTrackingEvent1, OrderTrackingState1> 
     on<DisconnectFromOrderTrackingHub>(_onDisconnectFromOrderTrackingHub);
     on<OrderTrackingReceived>(_onOrderTrackingReceived);
     on<LoadOrderTrackings>(_onLoadOrderTrackings);
+    on<OrderDetailReceived>(_onOrderDetailReceived);
+
 
     _registerOrderTrackingListener();
   }
 
   void _registerOrderTrackingListener() {
+    _orderTrackingSubscription?.cancel();
+    _sendOrderToStaffSubscription?.cancel();
+
     _orderTrackingSubscription = _remoteDataSource.notificationStream.listen(
           (orderTracking) => add(OrderTrackingReceived(orderTracking)),
+    );
+
+    _sendOrderToStaffSubscription = _remoteDataSource.notificationOrderStream.listen(
+          (sendOrderToStaff) => add(OrderDetailReceived(sendOrderToStaff)),
     );
   }
 
@@ -114,9 +124,32 @@ class OrderTrackingBloc1 extends Bloc<OrderTrackingEvent1, OrderTrackingState1> 
     }
   }
 
+  Future<void> _onOrderDetailReceived(
+      OrderDetailReceived event,
+      Emitter<OrderTrackingState1> emit,
+      ) async {
+    final existingIndex = state.sendOrderToStaffs.indexWhere(
+            (o) => o.id == event.sendOrderToStaff.id
+    );
+
+    List<SendOrderToStaff> updatedSendOrderToStaffs =
+    List.from(state.sendOrderToStaffs);
+
+    if (existingIndex >= 0) {
+      updatedSendOrderToStaffs[existingIndex] = event.sendOrderToStaff;
+    } else {
+      updatedSendOrderToStaffs.insert(0, event.sendOrderToStaff);
+    }
+
+    emit(state.copyWith(
+        sendOrderToStaffs: updatedSendOrderToStaffs
+    ));
+  }
+
   @override
   Future<void> close() {
     _orderTrackingSubscription?.cancel();
+    _sendOrderToStaffSubscription?.cancel();
     _remoteDataSource.dispose();
     return super.close();
   }

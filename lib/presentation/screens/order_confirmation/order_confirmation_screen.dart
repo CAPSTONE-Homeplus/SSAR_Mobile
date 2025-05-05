@@ -95,9 +95,10 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF1CAF7D), // Primary color
             ),
-            child: const Text('Xác nhận',
-                style: TextStyle(color: Colors.white),
-          ),
+            child: const Text(
+              'Xác nhận',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -130,49 +131,26 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
           setState(() => _isOrdering = false);
           _stateSubscription.cancel();
 
-          // Show error dialog
-          showDialog(
-            context: context,
-            builder: (dialogContext) => AlertDialog(
-              title: const Text('Lỗi'),
-              content: Text(state.message),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: const Text('Đóng'),
-                ),
-              ],
-            ),
-          );
+          showCustomDialog(
+              context: context, message: state.message, type: DialogType.error);
         }
       },
       onError: (error) {
         if (!mounted) return;
         setState(() => _isOrdering = false);
 
-        // Show generic error dialog
-        showDialog(
-          context: context,
-          builder: (dialogContext) => AlertDialog(
-            title: const Text('Lỗi'),
-            content: Text(error.toString()),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('Đóng'),
-              ),
-            ],
-          ),
-        );
+        _stateSubscription.cancel();
       },
     );
   }
 
-  // Ensure only one dialog is shown
   void _showTransactionDialog(BuildContext context) {
-    // Close any existing dialogs
+    // Dismiss any existing dialogs
     Navigator.of(context, rootNavigator: true)
         .popUntil((route) => route is! DialogRoute);
+
+    // Prevent multiple dialogs
+    if (ModalRoute.of(context)?.isCurrent != true) return;
 
     showDialog(
       context: context,
@@ -254,46 +232,45 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             },
           ),
           BlocListener<OrderBloc, OrderState>(
-            listener: (context, state) {
-              print('OrderBloc State: $state'); // Debug print state type
-              print('Current Context: $context'); // Print context details
-
-              if (state is OrderCreated) {
-                print('OrderCreated received. Order ID: ${state.order.id}');
-
-                // Add a check to prevent multiple calls
-                if (_isProcessing) return;
-                _isProcessing = true;
-
-                context.read<TransactionBloc>().add(
-                      SaveCleaningTransactionEvent(
-                        CreateTransaction(
-                          walletId: selectedWalletId,
-                          paymentMethodId:
-                              '15890b1a-f5a6-42c3-8f37-541029189722',
-                          amount: '0',
-                          note: 'Thanh toán dịch vụ',
-                          orderId: state.order.id,
-                          serviceType: 0,
-                        ),
-                      ),
-                    );
-
-                _showTransactionDialog(context);
-
-                // Reset processing flag after a short delay
-                Future.delayed(const Duration(seconds: 2), () {
-                  _isProcessing = false;
-                });
-              } else if (state is OrderError) {
-                showCustomDialog(
-                  context: context,
-                  message: state.message,
-                  type: DialogType.error,
-                );
-              }
+            listenWhen: (previousState, currentState) {
+              return currentState is OrderCreated && !_isProcessing;
             },
-          ),
+            listener: (context, state) {
+              setState(() {
+                _isProcessing = true;
+              });
+
+              final order = (state as OrderCreated).order;
+
+              context.read<TransactionBloc>().add(
+                    SaveCleaningTransactionEvent(
+                      CreateTransaction(
+                        walletId: selectedWalletId,
+                        paymentMethodId: '15890b1a-f5a6-42c3-8f37-541029189722',
+                        amount: '0',
+                        note: 'Thanh toán dịch vụ',
+                        orderId: order.id,
+                        serviceType: 0,
+                      ),
+                    ),
+                  );
+
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  _showTransactionDialog(context);
+                }
+              });
+
+              // Reset processing state
+              Future.delayed(const Duration(seconds: 2), () {
+                if (mounted) {
+                  setState(() {
+                    _isProcessing = false;
+                  });
+                }
+              });
+            },
+          )
         ],
         child: SingleChildScrollView(
           child: Column(

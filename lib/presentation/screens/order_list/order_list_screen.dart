@@ -467,7 +467,6 @@ class LaundryOrderList extends StatelessWidget {
       },
       child: ListView.builder(
         padding: EdgeInsets.symmetric(horizontal: SizeConfig.hem * 20),
-
         itemCount: orders.length,
         itemBuilder: (context, index) {
           final order = orders[index];

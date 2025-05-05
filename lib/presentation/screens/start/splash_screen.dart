@@ -128,10 +128,10 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> initSignalR() async {
     try {
-      await AppSignalrService.init(
-        authLocalDataSource: sl<AuthLocalDataSource>(),
-        orderTrackingLocalDataSource: sl<OrderTrackingLocalDataSource>(),
-      );
+      // await AppSignalrService.init(
+      //   authLocalDataSource: sl<AuthLocalDataSource>(),
+      //   orderTrackingLocalDataSource: sl<OrderTrackingLocalDataSource>(),
+      // );
     } catch (e) {
       print('❌ Lỗi kết nối SignalR: $e');
       sl<ClearAllDataUseCase>().call();

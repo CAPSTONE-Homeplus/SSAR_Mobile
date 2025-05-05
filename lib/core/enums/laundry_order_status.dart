@@ -17,7 +17,7 @@ extension LaundryOrderStatusExtension on LaundryOrderStatus {
       case LaundryOrderStatus.pendingPayment:
         return 'Chờ thanh toán';
       case LaundryOrderStatus.processing:
-        return 'Đang giặt';
+        return 'Đang thực hiện';
       case LaundryOrderStatus.completed:
         return 'Hoàn thành';
       case LaundryOrderStatus.cancelled:

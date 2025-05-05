@@ -35,6 +35,9 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     /// Thanh toán giặt
     on<SaveLaundryTransactionEvent>((event, emit) async {
       emit(LaundryTransactionLoading());
+
+      await Future.delayed(const Duration(seconds: 2));
+
       try {
         final response = await transactionRepository.saveTransaction(event.transaction);
         emit(LaundryTransactionSuccess(response));

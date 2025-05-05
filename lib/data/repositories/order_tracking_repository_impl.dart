@@ -17,6 +17,8 @@ class OrderTrackingRepositoryImpl implements OrderTrackingRepository {
   final OrderTrackingLocalDataSource localDataSource;
   final StreamController<OrderTracking> _orderTrackingController =
   StreamController<OrderTracking>.broadcast();
+  final StreamController<SendOrderToStaff> _sendOrderToStaffController =
+  StreamController<SendOrderToStaff>.broadcast();
 
   OrderTrackingRepositoryImpl({
     required this.remoteDataSource,
@@ -25,7 +27,14 @@ class OrderTrackingRepositoryImpl implements OrderTrackingRepository {
     remoteDataSource.notificationStream.listen((orderTracking) {
       _orderTrackingController.add(orderTracking);
     });
+    remoteDataSource.notificationOrderStream.listen((sendOrderToStaff) {
+      _sendOrderToStaffController.add(sendOrderToStaff);
+    });
   }
+
+  @override
+  Stream<SendOrderToStaff> get sendOrderToStaffStream =>
+      _sendOrderToStaffController.stream;
 
   @override
   Stream<OrderTracking> get orderTrackingStream => _orderTrackingController.stream;
@@ -96,5 +105,6 @@ class OrderTrackingRepositoryImpl implements OrderTrackingRepository {
   void dispose() {
     _orderTrackingController.close();
     remoteDataSource.dispose();
+    _sendOrderToStaffController.close(); //
   }
 }

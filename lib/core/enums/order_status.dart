@@ -106,6 +106,10 @@ extension OrderStatusExtension on OrderStatus {
         return Icons.schedule;
     }
   }
+
+  static OrderStatus fromString(String status) {
+    return status.toOrderStatus();
+  }
 }
 
 extension StringToOrderStatus on String {
