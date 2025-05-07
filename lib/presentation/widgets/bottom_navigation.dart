@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../core/constant/size_config.dart';
 import '../screens/home/home_screen.dart';
-import '../screens/notification/notification.dart';
 import '../screens/order_list/order_list_screen.dart';
 import '../screens/setting/settings_screen.dart';
 
@@ -25,22 +24,43 @@ class BottomNavigation extends StatefulWidget {
 
 class _BottomNavigationState extends State<BottomNavigation> {
   late int _currentIndex;
-
-  List<Widget> _getPages() {
-    return [
-      HomeScreen(),
-      OrderListScreen(selectedCategory: widget.selectedCategory ?? ''),
-      SettingsScreen()
-    ];
-  }
+  late List<Widget?> _pages;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    // Khởi tạo danh sách pages với null
+    _pages = List.filled(3, null);
+    // Load trang ban đầu
+    _loadPage(_currentIndex);
+  }
+
+  void _loadPage(int index) {
+    if (_pages[index] == null) {
+      // Lazy load trang khi chưa được khởi tạo
+      setState(() {
+        switch (index) {
+          case 0:
+            _pages[index] = HomeScreen();
+            break;
+          case 1:
+            _pages[index] = OrderListScreen(
+              selectedCategory: widget.selectedCategory ?? '',
+            );
+            break;
+          case 2:
+            _pages[index] = SettingsScreen();
+            break;
+        }
+      });
+    }
   }
 
   void _onTabTapped(int index) {
+    // Load trang trước khi chuyển
+    _loadPage(index);
+
     setState(() {
       _currentIndex = index;
     });
@@ -55,7 +75,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _getPages(),
+        children: _pages.map((page) => page ?? const SizedBox()).toList(),
       ),
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: Colors.grey[100]!,
@@ -74,4 +94,3 @@ class _BottomNavigationState extends State<BottomNavigation> {
     );
   }
 }
-

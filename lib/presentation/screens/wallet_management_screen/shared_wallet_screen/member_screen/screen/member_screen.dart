@@ -628,246 +628,251 @@ class _MembersScreenState extends State<MembersScreen> {
            });
          }
        },
-     child:  Scaffold(
-        backgroundColor: Colors.grey[100],
-        appBar: CustomAppBar(
-          title: 'Thành viên ví chung',
-          onBackPressed: () => AppRouter.navigateToSharedWallet(),
-        ),
-        body: isLoading
-            ? Center(
-          child: const MemberScreenLoading(),
-        )
-            : Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.people, size: 20, color: AppColors.primaryColor),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Danh sách thành viên (${sortedMembers.length})',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  !isAdmin
-                      ? TextButton(
-                    onPressed: () {
-                      _showLeaveWalletDialog(currentUser);
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        side: BorderSide(color: Colors.red.withOpacity(0.2)),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+     child:  RefreshIndicator(
+        onRefresh: () async {
+          await _initData();
+        },
+       child: Scaffold(
+          backgroundColor: Colors.grey[100],
+          appBar: CustomAppBar(
+            title: 'Thành viên ví chung',
+            onBackPressed: () => AppRouter.navigateToSharedWallet(),
+          ),
+          body: isLoading
+              ? Center(
+            child: const MemberScreenLoading(),
+          )
+              : Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
                       children: [
-                        Icon(
-                          Icons.exit_to_app_outlined,
-                          color: Colors.red,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 6),
-                        const Text(
-                          "Rời ví",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                        Icon(Icons.people, size: 20, color: AppColors.primaryColor),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Danh sách thành viên (${sortedMembers.length})',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                  )
-                      : TextButton(
-                    onPressed: () {
-                      _showDeleteWallet(currentUser);
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        side: BorderSide(color: Colors.red.withOpacity(0.2)),
+                    !isAdmin
+                        ? TextButton(
+                      onPressed: () {
+                        _showLeaveWalletDialog(currentUser);
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: BorderSide(color: Colors.red.withOpacity(0.2)),
+                        ),
                       ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.exit_to_app_outlined,
-                          color: Colors.red,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 6),
-                        const Text(
-                          "Xóa ví",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.exit_to_app_outlined,
+                            color: Colors.red,
+                            size: 18,
                           ),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: ListView.separated(
-                  itemCount: sortedMembers.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 2),
-                  itemBuilder: (context, index) {
-                    final user = sortedMembers[index];
-                    final bool isCurrentUser = user.id == currentUser.id;
-                    final bool isWalletOwner = user.id == sharedWallet.ownerId;
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                          const SizedBox(width: 6),
+                          const Text(
+                            "Rời ví",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
                           ),
                         ],
                       ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
+                    )
+                        : TextButton(
+                      onPressed: () {
+                        _showDeleteWallet(currentUser);
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: BorderSide(color: Colors.red.withOpacity(0.2)),
                         ),
-                        leading: CircleAvatar(
-                          backgroundColor: isCurrentUser
-                              ? AppColors.primaryColor
-                              : Colors.grey.shade200,
-                          child: Text(
-                            user.fullName?.isNotEmpty == true
-                                ? user.fullName![0].toUpperCase()
-                                : '?',
-                            style: TextStyle(
-                              color: isCurrentUser
-                                  ? Colors.white
-                                  : Colors.black87,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        title: Row(
-                          children: [
-                            Text(
-                              user.fullName ?? 'Không có tên',
-                              style: TextStyle(
-                                fontWeight: isCurrentUser
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                              ),
-                            ),
-                            if (isCurrentUser)
-                              Container(
-                                margin: const EdgeInsets.only(left: 8),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.shade100,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Text(
-                                  'Bạn',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.blue,
-                                  ),
-                                ),
-                              ),
-                            if (isWalletOwner)
-                              Container(
-                                margin: const EdgeInsets.only(left: 8),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.shade100,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Text(
-                                  'Chủ ví',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.amber,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            user.phoneNumber ?? 'Không có số điện thoại',
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ),
-                        trailing: isAdmin && !isWalletOwner && !isCurrentUser
-                            ? Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.person_remove_outlined,
-                                color: Colors.red,
-                              ),
-                              onPressed: () {
-                                _showDeleteMemberDialog(user);
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.admin_panel_settings_outlined,
-                                color: Colors.blue,
-                              ),
-                              onPressed: () {
-                                // TODO: Implement transfer ownership logic
-                                _showTransferOwnershipDialog(user);
-                              },
-                            ),
-                          ],
-                        )
-                            : null,
                       ),
-                    );
-                  },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.exit_to_app_outlined,
+                            color: Colors.red,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 6),
+                          const Text(
+                            "Xóa ví",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: sortedMembers.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 2),
+                    itemBuilder: (context, index) {
+                      final user = sortedMembers[index];
+                      final bool isCurrentUser = user.id == currentUser.id;
+                      final bool isWalletOwner = user.id == sharedWallet.ownerId;
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.03),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          leading: CircleAvatar(
+                            backgroundColor: isCurrentUser
+                                ? AppColors.primaryColor
+                                : Colors.grey.shade200,
+                            child: Text(
+                              user.fullName?.isNotEmpty == true
+                                  ? user.fullName![0].toUpperCase()
+                                  : '?',
+                              style: TextStyle(
+                                color: isCurrentUser
+                                    ? Colors.white
+                                    : Colors.black87,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          title: Row(
+                            children: [
+                              Text(
+                                user.fullName ?? 'Không có tên',
+                                style: TextStyle(
+                                  fontWeight: isCurrentUser
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                              if (isCurrentUser)
+                                Container(
+                                  margin: const EdgeInsets.only(left: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade100,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Text(
+                                    'Bạn',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                ),
+                              if (isWalletOwner)
+                                Container(
+                                  margin: const EdgeInsets.only(left: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.shade100,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Text(
+                                    'Chủ ví',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.amber,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              user.phoneNumber ?? 'Không có số điện thoại',
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ),
+                          trailing: isAdmin && !isWalletOwner && !isCurrentUser
+                              ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.person_remove_outlined,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () {
+                                  _showDeleteMemberDialog(user);
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.admin_panel_settings_outlined,
+                                  color: Colors.blue,
+                                ),
+                                onPressed: () {
+                                  // TODO: Implement transfer ownership logic
+                                  _showTransferOwnershipDialog(user);
+                                },
+                              ),
+                            ],
+                          )
+                              : null,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        floatingActionButton: isAdmin
-            ? FloatingActionButton(
-          onPressed: _showAddMemberDialog,
-          backgroundColor: AppColors.primaryColor,
-          child: const Icon(Icons.person_add),
-        )
-            : null,
+          floatingActionButton: isAdmin
+              ? FloatingActionButton(
+            onPressed: _showAddMemberDialog,
+            backgroundColor: AppColors.primaryColor,
+            child: const Icon(Icons.person_add),
+          )
+              : null,
+       ),
      ),
     );
   }

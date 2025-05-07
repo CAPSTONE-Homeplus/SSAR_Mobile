@@ -163,6 +163,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
               builder: (context) => BottomNavigation(
                 initialIndex: 2,
                 child: Container(),
+                  selectedCategory: 'laundry',
               ),
             ),
           );

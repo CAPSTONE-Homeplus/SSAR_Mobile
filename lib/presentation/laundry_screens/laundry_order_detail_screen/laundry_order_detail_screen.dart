@@ -24,6 +24,7 @@ import '../../laundry_blocs/cancel/cancel_order_state.dart';
 import '../../laundry_blocs/order/laundry_order_bloc.dart';
 import '../../laundry_blocs/order/laundry_order_event.dart';
 import '../../laundry_blocs/order/laundry_order_state.dart';
+import '../../widgets/bottom_navigation.dart';
 import '../../widgets/currency_display.dart';
 import '../../widgets/section_widget.dart';
 import 'components/OrderPaymentButton.dart';
@@ -31,8 +32,10 @@ import 'components/OrderPaymentButton.dart';
 class LaundryOrderDetailScreen extends StatefulWidget {
   final String orderId;
 
-  const LaundryOrderDetailScreen({Key? key, required this.orderId})
-      : super(key: key);
+  const LaundryOrderDetailScreen({
+    Key? key,
+    required this.orderId,
+  }) : super(key: key);
 
   @override
   State<LaundryOrderDetailScreen> createState() =>
@@ -74,7 +77,17 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
       backgroundColor: Colors.grey[100],
       appBar: CustomAppBar(
         title: 'Chi Tiết Đơn Giặt',
-        onBackPressed: () => Get.back(),
+        onBackPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BottomNavigation(
+                initialIndex: 1,
+                child: Container(),
+              ),
+            ),
+          );
+        },
       ),
       body: MultiBlocListener(
         listeners: [
@@ -244,20 +257,30 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                           order: order,
                           selectedWalletId: selectedWalletId ?? '',
                           onSuccess: () {
-                            showCustomDialog(
-                              context: context,
-                              message: 'Thanh toán thành công',
-                              type: DialogType.success,
-                              onConfirm: () {
-                                _refreshKey.currentState?.show();
-                              },
-                            );
+                            Future.microtask(() {
+                              if (mounted) {
+                                showCustomDialog(
+                                  context: context,
+                                  message: 'Thanh toán thành công',
+                                  type: DialogType.success,
+                                  onConfirm: () {
+                                    if (mounted) {
+                                      final currentState =
+                                          _refreshKey.currentState;
+                                      if (currentState != null) {
+                                        currentState.show();
+                                      }
+                                    }
+                                  },
+                                );
+                              }
+                            });
                           },
                         ),
                         const SizedBox(height: 16),
                         LaundryOrderStatusExtension.fromString(
-                            order.status ?? '') ==
-                            LaundryOrderStatus.pendingPayment
+                                    order.status ?? '') ==
+                                LaundryOrderStatus.pendingPayment
                             ? _buildCancelOrderButton(order)
                             : SizedBox(height: 16),
                       ],
@@ -280,8 +303,7 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
             LaundryOrderStatus.pendingPayment &&
         LaundryOrderStatusExtension.fromString(order.status ?? '') !=
             LaundryOrderStatus.processing) {
-      return SizedBox
-          .shrink();
+      return SizedBox.shrink();
     }
 
     return Container(
@@ -296,7 +318,8 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
             context: context,
             builder: (context) => AlertDialog(
               title: Text('Xác Nhận Hủy Đơn'),
-              content: Text('Bạn muốn hủy đơn hàng?\nVui lòng đến trung tâm để nhận hàng nếu tiếp tục.'),
+              content: Text(
+                  'Bạn muốn hủy đơn hàng?\nVui lòng đến trung tâm để nhận hàng nếu tiếp tục.'),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),

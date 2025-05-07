@@ -134,11 +134,11 @@ class _NotificationBellState extends State<NotificationBell> {
     return OverlayEntry(
       builder: (context) => Positioned(
         top: offset.dy + size.height + 10,
-        right: 20,
+        left: 20,
         width: 300,
         child: CompositedTransformFollower(
           link: _layerLink,
-          offset: Offset(-220, size.height + 8),
+          offset: Offset(-250, size.height + 8),
           child: Material(
             elevation: 8,
             borderRadius: BorderRadius.circular(12),

@@ -71,16 +71,20 @@ class _OrderListScreenState extends State<OrderListScreen> {
   }
 
   void _applyCleanFilters() {
-    final query = _searchController.text.toLowerCase();
+    if (_searchController.text.isEmpty && _selectedStatus == null) {
+      context.read<OrderBloc>().add(GetOrdersByUserEvent());
+      return;
+    }
 
-    final filtered = _allCleanOrders.where((order) {
-      final code = order.code?.toLowerCase() ?? '';
-      return query.isEmpty || code.contains(query);
-    }).toList();
+    final searchQuery = _searchController.text.toLowerCase().trim();
+    final statusName = _selectedStatus?.name;
 
-    setState(() {
-      _filteredCleanOrders = filtered;
-    });
+    context.read<OrderBloc>().add(
+      GetOrdersByUserEvent(
+        search: searchQuery.isNotEmpty ? searchQuery : null,
+        // status: statusName,
+      ),
+    );
   }
 
   void _switchCategory(String category) {
@@ -89,7 +93,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
     });
 
     if (category == 'clean') {
-      context.read<OrderBloc>().add(GetOrdersByUserEvent());
+      _applyCleanFilters();
     } else {
       context
           .read<LaundryOrderBlocV2>()
@@ -156,21 +160,17 @@ class _OrderListScreenState extends State<OrderListScreen> {
         if (state is OrderError) {
           return ErrorState(
             onRetry: () {
-              context.read<OrderBloc>().add(GetOrdersByUserEvent());
+              _applyCleanFilters();
             },
           );
         }
 
         if (state is OrdersByUserLoaded) {
-          _allCleanOrders = state.orders.items ?? [];
+          final orders = state.orders.items ?? [];
 
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _applyCleanFilters();
-          });
-
-          return _filteredCleanOrders.isEmpty
+          return orders.isEmpty
               ? const EmptyState()
-              : CleanOrderList(orders: _filteredCleanOrders);
+              : CleanOrderList(orders: orders);
         }
 
         return const SizedBox.shrink();

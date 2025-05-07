@@ -92,6 +92,7 @@ void main() async {
   await _requestNotificationPermission();
   await NotificationService.init();
   await initializeDateFormatting('vi_VN', null);
+  await initSignalR();
   runApp(HomeClean(preferences: sl<SharedPreferences>()));
 }
 
@@ -101,18 +102,17 @@ Future<void> _requestNotificationPermission() async {
   }
 }
 
-// Future<void> initSignalR() async {
-//   try {
-//     await AppSignalrService.init(
-//       authLocalDataSource: sl<AuthLocalDataSource>(),
-//       orderTrackingLocalDataSource: sl<OrderTrackingLocalDataSource>(),
-//     );
-//   } catch (e) {
-//     print('❌ Lỗi kết nối SignalR: $e');
-//     sl<ClearAllDataUseCase>().call();
-//     AppRouter.navigateToLogin();
-//   }
-// }
+Future<void> initSignalR() async {
+  try {
+    await AppSignalrService.init(
+      authLocalDataSource: sl<AuthLocalDataSource>(),
+    );
+  } catch (e) {
+    print('❌ Lỗi kết nối SignalR: $e');
+    sl<ClearAllDataUseCase>().call();
+    AppRouter.navigateToLogin();
+  }
+}
 
 class HomeClean extends StatelessWidget {
   final SharedPreferences preferences;

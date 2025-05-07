@@ -1,10 +1,6 @@
 import 'package:get/get.dart';
-import 'package:home_clean/data/datasource/signalr/order_laundry_remote_data_source.dart';
-import 'package:home_clean/domain/entities/service/service.dart';
 import 'package:home_clean/domain/entities/user/create_user.dart';
 import 'package:home_clean/presentation/screens/home/home_screen.dart';
-import 'package:home_clean/presentation/screens/message/message_screen.dart';
-import 'package:home_clean/presentation/screens/notification/notification.dart';
 import 'package:home_clean/presentation/screens/order_confirmation/order_confirmation_screen.dart';
 import 'package:home_clean/presentation/screens/order_detail/order_detail_screen.dart';
 import 'package:home_clean/presentation/screens/register/register_screen.dart';
@@ -18,14 +14,10 @@ import '../../data/laundry_repositories/laundry_order_repo.dart';
 import '../../domain/entities/order/create_order.dart';
 import '../../domain/entities/order/order.dart';
 import '../../domain/entities/staff/staff.dart';
-import '../../domain/entities/user/user.dart';
-import '../../main.dart';
 import '../../presentation/laundry_screens/choose_item_type_screen/choose_item_type_screen.dart';
 import '../../presentation/laundry_screens/choose_service_type_screen/choose_service_type_screen.dart';
 import '../../presentation/laundry_screens/laundry_order_detail_screen/components/task_section_widget.dart';
 import '../../presentation/laundry_screens/laundry_order_detail_screen/laundry_order_detail_screen.dart';
-import '../../presentation/laundry_screens/laundry_service_screen/laundry_service_screen.dart';
-import '../../presentation/screens/activity/activity_screen.dart';
 import '../../presentation/screens/forgor_password/email_input_screen.dart';
 import '../../presentation/screens/login/login_screen.dart';
 import '../../presentation/screens/order_list/order_list_screen.dart';
@@ -88,24 +80,6 @@ class AppRouter {
         GetPage(
           name: routeHome,
           page: () => BottomNavigation(child: HomeScreen()),
-          transition: Transition.cupertino,
-          transitionDuration: const Duration(milliseconds: 300),
-        ),
-        GetPage(
-          name: routeActivity,
-          page: () => BottomNavigation(child: ActivityScreen()),
-          transition: Transition.cupertino,
-          transitionDuration: const Duration(milliseconds: 300),
-        ),
-        GetPage(
-          name: routeMessage,
-          page: () => BottomNavigation(child: MessageScreen()),
-          transition: Transition.cupertino,
-          transitionDuration: const Duration(milliseconds: 300),
-        ),
-        GetPage(
-          name: routeSetting,
-          page: () => BottomNavigation(child: MessageScreen()),
           transition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
         ),
