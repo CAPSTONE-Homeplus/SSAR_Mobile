@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 
 import '../../../domain/entities/order/order.dart';
 import '../../../domain/entities/order/order_tracking.dart';
-import '../../blocs/order/order_bloc.dart';
 import '../../blocs/order_tracking/order_tracking_bloc.dart';
 import '../../blocs/order_tracking/order_tracking_event.dart';
 import '../../blocs/order_tracking/order_tracking_state.dart';
@@ -92,8 +91,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
               }
 
               setState(() {
-                // Chuyển đổi từ định dạng OrderTracking sang OrderStep
-                // Lưu ý: Bạn cần thêm hàm fromJson vào class OrderStep hoặc điều chỉnh cách chuyển đổi
                 _orderSteps = tracking.steps
                     .map((step) => OrderStep.fromJson(step))
                     .toList();
@@ -243,6 +240,19 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
       }
     }
 
+    String getSubActivityStatus() {
+      switch (subActivity.status.toLowerCase()) {
+        case "completed":
+          return "Đã hoàn thành";
+        case "inprogress":
+          return "Đang thực hiện";
+        case "pending":
+          return "Chưa bắt đầu";
+        default:
+          return "Không xác định";
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Row(
@@ -270,7 +280,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
                   ),
                 ),
                 Text(
-                  subActivity.status,
+                  getSubActivityStatus(),
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: Colors.grey[800],
@@ -280,7 +290,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
                   ),
                 ),
                 Text(
-                  'Dự kiến: ${subActivity.estimatedTime}',
+                  'Dự kiến: ${subActivity.estimatedTime} phút',
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     color: Colors.grey[600],

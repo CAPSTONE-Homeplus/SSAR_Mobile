@@ -7,6 +7,7 @@ import 'package:home_clean/core/constant/colors.dart';
 import 'package:home_clean/core/enums/wallet_enums.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/domain/entities/transaction/create_transaction.dart';
+import 'package:home_clean/domain/entities/wallet/wallet.dart';
 import 'package:home_clean/presentation/blocs/service_in_house_type/service_price_bloc.dart';
 import 'package:home_clean/presentation/widgets/currency_display.dart';
 import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
@@ -16,19 +17,19 @@ import '../../../domain/entities/house/house.dart';
 import '../../../domain/entities/order/create_order.dart';
 import '../../blocs/building/building_bloc.dart';
 import '../../blocs/building/building_event.dart';
+import '../../blocs/cleaning_transaction_bloc/cleaning_transaction_bloc.dart';
+import '../../blocs/cleaning_transaction_bloc/cleaning_transaction_event.dart';
+import '../../blocs/cleaning_transaction_bloc/cleaning_transaction_state.dart';
 import '../../blocs/house/house_bloc.dart';
 import '../../blocs/order/order_bloc.dart';
 import '../../blocs/service_in_house_type/service_price_event.dart';
 import '../../blocs/service_in_house_type/service_price_state.dart';
-import '../../blocs/transaction/transaction_event.dart';
-import '../../blocs/transaction/transation_bloc.dart';
 import '../../blocs/wallet/wallet_bloc.dart';
 import '../../blocs/wallet/wallet_state.dart';
 import '../../widgets/detail_row_widget.dart';
 import '../../widgets/section_widget.dart';
 import '../../widgets/show_dialog.dart';
 import '../../widgets/step_indicator_widget.dart';
-import 'components/transaction_pop_up.dart';
 
 class OrderConfirmationScreen extends StatefulWidget {
   final OrderConfirmationArguments arguments;
@@ -45,12 +46,9 @@ class OrderConfirmationScreen extends StatefulWidget {
 
 class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   String? selectedWalletId;
-  bool _isOrdering = false;
   House? house;
-  late StreamSubscription<OrderState> _stateSubscription;
   int priceOfHouseType = 0;
   Building? selectedBuilding;
-  bool _isProcessing = false;
   late CreateOrder orderDetails = widget.arguments.createOrder;
 
   @override
@@ -76,7 +74,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   }
 
   void _placeOrder(BuildContext context) {
-    // Show confirmation dialog
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -93,7 +90,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               _proceedWithOrder(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1CAF7D), // Primary color
+              backgroundColor: const Color(0xFF1CAF7D),
             ),
             child: const Text(
               'Xác nhận',
@@ -105,10 +102,70 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     );
   }
 
-  void _proceedWithOrder(BuildContext context) {
-    if (_isOrdering) return;
+  void _handleOrderError(BuildContext context, OrderError state) {
+    showCustomDialog(
+        context: context,
+        message: state.message,
+        type: DialogType.error
+    );
+  }
+  void _showTransactionDialog(BuildContext context, {
+    required bool isSuccess,
+    String? message,
+    VoidCallback? onConfirm,
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              isSuccess ? Icons.check_circle : Icons.error,
+              color: isSuccess ? Colors.green : Colors.red,
+              size: 32,
+            ),
+            SizedBox(width: 12),
+            Text(
+              isSuccess ? 'Thành công' : 'Lỗi',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                color: isSuccess ? Colors.green : Colors.red,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          message ?? (isSuccess
+              ? 'Giao dịch đã được thực hiện thành công'
+              : 'Đã có lỗi xảy ra trong quá trình giao dịch'),
+          style: GoogleFonts.poppins(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              if (onConfirm != null) {
+                onConfirm();
+              }
+            },
+            child: Text(
+              'Xác nhận',
+              style: GoogleFonts.poppins(
+                color: isSuccess ? Colors.green : Colors.red,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-    setState(() => _isOrdering = true);
+  void _proceedWithOrder(BuildContext context) {
     if (widget.arguments.reOrderId != null && widget.arguments.staff != null) {
       context
           .read<OrderBloc>()
@@ -116,55 +173,26 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     } else {
       context.read<OrderBloc>().add(CreateOrderEvent(orderDetails));
     }
+  }
 
-    _stateSubscription = BlocProvider.of<OrderBloc>(context).stream.listen(
-      (state) {
-        if (!mounted) {
-          _stateSubscription.cancel();
-          return;
-        }
+  void _handleOrderCreated(BuildContext context, OrderCreated state) {
+    final order = state.order;
 
-        if (state is OrderCreated) {
-          setState(() => _isOrdering = false);
-          _stateSubscription.cancel();
-        } else if (state is OrderError) {
-          setState(() => _isOrdering = false);
-          _stateSubscription.cancel();
-
-          showCustomDialog(
-              context: context, message: state.message, type: DialogType.error);
-        }
-      },
-      onError: (error) {
-        if (!mounted) return;
-        setState(() => _isOrdering = false);
-
-        _stateSubscription.cancel();
-      },
+    context.read<CleaningTransactionBloc>().add(
+      SaveCleaningTransactionEvent(
+        CreateTransaction(
+          walletId: selectedWalletId,
+          paymentMethodId: '15890b1a-f5a6-42c3-8f37-541029189722',
+          amount: '${0}',
+          note: 'Thanh toán dịch vụ',
+          orderId: order.id,
+          serviceType: 0,
+        ),
+      ),
     );
   }
 
-  void _showTransactionDialog(BuildContext context) {
-    // Dismiss any existing dialogs
-    Navigator.of(context, rootNavigator: true)
-        .popUntil((route) => route is! DialogRoute);
 
-    // Prevent multiple dialogs
-    if (ModalRoute.of(context)?.isCurrent != true) return;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => const TransactionPopup(),
-    );
-  }
-
-  @override
-  void dispose() {
-    // Ensure the subscription is cancelled
-    _stateSubscription.cancel();
-    super.dispose();
-  }
 
   void fetchHouse() {
     final houseBloc = context.read<HouseBloc>();
@@ -195,10 +223,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       total += priceOfHouseType;
     }
 
-    if (orderDetails.emergencyRequest) {
-      total += 30000; // Add emergency request fee
-    }
-
     return total;
   }
 
@@ -213,6 +237,15 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       ),
       body: MultiBlocListener(
         listeners: [
+          BlocListener<OrderBloc, OrderState>(
+            listener: (context, state) {
+              if (state is OrderCreated) {
+                _handleOrderCreated(context, state);
+              } else if (state is OrderError) {
+                _handleOrderError(context, state);
+              }
+            },
+          ),
           BlocListener<ServicePriceBloc, ServicePriceState>(
             listener: (context, state) {
               if (state is ServicePriceLoaded) {
@@ -231,44 +264,48 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               }
             },
           ),
-          BlocListener<OrderBloc, OrderState>(
-            listenWhen: (previousState, currentState) {
-              return currentState is OrderCreated && !_isProcessing;
+          BlocListener<CleaningTransactionBloc, CleaningTransactionState>(
+            listenWhen: (previous, current) {
+              return previous.status != current.status;
             },
             listener: (context, state) {
-              setState(() {
-                _isProcessing = true;
-              });
-
-              final order = (state as OrderCreated).order;
-
-              context.read<TransactionBloc>().add(
-                    SaveCleaningTransactionEvent(
-                      CreateTransaction(
-                        walletId: selectedWalletId,
-                        paymentMethodId: '15890b1a-f5a6-42c3-8f37-541029189722',
-                        amount: '0',
-                        note: 'Thanh toán dịch vụ',
-                        orderId: order.id,
-                        serviceType: 0,
-                      ),
-                    ),
+              switch (state.status) {
+                case CleaningTransactionStatus.loading:
+                  Navigator.of(context, rootNavigator: true).popUntil((route) => route is! DialogRoute);
+                  showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (dialogContext) => const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.green,
+                          strokeWidth: 3,
+                        ),
+                      )
                   );
-
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted) {
-                  _showTransactionDialog(context);
-                }
-              });
-
-              // Reset processing state
-              Future.delayed(const Duration(seconds: 2), () {
-                if (mounted) {
-                  setState(() {
-                    _isProcessing = false;
-                  });
-                }
-              });
+                  break;
+                case CleaningTransactionStatus.success:
+                  Navigator.of(context, rootNavigator: true).popUntil((route) => route is! DialogRoute);
+                  _showTransactionDialog(
+                      context,
+                      isSuccess: true,
+                      onConfirm: () {
+                        AppRouter.navigateToOrderDetailWithArguments(
+                            state.data?.orderId ?? ''
+                        );
+                      }
+                  );
+                  break;
+                case CleaningTransactionStatus.failure:
+                  Navigator.of(context, rootNavigator: true).popUntil((route) => route is! DialogRoute);
+                  _showTransactionDialog(
+                      context,
+                      isSuccess: false,
+                      message: state.errorMessage ?? 'Giao dịch thất bại'
+                  );
+                  break;
+                default:
+                  break;
+              }
             },
           )
         ],
@@ -371,11 +408,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                         title: 'Giá dịch vụ',
                         price: priceOfHouseType,
                       ),
-                      if (orderDetails.emergencyRequest)
-                        _buildOptionItem(
-                          title: 'Phí đặt ngay',
-                          price: 30000,
-                        ),
                       Divider(
                         color: Colors.grey[300],
                         thickness: 1,
@@ -443,7 +475,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                   return _buildPaymentOption(
                     title: walletTitle ?? '',
                     balance: (wallet.balance ?? 0).toInt(),
-                    // ✅ fix here
                     icon: Icons.account_balance,
                     isSelected: isSelected,
                     onTap: () {
@@ -557,7 +588,9 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          title,
+                          title == 'Shared'
+                              ? 'Ví chung'
+                              : 'Ví riêng',
                           style: GoogleFonts.poppins(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
@@ -641,34 +674,80 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
         ],
       ),
       child: SafeArea(
-        child: ElevatedButton(
-          onPressed: (_isOrdering || selectedWalletId == null)
-              ? null
-              : () => _placeOrder(context),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: (_isOrdering || selectedWalletId == null)
-                ? Colors.grey
-                : const Color(0xFF1CAF7D),
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 0,
-          ),
-          child: Text(
-            _isOrdering
-                ? 'Đang đặt hàng...'
-                : (selectedWalletId == null
-                    ? 'Vui lòng chọn ví'
-                    : 'Xác nhận đặt dịch vụ'),
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        child: BlocBuilder<WalletBloc, WalletState>(
+          builder: (context, walletState) {
+            final totalPayment = _calculateTotalPrice();
+
+            final selectedWallet = walletState is WalletLoaded
+                ? walletState.wallets.firstWhere(
+                  (wallet) => wallet.id == selectedWalletId,
+                  orElse: () =>Wallet(),
+            )
+                : null;
+
+            final canPlaceOrder =
+                selectedWalletId != null &&
+                selectedWallet != null &&
+                (selectedWallet.balance ?? 0) >= totalPayment;
+
+            return ElevatedButton(
+              onPressed: canPlaceOrder
+                  ? () {
+                if ((selectedWallet.balance ?? 0) < totalPayment) {
+                  showCustomDialog(
+                    context: context,
+                    message: 'Số dư ví không đủ để thanh toán',
+                    type: DialogType.error,
+                  );
+                  return;
+                }
+                _placeOrder(context);
+              }
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: canPlaceOrder
+                    ? const Color(0xFF1CAF7D)
+                    : Colors.grey,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                _getButtonText(
+                  selectedWalletId: selectedWalletId,
+                  selectedWallet: selectedWallet,
+                  totalPayment: totalPayment,
+                ),
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
+  }
+  String _getButtonText({
+    required String? selectedWalletId,
+    required dynamic selectedWallet,
+    required int totalPayment,
+  }) {
+
+    if (selectedWalletId == null) return 'Vui lòng chọn ví';
+
+    if (selectedWallet == null) return 'Ví không hợp lệ';
+
+    final walletBalance = selectedWallet.balance ?? 0;
+
+    if (walletBalance < totalPayment) {
+      return 'Số dư không đủ';
+    }
+
+    return 'Xác nhận đặt dịch vụ';
   }
 }

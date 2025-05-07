@@ -7,6 +7,7 @@ enum DialogType {
   success,
   warning,
   info,
+  loading,
 }
 
 class DialogConfig {
@@ -65,6 +66,7 @@ void showCustomDialog({
       buttonColor: AppColors.primaryColor,
       icon: Icons.info_outline,
     ),
+
   };
 
   showDialog(

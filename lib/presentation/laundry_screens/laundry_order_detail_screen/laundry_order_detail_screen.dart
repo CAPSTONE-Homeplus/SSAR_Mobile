@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_clean/core/router/app_router.dart';
 import 'package:home_clean/presentation/blocs/task/task_bloc.dart';
@@ -257,24 +256,9 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                           order: order,
                           selectedWalletId: selectedWalletId ?? '',
                           onSuccess: () {
-                            Future.microtask(() {
-                              if (mounted) {
-                                showCustomDialog(
-                                  context: context,
-                                  message: 'Thanh toán thành công',
-                                  type: DialogType.success,
-                                  onConfirm: () {
-                                    if (mounted) {
-                                      final currentState =
-                                          _refreshKey.currentState;
-                                      if (currentState != null) {
-                                        currentState.show();
-                                      }
-                                    }
-                                  },
-                                );
-                              }
-                            });
+                            context
+                                .read<LaundryOrderBloc>()
+                                .add(GetLaundryOrderEvent(widget.orderId));
                           },
                         ),
                         const SizedBox(height: 16),
@@ -307,11 +291,6 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
     }
 
     return Container(
-      margin: EdgeInsets.only(top: 8),
-      decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(24),
-      ),
       child: GestureDetector(
         onTap: () {
           showDialog(
@@ -342,8 +321,8 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(24),
+            color: Colors.red.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -627,7 +606,9 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          title,
+                          title == 'Shared'
+                              ? 'Ví chung'
+                              : 'Ví riêng',
                           style: GoogleFonts.poppins(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,

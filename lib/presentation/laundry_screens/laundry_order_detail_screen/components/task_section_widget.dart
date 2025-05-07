@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/enums/laundry_order_status.dart';
 import '../../../../data/laundry_repositories/laundry_order_repo.dart';
-import '../../../../domain/entities/order/order.dart';
 import '../../../../domain/entities/task/task.dart';
 import '../../../blocs/task/task_bloc.dart';
 import '../../../blocs/task/task_event.dart';
@@ -198,7 +197,15 @@ class StepIndicatorTaskTimelineWidget extends StatelessWidget {
 
   Widget _buildCustomTimeline(List<Task> tasks, BuildContext context) {
     tasks.sort((a, b) {
-      if (a.startDate == null) return 1;
+      if (a.startDate == null && b.startDate == null) {
+        return 0;
+      } else if (a.startDate == null) {
+        return 1;
+      } else if (b.startDate == null) {
+        return -1;
+      } else {
+        return a.startDate!.compareTo(b.startDate!);
+      }
     });
 
     return RefreshIndicator(
@@ -397,15 +404,12 @@ class StepIndicatorTaskTimelineWidget extends StatelessWidget {
     );
   }
 
-  String _formatDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return "Không có";
-    try {
-      final date = DateTime.parse(dateStr);
-      return DateFormat('dd/MM/yyyy – HH:mm')
-          .format(date); // ví dụ: 15/04/2025 – 12:34
-    } catch (e) {
-      return "Không hợp lệ";
+  String _formatDate(DateTime? dateStr) {
+    if (dateStr == null) {
+      return 'Chưa có ngày';
     }
+    final DateFormat formatter = DateFormat('dd/MM/yyyy');
+    return formatter.format(dateStr);
   }
 }
 

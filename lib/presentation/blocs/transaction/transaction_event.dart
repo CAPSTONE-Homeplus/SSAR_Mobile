@@ -58,22 +58,6 @@ class SaveTopUpTransactionEvent extends TransactionEvent {
   List<Object> get props => [transaction];
 }
 
-class SaveLaundryTransactionEvent extends TransactionEvent {
-  final CreateTransaction transaction;
 
-  const SaveLaundryTransactionEvent(this.transaction);
-
-  @override
-  List<Object> get props => [transaction];
-}
-
-class SaveCleaningTransactionEvent extends TransactionEvent {
-  final CreateTransaction transaction;
-
-  const SaveCleaningTransactionEvent(this.transaction);
-
-  @override
-  List<Object> get props => [transaction];
-}
 
 

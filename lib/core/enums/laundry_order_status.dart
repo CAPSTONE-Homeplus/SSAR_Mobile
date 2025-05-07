@@ -27,6 +27,23 @@ extension LaundryOrderStatusExtension on LaundryOrderStatus {
     }
   }
 
+  String get statusName {
+    switch (this) {
+      case LaundryOrderStatus.draft:
+        return 'draft';
+      case LaundryOrderStatus.pendingPayment:
+        return 'pendingPayment';
+      case LaundryOrderStatus.processing:
+        return 'processing';
+      case LaundryOrderStatus.completed:
+        return 'completed';
+      case LaundryOrderStatus.cancelled:
+        return 'cancelled';
+      case LaundryOrderStatus.paid:
+        return 'paid';
+    }
+  }
+
   Color get color {
     switch (this) {
       case LaundryOrderStatus.draft:

@@ -120,10 +120,12 @@ import '../../domain/use_cases/wallet/get_wallet_by_user.dart';
 import '../../presentation/blocs/additional_service/additional_service_bloc.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/building/building_bloc.dart';
+import '../../presentation/blocs/cleaning_transaction_bloc/cleaning_transaction_bloc.dart';
 import '../../presentation/blocs/feedbacks/rating_order_bloc.dart';
 import '../../presentation/blocs/forgot_password/forgot_password_bloc.dart';
 import '../../presentation/blocs/laundry_item_type/laundry_item_type_bloc.dart';
 import '../../presentation/blocs/laundry_order/laundry_order_bloc1.dart';
+import '../../presentation/blocs/laundry_transaction_bloc/laundry_transaction_bloc.dart';
 import '../../presentation/blocs/order_tracking/order_tracking_bloc.dart';
 import '../../presentation/blocs/order_tracking_notification/order_tracking_bloc.dart';
 import '../../presentation/blocs/payment_method/payment_method_bloc.dart';
@@ -147,89 +149,96 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => sharedPreferences);
   sl.registerLazySingleton(() => storage);
 
-
   sl.registerLazySingleton<AuthLocalDataSource>(
-        () => AuthLocalDataSource(),
+    () => AuthLocalDataSource(),
   );
 
   sl.registerLazySingleton<UserLocalDatasource>(
-        () => UserLocalDatasource(),
+    () => UserLocalDatasource(),
   );
 
   sl.registerLazySingleton<WalletLocalDataSource>(
-        () => WalletLocalDataSource(),
+    () => WalletLocalDataSource(),
   );
   sl.registerLazySingleton<OrderTrackingLocalDataSource>(
-        () => OrderTrackingLocalDataSource(),
+    () => OrderTrackingLocalDataSource(),
   );
 // sl.registerLazySingleton<ExtraServiceLocalDataSource>(
 //         () => ExtraServiceLocalDataSource(sharedPreferences: sl()),
 //   );
   // signalr
   sl.registerLazySingleton<WalletRemoteDataSource>(
-        () => WalletRemoteDataSource(authLocalDataSource: sl()),
+    () => WalletRemoteDataSource(authLocalDataSource: sl()),
   );
 
   sl.registerLazySingleton<OrderTrackingRemoteDataSource>(
-        () => OrderTrackingRemoteDataSource(
+    () => OrderTrackingRemoteDataSource(
       authLocalDataSource: sl(),
       orderTrackingLocalDataSource: sl(),
     ),
   );
 
   sl.registerLazySingleton<LocalDataSource>(() => LocalDataSource(
-    authLocalDataSource: sl(),
-    // serviceLocalDataSource: sl(),
-    userLocalDatasource: sl(),
-  ));
+        authLocalDataSource: sl(),
+        // serviceLocalDataSource: sl(),
+        userLocalDatasource: sl(),
+      ));
 
   sl.registerLazySingleton<OrderLaundryRemoteDataSource>(
-        () => OrderLaundryRemoteDataSource(
+    () => OrderLaundryRemoteDataSource(
       authLocalDataSource: sl(),
     ),
   );
 
   // Repositories (sử dụng LazySingleton vì chúng ta muốn tái sử dụng đối tượng)
-  sl.registerLazySingleton<AuthRepository>(
-          () => AuthRepositoryImpl(authLocalDataSource: sl(), userLocalDatasource: sl(),
-              userRepository: sl()));
+  sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(
+      authLocalDataSource: sl(),
+      userLocalDatasource: sl(),
+      userRepository: sl()));
   sl.registerLazySingleton<UserRepository>(
-          () => UserRepositoryImpl(userLocalDatasource: sl()));
-  sl.registerLazySingleton<ServiceRepository>(
-          () => ServiceRepositoryImpl());
+      () => UserRepositoryImpl(userLocalDatasource: sl()));
+  sl.registerLazySingleton<ServiceRepository>(() => ServiceRepositoryImpl());
   sl.registerLazySingleton<ServiceCategoryRepository>(
-          () => ServiceCategoryRepositoryImpl());
+      () => ServiceCategoryRepositoryImpl());
   sl.registerLazySingleton<ServiceActivityRepository>(
-          () => ServiceActivityRepositoryImpl());
+      () => ServiceActivityRepositoryImpl());
   sl.registerLazySingleton<OptionRepository>(() => OptionRepositoryImpl());
   sl.registerLazySingleton<SubActivityRepository>(
-          () => SubActivityRepositoryImpl());
+      () => SubActivityRepositoryImpl());
   sl.registerLazySingleton<ExtraServiceRepository>(
-          () => ExtraServiceRepositoryImpl());
+      () => ExtraServiceRepositoryImpl());
   sl.registerLazySingleton<EquipmentSupplyRepository>(
-          () => EquipmentSupplyRepositoryImpl());
+      () => EquipmentSupplyRepositoryImpl());
   sl.registerLazySingleton<TimeSlotRepository>(() => TimeSlotRepositoryImpl());
-  sl.registerLazySingleton<OrderRepository>(() => OrderRepositoryImpl( userLocalDatasource: sl()));
-  sl.registerLazySingleton<NotificationRepository>(() => NotificationRepositoryImpl(
-    localDataSource: sl(),
-    remoteDataSource: sl(),
-  ));
-  sl.registerLazySingleton<WalletRepository>(
-          () => WalletRepositoryImpl(authLocalDataSource: sl(), userLocalDatasource: sl()));
+  sl.registerLazySingleton<OrderRepository>(
+      () => OrderRepositoryImpl(userLocalDatasource: sl()));
+  sl.registerLazySingleton<NotificationRepository>(
+      () => NotificationRepositoryImpl(
+            localDataSource: sl(),
+            remoteDataSource: sl(),
+          ));
+  sl.registerLazySingleton<WalletRepository>(() => WalletRepositoryImpl(
+      authLocalDataSource: sl(), userLocalDatasource: sl()));
   sl.registerLazySingleton<RoomRepository>(() => RoomRepositoryImpl());
   sl.registerLazySingleton<BuildingRepository>(() => BuildingRepositoryImpl());
-  sl.registerLazySingleton<TransactionRepository>(() => TransactionRepositoryImpl(
-    authLocalDataSource: sl(),
-  ));
-  sl.registerLazySingleton<PaymentMethodRepository>(() => PaymentMethodRepositoryImpl());
+  sl.registerLazySingleton<TransactionRepository>(
+      () => TransactionRepositoryImpl(
+            authLocalDataSource: sl(),
+          ));
+  sl.registerLazySingleton<PaymentMethodRepository>(
+      () => PaymentMethodRepositoryImpl());
   sl.registerLazySingleton<HouseRepository>(() => HouseRepositoryImpl());
-  sl.registerLazySingleton<OrderTrackingRepository>(() => OrderTrackingRepositoryImpl(
-    remoteDataSource: sl(),
-    localDataSource: sl(),
-  ));
-  sl.registerLazySingleton<LaundryServiceTypeRepository>(() => LaundryServiceTypeRepositoryImpl());
-  sl.registerLazySingleton<AdditionalServiceRepository>(() => AdditionalServiceRepository());
-  sl.registerLazySingleton<LaundryOrderRepository>(() => LaundryOrderRepository(authLocalDataSource: sl(), userLocalDatasource: sl()));
+  sl.registerLazySingleton<OrderTrackingRepository>(
+      () => OrderTrackingRepositoryImpl(
+            remoteDataSource: sl(),
+            localDataSource: sl(),
+          ));
+  sl.registerLazySingleton<LaundryServiceTypeRepository>(
+      () => LaundryServiceTypeRepositoryImpl());
+  sl.registerLazySingleton<AdditionalServiceRepository>(
+      () => AdditionalServiceRepository());
+  sl.registerLazySingleton<LaundryOrderRepository>(() => LaundryOrderRepository(
+      authLocalDataSource: sl(), userLocalDatasource: sl()));
 
   sl.registerLazySingleton<TaskRepository>(() => TaskRepositoryImpl());
   // Use Cases
@@ -264,7 +273,7 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => DeleteUserWalletUseCase(sl()));
   sl.registerLazySingleton(() => GetUserByPhoneNumberUseCase(sl()));
   sl.registerLazySingleton(() => GetTransactionByWalletUseCase(sl()));
-  sl.registerLazySingleton(()=> GetNotificationsUseCase(sl()));
+  sl.registerLazySingleton(() => GetNotificationsUseCase(sl()));
   sl.registerLazySingleton(() => ConnectToNotificationHubUseCase(sl()));
   sl.registerLazySingleton(() => DisconnectFromNotificationHubUseCase(sl()));
   sl.registerLazySingleton(() => ListenForNotificationsUseCase(sl()));
@@ -285,7 +294,6 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => GetUserFromLocalUseCase(sl()));
   sl.registerLazySingleton(() => GetOrderByUserUseCase(sl()));
 
-
   // Blocs (sử dụng Factory vì mỗi bloc sẽ cần một instance mới)
   sl.registerSingleton(() => AuthBloc(
       loginUseCase: sl(),
@@ -295,7 +303,7 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(() => InternetBloc());
   sl.registerFactory(() => ThemeBloc(preferences: sl()));
   sl.registerFactory(
-        () => ServiceBloc(
+    () => ServiceBloc(
       getServicesUseCase: sl(),
       serviceRepository: sl(),
     ),
@@ -303,20 +311,21 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory(() => ServiceCategoryBloc(
       getServiceByServiceCategory: sl(), getServiceCategories: sl()));
   sl.registerFactory(
-          () => ServiceActivityBloc(getServiceActivitiesByService: sl()));
+      () => ServiceActivityBloc(getServiceActivitiesByService: sl()));
   sl.registerFactory(() => OptionBloc(getOptionsUseCase: sl()));
   sl.registerFactory(() => SubActivityBloc(getSubActivitiesUsecase: sl()));
   sl.registerFactory(() => ExtraServiceBloc(getExtraServiceUseCase: sl()));
   sl.registerFactory(
-          () => EquipmentSupplyBloc(getEquipmentSuppliesUseCase: sl()));
+      () => EquipmentSupplyBloc(getEquipmentSuppliesUseCase: sl()));
   sl.registerFactory(() => TimeSlotBloc(getTimeSlotsUsecase: sl()));
-  sl.registerFactory(() => OrderBloc(createOrderUseCase: sl(),
+  sl.registerFactory(() => OrderBloc(
+      createOrderUseCase: sl(),
       getOrderByUserUseCase: sl(),
       getOrderUseCase: sl(),
       cancelOrderUseCase: sl(),
       orderRepository: sl()));
   sl.registerFactory(
-        () => NotificationBloc(
+    () => NotificationBloc(
       getNotificationsUseCase: sl(),
       connectToHubUseCase: sl(),
       disconnectFromHubUseCase: sl(),
@@ -324,26 +333,33 @@ Future<void> setupServiceLocator() async {
       flutterLocalNotificationsPlugin: sl(),
     ),
   );
-  sl.registerFactory(() => WalletBloc(getWalletByUser: sl(), createWalletUseCase: sl(),
-      walletRepository: sl(), changeOwnerUseCase: sl(), deleteUserUseCase: sl(), getContributionStatisticUseCase: sl()));
+  sl.registerFactory(() => WalletBloc(
+      getWalletByUser: sl(),
+      createWalletUseCase: sl(),
+      walletRepository: sl(),
+      changeOwnerUseCase: sl(),
+      deleteUserUseCase: sl(),
+      getContributionStatisticUseCase: sl()));
   sl.registerFactory(() => RoomBloc(sl()));
-  sl.registerFactory(() => BuildingBloc(getBuildingUseCase: sl(), getBuildingsUseCase: sl()));
+  sl.registerFactory(
+      () => BuildingBloc(getBuildingUseCase: sl(), getBuildingsUseCase: sl()));
   sl.registerFactory(() => TransactionBloc(sl(), sl(), sl(), sl()));
-  sl.registerLazySingleton (() => HouseBloc(getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl()));
+  sl.registerLazySingleton(() =>
+      HouseBloc(getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl()));
   sl.registerFactory(() => PaymentMethodBloc(sl()));
   sl.registerFactory(() => UserBloc(sl(), sl(), sl(), sl()));
   sl.registerFactory(() => PersonalWalletBloc(getWalletByUser: sl()));
   sl.registerFactory(() => SharedWalletBloc(getWalletByUser: sl()));
   sl.registerFactory(() => OrderTrackingBloc(
-      connectToHub: sl(),
-      disconnectFromHub: sl(),
-      getLocalTrackings: sl(),
-      getTrackingById: sl(),
-      streamTracking: sl(),
-  ));
+        connectToHub: sl(),
+        disconnectFromHub: sl(),
+        getLocalTrackings: sl(),
+        getTrackingById: sl(),
+        streamTracking: sl(),
+      ));
   sl.registerLazySingleton(() => LaundryItemTypeBloc(sl()));
   sl.registerLazySingleton(() => AdditionalServiceBloc(repository: sl()));
-  sl.registerLazySingleton(()=> LaundryOrderBloc(sl()));
+  sl.registerLazySingleton(() => LaundryOrderBloc(sl()));
   sl.registerLazySingleton(() => ChangeOwnerBloc(walletRepository: sl()));
   sl.registerLazySingleton(() => DissolutionBloc(walletRepository: sl()));
   sl.registerLazySingleton(() => StaffBloc(orderRepository: sl()));
@@ -353,13 +369,19 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => LaundryOrderBloc1(sl()));
   sl.registerLazySingleton(() => TaskBloc(taskRepository: sl()));
   sl.registerLazySingleton(() => ForgotPasswordBloc(
-    authRepository: sl(),
-  ));
+        authRepository: sl(),
+      ));
   sl.registerLazySingleton(() => CancelOrderBloc(
-    repository: sl<LaundryOrderRepository>(),
-  ));
+        repository: sl<LaundryOrderRepository>(),
+      ));
   sl.registerLazySingleton(() => OrderTrackingBloc1(
-      remoteDataSource: sl<OrderTrackingRemoteDataSource>(),
-      localDataSource: sl<OrderTrackingLocalDataSource>(),
-  ));
+        remoteDataSource: sl<OrderTrackingRemoteDataSource>(),
+        localDataSource: sl<OrderTrackingLocalDataSource>(),
+      ));
+  sl.registerLazySingleton(() => CleaningTransactionBloc(
+        sl<TransactionRepository>(),
+      ));
+  sl.registerLazySingleton(() => LaundryTransactionBloc(
+        transactionRepository: sl<TransactionRepository>(),
+      ));
 }

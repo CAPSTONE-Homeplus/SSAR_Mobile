@@ -10,12 +10,20 @@ abstract class LaundryOrderEventV2 extends Equatable {
 
 /// Event: Fetch list of laundry orders by user ID
 class GetLaundryOrdersV2 extends LaundryOrderEventV2 {
-  final String laundryUserId;
+  final String? search;
+  final String? orderBy;
+  final int? page;
+  final int? size;
 
-  const GetLaundryOrdersV2(this.laundryUserId);
+  const GetLaundryOrdersV2({
+    this.search,
+    this.orderBy,
+    this.page,
+    this.size,
+  });
 
   @override
-  List<Object?> get props => [laundryUserId];
+  List<Object?> get props => [search, orderBy, page, size];
 }
 
 /// Event: Fetch laundry order detail by order ID

@@ -24,6 +24,7 @@ import 'package:home_clean/domain/repositories/user_repository.dart';
 import 'package:home_clean/presentation/blocs/additional_service/additional_service_bloc.dart';
 import 'package:home_clean/presentation/blocs/auth/auth_bloc.dart';
 import 'package:home_clean/presentation/blocs/building/building_bloc.dart';
+import 'package:home_clean/presentation/blocs/cleaning_transaction_bloc/cleaning_transaction_bloc.dart';
 import 'package:home_clean/presentation/blocs/equipment/equipment_supply_bloc.dart';
 import 'package:home_clean/presentation/blocs/extra_service/extra_service_bloc.dart';
 import 'package:home_clean/presentation/blocs/feedbacks/rating_order_bloc.dart';
@@ -32,6 +33,7 @@ import 'package:home_clean/presentation/blocs/house/house_bloc.dart';
 import 'package:home_clean/presentation/blocs/laundry_item_type/laundry_item_type_bloc.dart';
 import 'package:home_clean/presentation/blocs/laundry_order/laundry_order_bloc1.dart';
 import 'package:home_clean/presentation/blocs/laundry_service_type/laundry_service_type_bloc.dart';
+import 'package:home_clean/presentation/blocs/laundry_transaction_bloc/laundry_transaction_bloc.dart';
 import 'package:home_clean/presentation/blocs/notification/notification_bloc.dart';
 import 'package:home_clean/presentation/blocs/option/option_bloc.dart';
 import 'package:home_clean/presentation/blocs/order/order_bloc.dart';
@@ -92,7 +94,7 @@ void main() async {
   await _requestNotificationPermission();
   await NotificationService.init();
   await initializeDateFormatting('vi_VN', null);
-  await initSignalR();
+  // await initSignalR();
   runApp(HomeClean(preferences: sl<SharedPreferences>()));
 }
 
@@ -102,17 +104,17 @@ Future<void> _requestNotificationPermission() async {
   }
 }
 
-Future<void> initSignalR() async {
-  try {
-    await AppSignalrService.init(
-      authLocalDataSource: sl<AuthLocalDataSource>(),
-    );
-  } catch (e) {
-    print('❌ Lỗi kết nối SignalR: $e');
-    sl<ClearAllDataUseCase>().call();
-    AppRouter.navigateToLogin();
-  }
-}
+// Future<void> initSignalR() async {
+//   try {
+//     await AppSignalrService.init(
+//       authLocalDataSource: sl<AuthLocalDataSource>(),
+//     );
+//   } catch (e) {
+//     print('❌ Lỗi kết nối SignalR: $e');
+//     sl<ClearAllDataUseCase>().call();
+//     AppRouter.navigateToLogin();
+//   }
+// }
 
 class HomeClean extends StatelessWidget {
   final SharedPreferences preferences;
@@ -215,7 +217,8 @@ class HomeClean extends StatelessWidget {
           BlocProvider(
               create: (context) => BuildingBloc(
                   getBuildingUseCase: sl(), getBuildingsUseCase: sl())),
-          BlocProvider(create: (context) => TransactionBloc(sl(), sl(), sl(), sl())),
+          BlocProvider(
+              create: (context) => TransactionBloc(sl(), sl(), sl(), sl())),
           BlocProvider(
               create: (context) => HouseBloc(
                   getHouseByBuildingUseCase: sl(), getHouseByUseCase: sl())),
@@ -259,7 +262,8 @@ class HomeClean extends StatelessWidget {
               create: (context) => ServicePriceBloc(serviceRepository: sl())),
           BlocProvider(
               create: (context) => TransferBloc(
-                  walletRepository: sl(),)),
+                    walletRepository: sl(),
+                  )),
           BlocProvider<LaundryOrderBloc1>(
             create: (context) => LaundryOrderBloc1(
               sl<OrderLaundryRemoteDataSource>(),
@@ -286,8 +290,18 @@ class HomeClean extends StatelessWidget {
               localDataSource: sl<OrderTrackingLocalDataSource>(),
             ),
           ),
+          BlocProvider(
+            create: (context) => CleaningTransactionBloc(
+              sl<TransactionRepository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => LaundryTransactionBloc(
+              transactionRepository: sl<TransactionRepository>(),
+            ),
+          ),
         ],
-        child:GetMaterialApp(
+        child: GetMaterialApp(
           color: AppColors.primaryColor,
           navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,

@@ -13,11 +13,7 @@ import '../../../core/request/request.dart';
 import '../../../data/datasource/local/auth_local_datasource.dart';
 import '../../../data/datasource/local/order_tracking_data_source.dart';
 import '../../../data/datasource/signalr/app_signalR_service.dart';
-import '../../../domain/entities/auth/auth.dart';
 import '../../../domain/use_cases/local/cear_all_data_use_case.dart';
-import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/auth/auth_event.dart';
-import '../../blocs/auth/auth_state.dart';
 import '../../widgets/bottom_navigation.dart';
 import '../../widgets/show_dialog.dart';
 import '../home/home_screen.dart';
@@ -128,10 +124,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> initSignalR() async {
     try {
-      // await AppSignalrService.init(
-      //   authLocalDataSource: sl<AuthLocalDataSource>(),
-      //   orderTrackingLocalDataSource: sl<OrderTrackingLocalDataSource>(),
-      // );
+      await AppSignalrService.init(
+        authLocalDataSource: sl<AuthLocalDataSource>(),
+      );
     } catch (e) {
       print('❌ Lỗi kết nối SignalR: $e');
       sl<ClearAllDataUseCase>().call();

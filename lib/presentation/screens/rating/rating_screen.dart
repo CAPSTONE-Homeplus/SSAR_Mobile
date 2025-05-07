@@ -28,6 +28,17 @@ class _RatingReviewPageState extends State<RatingReviewPage> {
       if (state is RatingOrderLoaded) {
         _showSuccessDialog(context);
       }
+      if (state is RatingOrderLoading) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext dialogContext) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          },
+        );
+      }
     },
     child: Scaffold(
       appBar: CustomAppBar(

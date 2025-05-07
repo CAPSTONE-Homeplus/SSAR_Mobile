@@ -44,8 +44,8 @@ class AppStrings {
 class OrderListScreen extends StatefulWidget {
   late String? selectedCategory;
 
-   OrderListScreen({Key? key, this.selectedCategory = 'clean'
-  }) : super(key: key);
+  OrderListScreen({Key? key, this.selectedCategory = 'clean'})
+      : super(key: key);
 
   @override
   State<OrderListScreen> createState() => _OrderListScreenState();
@@ -53,10 +53,9 @@ class OrderListScreen extends StatefulWidget {
 
 class _OrderListScreenState extends State<OrderListScreen> {
   final _searchController = TextEditingController();
-  List<Orders> _filteredCleanOrders = [];
-  List<Orders> _allCleanOrders = [];
   List<OrderLaundry> _laundryOrders = [];
   OrderStatus? _selectedStatus;
+  LaundryOrderStatus? _selectedLaundryStatus;
 
   @override
   void dispose() {
@@ -70,41 +69,37 @@ class _OrderListScreenState extends State<OrderListScreen> {
     context.read<OrderBloc>().add(GetOrdersByUserEvent());
   }
 
-  void _applyCleanFilters() {
-    if (_searchController.text.isEmpty && _selectedStatus == null) {
-      context.read<OrderBloc>().add(GetOrdersByUserEvent());
-      return;
+  void _applyFilters() {
+    final searchQuery = _selectedStatus?.name ??
+        _selectedLaundryStatus?.statusName ??
+        _searchController.text.toLowerCase().trim();
+
+    if (widget.selectedCategory == 'clean') {
+      context.read<OrderBloc>().add(
+        GetOrdersByUserEvent(
+          search: searchQuery.isNotEmpty ? searchQuery : null,
+        ),
+      );
+    } else {
+      context.read<LaundryOrderBlocV2>().add(
+        GetLaundryOrdersV2(
+          search: searchQuery.isNotEmpty ? searchQuery : null,
+        ),
+      );
     }
-
-    final searchQuery = _searchController.text.toLowerCase().trim();
-    final statusName = _selectedStatus?.name;
-
-    context.read<OrderBloc>().add(
-      GetOrdersByUserEvent(
-        search: searchQuery.isNotEmpty ? searchQuery : null,
-        // status: statusName,
-      ),
-    );
   }
 
   void _switchCategory(String category) {
     setState(() {
       widget.selectedCategory = category;
+      _searchController.clear();
+      _selectedStatus = null;
+      _selectedLaundryStatus = null;
     });
 
-    if (category == 'clean') {
-      _applyCleanFilters();
-    } else {
-      context
-          .read<LaundryOrderBlocV2>()
-          .add(GetLaundryOrdersV2('laundry-user-id-goes-here'));
-    }
-  }
-
-  void _applyStatusCleanFilters() {
-    context
-        .read<OrderBloc>()
-        .add(GetOrdersByUserEvent(search: _selectedStatus?.name));
+    category == 'clean'
+        ? context.read<OrderBloc>().add(GetOrdersByUserEvent())
+        : context.read<LaundryOrderBlocV2>().add(GetLaundryOrdersV2());
   }
 
   @override
@@ -116,7 +111,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
         child: Column(
           children: [
             FilterTabs(
-              selectedCategory:  widget.selectedCategory ?? 'clean',
+              selectedCategory: widget.selectedCategory ?? 'clean',
               onCategorySelected: _switchCategory,
             ),
             Container(
@@ -126,15 +121,17 @@ class _OrderListScreenState extends State<OrderListScreen> {
               ),
               child: Row(
                 children: [
-                  SizedBox(child: _buildStatusDropdown()),
+                  SizedBox(
+                      child: widget.selectedCategory == 'clean'
+                          ? _buildStatusDropdown()
+                          : _buildLaundryStatusDropdown()
+                  ),
                   SizedBox(width: SizeConfig.fem * 8),
                   Expanded(
                     child: SearchBar(
                       controller: _searchController,
                       onChanged: (_) {
-                        if ( widget.selectedCategory == 'clean') {
-                          _applyCleanFilters();
-                        }
+                        _applyFilters();
                       },
                     ),
                   ),
@@ -142,7 +139,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
               ),
             ),
             Expanded(
-              child:  widget.selectedCategory == 'clean'
+              child: widget.selectedCategory == 'clean'
                   ? _buildCleanOrdersContent()
                   : _buildLaundryOrdersContent(),
             ),
@@ -160,13 +157,13 @@ class _OrderListScreenState extends State<OrderListScreen> {
         if (state is OrderError) {
           return ErrorState(
             onRetry: () {
-              _applyCleanFilters();
+              context.read<OrderBloc>().add(GetOrdersByUserEvent());
             },
           );
         }
 
         if (state is OrdersByUserLoaded) {
-          final orders = state.orders.items ?? [];
+          final orders = state.orders.items;
 
           return orders.isEmpty
               ? const EmptyState()
@@ -186,9 +183,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
         if (state is LaundryOrderFailureV2) {
           return ErrorState(
             onRetry: () {
-              context
-                  .read<LaundryOrderBlocV2>()
-                  .add(GetLaundryOrdersV2('laundry-user-id-goes-here'));
+              context.read<LaundryOrderBlocV2>().add(GetLaundryOrdersV2());
             },
           );
         }
@@ -232,14 +227,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
               maxLines: 1,
             ),
           ),
-          icon: Padding(
-            padding: EdgeInsets.only(right: 8 * SizeConfig.fem),
-            child: Icon(
-              Icons.arrow_drop_down,
-              color: Colors.grey[600],
-              size: 24 * SizeConfig.ffem,
-            ),
-          ),
           underline: Container(),
           style: GoogleFonts.poppins(
             color: Colors.black87,
@@ -250,10 +237,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
             setState(() {
               _selectedStatus = newValue;
 
-              // Reapply filters based on current category
-              if (widget.selectedCategory == 'clean') {
-                _applyStatusCleanFilters();
-              }
+              _applyFilters();
             });
           },
           items: [
@@ -283,12 +267,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
                       EdgeInsets.symmetric(horizontal: 12 * SizeConfig.fem),
                   child: Row(
                     children: [
-                      Icon(
-                        status.icon,
-                        color: status.color,
-                        size: 20 * SizeConfig.ffem,
-                      ),
-                      SizedBox(width: 8 * SizeConfig.fem),
                       Expanded(
                         child: Text(
                           status.displayName,
@@ -304,7 +282,100 @@ class _OrderListScreenState extends State<OrderListScreen> {
                   ),
                 ),
               );
-            }).toList(),
+            })
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLaundryStatusDropdown() {
+    return DropdownButtonHideUnderline(
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: SizeConfig.fem * 120,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12 * SizeConfig.fem),
+          border: Border.all(color: Colors.grey[300]!),
+        ),
+        child: DropdownButton<LaundryOrderStatus>(
+          value: _selectedLaundryStatus,
+          isExpanded: true,
+          hint: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12 * SizeConfig.fem),
+            child: Text(
+              'Trạng thái',
+              style: GoogleFonts.poppins(
+                color: Colors.grey[600],
+                fontSize: 12 * SizeConfig.ffem,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+          icon: Padding(
+            padding: EdgeInsets.only(right: 8 * SizeConfig.fem),
+            child: Icon(
+              Icons.arrow_drop_down,
+              color: Colors.grey[600],
+              size: 24 * SizeConfig.ffem,
+            ),
+          ),
+          underline: Container(),
+          style: GoogleFonts.poppins(
+            color: Colors.black87,
+            fontSize: 14 * SizeConfig.ffem,
+          ),
+          dropdownColor: Colors.white,
+          onChanged: (LaundryOrderStatus? newValue) {
+            setState(() {
+              _selectedLaundryStatus = newValue;
+              _applyFilters();
+            });
+          },
+          items: [
+            DropdownMenuItem<LaundryOrderStatus>(
+              value: null,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12 * SizeConfig.fem),
+                child: Text(
+                  'Tất cả',
+                  style: GoogleFonts.poppins(
+                    color: Colors.black87,
+                    fontSize: 12 * SizeConfig.ffem,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+            ),
+            // Add specific status options
+            ...LaundryOrderStatus.values
+                .map<DropdownMenuItem<LaundryOrderStatus>>((LaundryOrderStatus status) {
+              return DropdownMenuItem<LaundryOrderStatus>(
+                value: status,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12 * SizeConfig.fem),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          status.name,
+                          style: GoogleFonts.poppins(
+                            color: status.color,
+                            fontSize: 14 * SizeConfig.ffem,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            })
           ],
         ),
       ),
@@ -461,9 +532,7 @@ class LaundryOrderList extends StatelessWidget {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: () async {
-        context
-            .read<LaundryOrderBlocV2>()
-            .add(GetLaundryOrdersV2('laundry-user-id-goes-here'));
+        context.read<LaundryOrderBlocV2>().add(GetLaundryOrdersV2());
       },
       child: ListView.builder(
         padding: EdgeInsets.symmetric(horizontal: SizeConfig.hem * 20),
@@ -521,7 +590,7 @@ class LaundryOrderCard extends StatelessWidget {
         statusWidget: LaundryStatusChip(status: order.status ?? 'pending'),
         dateText: order.orderDate.toString(),
         serviceType: order.type ?? AppStrings.defaultLaundryType,
-        orderCode: order.orderCode ?? 'Không xác định',
+        orderCode: order.orderCode,
         totalAmount: order.totalAmount ?? 0,
       ),
     );
@@ -604,7 +673,6 @@ class OrderCardBase extends StatelessWidget {
                   OrderTotalDisplay(amount: totalAmount),
                 ],
               ),
-
             ],
           ),
         ),

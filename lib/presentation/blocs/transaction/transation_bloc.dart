@@ -32,32 +32,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       }
     });
 
-    /// Thanh toán giặt
-    on<SaveLaundryTransactionEvent>((event, emit) async {
-      emit(LaundryTransactionLoading());
-
-      await Future.delayed(const Duration(seconds: 2));
-
-      try {
-        final response = await transactionRepository.saveTransaction(event.transaction);
-        emit(LaundryTransactionSuccess(response));
-      } on ApiException catch (e) {
-        emit(LaundryTransactionFailure(e.description ?? "Có lỗi xảy ra khi thanh toán giặt"));
-      }
-    });
-
-    /// Thanh toán dọn dẹp
-    on<SaveCleaningTransactionEvent>((event, emit) async {
-      emit(CleaningTransactionLoading());
-      try {
-        final response = await transactionRepository.saveTransaction(event.transaction);
-        emit(CleaningTransactionSuccess(response));
-      } on ApiException catch (e) {
-        emit(CleaningTransactionFailure(e.description ?? "Có lỗi xảy ra khi thanh toán dọn dẹp"));
-      }
-    });
-
-
     on<GetTransactionByUserEvent>((event, emit) async {
       emit(TransactionLoading());
       final result = await getTransactionByUserUseCase.call(
@@ -73,7 +47,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
     on<GetTransactionByWalletEvent>((event, emit) async {
       emit(TransactionLoading());
-      Future.delayed(const Duration(milliseconds: 2000));
       final result = await getTransactionByWalletUseCase.execute(event.walletId ?? '', event.search, event.orderBy, event.page, event.size);
       result.fold(
             (failure) => emit(TransactionFailure(failure.message)),

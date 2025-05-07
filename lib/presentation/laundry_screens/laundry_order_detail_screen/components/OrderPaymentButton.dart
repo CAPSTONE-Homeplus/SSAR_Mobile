@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:home_clean/core/router/app_router.dart';
 
 import '../../../../core/enums/laundry_order_status.dart';
 import '../../../../domain/entities/transaction/create_transaction.dart';
-import '../../../blocs/transaction/transaction_event.dart';
-import '../../../blocs/transaction/transaction_state.dart';
-import '../../../blocs/transaction/transation_bloc.dart';
+import '../../../blocs/laundry_transaction_bloc/laundry_transaction_bloc.dart';
+import '../../../blocs/laundry_transaction_bloc/laundry_transaction_event.dart';
+import '../../../blocs/laundry_transaction_bloc/laundry_transaction_state.dart';
 import '../../../widgets/show_dialog.dart';
 
 class OrderPaymentButton extends StatelessWidget {
@@ -20,17 +21,16 @@ class OrderPaymentButton extends StatelessWidget {
     this.onSuccess,
   }) : super(key: key);
 
-  void _showErrorDialog(BuildContext context, String error) {
+  void _showErrorDialog(BuildContext context) {
     showCustomDialog(
       context: context,
-      message: error,
+      message: 'Giao dịch thất bại',
       type: DialogType.error,
-      onConfirm: () {},
     );
   }
 
   void _handlePayment(BuildContext context) {
-    context.read<TransactionBloc>().add(
+    context.read<LaundryTransactionBloc>().add(
           SaveLaundryTransactionEvent(
             CreateTransaction(
               walletId: selectedWalletId,
@@ -44,60 +44,97 @@ class OrderPaymentButton extends StatelessWidget {
         );
   }
 
+  void _showSuccessDialog(BuildContext context) {
+    showCustomDialog(
+      context: context,
+      message: 'Thanh toán thành công',
+      type: DialogType.success,
+      onConfirm: () {
+        if (onSuccess != null) {
+          onSuccess!();
+        }
+      },
+    );
+  }
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => const Center(
+        child: CircularProgressIndicator(
+          color: Colors.green,
+          strokeWidth: 3,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final primaryColor = const Color(0xFF1CAF7D);
 
-    return BlocConsumer<TransactionBloc, TransactionState>(
-      listenWhen: (prev, curr) =>
-          (curr is LaundryTransactionSuccess &&
-              prev is! LaundryTransactionSuccess) ||
-          (curr is LaundryTransactionFailure &&
-              prev is! LaundryTransactionFailure),
+    return BlocConsumer<LaundryTransactionBloc, LaundryTransactionState>(
+      listenWhen: (previous, current) => previous.status != current.status,
       listener: (context, state) {
-        if (state is LaundryTransactionSuccess) {
-          onSuccess?.call();
-        } else if (state is LaundryTransactionFailure) {
-          _showErrorDialog(context, state.error);
+        // Đóng tất cả dialog đang mở
+        Navigator.of(context, rootNavigator: true)
+            .popUntil((route) => route is! DialogRoute);
+
+        switch (state.status) {
+          case LaundryTransactionStatus.loading:
+            _showLoadingDialog(context);
+            break;
+          case LaundryTransactionStatus.success:
+            _showSuccessDialog(context);
+            break;
+          case LaundryTransactionStatus.failure:
+            _showErrorDialog(context);
+            break;
+          default:
+            break;
         }
       },
       builder: (context, state) {
-        final isLoading = state is LaundryTransactionLoading;
+        final isLoading = state.status == LaundryTransactionStatus.loading;
+        final isPendingPayment = order.status == 'PendingPayment';
 
         return SizedBox(
           width: double.infinity,
           height: 50,
           child: ElevatedButton(
-            onPressed: (order.status == 'PendingPayment' && !isLoading)
-                ? () => _handlePayment(context)
-                : null,
+            onPressed:
+                (isPendingPayment && selectedWalletId.isNotEmpty && !isLoading)
+                    ? () {
+                        if (selectedWalletId.isEmpty) {
+                          showCustomDialog(
+                            context: context,
+                            message: 'Vui lòng chọn ví thanh toán',
+                            type: DialogType.error,
+                          );
+                          return;
+                        }
+                        _handlePayment(context);
+                      }
+                    : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      strokeWidth: 2.5,
-                    ),
-                  )
-                : Text(
-                    order.status == 'PendingPayment'
-                        ? 'Thanh toán'
-                        : LaundryOrderStatusExtension.fromString(
-                                order.status ?? '')
-                            .name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+            child: Text(
+              isPendingPayment
+                  ? 'Thanh toán'
+                  : LaundryOrderStatusExtension.fromString(
+                order.status ?? '',
+              ).name,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
           ),
         );
       },

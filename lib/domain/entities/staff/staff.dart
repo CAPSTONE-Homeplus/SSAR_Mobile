@@ -11,7 +11,7 @@ class Staff {
   String? status;
   String? createdAt;
   String? updatedAt;
-  Null? accountId;
+  String? accountId;
   String? groupId;
   String? code;
 

@@ -119,21 +119,21 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Vui lòng chọn tòa nhà'),
-            backgroundColor: Colors.black,
+            backgroundColor: Colors.red,
           ),
         );
         return;
       }
 
-      // if (selectedHouse == null) {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       content: Text('Vui lòng chọn căn hộ'),
-      //       backgroundColor: Colors.black,
-      //     ),
-      //   );
-      //   return;
-      // }
+      if (selectedHouse == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Vui lòng chọn căn hộ'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
 
       showDialog(
         context: context,

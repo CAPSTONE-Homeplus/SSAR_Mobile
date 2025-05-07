@@ -22,10 +22,10 @@ class LaundryOrderBlocV2
 
     try {
       final response = await orderRepository.getOrdersByLaundryUser(
-        '',
-        '',
-        1,
-        100,
+        event.search,
+        event.orderBy,
+        event.page,
+        event.size,
       );
 
       emit(LaundryOrderLoadedV2(response.items ?? []));

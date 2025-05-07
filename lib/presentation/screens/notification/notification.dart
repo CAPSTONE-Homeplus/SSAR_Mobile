@@ -35,10 +35,13 @@ class _NotificationBellState extends State<NotificationBell> {
 
   @override
   void dispose() {
-    context.read<LaundryOrderBloc1>().add(DisconnectFromLaundryOrderHub1());
-    context.read<OrderTrackingBloc1>().add(DisconnectFromOrderTrackingHub());
     _overlayEntry?.remove();
     super.dispose();
+  }
+
+  void _disconnectHubs() {
+    context.read<LaundryOrderBloc1>().add(DisconnectFromLaundryOrderHub1());
+    context.read<OrderTrackingBloc1>().add(DisconnectFromOrderTrackingHub());
   }
 
   void _toggleOverlay() {
