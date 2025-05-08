@@ -136,10 +136,31 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
               return Center(
                   child: CircularProgressIndicator(color: primaryColor));
             } else if (state is LaundryOrderFailure) {
-              return Center(child: Text("Lỗi"));
+              return Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    AppRouter.navigateToHome();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1CAF7D),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0, vertical: 12.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  child: const Text(
+                    'Vui lòng đợi trong giây lát',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              );
             } else if (state is GetLaundrySuccess) {
               final order = state.order;
-
               return RefreshIndicator(
                 key: _refreshKey,
                 onRefresh: () {
@@ -252,14 +273,46 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                             ? _buildWallet(context)
                             : SizedBox(height: 16),
                         const SizedBox(height: 16),
-                        OrderPaymentButton(
-                          order: order,
-                          selectedWalletId: selectedWalletId ?? '',
-                          onSuccess: () {
-                            context
-                                .read<LaundryOrderBloc>()
-                                .add(GetLaundryOrderEvent(widget.orderId));
-                          },
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 4,
+                              child: OrderPaymentButton(
+                                order: order,
+                                selectedWalletId: selectedWalletId ?? '',
+                                onSuccess: () {
+                                  context
+                                      .read<LaundryOrderBloc>()
+                                      .add(GetLaundryOrderEvent(widget.orderId));
+                                },
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Expanded(
+                              flex: 1,
+                              child: InkWell(
+                                onTap: () {
+                                  showSupportContactDialog(context);
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFF1CAF7D).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.support_agent,
+                                      color: Color(0xFF1CAF7D),
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
                         LaundryOrderStatusExtension.fromString(
@@ -276,6 +329,137 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
               return Center(child: Text('Vui lòng đợi trong giây lát'));
             }
           },
+        ),
+      ),
+    );
+  }
+
+  void showSupportContactDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10.0,
+                  offset: Offset(0.0, 10.0),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    Icon(Icons.support_agent, color: Color(0xFF1CAF7D), size: 24),
+                    SizedBox(width: 10),
+                    Text(
+                      'Hỗ Trợ Khách Hàng',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1CAF7D),
+                      ),
+                    ),
+                    Spacer(),
+                    IconButton(
+                      icon: Icon(Icons.close, color: Colors.grey),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+                Divider(),
+                SizedBox(height: 10),
+
+                // Contact Info
+                _buildSupportRow(
+                  'Hotline:',
+                  '0909122123',
+                  icon: Icons.phone,
+                ),
+                SizedBox(height: 12),
+                _buildSupportRow(
+                  'Email:',
+                  'vinhomeresident.system@gmail.com',
+                  icon: Icons.email,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Giờ làm việc: 8:00 - 22:00 (Thứ 2 - Chủ nhật)',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                SizedBox(height: 20),
+
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSupportRow(
+    String label,
+    String value, {
+    required IconData icon,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        child: Row(
+          children: [
+            Icon(icon, size: 12, color: Color(0xFF1CAF7D)),
+            SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                Container(
+                  constraints: BoxConstraints(
+                    maxWidth: 150, // Điều chỉnh chiều rộng tối đa theo nhu cầu
+                  ),
+                  child: Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    overflow: TextOverflow.visible,
+                    softWrap: true,
+                    maxLines: null,
+                  ),
+                )
+              ],
+            ),
+            Spacer(),
+            Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
+          ],
         ),
       ),
     );
@@ -606,9 +790,7 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          title == 'Shared'
-                              ? 'Ví chung'
-                              : 'Ví riêng',
+                          title == 'Shared' ? 'Ví chung' : 'Ví riêng',
                           style: GoogleFonts.poppins(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,

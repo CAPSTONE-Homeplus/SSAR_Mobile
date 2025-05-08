@@ -78,7 +78,10 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Xác nhận thanh toán'),
-        content: const Text('Bạn có chắc chắn muốn thanh toán không?'),
+        content: const Text(
+          'Bạn có chắc chắn muốn thanh toán không?\n\n'
+              'Nhân viên sẽ được sắp xếp để thực hiện đơn trong thời gian gần nhất.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -102,10 +105,11 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     );
   }
 
+
   void _handleOrderError(BuildContext context, OrderError state) {
     showCustomDialog(
         context: context,
-        message: state.message,
+        message: "Tạo đơn hàng thất bại. Vui lòng thử lại sau.",
         type: DialogType.error
     );
   }
@@ -269,38 +273,42 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               return previous.status != current.status;
             },
             listener: (context, state) {
+              // In log ra trạng thái mới
+              debugPrint('CleaningTransactionStatus: ${state.status}');
+              debugPrint('Error message (nếu có): ${state.errorMessage}');
+              debugPrint('Order ID (nếu có): ${state.data?.orderId}');
+
+              Navigator.of(context, rootNavigator: true)
+                  .popUntil((route) => route is! DialogRoute);
+
               switch (state.status) {
                 case CleaningTransactionStatus.loading:
-                  Navigator.of(context, rootNavigator: true).popUntil((route) => route is! DialogRoute);
                   showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (dialogContext) => const Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.green,
-                          strokeWidth: 3,
-                        ),
-                      )
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (dialogContext) => const Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.green,
+                        strokeWidth: 3,
+                      ),
+                    ),
                   );
-                  break;
                 case CleaningTransactionStatus.success:
-                  Navigator.of(context, rootNavigator: true).popUntil((route) => route is! DialogRoute);
                   _showTransactionDialog(
-                      context,
-                      isSuccess: true,
-                      onConfirm: () {
-                        AppRouter.navigateToOrderDetailWithArguments(
-                            state.data?.orderId ?? ''
-                        );
-                      }
+                    context,
+                    isSuccess: true,
+                    onConfirm: () {
+                      AppRouter.navigateToOrderDetailWithArguments(
+                        state.data?.orderId ?? '',
+                      );
+                    },
                   );
                   break;
                 case CleaningTransactionStatus.failure:
-                  Navigator.of(context, rootNavigator: true).popUntil((route) => route is! DialogRoute);
                   _showTransactionDialog(
-                      context,
-                      isSuccess: false,
-                      message: state.errorMessage ?? 'Giao dịch thất bại'
+                    context,
+                    isSuccess: false,
+                    message: state.errorMessage ?? 'Giao dịch thất bại',
                   );
                   break;
                 default:
@@ -308,6 +316,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               }
             },
           )
+
         ],
         child: SingleChildScrollView(
           child: Column(
@@ -332,28 +341,28 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                           '${orderDetails.timeSlot.startTime} - ${orderDetails.timeSlot.endTime}',
                       icon: Icons.access_time,
                     ),
-                    DetailRowMultiInfoWidget(
-                      title: 'Nhân viên thực hiện',
-                      icon: Icons.person,
-                      iconColor: Colors.blue,
-                      verticalSpacing: 4,
-                      values: [
-                        {
-                          'label': 'Tên',
-                          'value':
-                              widget.arguments.staff?.fullName ?? 'Chưa có tên',
-                        },
-                        {
-                          'label': 'Mã NV',
-                          'value': widget.arguments.staff?.code ?? 'Chưa có mã',
-                        },
-                        {
-                          'label': 'SĐT',
-                          'value': widget.arguments.staff?.phoneNumber ??
-                              'Chưa có số điện thoại',
-                        },
-                      ],
-                    ),
+                    if (widget.arguments.staff != null)
+                      DetailRowMultiInfoWidget(
+                        title: 'Nhân viên thực hiện',
+                        icon: Icons.person,
+                        iconColor: Colors.blue,
+                        verticalSpacing: 4,
+                        values: [
+                          {
+                            'label': 'Tên',
+                            'value': widget.arguments.staff?.fullName ?? 'Chưa có tên',
+                          },
+                          {
+                            'label': 'Mã NV',
+                            'value': widget.arguments.staff?.code ?? 'Chưa có mã',
+                          },
+                          {
+                            'label': 'SĐT',
+                            'value': widget.arguments.staff?.phoneNumber ?? 'Chưa có số điện thoại',
+                          },
+                        ],
+                      ),
+
                   ],
                 ),
               ),

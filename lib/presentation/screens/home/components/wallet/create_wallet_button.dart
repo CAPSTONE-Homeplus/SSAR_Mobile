@@ -202,6 +202,27 @@ class CreateWalletButtonWidget extends StatelessWidget {
                           ),
                         ],
                       ),
+                      SizedBox(height: 8 * fem),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline,
+                            color: Colors.green,
+                            size: 18 * fem,
+                          ),
+                          SizedBox(width: 8 * fem),
+                          Expanded(
+                            child: Text(
+                              'Chúng tôi không chịu trách nhiệm đối với mục đích sử dụng ví chung của các thành viên.',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14 * fem,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+
+                        ],
+                      ),
                     ],
                   ),
                 ),

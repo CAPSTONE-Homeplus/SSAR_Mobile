@@ -26,7 +26,6 @@ import 'package:home_clean/presentation/widgets/custom_app_bar.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/constant/size_config.dart';
-import '../../../core/format/formater.dart';
 import '../../../domain/entities/house/house.dart';
 import '../../../domain/entities/order/create_order.dart';
 import '../../../domain/entities/service_activity/service_activity.dart';
@@ -56,11 +55,7 @@ class ServiceDetailScreen extends StatefulWidget {
 }
 
 class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
-  ServiceInHouseType _servicePriceType = ServiceInHouseType(
-    id: '',
-    name: '',
-    price: 0,
-    serviceId: '',
+  late ServiceInHouseType _servicePriceType = ServiceInHouseType(
   );
   House? house;
   final List<Option> _selectedOptions = [];
@@ -113,25 +108,25 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       fetchHouse();
 
       context.read<ServicePriceBloc>().add(
-            GetServicePrice(
-              houseId: house?.id ?? '',
-              serviceId: service.id ?? '',
-            ),
-          );
+        GetServicePrice(
+          houseId: house?.id ?? '',
+          serviceId: service.id ?? '',
+        ),
+      );
 
       // Dispatch events to fetch data
       context.read<ServiceActivityBloc>().add(
-            GetServiceActivitiesByServiceIdEvent(serviceId: service.id ?? ''),
-          );
+        GetServiceActivitiesByServiceIdEvent(serviceId: service.id ?? ''),
+      );
       context
           .read<OptionBloc>()
           .add(GetOptionsEvent(serviceId: service.id ?? ''));
       context.read<ExtraServiceBloc>().add(
-            GetExtraServices(serviceId: service.id ?? ''),
-          );
+        GetExtraServices(serviceId: service.id ?? ''),
+      );
       context.read<EquipmentSupplyBloc>().add(
-            GetEquipmentSupplies(serviceId: service.id ?? ''),
-          );
+        GetEquipmentSupplies(serviceId: service.id ?? ''),
+      );
       context.read<TimeSlotBloc>().add(GetTimeSlotEvents());
     });
   }
@@ -230,6 +225,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               setState(() {
                 _totalPrice = state.servicePrice.price!;
                 _servicePriceType = state.servicePrice;
+                _checkAllDataLoaded();
               });
             }
           },
@@ -241,8 +237,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           backgroundColor: Colors.grey.shade200,
           appBar: CustomAppBar(
             title: (widget.arguments?.orderIdToReOrder != null
-                    ? 'Order lại - '
-                    : '') +
+                ? 'Order lại - '
+                : '') +
                 (service.name ?? ''),
             onBackPressed: () {
               AppRouter.navigateToHome();
@@ -251,38 +247,38 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           body: isLoading
               ? _loadingPlaceholder()
               : SingleChildScrollView(
+            child: Column(
+              children: [
+                StepIndicatorWidget(currentStep: 2),
+                SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      StepIndicatorWidget(currentStep: 2),
-                      SizedBox(height: 8),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // _buildServiceSupply(),
-                            // SizedBox(height: 10),
-                            _buildOriginCost(),
-                            SizedBox(height: 10),
-                            _buildAdditionalOptionsSection(),
-                            SizedBox(height: 10),
-                            _buildExtraService(),
-                            SizedBox(height: 10),
-                            _buildJobDetailsSection(),
-                            SizedBox(height: 10),
-                            _buildNotesField(),
-                            if (widget.arguments?.staff != null) ...[
-                              SizedBox(height: 10),
-                              _buildEmployee(),
-                            ],
-                            SizedBox(height: 10),
-                            _build(),
-                          ],
-                        ),
-                      ),
+                      // _buildServiceSupply(),
+                      // SizedBox(height: 10),
+                      _buildOriginCost(),
+                      SizedBox(height: 10),
+                      _buildAdditionalOptionsSection(),
+                      SizedBox(height: 10),
+                      _buildExtraService(),
+                      SizedBox(height: 10),
+                      _buildJobDetailsSection(),
+                      SizedBox(height: 10),
+                      _buildNotesField(),
+                      if (widget.arguments?.staff != null) ...[
+                        SizedBox(height: 10),
+                        _buildEmployee(),
+                      ],
+                      SizedBox(height: 10),
+                      _build(),
                     ],
                   ),
                 ),
+              ],
+            ),
+          ),
           bottomNavigationBar: _buildBottomBar(),
         ),
       ),
@@ -322,7 +318,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   void _checkAllDataLoaded() {
     // if (_serviceActivities.isNotEmpty &&
-    if (    _options.isNotEmpty &&
+    if (_options.isNotEmpty &&
         _extraServices.isNotEmpty) {
       setState(() {
         isLoading = false;
@@ -590,7 +586,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
-        children: _options.asMap().entries.map((entry) {
+        children: _options
+            .asMap()
+            .entries
+            .map((entry) {
           final index = entry.key;
           final option = entry.value;
 
@@ -813,7 +812,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
-        children: _extraServices.asMap().entries.map((entry) {
+        children: _extraServices
+            .asMap()
+            .entries
+            .map((entry) {
           final index = entry.key;
           final extra = entry.value;
 
@@ -895,7 +897,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     ),
                     tabs: _serviceActivities.keys
                         .map((key) =>
-                            Tab(text: key.isNotEmpty ? key : 'Unnamed'))
+                        Tab(text: key.isNotEmpty ? key : 'Unnamed'))
                         .toList(),
                   ),
                   const SizedBox(height: 12),
@@ -933,8 +935,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                               padding: const EdgeInsets.only(left: 16),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: subActivities.asMap().entries.map(
-                                  (entry) {
+                                children: subActivities
+                                    .asMap()
+                                    .entries
+                                    .map(
+                                      (entry) {
                                     final index = entry.key;
                                     final subActivity = entry.value;
 
@@ -957,7 +962,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                       ),
                                     );
                                   },
-                                ).toList(),
+                                )
+                                    .toList(),
                               ),
                             ),
                           ],
@@ -1076,7 +1082,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Widget _buildShimmerLoading() {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.27,
+      height: MediaQuery
+          .of(context)
+          .size
+          .height * 0.27,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -1247,112 +1256,112 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     return isLoading
         ? _buildShimmerLoading()
         : Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, -2),
+            blurRadius: 10,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  offset: const Offset(0, -2),
-                  blurRadius: 10,
-                  spreadRadius: 0,
-                ),
-              ],
+              borderRadius: BorderRadius.circular(8),
+              color: const Color(0xFFF7FFFC),
+              border: Border.all(color: const Color(0xFFE0F5EF)),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: const Color(0xFFF7FFFC),
-                    border: Border.all(color: const Color(0xFFE0F5EF)),
-                  ),
-                  child: Row(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Tổng cộng',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13 * SizeConfig.ffem,
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          CurrencyDisplay(
-                            price: _totalPrice,
-                            fontSize: 18,
-                            iconSize: 16,
-                            unit: '',
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1CAF7D).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'Đã bao gồm VAT',
-                          style: TextStyle(
-                            fontSize: 11 * SizeConfig.ffem,
-                            color: const Color(0xFF1CAF7D),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 14),
-
-                // Action buttons with improved styling
-                Row(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: _buildActionButton(
-                        title: 'Đặt ngay',
-                        icon: Icons.flash_on,
-                        isEmergency: true,
-                        onPressed: () {
-                          _handleCreateOrder(true);
-                        },
+                    Text(
+                      'Tổng cộng',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13 * SizeConfig.ffem,
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    SizedBox(width: 10 * SizeConfig.hem),
-                    Expanded(
-                      child: _buildActionButton(
-                        title: 'Đặt theo giờ',
-                        icon: Icons.schedule,
-                        isEmergency: false,
-                        onPressed: () {
-                          if (_selectedTimeSlot.id == '') {
-                            _showErrorDialog(context,
-                                'Vui lòng chọn khung giờ trước khi đặt.');
-                          } else {
-                            _handleCreateOrder(false);
-                          }
-                        },
-                      ),
+                    const SizedBox(height: 2),
+                    CurrencyDisplay(
+                      price: _totalPrice,
+                      fontSize: 18,
+                      iconSize: 16,
+                      unit: '',
                     ),
                   ],
                 ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1CAF7D).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'Đã bao gồm VAT',
+                    style: TextStyle(
+                      fontSize: 11 * SizeConfig.ffem,
+                      color: const Color(0xFF1CAF7D),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
               ],
             ),
-          );
+          ),
+
+          const SizedBox(height: 14),
+
+          // Action buttons with improved styling
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionButton(
+                  title: 'Đặt ngay',
+                  icon: Icons.flash_on,
+                  isEmergency: true,
+                  onPressed: () {
+                    _handleCreateOrder(true);
+                  },
+                ),
+              ),
+              SizedBox(width: 10 * SizeConfig.hem),
+              Expanded(
+                child: _buildActionButton(
+                  title: 'Đặt theo giờ',
+                  icon: Icons.schedule,
+                  isEmergency: false,
+                  onPressed: () {
+                    if (_selectedTimeSlot.id == '') {
+                      _showErrorDialog(context,
+                          'Vui lòng chọn khung giờ trước khi đặt.');
+                    } else {
+                      _handleCreateOrder(false);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
 // Improved action button with gradient and animation
@@ -1378,15 +1387,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   : [Colors.white, Colors.white],
             ),
             border:
-                isEmergency ? null : Border.all(color: const Color(0xFF1CAF7D)),
+            isEmergency ? null : Border.all(color: const Color(0xFF1CAF7D)),
             boxShadow: isEmergency
                 ? [
-                    BoxShadow(
-                      color: const Color(0xFF1CAF7D).withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    )
-                  ]
+              BoxShadow(
+                color: const Color(0xFF1CAF7D).withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              )
+            ]
                 : null,
           ),
           child: Row(

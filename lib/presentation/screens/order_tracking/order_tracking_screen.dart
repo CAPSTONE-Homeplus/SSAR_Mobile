@@ -489,7 +489,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> with SingleTi
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Thời gian dự kiến: ${widget.orders.estimatedDuration} giờ',
+                  'Thời gian dự kiến: ${widget.orders.estimatedDuration} phút',
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: Colors.grey[700],

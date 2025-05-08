@@ -81,7 +81,7 @@ class PolicyPage extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(
-              "Bạn có quyền yêu cầu truy cập, chỉnh sửa, xoá thông tin cá nhân bằng cách liên hệ với chúng tôi qua email support@chungcuservice.vn.",
+              "Bạn có quyền yêu cầu truy cập, chỉnh sửa, xoá thông tin cá nhân bằng cách liên hệ với chúng tôi qua email vinhomeresident.system@gmail.com.",
             ),
             Text(
               "Bạn cũng có trách nhiệm cung cấp thông tin chính xác và tuân thủ điều khoản sử dụng dịch vụ.",
